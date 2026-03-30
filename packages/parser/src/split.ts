@@ -24,7 +24,8 @@
  */
 export function splitBlocks(content: string): string[] {
   const pieces = content
-    .split(/\n---\n/)
+    .split(/(^|\n)---(\n|$)/g)
+    .filter((_, i) => i % 3 === 0)
     .map(b => b.trim())
     .filter(b => b.length > 0)
 
@@ -36,10 +37,16 @@ export function splitBlocks(content: string): string[] {
 
   // Remaining pieces come in pairs: [frontmatter-content, body]
   // Reassemble each pair into a proper `---\nfrontmatter\n---\nbody` block
+  if (rest.length % 2 !== 0) {
+    throw new Error(
+      `Malformed .quizv.md file: expected an even number of blocks after the meta section, got ${rest.length}`,
+    )
+  }
+
   const questionBlocks: string[] = []
   for (let i = 0; i < rest.length; i += 2) {
     const frontmatter = rest[i]!
-    const body = rest[i + 1] ?? ''
+    const body = rest[i + 1]!
     // Reassemble so gray-matter can parse it correctly
     questionBlocks.push(`---\n${frontmatter}\n---\n\n${body}`)
   }

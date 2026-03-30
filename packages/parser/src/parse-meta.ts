@@ -10,9 +10,10 @@ export function parseMeta(rawBlock: string): QuizMeta {
   // Ensure the block is wrapped in frontmatter delimiters
   let wrapped: string
   if (rawBlock.startsWith('---')) {
-    // Has opening delimiter — check if it also has closing delimiter
+    // Has opening delimiter — check if it also has a structural closing delimiter
+    // Only the first occurrence of a bare `---` line after line 0 counts.
     const lines = rawBlock.split('\n')
-    const hasClosing = lines.slice(1).some(l => l.trim() === '---')
+    const hasClosing = lines.slice(1).findIndex(l => l === '---') !== -1
     wrapped = hasClosing ? rawBlock : `${rawBlock}\n---`
   } else {
     wrapped = `---\n${rawBlock}\n---`

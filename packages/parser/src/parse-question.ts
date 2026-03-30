@@ -33,7 +33,7 @@ export function parseQuestion(rawBlock: string): Question {
   }
 
   // Extract question heading (first # line)
-  const headingMatch = body.match(/^#\s+(.+)$/m)
+  const headingMatch = body.match(/^# (.+)$/m)
   const questionText = headingMatch ? headingMatch[1]!.trim() : ''
 
   // Extract choices from GFM task list items

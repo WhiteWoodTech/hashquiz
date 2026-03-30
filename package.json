@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "build": "bun run --filter='*' build",
-    "test": "bun test",
+    "test": "bun run --filter='*' test",
     "dev": "bun run packages/server/src/cli.ts dev"
   },
   "devDependencies": {

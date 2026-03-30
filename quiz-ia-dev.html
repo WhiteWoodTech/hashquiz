@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Dev Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --accent: #7c3aed;
+    --accent2: #06b6d4;
+    --correct: #10b981;
+    --wrong: #ef4444;
+    --warning: #f59e0b;
+    --c1: #7c3aed;
+    --c2: #0ea5e9;
+    --c3: #f97316;
+    --c4: #ec4899;
+  }
+
+  body {
+    font-family: 'IBM Plex Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(124,58,237,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(ellipse at 30% 20%, rgba(124,58,237,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(6,182,212,0.06) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+    animation: drift 20s ease-in-out infinite alternate;
+  }
+
+  @keyframes drift {
+    from { transform: translate(0, 0); }
+    to { transform: translate(30px, -20px); }
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 860px;
+    padding: 20px;
+  }
+
+  .screen { display: none; animation: fadeUp 0.4s ease; }
+  .screen.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* INTRO */
+  .intro-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 2px;
+    margin-bottom: 24px;
+  }
+
+  .intro-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  .intro-title .highlight {
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .intro-subtitle {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 40px;
+    line-height: 1.6;
+  }
+
+  .stats-row { display: flex; gap: 32px; margin-bottom: 40px; }
+  .stat { color: var(--muted); font-size: 0.8rem; }
+  .stat strong { display: block; color: var(--text); font-size: 1.5rem; font-weight: 700; font-family: 'Syne', sans-serif; }
+
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 48px;
+  }
+
+  .topic-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .topic-chip span { display: block; font-size: 1.1rem; margin-bottom: 4px; }
+
+  .btn-start {
+    display: block;
+    width: 100%;
+    padding: 18px;
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 50%, #06b6d4 100%);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 0 40px rgba(124,58,237,0.3);
+  }
+
+  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 4px 60px rgba(124,58,237,0.5); }
+
+  /* QUIZ */
+  .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .progress-bar-wrap {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 0 20px;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .q-counter { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+  .score-display { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: var(--accent2); white-space: nowrap; }
+
+  .category-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    background: rgba(124,58,237,0.15);
+    border: 1px solid rgba(124,58,237,0.3);
+    color: #a78bfa;
+  }
+
+  .difficulty-dots { display: flex; gap: 4px; margin-bottom: 16px; }
+  .difficulty-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+  .difficulty-dots.easy span:nth-child(-n+1),
+  .difficulty-dots.medium span:nth-child(-n+2),
+  .difficulty-dots.hard span:nth-child(-n+3) { background: var(--warning); }
+
+  .timer-ring { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring circle { fill: none; stroke-width: 4; }
+  .timer-ring .bg { stroke: var(--border); }
+  .timer-ring .fg { stroke: #7c3aed; stroke-dasharray: 176; transition: stroke-dasharray 1s linear, stroke 0.3s; }
+  .timer-ring .number {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem; font-weight: 800;
+  }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--accent);
+    border-radius: 6px;
+    padding: 32px;
+    margin-bottom: 20px;
+  }
+
+  .question-text {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1rem, 2.5vw, 1.35rem);
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text);
+  }
+
+  .answers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .answer-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .answer-btn:hover:not(:disabled) {
+    border-color: var(--btn-color);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--btn-color) 20%, transparent);
+    transform: translateY(-1px);
+  }
+
+  .answer-btn:disabled { cursor: default; }
+
+  .answer-btn .letter {
+    width: 32px; height: 32px;
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem; font-weight: 800;
+    flex-shrink: 0;
+    background: var(--btn-color);
+    color: #fff;
+  }
+
+  .answer-btn[data-index="0"] { --btn-color: var(--c1); }
+  .answer-btn[data-index="1"] { --btn-color: var(--c2); }
+  .answer-btn[data-index="2"] { --btn-color: var(--c3); }
+  .answer-btn[data-index="3"] { --btn-color: var(--c4); }
+
+  .answer-btn.correct {
+    border-color: var(--correct);
+    background: rgba(16,185,129,0.1);
+    box-shadow: 0 0 30px rgba(16,185,129,0.2);
+    animation: pulse-correct 0.4s ease;
+  }
+
+  .answer-btn.correct .letter { background: var(--correct); }
+
+  .answer-btn.wrong {
+    border-color: var(--wrong);
+    background: rgba(239,68,68,0.08);
+    opacity: 0.7;
+  }
+
+  .answer-btn.wrong .letter { background: var(--wrong); }
+
+  @keyframes pulse-correct {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+
+  .explanation-box {
+    margin-top: 16px;
+    background: rgba(124,58,237,0.08);
+    border: 1px solid rgba(124,58,237,0.2);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 14px 18px;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: #c4c4d8;
+    display: none;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .explanation-box.show { display: block; }
+
+  .btn-next {
+    display: none;
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-next:hover { background: rgba(124,58,237,0.2); box-shadow: 0 0 30px rgba(124,58,237,0.3); }
+  .btn-next.show { display: block; animation: fadeUp 0.3s ease; }
+
+  /* RESULTS */
+  .results-header { text-align: center; margin-bottom: 40px; }
+
+  .results-score-ring {
+    width: 160px; height: 160px;
+    margin: 0 auto 24px;
+    position: relative;
+  }
+
+  .results-score-ring svg { transform: rotate(-90deg); }
+  .results-score-ring circle { fill: none; stroke-width: 8; }
+  .results-score-ring .bg { stroke: var(--border); }
+  .results-score-ring .fg { stroke: url(#scoreGrad); stroke-linecap: round; stroke-dasharray: 0 440; transition: stroke-dasharray 1.5s ease; }
+  .results-score-ring .center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+
+  .results-score-ring .pct { font-family: 'Syne', sans-serif; font-size: 2.5rem; font-weight: 900; line-height: 1; }
+  .results-score-ring .pts { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+  .results-title { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 900; margin-bottom: 8px; }
+  .results-subtitle { color: var(--muted); font-size: 0.85rem; }
+
+  .results-breakdown {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .breakdown-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .breakdown-card .val { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+  .breakdown-card .lbl { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+
+  .category-results {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .cat-result-title { font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+
+  .cat-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .cat-row:last-child { margin-bottom: 0; }
+  .cat-name { width: 160px; font-size: 0.75rem; color: var(--text); flex-shrink: 0; }
+  .cat-bar-wrap { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .cat-bar-fill { height: 100%; border-radius: 3px; transition: width 1s ease 0.3s; }
+  .cat-pct { font-size: 0.75rem; color: var(--muted); width: 36px; text-align: right; flex-shrink: 0; }
+
+  .btn-restart {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 0 40px rgba(124,58,237,0.25);
+  }
+
+  .btn-restart:hover { transform: translateY(-2px); box-shadow: 0 4px 60px rgba(124,58,237,0.45); }
+
+  .feedback-overlay {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none; z-index: 100;
+    opacity: 0; transition: opacity 0.2s;
+  }
+
+  .feedback-overlay.show { opacity: 1; }
+
+  .feedback-msg {
+    font-family: 'Syne', sans-serif;
+    font-size: 3rem; font-weight: 900;
+    padding: 24px 48px; border-radius: 8px;
+    animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .feedback-msg.correct { background: rgba(16,185,129,0.9); color: #fff; }
+  .feedback-msg.wrong { background: rgba(239,68,68,0.9); color: #fff; }
+
+  @keyframes popIn {
+    from { transform: scale(0.6); }
+    to { transform: scale(1); }
+  }
+
+  @media (max-width: 580px) {
+    .answers-grid { grid-template-columns: 1fr; }
+    .topics-grid { grid-template-columns: repeat(2, 1fr); }
+    .results-breakdown { grid-template-columns: 1fr; }
+    .cat-name { width: 110px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- INTRO -->
+  <div class="screen active" id="screen-intro">
+    <div class="intro-badge">🧠 Dev Quiz · 2025 Edition</div>
+    <h1 class="intro-title">
+      <span class="highlight">AI Dev</span><br>
+      Challenge
+    </h1>
+    <p class="intro-subtitle">
+      Testez vos connaissances sur l'IA moderne :<br>
+      LLM, Prompt Engineering, RAG, Agents &amp; Agentic Coding
+    </p>
+
+    <div class="stats-row">
+      <div class="stat"><strong>24</strong>questions</div>
+      <div class="stat"><strong>6</strong>thèmes</div>
+      <div class="stat"><strong>20s</strong>par question</div>
+    </div>
+
+    <div class="topics-grid">
+      <div class="topic-chip"><span>🤖</span>IA &amp; LLM</div>
+      <div class="topic-chip"><span>✍️</span>Prompt Eng.</div>
+      <div class="topic-chip"><span>📐</span>Context Eng.</div>
+      <div class="topic-chip"><span>🦾</span>AI Agents</div>
+      <div class="topic-chip"><span>⌨️</span>Agentic Coding</div>
+      <div class="topic-chip"><span>📚</span>RAG</div>
+    </div>
+
+    <button class="btn-start" onclick="startQuiz()">▶ Lancer le Quiz</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="screen-quiz">
+    <div class="quiz-header">
+      <span class="q-counter" id="q-counter">Q1 / 24</span>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <span class="score-display" id="score-display">0 pts</span>
+    </div>
+
+    <div style="display:flex; align-items:flex-start; gap:16px; margin-bottom:16px;">
+      <div style="flex:1">
+        <div class="category-tag" id="category-tag"></div>
+        <div class="difficulty-dots medium" id="difficulty-dots">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="question-card">
+          <div class="question-text" id="question-text"></div>
+        </div>
+      </div>
+      <div class="timer-ring">
+        <svg width="64" height="64" viewBox="0 0 64 64">
+          <circle class="bg" cx="32" cy="32" r="28"/>
+          <circle class="fg" id="timer-circle" cx="32" cy="32" r="28"/>
+        </svg>
+        <div class="number" id="timer-number">20</div>
+      </div>
+    </div>
+
+    <div class="answers-grid" id="answers-grid"></div>
+    <div class="explanation-box" id="explanation-box"></div>
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()">Suite →</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="screen" id="screen-results">
+    <div class="results-header">
+      <div class="results-score-ring">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <defs>
+            <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#7c3aed"/>
+              <stop offset="100%" stop-color="#06b6d4"/>
+            </linearGradient>
+          </defs>
+          <circle class="bg" cx="80" cy="80" r="70"/>
+          <circle class="fg" id="score-ring-circle" cx="80" cy="80" r="70"/>
+        </svg>
+        <div class="center">
+          <div class="pct" id="result-pct">—</div>
+          <div class="pts" id="result-pts">points</div>
+        </div>
+      </div>
+      <h2 class="results-title" id="result-title">Résultat</h2>
+      <p class="results-subtitle" id="result-subtitle">—</p>
+    </div>
+
+    <div class="results-breakdown">
+      <div class="breakdown-card">
+        <div class="val" id="res-correct" style="color:var(--correct)">—</div>
+        <div class="lbl">Correctes</div>
+      </div>
+      <div class="breakdown-card">
+        <div class="val" id="res-wrong" style="color:var(--wrong)">—</div>
+        <div class="lbl">Incorrectes</div>
+      </div>
+      <div class="breakdown-card">
+        <div class="val" id="res-time" style="color:var(--warning)">—</div>
+        <div class="lbl">Tps moyen</div>
+      </div>
+    </div>
+
+    <div class="category-results">
+      <div class="cat-result-title">Score par thème</div>
+      <div id="cat-breakdown"></div>
+    </div>
+
+    <button class="btn-restart" onclick="restartQuiz()">↺ Rejouer</button>
+  </div>
+
+</div>
+
+<div class="feedback-overlay" id="feedback-overlay">
+  <div class="feedback-msg" id="feedback-msg"></div>
+</div>
+
+<script>
+const QUESTIONS = [
+  // IA & LLM
+  { cat:"🤖 IA & LLM", diff:"easy", catId:"ia",
+    q:"Que signifie l'acronyme LLM ?",
+    opts:["Large Language Model","Logical Learning Machine","Linear Language Module","Low Latency Mechanism"],
+    ans:0,
+    exp:"LLM = <strong>Large Language Model</strong>. Un modèle de langage entraîné sur de vastes corpus pour prédire et générer du texte en se basant sur des probabilités sur les tokens suivants." },
+
+  { cat:"🤖 IA & LLM", diff:"medium", catId:"ia",
+    q:"Quelle architecture est à la base de la quasi-totalité des LLM modernes (GPT, Claude, Gemini) ?",
+    opts:["CNN (Convolutional Neural Network)","RNN (Recurrent Neural Network)","Transformer (self-attention)","GAN (Generative Adversarial Network)"],
+    ans:2,
+    exp:"L'architecture <strong>Transformer</strong> (Vaswani et al., 2017 — \"Attention is All You Need\") est le socle de tous les LLM modernes. Le mécanisme de self-attention permet de capturer les dépendances entre tokens sur l'ensemble de la séquence." },
+
+  { cat:"🤖 IA & LLM", diff:"medium", catId:"ia",
+    q:"Quelle est la différence clé entre un modèle de type GPT-4 et un modèle \"reasoning\" de type o1/o3 ?",
+    opts:["o1 génère uniquement du code","o1 utilise une chaîne de réflexion interne avant de répondre","o1 a une fenêtre de contexte plus petite","o1 est open-source contrairement à GPT-4"],
+    ans:1,
+    exp:"Les modèles <strong>reasoning</strong> (o1, o3, DeepSeek-R1, Claude 3.7 Sonnet) génèrent une <em>chain-of-thought interne</em> avant la réponse finale. Cette phase de réflexion prolongée améliore drastiquement les performances sur les tâches de raisonnement complexe." },
+
+  { cat:"🤖 IA & LLM", diff:"hard", catId:"ia",
+    q:"Que mesure la \"perplexité\" (perplexity) lors de l'évaluation d'un LLM ?",
+    opts:["Le nombre de paramètres du modèle","L'incertitude du modèle à prédire le token suivant","La vitesse d'inférence en tokens/s","Le coût d'entraînement en GPU-heures"],
+    ans:1,
+    exp:"La <strong>perplexité</strong> = exponentielle de la cross-entropy loss. Elle mesure la \"surprise\" du modèle face à un texte test. Une perplexité basse indique que le modèle prédit bien le corpus — c'est une métrique d'évaluation intrinsèque." },
+
+  // PROMPT ENGINEERING
+  { cat:"✍️ Prompt Engineering", diff:"easy", catId:"prompt",
+    q:"Quelle technique consiste à inclure des exemples entrée/sortie directement dans le prompt ?",
+    opts:["Zero-shot","Few-shot prompting","Chain-of-Thought","Self-Consistency"],
+    ans:1,
+    exp:"<strong>Few-shot prompting</strong> : fournir 1 ou plusieurs exemples (\"shots\") dans le prompt pour montrer le format et le comportement attendu, sans modifier les poids du modèle." },
+
+  { cat:"✍️ Prompt Engineering", diff:"medium", catId:"prompt",
+    q:"Quelle technique améliore le raisonnement d'un LLM en lui demandant d'expliquer ses étapes intermédiaires ?",
+    opts:["RAG","Tree of Thought","Chain-of-Thought (CoT)","RLHF"],
+    ans:2,
+    exp:"<strong>Chain-of-Thought (CoT)</strong> : en ajoutant \"pense étape par étape\" ou en montrant des exemples de raisonnement décomposé, le LLM produit des résultats nettement meilleurs sur des tâches de math, logique et code." },
+
+  { cat:"✍️ Prompt Engineering", diff:"medium", catId:"prompt",
+    q:"Quel est le rôle du System Prompt dans l'API Claude ou OpenAI ?",
+    opts:["Injecter uniquement des données RAG","Définir le persona, les règles et le contexte global du modèle","Spécifier la température d'inférence","Lister exclusivement les outils disponibles"],
+    ans:1,
+    exp:"Le <strong>system prompt</strong> est traité avant tous les messages utilisateur. Il définit l'identité, les contraintes comportementales et le contexte global de l'assistant — il influence l'ensemble de la conversation." },
+
+  { cat:"✍️ Prompt Engineering", diff:"hard", catId:"prompt",
+    q:"Qu'est-ce qu'une attaque de \"prompt injection\" ?",
+    opts:["L'injection de variables dynamiques dans un template de prompt","Une attaque qui fait ignorer les instructions système via des inputs malveillants","Une technique d'optimisation automatique des prompts","L'ajout de documents dans la fenêtre de contexte"],
+    ans:1,
+    exp:"<strong>Prompt injection</strong> : un acteur malveillant insère des instructions dans les données traitées par l'agent (ex: document, email) pour détourner son comportement et contourner le system prompt (\"Ignore previous instructions...\")." },
+
+  // CONTEXT ENGINEERING
+  { cat:"📐 Context Engineering", diff:"easy", catId:"context",
+    q:"Que désigne la \"context window\" (fenêtre de contexte) d'un LLM ?",
+    opts:["La taille de la base de données vectorielle","Le nombre max de tokens traités en une seule inférence","La durée maximale d'une session API","La mémoire persistante entre sessions"],
+    ans:1,
+    exp:"La <strong>context window</strong> = quantité maximale de tokens (prompt + réponse) visibles simultanément par le modèle. Ex : Claude 3.5 Sonnet ≈ 200k tokens, GPT-4o ≈ 128k tokens." },
+
+  { cat:"📐 Context Engineering", diff:"medium", catId:"context",
+    q:"Quel phénomène décrit la baisse de performance quand l'info critique est au milieu d'un long contexte ?",
+    opts:["Context poisoning","Lost in the middle","Attention collapse","Token overflow"],
+    ans:1,
+    exp:"<strong>\"Lost in the middle\"</strong> (Liu et al., 2023) : les LLM performent mieux quand l'information importante est placée en début ou en fin de contexte. L'info enfouie au milieu est souvent ignorée." },
+
+  { cat:"📐 Context Engineering", diff:"medium", catId:"context",
+    q:"Quelle stratégie permet de gérer des conversations très longues qui dépassent la context window ?",
+    opts:["Augmenter la température du modèle","Sliding window + résumé compressé des échanges précédents","Réduire max_tokens","Passer à un modèle plus petit"],
+    ans:1,
+    exp:"<strong>Sliding window + summarization</strong> : on conserve les N derniers messages + un résumé compressé de l'historique, créant une \"mémoire longue\" sans jamais dépasser la context window." },
+
+  { cat:"📐 Context Engineering", diff:"hard", catId:"context",
+    q:"Qu'est-ce que le \"KV Cache\" dans l'inférence d'un LLM ?",
+    opts:["Un cache Redis pour les résultats d'API","La mise en cache des matrices Key/Value d'attention pour les préfixes communs","Un cache de vecteurs d'embeddings","Un cache HTTP pour les requêtes LLM"],
+    ans:1,
+    exp:"<strong>KV Cache</strong> : lors de la génération auto-régressive, les matrices Key/Value calculées pour le préfixe fixe sont mises en cache. Évite de les recalculer à chaque nouveau token — réduit drastiquement la latence et le coût (Prompt Caching chez Anthropic, jusqu'à -90% sur les tokens cached)." },
+
+  // AI AGENTS
+  { cat:"🦾 AI Agents", diff:"easy", catId:"agents",
+    q:"Dans l'architecture d'un agent IA, que désigne le \"tool use\" / \"function calling\" ?",
+    opts:["La capacité du modèle à se fine-tuner lui-même","La capacité du LLM à invoquer des fonctions/APIs externes","Le mécanisme de mémoire long-terme","Le système de routing entre plusieurs agents"],
+    ans:1,
+    exp:"<strong>Tool use / Function calling</strong> : le LLM peut décider d'appeler des fonctions définies (API REST, recherche web, exécution de code, BDD...) et intégrer les résultats dans son raisonnement pour produire sa réponse finale." },
+
+  { cat:"🦾 AI Agents", diff:"medium", catId:"agents",
+    q:"Qu'est-ce que le pattern \"ReAct\" dans le contexte des agents LLM ?",
+    opts:["Un framework React.js pour les UIs d'agents","Un pattern Reasoning + Acting alternant réflexion et actions outillées","Un algorithme de reinforcement learning","Un protocole de communication inter-agents"],
+    ans:1,
+    exp:"<strong>ReAct</strong> (Yao et al., 2022) = Reasoning + Acting : l'agent alterne entre <em>Thought</em> (raisonnement interne), <em>Action</em> (appel outil) et <em>Observation</em> (résultat), formant une boucle itérative jusqu'à la réponse finale." },
+
+  { cat:"🦾 AI Agents", diff:"medium", catId:"agents",
+    q:"Que signifie MCP dans l'écosystème Anthropic / agents IA ?",
+    opts:["Multi-Chain Processing","Model Context Protocol","Memory & Context Pipeline","Multi-Component Planning"],
+    ans:1,
+    exp:"<strong>Model Context Protocol (MCP)</strong> — Anthropic, 2024 : protocole open-source standardisant la connexion entre LLM et serveurs de ressources (outils, données). Permet l'interopérabilité des agents avec n'importe quel fournisseur de services." },
+
+  { cat:"🦾 AI Agents", diff:"hard", catId:"agents",
+    q:"Dans un système multi-agents, quelle est la différence entre un orchestrateur et un \"swarm\" ?",
+    opts:["Le swarm est systématiquement plus rapide","L'orchestrateur centralise le contrôle ; le swarm opère de façon décentralisée avec des agents autonomes","Le swarm utilise toujours plus d'agents","L'orchestrateur ne peut gérer qu'un seul sous-agent"],
+    ans:1,
+    exp:"<strong>Orchestrateur</strong> = contrôle centralisé, un LLM principal planifie et délègue aux sous-agents. <strong>Swarm</strong> = décentralisé, chaque agent prend ses décisions localement, la coordination émerge des interactions (ex: OpenAI Swarm, AutoGen)." },
+
+  // AGENTIC CODING
+  { cat:"⌨️ Agentic Coding", diff:"easy", catId:"coding",
+    q:"Quel outil CLI développé par Anthropic permet d'utiliser Claude directement dans le terminal pour des tâches de développement ?",
+    opts:["Claude Studio","Claude Code","Claude Terminal","Claude Dev"],
+    ans:1,
+    exp:"<strong>Claude Code</strong> : outil CLI d'Anthropic qui intègre Claude dans le terminal. Il peut lire les fichiers, exécuter des commandes bash, modifier du code et interagir avec Git de façon autonome dans votre repo." },
+
+  { cat:"⌨️ Agentic Coding", diff:"medium", catId:"coding",
+    q:"Dans une session d'agentic coding (Claude Code, Cursor...), quel type de fichier est utilisé pour définir les conventions du projet ?",
+    opts:[".env","CLAUDE.md / CONVENTIONS.md / .cursorrules","package.json","Dockerfile"],
+    ans:1,
+    exp:"Des fichiers comme <strong>CLAUDE.md</strong> (Claude Code), <strong>.cursorrules</strong> (Cursor) ou <strong>CONVENTIONS.md</strong> servent de \"mémoire projet\" : l'agent les lit au démarrage pour respecter l'architecture, les patterns de code et les règles métier." },
+
+  { cat:"⌨️ Agentic Coding", diff:"medium", catId:"coding",
+    q:"Quelle approche consiste à rédiger une spécification détaillée AVANT de générer du code avec un agent IA ?",
+    opts:["Vibe coding","Spec-Driven Development","TDD classique","Mob programming"],
+    ans:1,
+    exp:"<strong>Spec-Driven Development</strong> : rédiger un PRD ou SPEC.md exhaustif en amont permet à l'agent de rester aligné sur l'intention, réduit les hallucinations architecturales et facilite la validation des livrables." },
+
+  { cat:"⌨️ Agentic Coding", diff:"hard", catId:"coding",
+    q:"Qu'est-ce que le \"vibe coding\" et sa principale limite en production ?",
+    opts:["Une méthode agile basée sur l'ambiance d'équipe","Générer du code par description langage naturel sans le lire — limite : dette technique invisible et code incompris","Un style de pair programming asynchrone","Un framework de test basé sur l'expérience utilisateur"],
+    ans:1,
+    exp:"<strong>Vibe coding</strong> (Karpathy, 2025) : générer du code sans le comprendre ni le relire, guidé uniquement par des prompts. Risques : <em>dette technique invisible</em>, vulnérabilités de sécurité non détectées, code impossible à maintenir ou déboguer." },
+
+  // RAG
+  { cat:"📚 RAG", diff:"easy", catId:"rag",
+    q:"Que signifie l'acronyme RAG ?",
+    opts:["Rapid API Generation","Retrieval-Augmented Generation","Random Adaptive Gradient","Recursive Attention Graph"],
+    ans:1,
+    exp:"<strong>RAG = Retrieval-Augmented Generation</strong> : enrichir la génération d'un LLM avec des documents récupérés dynamiquement depuis une base de connaissances, sans modifier les poids du modèle (pas de fine-tuning)." },
+
+  { cat:"📚 RAG", diff:"medium", catId:"rag",
+    q:"Quelle est la fonction principale d'un modèle d'embedding dans un pipeline RAG ?",
+    opts:["Compresser et résumer les PDF","Convertir du texte en vecteurs pour la recherche sémantique","Générer la réponse finale de l'assistant","Chiffrer les données stockées en base"],
+    ans:1,
+    exp:"Un <strong>embedding model</strong> (ex: text-embedding-3-small, nomic-embed-text) transforme le texte en vecteurs denses dans un espace latent. La similarité cosinus entre vecteurs permet une <em>recherche sémantique</em> bien au-delà du keyword matching." },
+
+  { cat:"📚 RAG", diff:"medium", catId:"rag",
+    q:"Quelle extension PostgreSQL est couramment utilisée pour stocker et interroger des vecteurs d'embeddings ?",
+    opts:["Redis Vectors","Elasticsearch","pgvector","Pinecone uniquement"],
+    ans:2,
+    exp:"<strong>pgvector</strong> : extension PostgreSQL ajoutant un type vectoriel et les opérateurs de similarité (cosine, L2, inner product). Parfaitement intégré avec <strong>Supabase</strong> pour construire un RAG sans infrastructure vectorielle dédiée." },
+
+  { cat:"📚 RAG", diff:"hard", catId:"rag",
+    q:"Qu'est-ce que le \"Hybrid Search\" dans un RAG et pourquoi est-il souvent supérieur à la recherche vectorielle seule ?",
+    opts:["Rechercher simultanément dans plusieurs LLM","Combiner recherche dense (vectorielle) + sparse (BM25) via RRF, capturant sémantique ET correspondances exactes","Une technique de chunking adaptative","Chercher en parallèle dans plusieurs bases vectorielles"],
+    ans:1,
+    exp:"<strong>Hybrid Search</strong> = dense (sémantique) + sparse (BM25/TF-IDF), fusionnés via <em>Reciprocal Rank Fusion (RRF)</em> ou un re-ranker. Capture à la fois la proximité sémantique ET les correspondances exactes (noms propres, codes, acronymes) — supérieur en précision sur la majorité des cas d'usage." }
+];
+
+const TOTAL = QUESTIONS.length;
+const TOTAL_TIME = 20;
+const CIRCUM = 2 * Math.PI * 28;
+
+let currentQ, score, correctCount, timerInterval, timeLeft, answered, answerTimes, catStats;
+let shuffledOpts, correctShuffledIdx; // track shuffled answer order per question
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startQuiz() {
+  currentQ = 0; score = 0; correctCount = 0; answered = false;
+  answerTimes = []; catStats = {};
+  QUESTIONS.forEach(q => {
+    if (!catStats[q.catId]) catStats[q.catId] = { correct: 0, total: 0, label: q.cat };
+  });
+  showScreen('screen-quiz');
+  loadQuestion();
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function loadQuestion() {
+  const q = QUESTIONS[currentQ];
+  answered = false;
+  timeLeft = TOTAL_TIME;
+
+  // Shuffle options and track where the correct answer landed
+  const indices = shuffle([0, 1, 2, 3]);
+  shuffledOpts = indices.map(i => q.opts[i]);
+  correctShuffledIdx = indices.indexOf(q.ans);
+
+  document.getElementById('q-counter').textContent = `Q${currentQ + 1} / ${TOTAL}`;
+  document.getElementById('progress-fill').style.width = `${(currentQ / TOTAL) * 100}%`;
+  document.getElementById('score-display').textContent = `${score} pts`;
+  document.getElementById('category-tag').textContent = q.cat;
+
+  const dots = document.getElementById('difficulty-dots');
+  dots.className = 'difficulty-dots ' + q.diff;
+
+  document.getElementById('question-text').innerHTML = q.q;
+
+  const grid = document.getElementById('answers-grid');
+  grid.innerHTML = '';
+  ['A','B','C','D'].forEach((letter, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.dataset.index = i;
+    btn.innerHTML = `<span class="letter">${letter}</span><span>${shuffledOpts[i]}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    grid.appendChild(btn);
+  });
+
+  document.getElementById('explanation-box').className = 'explanation-box';
+  document.getElementById('btn-next').className = 'btn-next';
+
+  updateTimer(TOTAL_TIME);
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimer(timeLeft);
+    if (timeLeft <= 0) { clearInterval(timerInterval); if (!answered) timeout(); }
+  }, 1000);
+}
+
+function updateTimer(t) {
+  const pct = t / TOTAL_TIME;
+  const dash = pct * CIRCUM;
+  const circle = document.getElementById('timer-circle');
+  circle.style.strokeDasharray = `${dash} ${CIRCUM}`;
+  circle.style.stroke = t <= 5 ? '#ef4444' : t <= 10 ? '#f59e0b' : '#7c3aed';
+  document.getElementById('timer-number').textContent = t;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+  answerTimes.push(TOTAL_TIME - timeLeft);
+
+  const q = QUESTIONS[currentQ];
+  catStats[q.catId].total++;
+
+  document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true);
+
+  if (idx === correctShuffledIdx) {
+    document.querySelectorAll('.answer-btn')[idx].classList.add('correct');
+    const bonus = Math.max(10, Math.round(50 + timeLeft * 5));
+    score += bonus;
+    correctCount++;
+    catStats[q.catId].correct++;
+    showFeedback(true, bonus);
+  } else {
+    document.querySelectorAll('.answer-btn')[idx].classList.add('wrong');
+    document.querySelectorAll('.answer-btn')[correctShuffledIdx].classList.add('correct');
+    showFeedback(false, 0);
+  }
+
+  document.getElementById('explanation-box').innerHTML = `💡 ${q.exp}`;
+  document.getElementById('explanation-box').className = 'explanation-box show';
+  document.getElementById('btn-next').className = 'btn-next show';
+  document.getElementById('score-display').textContent = `${score} pts`;
+}
+
+function timeout() {
+  answered = true;
+  answerTimes.push(TOTAL_TIME);
+  const q = QUESTIONS[currentQ];
+  catStats[q.catId].total++;
+  document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true);
+  document.querySelectorAll('.answer-btn')[correctShuffledIdx].classList.add('correct');
+  document.getElementById('explanation-box').innerHTML = `⏱️ Temps écoulé ! &nbsp;💡 ${q.exp}`;
+  document.getElementById('explanation-box').className = 'explanation-box show';
+  document.getElementById('btn-next').className = 'btn-next show';
+}
+
+function showFeedback(correct, pts) {
+  const overlay = document.getElementById('feedback-overlay');
+  const msg = document.getElementById('feedback-msg');
+  msg.className = 'feedback-msg ' + (correct ? 'correct' : 'wrong');
+  msg.textContent = correct ? `✓ +${pts} pts` : '✗ Raté !';
+  overlay.classList.add('show');
+  setTimeout(() => overlay.classList.remove('show'), 700);
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= TOTAL) showResults();
+  else loadQuestion();
+}
+
+function showResults() {
+  showScreen('screen-results');
+  const pct = Math.round((correctCount / TOTAL) * 100);
+  const avgTime = answerTimes.length ? Math.round(answerTimes.reduce((a,b)=>a+b,0)/answerTimes.length) : 0;
+
+  document.getElementById('result-pct').textContent = pct + '%';
+  document.getElementById('result-pts').textContent = score + ' pts';
+  document.getElementById('res-correct').textContent = correctCount;
+  document.getElementById('res-wrong').textContent = TOTAL - correctCount;
+  document.getElementById('res-time').textContent = avgTime + 's';
+
+  let title, subtitle;
+  if (pct >= 85) { title = '🏆 Expert IA !'; subtitle = 'Impressionnant — vous maîtrisez l\'IA moderne de bout en bout.'; }
+  else if (pct >= 65) { title = '🚀 Bon niveau !'; subtitle = 'Solides bases, quelques angles morts à combler.'; }
+  else if (pct >= 45) { title = '📈 En progression'; subtitle = 'Les fondamentaux sont là, place à l\'approfondissement.'; }
+  else { title = '📚 À bosser !'; subtitle = 'L\'IA évolue vite — reprenez les bases et retentez !'; }
+
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-subtitle').textContent = subtitle;
+
+  setTimeout(() => {
+    const circ = 2 * Math.PI * 70;
+    document.getElementById('score-ring-circle').style.strokeDasharray = `${(pct/100)*circ} ${circ}`;
+  }, 200);
+
+  const catColors = { ia:'#7c3aed', prompt:'#0ea5e9', context:'#f97316', agents:'#ec4899', coding:'#10b981', rag:'#f59e0b' };
+  const catDiv = document.getElementById('cat-breakdown');
+  catDiv.innerHTML = '';
+  Object.entries(catStats).forEach(([id, s]) => {
+    const p = s.total > 0 ? Math.round((s.correct/s.total)*100) : 0;
+    catDiv.innerHTML += `
+      <div class="cat-row">
+        <div class="cat-name">${s.label}</div>
+        <div class="cat-bar-wrap">
+          <div class="cat-bar-fill" style="background:${catColors[id]};width:0%" data-w="${p}%"></div>
+        </div>
+        <div class="cat-pct">${p}%</div>
+      </div>`;
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.cat-bar-fill').forEach(b => b.style.width = b.dataset.w);
+  }, 300);
+}
+
+function restartQuiz() { startQuiz(); }
+</script>
+</body>
+</html>

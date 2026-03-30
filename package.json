@@ -1,0 +1,18 @@
+{
+  "name": "quizv",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "bun run --filter='*' build",
+    "test": "bun test",
+    "dev": "bun run packages/server/src/cli.ts dev"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

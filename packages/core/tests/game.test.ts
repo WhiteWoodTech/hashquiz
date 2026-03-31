@@ -109,4 +109,37 @@ describe('GameEngine', () => {
     await engine.nextQuestion()
     expect(engine.state.status).toBe('finished')
   })
+
+  test('revealAnswer broadcasts answer_revealed with correct choiceCounts', async () => {
+    const transport = makeTransport()
+    const engine = new GameEngine(makeQuiz(), transport, 'TEST01')
+    engine.addPlayer({ id: 'p1', pseudo: 'Alice', email: 'alice@test.com', score: 0, joinedAt: Date.now() })
+    engine.addPlayer({ id: 'p2', pseudo: 'Bob', email: 'bob@test.com', score: 0, joinedAt: Date.now() })
+    await engine.start()
+    // p1 picks 'b' (correct), p2 picks 'a' (wrong)
+    engine.submitAnswer('p1', ['b'], 10000)
+    engine.submitAnswer('p2', ['a'], 10000)
+    await engine.revealAnswer()
+
+    const broadcastMock = transport.broadcast as ReturnType<typeof mock>
+    const broadcastedEvents = broadcastMock.mock.calls.map((call: unknown[]) => call[1])
+    expect(broadcastedEvents).toContainEqual(
+      expect.objectContaining({ type: 'answer_revealed', choiceCounts: { b: 1, a: 1 } })
+    )
+  })
+
+  test('revealAnswer broadcasts answer_revealed with empty choiceCounts when no answers submitted', async () => {
+    const transport = makeTransport()
+    const engine = new GameEngine(makeQuiz(), transport, 'TEST01')
+    engine.addPlayer({ id: 'p1', pseudo: 'Alice', email: 'alice@test.com', score: 0, joinedAt: Date.now() })
+    await engine.start()
+    // no submitAnswer call — player did not answer
+    await engine.revealAnswer()
+
+    const broadcastMock = transport.broadcast as ReturnType<typeof mock>
+    const broadcastedEvents = broadcastMock.mock.calls.map((call: unknown[]) => call[1])
+    expect(broadcastedEvents).toContainEqual(
+      expect.objectContaining({ type: 'answer_revealed', choiceCounts: {} })
+    )
+  })
 })

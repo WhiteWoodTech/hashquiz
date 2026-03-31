@@ -1,0 +1,24 @@
+{
+  "name": "@quizv/server",
+  "version": "0.0.1",
+  "type": "module",
+  "bin": {
+    "quizv": "./src/cli.ts"
+  },
+  "main": "./src/server.ts",
+  "exports": {
+    ".": "./src/server.ts"
+  },
+  "scripts": {
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@quizv/core": "workspace:*",
+    "@quizv/parser": "workspace:*",
+    "@quizv/transport-local": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "@types/bun": "latest"
+  }
+}

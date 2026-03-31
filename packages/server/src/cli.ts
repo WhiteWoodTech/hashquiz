@@ -1,0 +1,64 @@
+#!/usr/bin/env bun
+import { devCommand } from './dev'
+import { parseQuizFile, validateQuiz } from '@quizv/parser'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+
+const [,, command, arg, ...flags] = process.argv
+
+function printUsage(): void {
+  console.log(`
+  quizv <command> [options]
+
+  Commands:
+    dev <quiz.quizv.md>     Start local dev server with hot-reload
+    check <quiz.quizv.md>   Validate quiz file format
+
+  Options:
+    --port <number>         Port to listen on (default: 3030)
+`)
+}
+
+if (!command || command === '--help' || command === '-h') {
+  printUsage()
+  process.exit(0)
+}
+
+const portFlag = flags.indexOf('--port')
+const port = portFlag !== -1 ? parseInt(flags[portFlag + 1] ?? '3030') : 3030
+
+if (command === 'dev') {
+  if (!arg) {
+    console.error('Error: provide a .quizv.md file path\n  quizv dev quiz.quizv.md')
+    process.exit(1)
+  }
+  devCommand(arg, port)
+} else if (command === 'check') {
+  if (!arg) {
+    console.error('Error: provide a .quizv.md file path\n  quizv check quiz.quizv.md')
+    process.exit(1)
+  }
+  try {
+    const content = readFileSync(resolve(arg), 'utf-8')
+    const quiz = parseQuizFile(content)
+    const result = validateQuiz(quiz)
+    if (result.valid) {
+      console.log(`✓ ${arg} is valid`)
+      console.log(`  ${quiz.questions.length} questions, theme: ${quiz.meta.theme}`)
+    } else {
+      console.error(`✗ ${arg} has errors:`)
+      for (const err of result.errors) {
+        const loc = err.questionIndex !== undefined ? ` [Q${err.questionIndex + 1}]` : ''
+        console.error(`  ${err.field}${loc}: ${err.message}`)
+      }
+      process.exit(1)
+    }
+  } catch (e) {
+    console.error('Failed to read file:', e instanceof Error ? e.message : String(e))
+    process.exit(1)
+  }
+} else {
+  console.error(`Unknown command: ${command}`)
+  printUsage()
+  process.exit(1)
+}

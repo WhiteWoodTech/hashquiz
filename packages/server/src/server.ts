@@ -412,7 +412,7 @@ export class QuizvServer {
           clearInterval(timerInterval)
           timerInterval = setInterval(() => {
             remaining = Math.max(0, remaining - 1)
-            timerEl.textContent = timerEl.dataset.answered === '1' ? '(' + remaining + ')' : remaining
+            timerEl.textContent = remaining
             if (remaining === 0) clearInterval(timerInterval)
           }, 1000)
         }

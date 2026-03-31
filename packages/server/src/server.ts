@@ -184,25 +184,41 @@ export class QuizvServer {
     button { background: #7c3aed; color: #fff; border: none; padding: 0.75rem 1.5rem;
              border-radius: 8px; cursor: pointer; font-size: 1rem; margin: 0.5rem; }
     button:hover { background: #6d28d9; }
+    button:disabled { background: #333; cursor: not-allowed; opacity: 0.5; }
     #status { background: #111118; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    #question-box { background: #111118; border-radius: 8px; padding: 1rem; margin: 1rem 0; display: none; }
+    #question-box h2 { margin: 0 0 0.5rem; font-size: 1.2rem; color: #7c3aed; }
+    #question-box p { margin: 0.25rem 0; }
     #log { background: #0d0d14; border-radius: 8px; padding: 1rem; font-family: monospace;
-           font-size: 0.85rem; height: 300px; overflow-y: auto; }
+           font-size: 0.85rem; height: 200px; overflow-y: auto; margin-top: 1rem; }
+    #ws-status { font-size: 0.85rem; color: #888; margin-bottom: 0.5rem; }
   </style>
 </head>
 <body>
   <h1>QuizV Host Control</h1>
+  <p id="ws-status">Connecting...</p>
   <div id="status">
     <p>Join code: <strong>${this.joinCode}</strong></p>
-    <p>Players: <span id="playerCount">0</span></p>
+    <p>Players: <span id="playerCount">0</span> &nbsp;|&nbsp; State: <span id="game-state">lobby</span></p>
   </div>
-  <button onclick="send('host_start')">▶ Start Game</button>
-  <button onclick="send('host_reveal')">🔍 Reveal Answer</button>
-  <button onclick="send('host_next')">⏭ Next Question</button>
+  <div id="question-box">
+    <h2>Question <span id="q-idx">1</span> / <span id="q-total">${this.engine.state.totalQuestions}</span></h2>
+    <p id="q-text"></p>
+    <p>Answers received: <span id="answer-count">0</span></p>
+  </div>
+  <div>
+    <button id="btn-start" onclick="send('host_start')">▶ Start Game</button>
+    <button id="btn-reveal" onclick="send('host_reveal')" disabled>🔍 Reveal Answer</button>
+    <button id="btn-next" onclick="send('host_next')" disabled>⏭ Next Question</button>
+  </div>
   <div id="log"></div>
   <script>
     const ws = new WebSocket('ws://localhost:${this.port}/ws?role=host')
-    let playerCount = 0
-    function send(type) { ws.send(JSON.stringify({ type })) }
+    let playerCount = 0, answerCount = 0
+
+    function send(type) {
+      if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type }))
+    }
     function log(msg) {
       const el = document.getElementById('log')
       const div = document.createElement('div')
@@ -210,11 +226,47 @@ export class QuizvServer {
       el.appendChild(div)
       el.scrollTop = el.scrollHeight
     }
+    function setButtons(state) {
+      document.getElementById('btn-start').disabled = state !== 'lobby'
+      document.getElementById('btn-reveal').disabled = state !== 'question'
+      document.getElementById('btn-next').disabled = state !== 'revealed'
+    }
+
+    ws.onopen = () => {
+      document.getElementById('ws-status').textContent = 'Connected'
+      document.getElementById('ws-status').style.color = '#22c55e'
+    }
+    ws.onerror = () => {
+      document.getElementById('ws-status').textContent = 'Connection error'
+      document.getElementById('ws-status').style.color = '#ef4444'
+    }
     ws.onmessage = (e) => {
       const data = JSON.parse(e.data)
-      if (data.type === 'player_joined') playerCount++
-      if (data.type === 'player_left') playerCount = Math.max(0, playerCount - 1)
-      document.getElementById('playerCount').textContent = playerCount
+      if (data.type === 'player_joined') { playerCount++; document.getElementById('playerCount').textContent = playerCount }
+      if (data.type === 'player_left') { playerCount = Math.max(0, playerCount - 1); document.getElementById('playerCount').textContent = playerCount }
+      if (data.type === 'question_started') {
+        answerCount = 0
+        document.getElementById('game-state').textContent = 'question ' + (data.idx + 1)
+        document.getElementById('q-idx').textContent = data.idx + 1
+        const qText = data.question.text.replace(/^#+ /, '')
+        document.getElementById('q-text').textContent = qText
+        document.getElementById('answer-count').textContent = '0'
+        document.getElementById('question-box').style.display = 'block'
+        setButtons('question')
+      }
+      if (data.type === 'answer_submitted') {
+        answerCount++
+        document.getElementById('answer-count').textContent = answerCount
+      }
+      if (data.type === 'answer_revealed') {
+        document.getElementById('game-state').textContent = 'revealed'
+        setButtons('revealed')
+      }
+      if (data.type === 'game_ended') {
+        document.getElementById('game-state').textContent = 'finished'
+        document.getElementById('question-box').style.display = 'none'
+        setButtons('finished')
+      }
       log(data)
     }
   </script>

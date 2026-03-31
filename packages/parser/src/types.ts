@@ -4,6 +4,9 @@ export interface QuizMeta {
   theme: string
   author?: string
   tags: string[]
+  oneShoot: boolean       // one-shoot frontmatter, default true
+  maxQuestions?: number   // max-questions frontmatter
+  maxTimeSec?: number     // max-time frontmatter, stored in seconds
 }
 
 export interface Choice {

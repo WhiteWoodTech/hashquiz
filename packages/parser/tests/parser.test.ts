@@ -112,3 +112,120 @@ difficulty: easy
     expect(result.errors.some(e => e.field === 'choices' && e.questionIndex === 0)).toBe(true)
   })
 })
+
+describe('parseMeta — new fields', () => {
+  test('one-shoot defaults to true when absent', () => {
+    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    expect(quiz.meta.oneShoot).toBe(true)
+  })
+
+  test('one-shoot: false is parsed correctly', () => {
+    const content = `---
+title: T
+theme: default
+tags: []
+one-shoot: false
+---
+---
+type: single
+timer: 20
+difficulty: easy
+---
+# Q?
+- [x] A
+- [ ] B
+`
+    const quiz = parseQuizFile(content)
+    expect(quiz.meta.oneShoot).toBe(false)
+  })
+
+  test('max-questions is parsed as number', () => {
+    const content = `---
+title: T
+theme: default
+tags: []
+max-questions: 5
+---
+---
+type: single
+timer: 20
+difficulty: easy
+---
+# Q?
+- [x] A
+- [ ] B
+`
+    const quiz = parseQuizFile(content)
+    expect(quiz.meta.maxQuestions).toBe(5)
+  })
+
+  test('max-time integer (no suffix) parsed as minutes to seconds', () => {
+    const content = `---
+title: T
+theme: default
+tags: []
+max-time: 5
+---
+---
+type: single
+timer: 20
+difficulty: easy
+---
+# Q?
+- [x] A
+- [ ] B
+`
+    const quiz = parseQuizFile(content)
+    expect(quiz.meta.maxTimeSec).toBe(300)
+  })
+
+  test('max-time with m suffix parsed as seconds', () => {
+    const content = `---
+title: T
+theme: default
+tags: []
+max-time: 3m
+---
+---
+type: single
+timer: 20
+difficulty: easy
+---
+# Q?
+- [x] A
+- [ ] B
+`
+    const quiz = parseQuizFile(content)
+    expect(quiz.meta.maxTimeSec).toBe(180)
+  })
+
+  test('max-time with s suffix parsed as seconds directly', () => {
+    const content = `---
+title: T
+theme: default
+tags: []
+max-time: 90s
+---
+---
+type: single
+timer: 20
+difficulty: easy
+---
+# Q?
+- [x] A
+- [ ] B
+`
+    const quiz = parseQuizFile(content)
+    expect(quiz.meta.maxTimeSec).toBe(90)
+  })
+
+  test('max-questions undefined when absent', () => {
+    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    expect(quiz.meta.maxQuestions).toBeUndefined()
+  })
+
+  test('max-time undefined when absent', () => {
+    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    expect(quiz.meta.maxTimeSec).toBeUndefined()
+  })
+})

@@ -1,4 +1,7 @@
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
 import App from './App.vue'
+import 'virtual:uno.css'
+import '@quizv/theme-default/styles/vars.css'
 
-createApp(App).mount('#app')
+createApp(App).use(createPinia()).mount('#app')

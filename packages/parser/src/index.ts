@@ -37,6 +37,13 @@ export function validateQuiz(quiz: Quiz): ValidationResult {
     errors.push({ field: 'questions', message: 'Quiz must have at least one question' })
   }
 
+  if (quiz.meta.maxQuestions !== undefined && quiz.meta.maxTimeSec !== undefined) {
+    errors.push({
+      field: 'max-questions',
+      message: 'max-questions and max-time are mutually exclusive — use only one',
+    })
+  }
+
   for (const [i, q] of quiz.questions.entries()) {
     const correctCount = q.choices.filter(c => c.isCorrect).length
     if (correctCount === 0) {

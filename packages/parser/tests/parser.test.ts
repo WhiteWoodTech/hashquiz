@@ -88,6 +88,29 @@ describe('validateQuiz', () => {
     expect(result.errors.some(e => e.field === 'questions')).toBe(true)
   })
 
+  test('returns error when both max-questions and max-time are set', () => {
+    const content = `---
+title: T
+theme: default
+tags: []
+max-questions: 3
+max-time: 5m
+---
+---
+type: single
+timer: 20
+difficulty: easy
+---
+# Q?
+- [x] A
+- [ ] B
+`
+    const quiz = parseQuizFile(content)
+    const result = validateQuiz(quiz)
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e => e.field === 'max-questions')).toBe(true)
+  })
+
   test('returns error when question has no correct answer', () => {
     const content = `---
 title: Bad Quiz

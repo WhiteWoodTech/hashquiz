@@ -270,7 +270,7 @@ export class QuizvServer {
     </div>
   </div>
   <script>
-    let ws, playerId = crypto.randomUUID(), timerInterval, playerCount = 0
+    let ws, playerId = Math.random().toString(36).slice(2) + Date.now().toString(36), timerInterval, playerCount = 0
 
     function show(id) {
       ['lobby','question-screen','feedback','podium'].forEach(s => {

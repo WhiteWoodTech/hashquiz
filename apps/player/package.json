@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@quizv/core": "workspace:*",
+    "@quizv/transport-supabase": "workspace:*",
     "vue": "^3.4.27"
   },
   "devDependencies": {

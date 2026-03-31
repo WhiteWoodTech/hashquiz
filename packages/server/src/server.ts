@@ -147,8 +147,8 @@ export class QuizvServer {
           }
         },
         close(ws) {
-          const { playerId } = ws.data as { playerId: string }
-          self.engine.removePlayer(playerId)
+          const { role, playerId } = ws.data as { role: string; playerId: string }
+          if (role !== 'host') self.engine.removePlayer(playerId)
         },
       },
     })
@@ -203,7 +203,9 @@ export class QuizvServer {
     function send(type) { ws.send(JSON.stringify({ type })) }
     function log(msg) {
       const el = document.getElementById('log')
-      el.innerHTML += '<div>' + new Date().toISOString().slice(11,19) + ' ' + JSON.stringify(msg) + '</div>'
+      const div = document.createElement('div')
+      div.textContent = new Date().toISOString().slice(11,19) + ' ' + JSON.stringify(msg)
+      el.appendChild(div)
       el.scrollTop = el.scrollHeight
     }
     ws.onmessage = (e) => {
@@ -331,8 +333,13 @@ export class QuizvServer {
         if (data.type === 'game_ended') {
           clearInterval(timerInterval)
           show('podium')
-          document.getElementById('podium-list').innerHTML =
-            data.podium.map(p => '<p>#' + p.rank + ' ' + p.pseudo + ' — ' + p.score + ' pts</p>').join('')
+          const list = document.getElementById('podium-list')
+          list.innerHTML = ''
+          data.podium.forEach(p => {
+            const el = document.createElement('p')
+            el.textContent = '#' + p.rank + ' ' + p.pseudo + ' \u2014 ' + p.score + ' pts'
+            list.appendChild(el)
+          })
         }
       }
     }

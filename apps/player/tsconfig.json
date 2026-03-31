@@ -4,5 +4,5 @@
     "jsx": "preserve",
     "lib": ["ESNext", "DOM"]
   },
-  "include": ["src"]
+  "include": ["src", "../../packages/*/src"]
 }

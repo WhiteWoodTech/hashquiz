@@ -1,3 +1,6 @@
 export { default as TimerRing } from './TimerRing.vue'
 export { default as AnswerButton } from './AnswerButton.vue'
 export { default as AnswerBarChart } from './AnswerBarChart.vue'
+export { default as PlayerList } from './PlayerList.vue'
+export { default as Podium } from './Podium.vue'
+export { default as QrCode } from './QrCode.vue'

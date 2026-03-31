@@ -75,6 +75,10 @@ export class QuizvServer {
         if (req.headers.get('upgrade') === 'websocket') {
           const role = url.searchParams.get('role') ?? 'player'
           const playerId = url.searchParams.get('id') ?? crypto.randomUUID()
+          // Players must provide the correct join code
+          if (role === 'player' && url.searchParams.get('code') !== self.joinCode) {
+            return new Response('Invalid join code', { status: 403 })
+          }
           const upgraded = server.upgrade(req, { data: { role, playerId } })
           if (upgraded) return undefined
           return new Response('WebSocket upgrade failed', { status: 400 })
@@ -202,7 +206,7 @@ export class QuizvServer {
     <p>Players: <span id="playerCount">0</span> &nbsp;|&nbsp; State: <span id="game-state">lobby</span></p>
   </div>
   <div id="question-box">
-    <h2>Question <span id="q-idx">1</span> / <span id="q-total">${this.engine.state.totalQuestions}</span></h2>
+    <h2>Question <span id="q-idx">1</span> / <span id="q-total">${this.engine.state.totalQuestions}</span> &nbsp;⏱ <span id="q-timer" style="color:#7c3aed">—</span>s</h2>
     <p id="q-text"></p>
     <p>Answers received: <span id="answer-count">0</span></p>
   </div>
@@ -214,7 +218,7 @@ export class QuizvServer {
   <div id="log"></div>
   <script>
     const ws = new WebSocket('ws://localhost:${this.port}/ws?role=host')
-    let playerCount = 0, answerCount = 0
+    let playerCount = 0, answerCount = 0, hostTimerInterval
 
     function send(type) {
       if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type }))
@@ -253,12 +257,23 @@ export class QuizvServer {
         document.getElementById('answer-count').textContent = '0'
         document.getElementById('question-box').style.display = 'block'
         setButtons('question')
+        // Host timer countdown — mirrors player timer
+        clearInterval(hostTimerInterval)
+        let remaining = data.question.timer
+        document.getElementById('q-timer').textContent = remaining
+        hostTimerInterval = setInterval(() => {
+          remaining = Math.max(0, remaining - 1)
+          document.getElementById('q-timer').textContent = remaining
+          if (remaining === 0) clearInterval(hostTimerInterval)
+        }, 1000)
       }
       if (data.type === 'answer_submitted') {
         answerCount++
         document.getElementById('answer-count').textContent = answerCount
       }
       if (data.type === 'answer_revealed') {
+        clearInterval(hostTimerInterval)
+        document.getElementById('q-timer').textContent = '—'
         document.getElementById('game-state').textContent = 'revealed'
         setButtons('revealed')
       }
@@ -298,9 +313,11 @@ export class QuizvServer {
 <body>
   <div id="join-screen">
     <h1>Join QuizV</h1>
+    <input id="code" placeholder="Join code (e.g. ABC123)" style="text-transform:uppercase;letter-spacing:0.15em" />
     <input id="pseudo" placeholder="Your name" />
     <input id="email" type="email" placeholder="Email (optional)" />
     <button onclick="join()">Join Game</button>
+    <p id="join-error" style="color:#ef4444;display:none"></p>
   </div>
   <div id="screen">
     <div id="lobby" style="display:none">
@@ -331,10 +348,18 @@ export class QuizvServer {
     }
 
     function join() {
+      const code = document.getElementById('code').value.trim().toUpperCase()
       const pseudo = document.getElementById('pseudo').value.trim()
       const email = document.getElementById('email').value.trim()
-      if (!pseudo) return alert('Enter your name')
-      ws = new WebSocket('ws://' + location.host + '/ws?role=player&id=' + playerId)
+      const errEl = document.getElementById('join-error')
+      if (!code) { errEl.textContent = 'Enter the join code'; errEl.style.display = 'block'; return }
+      if (!pseudo) { errEl.textContent = 'Enter your name'; errEl.style.display = 'block'; return }
+      errEl.style.display = 'none'
+      ws = new WebSocket('ws://' + location.host + '/ws?role=player&id=' + playerId + '&code=' + encodeURIComponent(code))
+      ws.onerror = () => {
+        errEl.textContent = 'Connection failed — check the join code'
+        errEl.style.display = 'block'
+      }
       ws.onopen = () => {
         ws.send(JSON.stringify({ type: 'player_join', pseudo, email }))
       }
@@ -351,28 +376,35 @@ export class QuizvServer {
         }
         if (data.type === 'question_started') {
           show('question-screen')
-          document.getElementById('question-text').textContent = data.question.text
+          document.getElementById('question-text').textContent = data.question.text.replace(/^#+ /, '')
           const container = document.getElementById('choices')
           container.innerHTML = ''
+          let answered = false
           data.question.choices.forEach(c => {
             const btn = document.createElement('button')
             btn.className = 'answer-btn'
             btn.textContent = c.id.toUpperCase() + '. ' + c.text
             btn.dataset.id = c.id
             btn.onclick = () => {
-              clearInterval(timerInterval)
-              const elapsed = (data.question.timer - parseInt(document.getElementById('timer').textContent)) * 1000
+              if (answered) return
+              answered = true
+              const remaining = parseInt(document.getElementById('timer').textContent.replace(/[^0-9]/g, ''))
+              const elapsed = (data.question.timer - remaining) * 1000
               ws.send(JSON.stringify({ type: 'submit_answer', choiceIds: [c.id], answerTimeMs: elapsed }))
               document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true)
+              // timer keeps running — show in parentheses to indicate answer is locked
+              document.getElementById('timer').dataset.answered = '1'
             }
             container.appendChild(btn)
           })
           let remaining = data.question.timer
           document.getElementById('timer').textContent = remaining
+          document.getElementById('timer').dataset.answered = ''
           clearInterval(timerInterval)
           timerInterval = setInterval(() => {
             remaining = Math.max(0, remaining - 1)
-            document.getElementById('timer').textContent = remaining
+            const timerEl = document.getElementById('timer')
+            timerEl.textContent = timerEl.dataset.answered === '1' ? '(' + remaining + ')' : remaining
             if (remaining === 0) clearInterval(timerInterval)
           }, 1000)
         }

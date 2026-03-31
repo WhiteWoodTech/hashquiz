@@ -320,12 +320,14 @@ export class QuizvServer {
     <p id="join-error" style="color:#ef4444;display:none"></p>
   </div>
   <div id="screen">
+    <p id="score-bar" style="display:none;text-align:right;font-size:0.9rem;color:#888;margin:0 0 0.5rem">Score: <strong id="total-score">0</strong> pts</p>
     <div id="lobby" style="display:none">
       <h2>Waiting for host to start...</h2>
       <p>Players: <span id="playerCount">0</span></p>
     </div>
     <div id="question-screen" style="display:none">
-      <p id="timer" style="font-size:2rem;text-align:center">20</p>
+      <p id="timer" style="font-size:2rem;text-align:center;margin:0">20</p>
+      <p id="answer-time" style="font-size:0.85rem;text-align:center;color:#888;min-height:1.2em;margin:0.1rem 0 0.5rem"></p>
       <h2 id="question-text"></h2>
       <div id="choices"></div>
     </div>
@@ -339,7 +341,7 @@ export class QuizvServer {
     </div>
   </div>
   <script>
-    let ws, playerId = Math.random().toString(36).slice(2) + Date.now().toString(36), timerInterval, playerCount = 0
+    let ws, playerId = Math.random().toString(36).slice(2) + Date.now().toString(36), timerInterval, playerCount = 0, totalScore = null
 
     function show(id) {
       ['lobby','question-screen','feedback','podium'].forEach(s => {
@@ -388,22 +390,28 @@ export class QuizvServer {
             btn.onclick = () => {
               if (answered) return
               answered = true
-              const remaining = parseInt(document.getElementById('timer').textContent.replace(/[^0-9]/g, ''))
-              const elapsed = (data.question.timer - remaining) * 1000
+              const timerEl = document.getElementById('timer')
+              const rem = parseInt(timerEl.textContent.replace(/[^0-9]/g, ''))
+              const elapsed = (data.question.timer - rem) * 1000
               ws.send(JSON.stringify({ type: 'submit_answer', choiceIds: [c.id], answerTimeMs: elapsed }))
               document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true)
-              // timer keeps running — show in parentheses to indicate answer is locked
-              document.getElementById('timer').dataset.answered = '1'
+              // Show time taken, then countdown in parens
+              const taken = Math.round(elapsed / 1000)
+              timerEl.dataset.answered = '1'
+              timerEl.dataset.taken = taken
+              timerEl.dataset.total = data.question.timer
+              document.getElementById('answer-time').textContent = 'Répondu en ' + taken + 's / ' + data.question.timer + 's'
             }
             container.appendChild(btn)
           })
           let remaining = data.question.timer
-          document.getElementById('timer').textContent = remaining
-          document.getElementById('timer').dataset.answered = ''
+          const timerEl = document.getElementById('timer')
+          timerEl.textContent = remaining
+          timerEl.dataset.answered = ''
+          document.getElementById('answer-time').textContent = ''
           clearInterval(timerInterval)
           timerInterval = setInterval(() => {
             remaining = Math.max(0, remaining - 1)
-            const timerEl = document.getElementById('timer')
             timerEl.textContent = timerEl.dataset.answered === '1' ? '(' + remaining + ')' : remaining
             if (remaining === 0) clearInterval(timerInterval)
           }, 1000)
@@ -412,9 +420,14 @@ export class QuizvServer {
           clearInterval(timerInterval)
           show('feedback')
           const myScore = data.scores.find(s => s.playerId === playerId)
+          if (myScore) {
+            totalScore = myScore.score
+            document.getElementById('total-score').textContent = totalScore
+            document.getElementById('score-bar').style.display = 'block'
+          }
           document.getElementById('feedback-text').textContent = myScore?.delta > 0 ? '✓' : '✗'
           document.getElementById('points-text').textContent =
-            myScore ? '+' + myScore.delta + ' pts (total: ' + myScore.score + ')' : ''
+            myScore ? '+' + myScore.delta + ' pts (total\u00a0: ' + myScore.score + ')' : ''
         }
         if (data.type === 'game_ended') {
           clearInterval(timerInterval)

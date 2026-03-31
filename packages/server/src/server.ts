@@ -106,6 +106,7 @@ export class QuizvServer {
               type: 'host_connected',
               joinCode: self.joinCode,
               totalQuestions: self.engine.state.totalQuestions,
+              // Port 3032 = dedicated player Vite dev server (apps/player) — see Phase 2 plan
               playerUrl: `http://${localIP}:3032?code=${self.joinCode}`,
             }))
           }

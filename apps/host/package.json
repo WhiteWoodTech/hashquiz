@@ -8,13 +8,15 @@
   },
   "dependencies": {
     "@quizv/core": "workspace:*",
-    "@quizv/transport-supabase": "workspace:*",
+    "@quizv/ui": "workspace:*",
+    "@quizv/theme-default": "workspace:*",
+    "pinia": "^2.1.7",
     "vue": "^3.4.27"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.5",
     "typescript": "^5.4.5",
-    "vite": "^5.3.1",
-    "unocss": "^0.61.0"
+    "unocss": "^0.61.0",
+    "vite": "^5.3.1"
   }
 }

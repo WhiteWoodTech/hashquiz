@@ -61,3 +61,4 @@ coverage/
 vite.proxy.config.js
 vite.proxy.config.json
 index/public/deck-ports.json
+/docs/superpowers/

@@ -1,267 +1,245 @@
 # Technical Guide
 
-Detailed guide for technical implementation aspects.
-
-## Tech Stack
-
-| Category | Technology | Version |
-|----------|------------|---------|
-| Package Manager | Bun | >= 1.1.45 |
-| Node | Node.js | >= 22.11.0 |
-| Git Hooks | Husky | ^9.1.7 |
-| Staged Files | lint-staged | ^16.2.7 |
-| Commit Tool | gitmoji-cli | ^9.7.0 |
-| Commit Lint | commitlint | ^20.4.1 |
-| Changelog | conventional-changelog | ^5.0.0 |
-| Release | semantic-release | ^25.0.3 |
-| Markdown Lint | markdownlint-cli | ^0.47.0 |
+Architecture, WebSocket protocol, scoring, and implementation details for QuizV.
 
 ---
 
-## CI/CD
+## Architecture Overview
 
-### Lint Workflow
-
-The project runs linting on every push and PR to `develop` and `main`:
-
-```yaml
-# .github/workflows/lint.yml
-name: Lint
-
-on:
-  push:
-    branches: [develop, main]
-  pull_request:
-    branches: [develop, main]
-
-jobs:
-  markdownlint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
-      - run: bun run lint:md
-
-  yamllint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - run: pip install yamllint
-      - run: yamllint .
+```
+┌─────────────────────────────────────────────────────┐
+│                  quizv dev <file>                   │
+│                                                     │
+│  ┌──────────────┐  ┌────────────┐  ┌────────────┐  │
+│  │  Bun WS/HTTP │  │ Vite host  │  │Vite player │  │
+│  │   port 3030  │  │ port 3031  │  │ port 3032  │  │
+│  └──────┬───────┘  └─────┬──────┘  └─────┬──────┘  │
+│         │                │               │          │
+└─────────┼────────────────┼───────────────┼──────────┘
+          │ WS             │ HTTP          │ HTTP
+     ┌────▼────┐      ┌────▼────┐    ┌────▼────┐
+     │GameEngine│      │ Host    │    │ Player  │
+     │(state   │      │ Vue SPA │    │ Vue SPA │
+     │ machine)│      │(desktop)│    │(mobile) │
+     └─────────┘      └─────────┘    └─────────┘
 ```
 
-### Additional Workflows (Future)
-
-- **PR Checks** - Tests, type checking
-- **Security** - CodeQL analysis
-- **Deploy** - Automated deployment
+**Data flow:** The Bun server holds one `GameEngine` instance per running game.
+Host and player apps connect via WebSocket and react to broadcasted `GameEvent` messages.
+State is managed in Pinia stores on the client side.
 
 ---
 
-## Git Hooks
+## Packages
 
-### Pre-commit Hook
+### `@quizv/parser`
 
-Husky runs lint-staged automatically on commit:
+Parses `.quizv.md` files into typed `Quiz` objects.
 
-```json
-// package.json
-{
-  "lint-staged": {
-    "*.md": "markdownlint --fix",
-    "*.{yml,yaml}": "yamllint"
-  }
+```typescript
+import { parseQuizFile, validateQuiz } from '@quizv/parser'
+
+const quiz = parseQuizFile(markdownString)  // throws on malformed input
+const result = validateQuiz(quiz)           // { valid: boolean, errors: [] }
+```
+
+**`.quizv.md` format:**
+
+```markdown
+---
+title: My Quiz
+theme: dark
+---
+
+## Question text
+
+- [x] Correct answer
+- [ ] Wrong answer A
+- [ ] Wrong answer B
+
+> Optional explanation
+
+---timer: 20
+```
+
+### `@quizv/core`
+
+Core game logic. No I/O, fully testable.
+
+```typescript
+// GameEngine state machine
+const engine = new GameEngine(quiz, transport, channel)
+await engine.addPlayer({ id, pseudo, email })
+await engine.start()              // lobby → active
+await engine.submitAnswer(playerId, choiceIds, answerTimeMs)
+await engine.revealAnswer()       // broadcasts answer_revealed + choiceCounts
+await engine.nextQuestion()       // active (next question)
+// ... last question:
+await engine.nextQuestion()       // active → finished (broadcasts game_ended)
+```
+
+**Game states:** `lobby → active → finished`
+
+**Scoring:**
+
+```typescript
+// packages/core/src/scoring.ts
+function calcPoints(timeRemaining: number, isCorrect: boolean): number {
+  if (!isCorrect) return 0
+  return Math.round(500 + 500 * (timeRemaining / timer))
 }
 ```
 
-### Commit-msg Hook
+Points range: 500 (last second) to 1000 (instant answer).
 
-Commitlint validates commit messages:
+### `@quizv/transport-local`
 
-```bash
-# .husky/commit-msg
-bun commitlint --edit "$1"
+Implements `IRealtimeTransport` using Bun's native WebSocket pub/sub:
+
+```typescript
+interface IRealtimeTransport {
+  broadcast(channel: string, event: GameEvent): Promise<void>
+  subscribe(channel: string, handler: (event: GameEvent) => void): Unsubscribe
+}
 ```
 
-Configuration in `commitlint.config.js` accepts two formats:
+### `@quizv/server`
 
-- **Gitmoji**: `<emoji> <description>` (e.g., `✨ Add feature`)
-- **Conventional**: `<type>(scope): <description>` (e.g., `feat: Add feature`)
+Bun HTTP + WebSocket server. Serves the game over a single port (3030).
 
-Rules:
+**WebSocket upgrade URL:** `ws://host:3030/ws?role=<role>[&id=<id>&code=<code>]`
 
-- Message must match one of the formats above
-- Maximum header length of 100 characters
+**HTTP routes:**
 
-### Setup
+- `GET /` → host HTML (redirect to Vite in Phase 2)
+- `GET /play` → player HTML
+- `GET /ws` → WebSocket upgrade
 
-Hooks are configured automatically via the `prepare` script:
+---
 
-```bash
-bun install  # Runs "husky" automatically
+## WebSocket Protocol
+
+### Client → Server messages
+
+| Message type | Sender | Fields |
+|-------------|--------|--------|
+| `player_join` | Player | `{ pseudo, email }` |
+| `submit_answer` | Player | `{ choiceIds: string[], answerTimeMs: number }` |
+| `host_start` | Host | `{}` |
+| `host_reveal` | Host | `{}` |
+| `host_next` | Host | `{}` |
+
+### Server → Client events (`GameEvent`)
+
+| Event type | Recipients | Key fields |
+|-----------|-----------|------------|
+| `host_connected` | Host only | `joinCode`, `totalQuestions`, `playerUrl` |
+| `player_joined` | All | `player: PlayerState` |
+| `player_left` | All | `playerId` |
+| `question_started` | All | `question: QuestionPublic`, `idx` |
+| `answer_submitted` | All | `playerId`, `answerTimeMs` |
+| `answer_revealed` | All | `correct: string[]`, `scores: Score[]`, `choiceCounts: Record<string, number>`, `explanation?` |
+| `game_ended` | All | `podium: PodiumEntry[]` |
+
+### Security
+
+- Host commands (`host_start`, `host_reveal`, `host_next`) are rejected if the sender's `role !== 'host'`
+- Players are rejected at WS upgrade time if their `?code=` does not match the active join code
+- `GameEngine` guards against out-of-order commands with status checks (`lobby`, `active`, `finished`)
+
+---
+
+## Host App Store (`apps/host/src/stores/game.ts`)
+
+```typescript
+type HostPhase = 'connecting' | 'lobby' | 'question' | 'revealed' | 'finished'
 ```
 
----
-
-## Dependency Management
-
-### Renovate
-
-Renovate is configured to:
-
-- Group minor and patch updates
-- Auto-merge patches for devDependencies
-- Run updates on Monday morning (Europe/Paris timezone)
-
-### Dependabot
-
-Dependabot monitors:
-
-- Bun dependencies (via package.json)
-- GitHub Actions versions
+| Phase | Trigger | View |
+|-------|---------|------|
+| `connecting` | Initial, or WS close/error | "Connecting…" |
+| `lobby` | `host_connected` received | `LobbyView` |
+| `question` | `question_started` received | `QuestionView` |
+| `revealed` | `answer_revealed` received | `RevealView` |
+| `finished` | `game_ended` received | `PodiumView` |
 
 ---
 
-## Changelog
+## Player App Store (`apps/player/src/stores/game.ts`)
 
-Generate changelogs from commit history using gitmoji and conventional commits:
-
-```bash
-# Update changelog with new commits
-bun run changelog
-
-# Generate full changelog from scratch
-bun run changelog:init
+```typescript
+type PlayerPhase = 'join' | 'lobby' | 'question' | 'feedback' | 'podium'
 ```
 
-The changelog is generated in `CHANGELOG.md` and groups commits by type (features, fixes, etc.).
+| Phase | Trigger | View |
+|-------|---------|------|
+| `join` | Initial | `JoinView` |
+| `lobby` | `joined` message received | `LobbyView` |
+| `question` | `question_started` received | `QuestionView` |
+| `feedback` | `answer_revealed` received | `FeedbackView` |
+| `podium` | `game_ended` received | `PodiumView` |
+
+**Multi-select answer flow:**
+
+1. Player toggles answer buttons (can select/deselect multiple)
+2. Timer reaches 0 → auto-submit with all selected IDs and `lastPressElapsed`
+3. If nothing selected → no submit, buttons disabled, "No answer submitted" shown
 
 ---
 
-## Semantic Release
+## Dev Stack Startup (`packages/server/src/dev.ts`)
 
-Automated versioning and releases based on commit messages:
+```typescript
+export function devCommand(quizFile: string, port?: number): void {
+  const server = new QuizvServer({ quizFile, port })
+  server.start()  // WS on port 3030
 
-```bash
-# Run release (usually done by CI)
-bun run release
+  // Spawn Vite dev servers
+  spawn('bun', ['run', 'dev'], { cwd: 'apps/host',   stdio: 'inherit' })
+  spawn('bun', ['run', 'dev'], { cwd: 'apps/player', stdio: 'inherit' })
 
-# Dry run to preview release
-bun run release:dry
+  // Graceful shutdown
+  process.on('SIGINT',  () => { /* kill children */ process.exit(0) })
+  process.on('SIGTERM', () => { /* kill children */ process.exit(0) })
+}
 ```
 
-### Version Bumping
+**Port allocation:**
 
-Versions are determined by gitmoji:
-
-| Emoji | Version Bump |
-|-------|--------------|
-| 💥 | Major (breaking change) |
-| ✨ 🎉 | Minor (new feature) |
-| 🐛 🚑️ 🩹 ⚡️ 🔒️ 🚀 ♻️ ⬆️ ⬇️ | Patch (fix/improvement) |
-
-### CI/CD Integration
-
-Releases are automated via GitHub Actions (`.github/workflows/release.yml`):
-
-- Triggered on push to `main`
-- Creates GitHub releases with changelog
-- Updates `CHANGELOG.md` and `package.json`
+| Port | Process |
+|------|---------|
+| 3030 | Bun WS server (game logic) |
+| 3031 | Vite — `apps/host` |
+| 3032 | Vite — `apps/player` (binds `0.0.0.0` for LAN access) |
 
 ---
 
-## Available Scripts
+## Testing
 
 ```bash
-# Install dependencies
-bun install
-
-# Lint all files
-bun run lint
-
-# Lint markdown only
-bun run lint:md
-
-# Auto-fix markdown issues
-bun run lint:md:fix
-
-# Lint YAML files
-bun run lint:yaml
-
-# Create a commit with gitmoji
-bun run commit
-
-# Generate/update changelog
-bun run changelog
-
-# Setup husky hooks (runs automatically on install)
-bun run prepare
+bun test                    # Run all tests
+bun test --watch            # Watch mode
+bun test packages/core      # Single package
 ```
 
----
+Current coverage: **27 tests, 0 failures**
 
-## Linting Rules
-
-### Markdownlint
-
-Configuration in `.markdownlint.json`:
-
-- Line length limits
-- Heading structure
-- List formatting
-- Code block rules
-
-### Yamllint
-
-Configuration in `.yamllint.yml`:
-
-- Indentation rules
-- Line length
-- Key ordering
+| Package | Tests | Coverage |
+|---------|-------|----------|
+| `@quizv/parser` | 13 | Parse paths, edge cases, validation |
+| `@quizv/core` | 14 | GameEngine transitions, scoring, choiceCounts |
 
 ---
 
-## Development Workflow
+## Known Constraints
 
-### Daily Process
-
-1. **Pull** - `git pull origin main`
-2. **Branch** - `git checkout -b feature/description`
-3. **Develop** - Make changes following conventions
-4. **Lint** - `bun run lint`
-5. **Commit** - `bun run commit` (uses gitmoji)
-6. **Push** - `git push origin feature/description`
-7. **PR** - Create pull request
-
-### Pre-commit Checklist
-
-- [ ] `bun run lint` passes
-- [ ] Documentation updated if needed
-- [ ] Commit uses gitmoji convention
-- [ ] No sensitive data committed
+| Constraint | Reason |
+|-----------|--------|
+| `crypto.randomUUID()` not used | Fails on HTTP over LAN (requires secure context) |
+| No Vue Router | Linear game flow — `v-if` on phase is sufficient |
+| `@quizv/transport-supabase` is a stub | Planned for Phase 3 (cloud/internet games) |
+| `playerUrl` hardcoded to port 3032 | Phase 2 dedicated Vite player server port |
 
 ---
 
-## Issue Templates
-
-### Bug Report
-
-Uses `.github/ISSUE_TEMPLATE/bug_report.yml`:
-
-- Description
-- Steps to reproduce
-- Expected vs actual behavior
-- Environment details
-
-### Feature Request
-
-Uses `.github/ISSUE_TEMPLATE/feature_request.yml`:
-
-- Problem description
-- Proposed solution
-- Alternatives considered
-
----
-
-*Last updated: 2026-02-03*
+*Last updated: 2026-03-31*

@@ -1,126 +1,209 @@
 # Conventions
 
-Advanced coding conventions and guidelines.
+Code style, naming, and git conventions for the QuizV project.
 
 ## Code Style
 
 ### General Principles
 
-- Write readable, self-documenting code
-- Follow the DRY principle (Don't Repeat Yourself)
-- Keep functions small and focused
-- Use meaningful names for variables and functions
+- TypeScript strict mode everywhere (`"strict": true` in all tsconfigs)
+- No `any` — use `unknown` and type guards at boundaries
+- Small, focused functions
+- Meaningful names — no abbreviations except well-known ones (`ws`, `url`, `id`)
 
 ### Naming Conventions
 
 | Element | Convention | Example |
 |---------|------------|---------|
-| Files | kebab-case | `user-service.ts` |
-| Classes | PascalCase | `UserService` |
-| Functions | camelCase | `getUserById` |
-| Constants | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT` |
-| Variables | camelCase | `userName` |
+| Files | kebab-case | `game-engine.ts`, `TimerRing.vue` |
+| Classes | PascalCase | `GameEngine`, `QuizvServer` |
+| Vue components | PascalCase | `AnswerButton.vue`, `PlayerList.vue` |
+| Interfaces | PascalCase with `I` prefix for transport | `IRealtimeTransport` |
+| Types | PascalCase | `GameEvent`, `PlayerState`, `HostPhase` |
+| Functions | camelCase | `parseQuizFile`, `revealAnswer` |
+| Constants | camelCase or UPPER_SNAKE_CASE | `joinCode`, `MAX_RETRY` |
+| CSS classes | BEM kebab | `qv-btn`, `qv-btn__badge`, `qv-btn--selected` |
+| CSS variables | `--qv-*` prefix | `--qv-accent`, `--qv-surface-2` |
 
-### File Organization
+### TypeScript Patterns
 
 ```typescript
-// 1. Imports (external first, then internal)
-import { useState } from 'react';
-import { UserService } from './services';
+// Discriminated unions for events
+type GameEvent =
+  | { type: 'player_joined'; player: PlayerState }
+  | { type: 'question_started'; question: QuestionPublic; idx: number }
 
-// 2. Types/Interfaces
-interface Props {
-  name: string;
+// Builder pattern for events
+const GameEvents = {
+  playerJoined: (player: PlayerState): GameEvent => ({ type: 'player_joined', player }),
 }
 
-// 3. Constants
-const DEFAULT_VALUE = 10;
+// Pinia stores — composition API style
+export const useGameStore = defineStore('game', () => {
+  const phase = ref<HostPhase>('connecting')
+  // ...
+  return { phase, connect, send }
+})
+```
 
-// 4. Component/Function
-export function Component({ name }: Props) {
-  // Implementation
-}
+### Vue Component Structure
+
+```vue
+<template>
+  <!-- Template first -->
+</template>
+
+<script setup lang="ts">
+// 1. Vue imports
+import { ref, computed, watch, onMounted } from 'vue'
+// 2. Store imports
+import { useGameStore } from '../stores/game'
+// 3. Component imports
+import { TimerRing } from '@quizv/ui'
+
+// 4. Props / emits
+const props = defineProps<{ total: number; remaining: number }>()
+const emit = defineEmits<{ select: [id: string] }>()
+
+// 5. Store usage
+const game = useGameStore()
+
+// 6. Reactive state
+const selected = ref<Set<string>>(new Set())
+
+// 7. Computed
+const fraction = computed(() => props.remaining / props.total)
+
+// 8. Functions
+function toggleChoice(id: string) { /* ... */ }
+</script>
+
+<style scoped>
+/* Scoped styles using --qv-* tokens */
+</style>
 ```
 
 ---
 
-## CSS/Styling Conventions
+## CSS Conventions
 
-### Methodology
+### BEM Naming
 
-Use BEM (Block Element Modifier) or CSS Modules:
-
-```css
-/* BEM */
-.block { }
-.block__element { }
-.block--modifier { }
-
-/* Example */
-.card { }
-.card__title { }
-.card--featured { }
-```
-
-### CSS Variables
+All component CSS classes use BEM with the `qv-` prefix:
 
 ```css
-:root {
-  --color-primary: #2563eb;
-  --spacing-md: 1rem;
-  --font-size-base: 16px;
-}
+.qv-btn { }                /* block */
+.qv-btn__badge { }         /* element */
+.qv-btn--selected { }      /* modifier */
+.qv-btn--a { }             /* color variant modifier */
 ```
+
+### Design Tokens
+
+Always use CSS custom properties from `@quizv/theme-default`:
+
+```css
+/* Do */
+background: var(--qv-surface-2);
+color: var(--qv-accent);
+
+/* Don't */
+background: #1a1a25;
+color: #7c3aed;
+```
+
+See [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) for the full token list.
 
 ---
 
 ## Testing Conventions
 
-### Test File Naming
+### Test Files
 
-- Unit tests: `*.test.ts` or `*.spec.ts`
-- Integration tests: `*.integration.test.ts`
-- E2E tests: `*.e2e.test.ts`
+Tests live alongside source in `packages/*/tests/`:
+
+```
+packages/core/tests/game.test.ts
+packages/parser/tests/parser.test.ts
+```
 
 ### Test Structure
 
 ```typescript
-describe('ComponentName', () => {
-  describe('methodName', () => {
-    it('should do something when condition', () => {
+import { describe, it, expect, mock } from 'bun:test'
+
+describe('GameEngine', () => {
+  describe('revealAnswer', () => {
+    it('broadcasts choiceCounts matching submitted answers', async () => {
       // Arrange
+      const transport = { broadcast: mock(), subscribe: mock() }
+      const engine = new GameEngine(quiz, transport, 'channel')
+
       // Act
+      await engine.revealAnswer()
+
       // Assert
-    });
-  });
-});
+      expect(transport.broadcast).toHaveBeenCalledWith(
+        'channel',
+        expect.objectContaining({ type: 'answer_revealed', choiceCounts: { a: 1 } })
+      )
+    })
+  })
+})
 ```
+
+### Coverage Targets
+
+- `@quizv/parser`: all parse paths, edge cases, validation errors
+- `@quizv/core`: all `GameEngine` state transitions, scoring formula
+- No tests for Vue components or server (manual E2E instead)
 
 ---
 
-## Project Organization
+## File Organization
 
-### Directory Structure
+### Monorepo Layout
 
 ```text
-project-root/
-├── .github/            # GitHub configuration
-│   ├── workflows/      # CI/CD workflows
-│   └── ISSUE_TEMPLATE/ # Issue templates
-├── docs/               # Documentation
-├── node_modules/       # Dependencies (Bun)
-├── package.json        # Project config
-├── bun.lock            # Lock file
-├── CLAUDE.md           # AI assistant guide
-└── README.md           # Main documentation
+quizv/
+├── packages/         # Shared packages
+│   └── <name>/
+│       ├── package.json
+│       ├── tsconfig.json
+│       └── src/
+│           └── index.ts   # Always has a barrel export
+├── apps/             # Vite SPAs
+│   └── <name>/
+│       ├── package.json
+│       ├── vite.config.ts
+│       ├── uno.config.ts
+│       ├── index.html
+│       └── src/
+│           ├── main.ts
+│           ├── App.vue
+│           ├── stores/
+│           └── views/
+└── examples/
 ```
 
 ### Import Order
 
-1. External packages
-2. Internal modules (absolute paths)
-3. Relative imports
-4. Styles
+```typescript
+// 1. Node built-ins
+import { resolve } from 'node:path'
+import { spawn } from 'node:child_process'
+
+// 2. External packages
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+
+// 3. Workspace packages
+import type { GameEvent, PlayerState } from '@quizv/core'
+import { TimerRing } from '@quizv/ui'
+
+// 4. Relative imports
+import { useGameStore } from '../stores/game'
+```
 
 ---
 
@@ -130,86 +213,42 @@ project-root/
 
 ```text
 feature/short-description
-fix/issue-number-description
+fix/issue-description
 refactor/component-name
-docs/update-readme
+docs/update-description
 ```
 
-### Commit Messages (Gitmoji or Conventional)
+### Commit Messages
 
-This project accepts **Gitmoji** or **Conventional Commits** formats:
+**Gitmoji format:** `<emoji> <description>`
 
 ```bash
-# Use the interactive gitmoji tool
-bun run commit
+bun run commit  # Interactive gitmoji tool
 ```
-
-#### Gitmoji Format
-
-`<emoji> <description>`
-
-Examples:
-
-- `✨ Add user authentication`
-- `🐛 Fix login button not responding`
-- `📝 Update README with installation steps`
-
-Common gitmojis:
 
 | Emoji | When to use |
 |-------|-------------|
 | ✨ | New feature |
 | 🐛 | Bug fix |
-| 📝 | Documentation |
-| 🎨 | Code style/format |
-| ♻️ | Refactor |
-| 🔧 | Configuration |
-| ✅ | Add tests |
-| 🔥 | Remove code/files |
-| 🚀 | Deploy |
-| 💄 | UI/style |
+| 🔒 | Security fix |
+| 📦 | New package / dependencies |
+| 📝 | Documentation only |
+| ♻️ | Refactor (no behavior change) |
+| ✅ | Add or fix tests |
+| 🔧 | Config / build changes |
+| 🎨 | Code formatting / style |
+| 🧪 | Failing tests (TDD red phase) |
 
 Full reference: [gitmoji.dev](https://gitmoji.dev)
 
-#### Conventional Commits Format
+### Version Bumping
 
-`<type>(scope): <description>`
-
-Examples:
-
-- `feat: Add user authentication`
-- `fix(auth): Fix login button not responding`
-- `docs: Update README with installation steps`
-
-Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
+| Emoji | Bump |
+|-------|------|
+| 💥 | Major |
+| ✨ 🎉 | Minor |
+| 🐛 🚑️ ⚡️ 🔒️ 🩹 | Patch |
 
 ---
 
-## Documentation
-
-### Code Comments
-
-```typescript
-// Single line comment for brief explanations
-
-/**
- * Multi-line comment for complex logic
- * explaining the why, not the what
- */
-
-/** JSDoc for public APIs */
-function publicFunction(param: string): void {
-  // Implementation
-}
-```
-
-### Markdown Style
-
-- Follow markdownlint rules
-- No trailing whitespace
-- Single blank line between sections
-- Use fenced code blocks with language identifier
-
----
-
-*Last updated: 2026-02-03*
+*Last updated: 2026-03-31*

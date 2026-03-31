@@ -1,20 +1,33 @@
 # AI Agents Guide
 
-Complete guide for AI assistants working on this repository.
+Complete guide for AI assistants working on the QuizV repository.
 
 ## Documentation Index
 
-| File | Purpose | Description |
-|------|---------|-------------|
-| [`AGENTS.md`](./AGENTS.md) | AI Guide | This file - conventions and rules for AI agents |
-| [`PROJECT_STRUCTURE.md`](./PROJECT_STRUCTURE.md) | Architecture | Directory and file organization |
-| [`CONVENTIONS.md`](./CONVENTIONS.md) | Code style | Naming conventions, code style, git |
-| [`TECHNICAL_GUIDE.md`](./TECHNICAL_GUIDE.md) | Implementation | API, CI/CD, performance, security, tests |
-| [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) | UI/UX | Colors, typography, spacing, accessibility |
-| [`COMPONENT_REFERENCE.md`](./COMPONENT_REFERENCE.md) | Components | Technical reference for UI components |
-| [`FEATURES.md`](./FEATURES.md) | Features | Epics, user stories, feature status |
-| [`SCREEN_FLOW.md`](./SCREEN_FLOW.md) | Navigation | Screen flows and user journeys |
-| [`TASKS.md`](./TASKS.md) | Tasks | Task tracking and backlog |
+| File | Purpose |
+|------|---------|
+| [`AGENTS.md`](./AGENTS.md) | This file — conventions and rules for AI agents |
+| [`PROJECT_STRUCTURE.md`](./PROJECT_STRUCTURE.md) | Monorepo layout and file map |
+| [`CONVENTIONS.md`](./CONVENTIONS.md) | Naming, code style, git conventions |
+| [`TECHNICAL_GUIDE.md`](./TECHNICAL_GUIDE.md) | Architecture, WS protocol, scoring, testing |
+| [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) | CSS tokens (`--qv-*`), typography, spacing |
+| [`COMPONENT_REFERENCE.md`](./COMPONENT_REFERENCE.md) | `@quizv/ui` component API reference |
+| [`FEATURES.md`](./FEATURES.md) | Feature list and roadmap |
+| [`SCREEN_FLOW.md`](./SCREEN_FLOW.md) | Host and player screen flows |
+| [`TASKS.md`](./TASKS.md) | Task backlog |
+
+---
+
+## Project Context
+
+**QuizV** is a Kahoot-alternative real-time quiz platform. The source lives at:
+
+```
+/Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv/
+```
+
+This documentation repo (`quizz-agentic-coding`) holds plans, specs, and docs only.
+Always work on source files in `../quizv/`.
 
 ---
 
@@ -22,175 +35,112 @@ Complete guide for AI assistants working on this repository.
 
 | Category | Technology |
 |----------|------------|
-| Package Manager | Bun |
-| Node Version | >= 22.11.0 |
-| Git Hooks | Husky + lint-staged |
-| Commit Convention | Gitmoji |
-| Commit Validation | commitlint |
-| Linting | markdownlint, yamllint |
-| Dependency Updates | Renovate, Dependabot |
-| CI/CD | GitHub Actions |
+| Runtime | Bun 1.x |
+| Language | TypeScript 5 strict |
+| Frontend | Vue 3 + Vite 5 + Pinia + UnoCSS |
+| Realtime | Bun native WebSocket |
+| Testing | Bun test (built-in) |
+| Package manager | Bun workspaces |
+| Commit convention | Gitmoji |
 
-### Available Commands
+### Key commands
 
 ```bash
-bun install           # Install dependencies
-bun run lint          # Lint markdown and yaml
-bun run lint:md       # Lint markdown only
-bun run lint:md:fix   # Auto-fix markdown
-bun run lint:yaml     # Lint yaml files
-bun run lint:commit   # Validate last commit message
-bun run commit        # Interactive gitmoji commit
+# Run from /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+
+bun install                                                    # Install deps
+bun test                                                       # Run all tests
+bun run packages/server/src/cli.ts dev examples/demo.quizv.md # Full dev stack
+bun run packages/server/src/cli.ts check <file>               # Validate quiz
 ```
 
 ---
 
-## File Summaries
+## Monorepo Packages
 
-### PROJECT_STRUCTURE.md
+| Package | Description |
+|---------|-------------|
+| `@quizv/parser` | Parse `.quizv.md` files → typed `Quiz` objects |
+| `@quizv/core` | `GameEngine`, `GameEvent` union, `IRealtimeTransport`, scoring |
+| `@quizv/transport-local` | `LocalTransport` — Bun WebSocket pub/sub |
+| `@quizv/transport-supabase` | Cloud transport stub (Phase 3) |
+| `@quizv/server` | Bun HTTP+WS server + `quizv` CLI |
+| `@quizv/theme-default` | CSS custom properties (`--qv-*`) |
+| `@quizv/ui` | Shared Vue 3 components |
 
-Project structure with source/tests/docs organization. Key points:
-
-- Root files: package.json, CLAUDE.md, README.md
-- `.github/`: workflows, issue templates, PR template
-- `docs/`: all documentation files
-- `node_modules/`: dependencies (managed by Bun)
-
-### CONVENTIONS.md
-
-Development conventions. Key points:
-
-- **Naming**: files kebab-case, classes PascalCase, functions camelCase, constants UPPER_SNAKE_CASE
-- **CSS**: BEM (block__element--modifier), CSS variables
-- **Git branches**: feature/fix/refactor/docs
-- **Commits**: Gitmoji convention (emoji + description)
-
-### TECHNICAL_GUIDE.md
-
-Technical implementation guide. Key points:
-
-- **CI/CD**: GitHub Actions workflows (lint on push/PR)
-- **Pre-commit**: Husky runs lint-staged automatically
-- **Dependency management**: Renovate (weekly) + Dependabot (security)
-
-### DESIGN_SYSTEM.md
-
-UI/UX design system. Key points:
-
-- **Colors**: primary, secondary, semantic (success/warning/error/info)
-- **Typography**: system fonts, size scale
-- **Spacing**: consistent scale
-- **Accessibility**: WCAG 2.1 AA target
-
-### COMPONENT_REFERENCE.md
-
-Component documentation. Key points:
-
-- **Structure**: components organized by type
-- **Props**: types and defaults documented
-- **Best practices**: composition, accessibility
-
-### FEATURES.md
-
-Feature management. Key points:
-
-- Organization by epics with user stories
-- Format: "As a user, I want to [action] so that [benefit]"
-- Statuses: Done, In Progress, Planned
-
-### SCREEN_FLOW.md
-
-Navigation and user flows. Key points:
-
-- Flow diagrams between screens
-- Entry/Exit points for each screen
-
-### TASKS.md
-
-Project tracking. Key points:
-
-- Current sprint, Backlog, Completed
-- Markdown checklist format
+| App | Port | Description |
+|-----|------|-------------|
+| `apps/host` | 3031 | Desktop host dashboard |
+| `apps/player` | 3032 | Mobile player client |
 
 ---
 
 ## AI Agent Specific Rules
 
-### Language Rule
+### Language
 
-**All written content must be in English**, regardless of the user's prompt language:
-
-- Documentation (markdown files, comments)
-- Commit messages
-- Tasks and subtasks
-- Epics and user stories
-- Code comments and JSDoc
-- Variable and function names
-- Error messages and logs
+All written content must be in **English**: documentation, commit messages, code comments, variable names, error messages.
 
 ### Commit Convention
 
-This project accepts **Gitmoji** or **Conventional Commits**:
+Use **Gitmoji** format: `<emoji> <description>`
 
 ```bash
-bun run commit  # Interactive gitmoji tool
+bun run commit  # Interactive gitmoji tool (run from quizz-agentic-coding)
 ```
 
-**Gitmoji format:** `<emoji> <description>`
-
-| Emoji | Description |
-|-------|-------------|
+| Emoji | Use case |
+|-------|----------|
 | ✨ | New feature |
 | 🐛 | Bug fix |
+| 🔒 | Security fix |
+| 📦 | Package / dependency |
 | 📝 | Documentation |
 | ♻️ | Refactor |
+| ✅ | Tests |
 | 🔧 | Configuration |
+| 🎨 | Code style |
 
-**Conventional format:** `<type>(scope): <description>`
-
-Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
-
-Full gitmoji list: [gitmoji.dev](https://gitmoji.dev)
+Full list: [gitmoji.dev](https://gitmoji.dev)
 
 ### Fundamental Principles
 
-1. **Read before modifying** - Always read a file before proposing changes
-2. **Consult documentation** - Check relevant docs/ files before any task
-3. **Respect existing patterns** - Follow the style and conventions already in place
-4. **Minimize changes** - Only modify what is necessary
-5. **Document changes** - Update docs if behavior changes
+1. **Read before modifying** — always read a file before proposing changes
+2. **Consult docs** — check relevant `docs/` files before starting a task
+3. **Respect existing patterns** — follow the style already in place
+4. **Minimize changes** — only modify what is necessary
+5. **Tests must pass** — `bun test` must be green before committing
+6. **No secrets** — never commit `.env` files or API keys
 
-### Code Generation Preferences
+### Working with the WS Protocol
 
-| Language | Preferences |
-|----------|-------------|
-| **Markdown** | Follow markdownlint rules, no trailing spaces |
-| **YAML** | Follow yamllint rules, consistent indentation |
-| **JavaScript** | ES6+, no unnecessary dependencies |
-| **TypeScript** | Strict types, explicit interfaces, avoid `any` |
+The WebSocket server at `ws://localhost:3030/ws` accepts two roles:
+
+- `?role=host` — host connection, sends `host_start | host_reveal | host_next`
+- `?role=player&id=<id>&code=<code>` — player connection, sends `player_join | submit_answer`
+
+All messages are JSON. See [`TECHNICAL_GUIDE.md`](./TECHNICAL_GUIDE.md) for the full event reference.
+
+### Working with Vue Components
+
+Components live in `packages/ui/src/`. All use `<script setup lang="ts">`.
+Design tokens from `@quizv/theme-default/styles/vars.css` are available as `var(--qv-*)`.
 
 ### Pre-commit Checklist
 
-- [ ] Code passes `bun run lint`
-- [ ] Documentation updated if necessary
-- [ ] Commit uses gitmoji convention
-- [ ] No secrets or sensitive data
+- [ ] `bun test` passes (27+ tests, 0 failures)
+- [ ] No debug `console.log` left in code
+- [ ] Documentation updated if behavior changed
+- [ ] Commit uses gitmoji format
 
 ### Behaviors to Avoid
 
-- Do not create unnecessary files
-- Do not add dependencies without justification
-- Do not modify project structure without discussion
-- Do not ignore linting errors
-- Do not comment out dead code, delete it
-
-### Priorities
-
-1. **Functionality** - Code must work correctly
-2. **Readability** - Code must be understandable
-3. **Consistency** - Follow existing patterns
-4. **Simplicity** - Avoid over-engineering
+- Do not add `any` types without justification
+- Do not call `crypto.randomUUID()` — it fails on HTTP over LAN; use `Math.random()` instead
+- Do not add Vue Router — navigation is phase-driven (`v-if` on store phase)
+- Do not import `@quizv/transport-supabase` in production paths — it is a stub
+- Do not call `ws.send()` without checking `readyState === WebSocket.OPEN`
 
 ---
 
-*Last updated: 2026-02-03*
+*Last updated: 2026-03-31*

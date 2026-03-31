@@ -1,215 +1,128 @@
 # Design System
 
-UI/UX design system and conventions guide.
-
-## 🎨 Design Principles
-
-- **Consistency** - Unified look and feel
-- **Accessibility** - WCAG 2.1 AA compliance
-- **Responsive** - Mobile-first approach
-- **Performance** - Optimized assets
+CSS tokens, typography, spacing, and UI conventions for QuizV.
 
 ---
 
-## 🎨 Color System
+## Design Principles
 
-### Primary Colors
-
-```css
-:root {
-  --color-primary: #2563eb;
-  --color-primary-light: #3b82f6;
-  --color-primary-dark: #1d4ed8;
-}
-```
-
-### Secondary Colors
-
-```css
-:root {
-  --color-secondary: #64748b;
-  --color-secondary-light: #94a3b8;
-  --color-secondary-dark: #475569;
-}
-```
-
-### Semantic Colors
-
-```css
-:root {
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-info: #3b82f6;
-}
-```
-
-### Theme Colors
-
-```css
-:root {
-  --color-background: #ffffff;
-  --color-surface: #f8fafc;
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #64748b;
-  --color-border: #e2e8f0;
-}
-
-/* Dark mode */
-:root[data-theme="dark"] {
-  --color-background: #0f172a;
-  --color-surface: #1e293b;
-  --color-text-primary: #f8fafc;
-  --color-text-secondary: #cbd5e1;
-  --color-border: #334155;
-}
-```
+- **Dark-first** — all surfaces use a near-black palette
+- **Accent-driven** — purple (`#7c3aed`) as primary brand color
+- **Legible at distance** — large type, high contrast (host screen shown on projector)
+- **Mobile-friendly** — player UI designed for one-hand use on phones
+- **Token-only styling** — never hardcode colors; always use `var(--qv-*)`
 
 ---
 
-## 📝 Typography
+## CSS Tokens
 
-### Font Families
+All tokens are defined in `@quizv/theme-default/styles/vars.css` and available globally after import.
+
+### Colors
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--qv-bg` | `#0a0a0f` | Page background |
+| `--qv-surface` | `#111118` | Cards, panels |
+| `--qv-surface-2` | `#1a1a25` | Buttons, inputs, nested surfaces |
+| `--qv-border` | `#2a2a3a` | Dividers, borders |
+| `--qv-accent` | `#7c3aed` | Primary brand — purple |
+| `--qv-accent-2` | `#06b6d4` | Secondary accent — cyan |
+| `--qv-correct` | `#22c55e` | Correct answer state |
+| `--qv-wrong` | `#ef4444` | Wrong answer state |
+| `--qv-warn` | `#f97316` | Warning / mid-timer state |
+| `--qv-text` | `#ffffff` | Primary text |
+| `--qv-text-muted` | `#888899` | Secondary text, labels |
+
+### Typography
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--qv-font-display` | `'Syne', system-ui, sans-serif` | Headings, buttons, UI labels |
+| `--qv-font-mono` | `'IBM Plex Mono', monospace` | Codes, join code display |
+
+Body text inherits `--qv-font-display`. All components use `font-family: inherit`.
+
+### Radii
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--qv-radius` | `12px` | Cards, buttons, primary elements |
+| `--qv-radius-sm` | `8px` | Badges, inner elements |
+
+---
+
+## Token Usage Examples
 
 ```css
-:root {
-  --font-sans: system-ui, -apple-system, sans-serif;
-  --font-mono: 'SF Mono', Monaco, monospace;
-}
-```
+/* Do — use tokens */
+background: var(--qv-surface-2);
+color: var(--qv-text-muted);
+border: 1px solid var(--qv-border);
+border-radius: var(--qv-radius);
 
-### Font Sizes
-
-```css
-:root {
-  --text-xs: 0.75rem;    /* 12px */
-  --text-sm: 0.875rem;   /* 14px */
-  --text-base: 1rem;     /* 16px */
-  --text-lg: 1.125rem;   /* 18px */
-  --text-xl: 1.25rem;    /* 20px */
-  --text-2xl: 1.5rem;    /* 24px */
-  --text-3xl: 1.875rem;  /* 30px */
-  --text-4xl: 2.25rem;   /* 36px */
-}
+/* Don't — hardcode values */
+background: #1a1a25;
+color: #888899;
 ```
 
 ---
 
-## 📏 Spacing
+## Answer Color Variants
+
+The four answer slots (A/B/C/D) each have a fixed accent color used for borders, badges, and chart bars:
+
+| Slot | Color | Hex |
+|------|-------|-----|
+| A | Purple | `#7c3aed` |
+| B | Cyan | `#0891b2` |
+| C | Amber | `#d97706` |
+| D | Green | `#059669` |
+
+These are defined inline per component as CSS custom property `--c` and are **not** design tokens.
+
+---
+
+## BEM Naming
+
+All component styles use BEM with the `qv-` prefix:
 
 ```css
-:root {
-  --space-xs: 0.25rem;   /* 4px */
-  --space-sm: 0.5rem;    /* 8px */
-  --space-md: 1rem;      /* 16px */
-  --space-lg: 1.5rem;    /* 24px */
-  --space-xl: 3rem;      /* 48px */
-  --space-2xl: 6rem;     /* 96px */
-}
+.qv-btn { }              /* block */
+.qv-btn__badge { }       /* element */
+.qv-btn--selected { }    /* modifier */
+.qv-btn--a { }           /* color variant modifier */
+```
+
+```css
+.qv-chart { }
+.qv-chart__row { }
+.qv-chart__bar { }
 ```
 
 ---
 
-## 📐 Layout
+## Timer Ring Colors
 
-### Container
+The `TimerRing` component changes color dynamically based on remaining fraction:
 
-```css
-:root {
-  --container-max-width: 1280px;
-  --container-padding: clamp(1rem, 5vw, 3rem);
-}
-```
+| Fraction remaining | Color | Token |
+|-------------------|-------|-------|
+| > 50% | Purple | `var(--qv-accent)` |
+| 25–50% | Orange | `var(--qv-warn)` |
+| < 25% | Red | `var(--qv-wrong)` |
 
-### Breakpoints
-
-```css
---breakpoint-sm: 640px;
---breakpoint-md: 768px;
---breakpoint-lg: 1024px;
---breakpoint-xl: 1280px;
-```
+Transitions use `stroke 0.4s ease` for smooth color change.
 
 ---
 
-## 🧩 Components
+## Layout Conventions
 
-### Naming Convention
-
-Use BEM or consistent naming:
-
-```css
-.component { }
-.component__element { }
-.component--modifier { }
-```
-
-### Component List
-
-| Component | Description |
-|-----------|-------------|
-| Button | Interactive button element |
-| Card | Content container |
-| Input | Form input field |
-| Modal | Dialog overlay |
-
-See [COMPONENT_REFERENCE.md](./COMPONENT_REFERENCE.md) for details.
+- **Host app** — designed for large screens (1080p+), landscape
+- **Player app** — designed for mobile (375px+), portrait, single column
+- Answer grid: 2×2 CSS Grid on mobile (`grid-template-columns: 1fr 1fr`)
+- No fixed breakpoints — relative units and `min()` / `max()` preferred
 
 ---
 
-## 🎭 Animations
-
-### Transitions
-
-```css
-:root {
-  --transition-fast: 150ms ease-in-out;
-  --transition-normal: 250ms ease-in-out;
-  --transition-slow: 350ms ease-in-out;
-}
-```
-
-### Motion
-
-```css
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-```
-
----
-
-## ♿ Accessibility
-
-### Focus States
-
-All interactive elements must have visible focus states.
-
-### Color Contrast
-
-- Normal text: minimum 4.5:1 ratio
-- Large text: minimum 3:1 ratio
-
-### Skip Links
-
-```html
-<a href="#main-content" class="skip-link">Skip to main content</a>
-```
-
----
-
-## 📁 File Structure
-
-```
-styles/
-├── _variables.css      # Design tokens
-├── _base.css           # Base styles
-├── _components.css     # Component styles
-├── _utilities.css      # Utility classes
-└── main.css            # Entry point
-```
-
----
-
-*Last updated: [Date]*
+*Last updated: 2026-03-31*

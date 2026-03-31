@@ -1,37 +1,88 @@
 # Features
 
-Application features organized by epics and user stories.
-Each item is linked to a GitHub issue for tracking and status.
-
-## Epics
-
-| # | Epic | Description | Issue |
-|---|------|-------------|-------|
-| 1 | [Epic Name] | Brief description of the epic goal and scope (200-400 chars max). | [#1](../../issues/1) |
-| 2 | [Epic Name] | Brief description of the epic goal and scope (200-400 chars max). | [#2](../../issues/2) |
-| 3 | [Epic Name] | Brief description of the epic goal and scope (200-400 chars max). | [#3](../../issues/3) |
+Feature list and roadmap for QuizV, organized by phase.
 
 ---
 
-## User Stories
+## Phase 1 — Core Engine (complete)
 
-| Epic | User Story | Issue |
-|------|------------|-------|
-| Epic 1 | As a user, I want to [action] so that [benefit] | [#10](../../issues/10) |
-| Epic 1 | As a user, I want to [action] so that [benefit] | [#11](../../issues/11) |
-| Epic 2 | As a user, I want to [action] so that [benefit] | [#20](../../issues/20) |
-| Epic 2 | As a user, I want to [action] so that [benefit] | [#21](../../issues/21) |
-| Epic 3 | As a user, I want to [action] so that [benefit] | [#30](../../issues/30) |
-
----
-
-## Technical Features
-
-| Feature | Description | Issue |
-|---------|-------------|-------|
-| Feature 1 | Brief technical description | [#100](../../issues/100) |
-| Feature 2 | Brief technical description | [#101](../../issues/101) |
+| Feature | Status | Description |
+|---------|--------|-------------|
+| `.quizv.md` parser | ✅ | Parse quiz files with YAML frontmatter and GFM choices |
+| Quiz validation | ✅ | `validateQuiz()` reports malformed questions |
+| `GameEngine` state machine | ✅ | `lobby → active → finished` transitions |
+| `IRealtimeTransport` interface | ✅ | Pluggable transport layer |
+| `LocalTransport` (Bun WS) | ✅ | Bun native WebSocket pub/sub |
+| WebSocket server | ✅ | Bun HTTP+WS server on port 3030 |
+| Host role auth | ✅ | `host_*` commands rejected if `role !== 'host'` |
+| Player join code guard | ✅ | WS upgrade rejected on wrong `?code=` |
+| Scoring formula | ✅ | 500–1000 pts based on answer speed |
+| `quizv dev` CLI | ✅ | Starts WS server from a `.quizv.md` file |
+| `quizv check` CLI | ✅ | Validates a quiz file and reports errors |
+| Unit tests (27) | ✅ | Parser (13) + Core (14), 0 failures |
 
 ---
 
-*Status is managed directly on GitHub issues.*
+## Phase 2 — Vue Apps (complete)
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| `@quizv/theme-default` | ✅ | CSS custom properties (`--qv-*`) |
+| `TimerRing` component | ✅ | Animated SVG ring, purple → orange → red |
+| `AnswerButton` component | ✅ | Multi-state button with 4 color variants |
+| `AnswerBarChart` component | ✅ | Live answer distribution chart |
+| `PlayerList` component | ✅ | Lobby player chips |
+| `Podium` component | ✅ | Ranked leaderboard with medals |
+| `QrCode` component | ✅ | Canvas QR code (wraps `qrcode`) |
+| Host app — Lobby | ✅ | QR code, join code, live player list |
+| Host app — Question | ✅ | Timer ring, live answer count, Reveal button |
+| Host app — Reveal | ✅ | Correct answers, score deltas, bar chart |
+| Host app — Podium | ✅ | Final leaderboard |
+| Player app — Join | ✅ | Join code + pseudo/email form |
+| Player app — Lobby | ✅ | Waiting room with player count |
+| Player app — Question | ✅ | 2×2 answer grid + timer ring |
+| Player app — Feedback | ✅ | Correct/wrong + points earned + rank |
+| Player app — Podium | ✅ | Final rank + score |
+| Multi-select answers | ✅ | Toggle choices until timer ends, auto-submit |
+| `quizv dev` spawns Vite | ✅ | Host (3031) + Player (3032) Vite servers |
+| `choiceCounts` in reveal | ✅ | Per-choice answer counts for host bar chart |
+| `playerUrl` in `host_connected` | ✅ | Pre-filled join URL for QR code |
+
+---
+
+## Phase 3 — Cloud / Supabase (planned)
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| `@quizv/transport-supabase` | ⬜ | Supabase Realtime transport |
+| Host authentication | ⬜ | Supabase Auth (magic link) |
+| Quiz persistence | ⬜ | Save/load quizzes from Supabase Postgres |
+| `quizv upload` CLI | ⬜ | Push quiz to Supabase |
+| Vercel deployment | ⬜ | Deploy host + player apps |
+| Internet multiplayer | ⬜ | Players join from anywhere via URL |
+
+---
+
+## Phase 4 — Slidev Addon (planned)
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| `slidev-addon-quizv` | ⬜ | Embed live quizzes in Slidev presentations |
+| `<QuizvEmbed>` component | ⬜ | QR code + answer overlay on slides |
+| Presenter controls | ⬜ | Host controls in Slidev presenter notes |
+| Live answer animation | ⬜ | Answers animate as overlay on slide |
+
+---
+
+## Known Constraints
+
+| Constraint | Reason |
+|-----------|--------|
+| `crypto.randomUUID()` not used | Fails on HTTP over LAN (non-secure context) |
+| No Vue Router | Linear game flow — `v-if` on phase is sufficient |
+| `@quizv/transport-supabase` is a stub | Planned for Phase 3 |
+| `playerUrl` hardcoded to port 3032 | Dedicated Vite player dev server |
+
+---
+
+*Last updated: 2026-03-31*

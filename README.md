@@ -1,169 +1,146 @@
-# GitHub Repository Template
+# QuizV
 
 <!-- markdownlint-disable -->
 <p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" width="80" height="80" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/githubactions/githubactions-original-wordmark.svg" alt="Github Action" width="80" height="80" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg" alt="Vue" width="60" height="60" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" alt="TypeScript" width="60" height="60" />
 </p>
 
 <p align="center">
-  <strong>GitHub repository template with preconfigured code quality and release automation</strong>
+  <strong>Kahoot-alternative — real-time multiplayer quiz platform, self-hosted on LAN</strong>
 </p>
 
 <p align="center">
-<a href="https://github.com/maxime-lenne/github-repository-template/actions?query=workflow%3ALint+branch%3Amaster">
-		<img src="https://img.shields.io/github/actions/workflow/status/maxime-lenne/github-repository-template/lint.yml?branch=master"
-			 alt="Build Status">
-	</a>
-  <a href="https://github.com/maxime-lenne/github-repository-template/actions?query=workflow%3ARelease+branch%3Amaster">
-		<img src="https://img.shields.io/github/actions/workflow/status/maxime-lenne/github-repository-template/release.yml?branch=master"
-			 alt="Build Status">
-	</a>
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" />
-  </a>
-  <a href="https://bun.sh">
-    <img src="https://img.shields.io/badge/Package%20Manager-Bun-black" alt="Bun" />
-  </a>
-  <a href="https://gitmoji.dev">
-    <img src="https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg" alt="Gitmoji" />
-  </a>
-  <a href="https://semantic-release.gitbook.io/">
-    <img src="https://img.shields.io/badge/semantic--release-gitmoji-e10079?logo=semantic-release" alt="semantic-release: gitmoji" />
-</a>
+  <img src="https://img.shields.io/badge/runtime-Bun-black" alt="Bun" />
+  <img src="https://img.shields.io/badge/frontend-Vue%203-42b883" alt="Vue 3" />
+  <img src="https://img.shields.io/badge/realtime-WebSocket-blue" alt="WebSocket" />
+  <img src="https://img.shields.io/badge/license-MIT-yellow" alt="MIT" />
+  <img src="https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg" alt="Gitmoji" />
 </p>
 <!-- markdownlint-restore -->
 
 ---
 
-A ready-to-use GitHub repository template with linting, git hooks, automated changelog, and semantic versioning.
+Host a quiz game from your laptop. Players join via QR code or join code on their phone — no account, no cloud required.
 
 ## Features
 
-### Code Quality
+- **`.quizv.md` format** — write quizzes in Markdown with YAML frontmatter
+- **Real-time WebSocket** — sub-second sync between host and players
+- **Multi-select answers** — players toggle choices until the timer ends
+- **Score by speed** — faster correct answers earn more points
+- **Host dashboard** — timer ring, live answer count, bar chart reveal
+- **Player mobile UI** — 2×2 answer grid, timer, feedback screen, confetti podium
+- **QR code join** — scan to open the player URL pre-filled with the join code
+- **LAN-first** — works fully offline, no internet required
 
-- **Bun** - Fast and modern package manager
-- **Husky** - Automated Git hooks
-- **lint-staged** - Incremental linting on staged files
-- **Markdownlint** - Markdown file validation
-- **Yamllint** - YAML file validation
-- **EditorConfig** - Consistent coding styles across editors
+## Tech Stack
 
-### Commit & Release
-
-- **Gitmoji** - Commits with emojis (`✨ Add feature`)
-- **Commitlint** - Validates commit messages (gitmoji or conventional)
-- **Changelog** - Auto-generated from commits
-- **Semantic Release** - Automated versioning and GitHub releases
-
-### Dependency Management
-
-- **Renovate** - Automatic dependency updates
-- **Dependabot** - Security alerts and updates
+| Layer | Technology |
+|-------|-----------|
+| Runtime | Bun 1.x |
+| Language | TypeScript 5 (strict) |
+| Frontend | Vue 3 + Vite 5 + Pinia + UnoCSS |
+| Realtime | Bun native WebSocket |
+| Quiz format | `.quizv.md` (Markdown + YAML frontmatter) |
+| Monorepo | Bun workspaces |
 
 ## Installation
 
 ```bash
-# Clone the template
-git clone https://github.com/maxime-lenne/github-repository-template.git my-project
-cd my-project
-
-# Install dependencies
+git clone <repo> quizv
+cd quizv
 bun install
 ```
 
 ## Usage
 
-### Commits
+### Start a game
 
 ```bash
-# Interactive gitmoji commit
-bun run commit
+bun run packages/server/src/cli.ts dev examples/demo.quizv.md
 ```
 
-Accepted formats:
+This starts three servers simultaneously:
 
-- **Gitmoji**: `✨ Add new feature`
-- **Conventional**: `feat(scope): Add new feature`
+| Server | URL | Role |
+|--------|-----|------|
+| WS / HTTP | `ws://localhost:3030` | Game logic |
+| Host app | `http://localhost:3031` | Desktop dashboard |
+| Player app | `http://localhost:3032` | Mobile client |
 
-### Linting
+Open `http://localhost:3031` on the host machine. Players scan the QR code or navigate to the printed player URL.
+
+### Validate a quiz file
 
 ```bash
-bun run lint          # Lint all files
-bun run lint:md       # Lint Markdown only
-bun run lint:md:fix   # Auto-fix Markdown
-bun run lint:yaml     # Lint YAML files
+bun run packages/server/src/cli.ts check examples/demo.quizv.md
 ```
 
-### Changelog
+### Run tests
 
 ```bash
-bun run changelog       # Update changelog with new commits
-bun run changelog:init  # Generate full changelog from scratch
+bun test
 ```
 
-### Release
+## Quiz File Format
 
-Releases are automated via GitHub Actions on push to `main`. Manual release:
+```markdown
+---
+title: My Quiz
+theme: dark
+---
 
-```bash
-bun run release:dry   # Preview release
-bun run release       # Execute release
+## Question text here
+
+- [x] Correct answer
+- [ ] Wrong answer A
+- [ ] Wrong answer B
+- [ ] Wrong answer C
+
+> Optional explanation shown after reveal
+
+---timer: 20
 ```
 
-### Git Hooks
+## Project Structure
 
-Hooks are automatically configured via Husky:
+```text
+quizv/
+├── packages/
+│   ├── parser/           # @quizv/parser — .quizv.md → Quiz object
+│   ├── core/             # @quizv/core — GameEngine, events, types
+│   ├── transport-local/  # @quizv/transport-local — Bun WS transport
+│   ├── transport-supabase/ # @quizv/transport-supabase — cloud transport (stub)
+│   ├── server/           # @quizv/server — Bun HTTP+WS server + CLI
+│   ├── theme-default/    # @quizv/theme-default — CSS design tokens
+│   └── ui/               # @quizv/ui — shared Vue 3 components
+├── apps/
+│   ├── host/             # Vue 3 SPA — port 3031
+│   └── player/           # Vue 3 SPA — port 3032
+└── examples/
+    └── demo.quizv.md
+```
 
-- **pre-commit**: Runs lint-staged on modified files
-- **commit-msg**: Validates commit message format
-
-## Version Bumping
-
-Versions are determined automatically by commit emojis:
-
-| Emoji | Version Bump | Example |
-|-------|--------------|---------|
-| 💥 | Major | Breaking changes |
-| ✨ 🎉 | Minor | New features |
-| 🐛 🚑️ ⚡️ 🔒️ | Patch | Fixes, performance, security |
+See [`docs/PROJECT_STRUCTURE.md`](docs/PROJECT_STRUCTURE.md) for the full file map.
 
 ## Documentation
 
 | File | Description |
 |------|-------------|
 | [`docs/AGENTS.md`](docs/AGENTS.md) | AI assistant guide and conventions |
-| [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md) | Code style and git conventions |
-| [`docs/TECHNICAL_GUIDE.md`](docs/TECHNICAL_GUIDE.md) | Technical implementation details |
+| [`docs/TECHNICAL_GUIDE.md`](docs/TECHNICAL_GUIDE.md) | Architecture, WS protocol, scoring |
 | [`docs/PROJECT_STRUCTURE.md`](docs/PROJECT_STRUCTURE.md) | Directory and file organization |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Contribution guidelines |
-| [`CHANGELOG.md`](CHANGELOG.md) | Version history |
-
-## Configuration Files
-
-| File | Purpose |
-|------|---------|
-| `.gitmoji.json` | Gitmoji-cli settings |
-| `.releaserc.json` | Semantic-release config |
-| `.markdownlint.json` | Markdown linting rules |
-| `.yamllint.yml` | YAML linting rules |
-| `.editorconfig` | Editor settings |
-| `commitlint.config.js` | Commit message validation |
-
-## Customization
-
-1. Update `package.json` with your project name
-2. Modify linting rules according to your needs
-3. Adjust Renovate/Dependabot configuration
-4. Update or replace this README
+| [`docs/SCREEN_FLOW.md`](docs/SCREEN_FLOW.md) | Host and player screen flows |
+| [`docs/COMPONENT_REFERENCE.md`](docs/COMPONENT_REFERENCE.md) | `@quizv/ui` component API |
+| [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) | CSS tokens and design decisions |
+| [`docs/FEATURES.md`](docs/FEATURES.md) | Feature list and roadmap |
+| [`docs/TASKS.md`](docs/TASKS.md) | Task backlog |
 
 ## License
 
-MIT License - see the [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE)
 
 ## Author
 
-**Maxime Lenne** - [maxime-lenne.fr](https://maxime-lenne.fr)
-
-- GitHub: [@maxime-lenne](https://github.com/maxime-lenne)
-- LinkedIn: [maximelenne](https://linkedin.com/in/maximelenne)
+**Maxime Lenne** — [maxime-lenne.fr](https://maxime-lenne.fr)

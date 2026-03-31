@@ -1,24 +1,78 @@
-## [1.1.0](https://github.com/maxime-lenne/github-repository-template/compare/v1.0.0...v1.1.0) (2026-02-04)
+## [2.0.0](https://github.com/maxime-lenne/quizv/compare/v1.0.0...v2.0.0) (2026-03-31)
 
-## 1.0.0 (2026-02-03)
+### Features
 
-## 1.0.0 (2026-02-03)
+- ✨ Multi-select answers: toggle until timer ends, auto-submit at 0
+- ✨ quizv dev spawns Vite apps for host and player
+- ✨ Player app: Join, Lobby, Question, Feedback, Podium views
+- ✨ Host app: Lobby, Question, Reveal, Podium views
+- ✨ Add PlayerList, Podium, QrCode to @quizv/ui
+- ✨ Add AnswerButton and AnswerBarChart to @quizv/ui
+- ✨ Add @quizv/ui package with TimerRing component
+- ✨ Add choiceCounts to answer_revealed, playerUrl to host_connected
+- 📦 Player app infrastructure: Vite + Pinia + game store
+- 📦 Host app infrastructure: Vite + Pinia + game store
+- 📦 Add @quizv/theme-default CSS token package
 
-* :arrow_up: Bump actions/checkout from 4 to 6 ([9d57470](https://github.com/maxime-lenne/github-repository-template/commit/9d57470))
-* :wrench: chore: Add commitlint with gitmoji configuration ([477a52d](https://github.com/maxime-lenne/github-repository-template/commit/477a52d))
-* ✨ Add changelog generation with gitmoji support ([7158a97](https://github.com/maxime-lenne/github-repository-template/commit/7158a97))
-* ✨ Add semantic-release with gitmoji support ([c6e4434](https://github.com/maxime-lenne/github-repository-template/commit/c6e4434))
-* ✨ Support both gitmoji and conventional commit formats ([b4bed7b](https://github.com/maxime-lenne/github-repository-template/commit/b4bed7b))
-* 🎉 Initial commit - Repository template setup ([6c9fc72](https://github.com/maxime-lenne/github-repository-template/commit/6c9fc72))
-* 🎨 Fix markdownlint issues in README ([c4fd2f4](https://github.com/maxime-lenne/github-repository-template/commit/c4fd2f4))
-* 🐛 Fix Node.js version for semantic-release ([f307677](https://github.com/maxime-lenne/github-repository-template/commit/f307677))
-* 🐛 Fix semantic-release configuration ([e849146](https://github.com/maxime-lenne/github-repository-template/commit/e849146))
-* 💄 Restore centered HTML header with markdownlint bypass ([bb07fa9](https://github.com/maxime-lenne/github-repository-template/commit/bb07fa9))
-* 📝 Add .editorconfig and CONTRIBUTING.md ([f753ab5](https://github.com/maxime-lenne/github-repository-template/commit/f753ab5))
-* 📝 Change github username ([5a32c3b](https://github.com/maxime-lenne/github-repository-template/commit/5a32c3b))
-* 📝 Clean and simplify template documentation files ([edfb979](https://github.com/maxime-lenne/github-repository-template/commit/edfb979))
-* 📝 First shot of doc without clean ([3da9e03](https://github.com/maxime-lenne/github-repository-template/commit/3da9e03))
-* 📝 Update documentation to reflect actual project stack ([3fc1c92](https://github.com/maxime-lenne/github-repository-template/commit/3fc1c92))
-* 📝 Update README with all template features ([774a7cd](https://github.com/maxime-lenne/github-repository-template/commit/774a7cd))
-* 🔧 Use unicode emoji format for gitmoji commits ([0e3b917](https://github.com/maxime-lenne/github-repository-template/commit/0e3b917))
-* add gitignore ([0b5b204](https://github.com/maxime-lenne/github-repository-template/commit/0b5b204))
+### Bug Fixes
+
+- 🐛 Fix TimerRing aria-label binding, socket identity guard, reveal score delta styling
+- 🐛 Fix WS close handler and double-connect guard in host store
+
+### Tests
+
+- ✅ Add choiceCounts assertions to game.test.ts
+
+### Documentation
+
+- 📝 Document port 3032 as Phase 2 player Vite dev server port
+
+---
+
+## [1.0.0](https://github.com/maxime-lenne/quizv/compare/v0.0.1...v1.0.0) (2026-03-31)
+
+### Features
+
+- ✨ Player UX: answer time display and persistent score bar
+- ✨ Fix join code, timer UX, and host timer sync
+- ✨ Improve host page: game state display and WS connection guard
+- ✨ Implement @quizv/server — Bun HTTP+WS dev server and CLI
+- ✨ Implement @quizv/transport-local — Bun WebSocket transport
+- ✨ Implement @quizv/core — game engine, scoring, events
+- ✨ Implement @quizv/parser — parseQuizFile and validateQuiz
+
+### Bug Fixes
+
+- 🐛 Remove parens around countdown after answer
+- 🐛 Fix playerId TDZ error on LAN (HTTP non-secure context)
+- 🐛 Fix parser edge cases: split.ts odd-block guard, regex, parse-meta closing delimiter
+
+### Security
+
+- 🔒 Fix role auth and GameEngine status guards
+- 🔒 Fix XSS in inline HTML, host close guard, app deps and tsconfig
+
+### Packages
+
+- 📦 Add Vue 3 app stubs and transport-supabase stub
+- 📦 Add @quizv/core — types, transport interface, game events
+- 📦 Add @quizv/parser package scaffold with types
+
+### Configuration
+
+- 🔧 Fix core: JSDoc on transport presence, remove unused field, type exports
+- 🔧 Fix tsconfig isolatedModules, verbatimModuleSyntax and test script
+
+### Tests
+
+- 🧪 Add failing tests for @quizv/parser
+
+### Documentation
+
+- 📝 Add demo.quizv.md example quiz file
+
+---
+
+## 0.0.1 (2026-03-31)
+
+- 📦 Initialize quizv monorepo

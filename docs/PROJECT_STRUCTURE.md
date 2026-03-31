@@ -1,109 +1,128 @@
 # Project Structure
 
+Directory layout and file map for the QuizV monorepo.
+
+---
+
 ## Directory Organization
 
 ```text
-github-repository-template/
-├── .claude/                    # Claude Code configuration
-├── .github/                    # GitHub configuration
-│   ├── workflows/              # CI/CD workflows
-│   │   └── lint.yml            # Markdown and YAML linting
-│   ├── ISSUE_TEMPLATE/         # Issue templates
-│   │   ├── bug_report.yml
-│   │   ├── feature_request.yml
-│   │   └── config.yml
-│   └── pull_request_template.md
-├── docs/                       # Documentation
-│   ├── AGENTS.md               # AI assistant guide
-│   ├── PROJECT_STRUCTURE.md    # This file
-│   ├── CONVENTIONS.md          # Code conventions
-│   ├── TECHNICAL_GUIDE.md      # Technical guide
-│   ├── DESIGN_SYSTEM.md        # Design system
-│   ├── COMPONENT_REFERENCE.md  # Component docs
-│   ├── FEATURES.md             # Features list
-│   ├── SCREEN_FLOW.md          # Screen flows
-│   └── TASKS.md                # Task tracking
-├── node_modules/               # Dependencies (Bun)
-├── .gitignore                  # Git ignore rules
-├── .gitmoji.json               # Gitmoji configuration
-├── .markdownlint.json          # Markdownlint rules
-├── .yamllint.yml               # Yamllint configuration
-├── bun.lock                    # Bun lock file
-├── package.json                # Project configuration
-├── renovate.json               # Renovate configuration
-├── CLAUDE.md                   # AI assistant entry point
-├── LICENSE                     # MIT License
-└── README.md                   # Main documentation
+quizv/
+├── apps/
+│   ├── host/                        # Vue 3 SPA — host dashboard (port 3031)
+│   │   ├── index.html
+│   │   ├── package.json
+│   │   ├── vite.config.ts
+│   │   ├── uno.config.ts
+│   │   └── src/
+│   │       ├── main.ts
+│   │       ├── App.vue
+│   │       ├── stores/
+│   │       │   └── game.ts          # Pinia store — HostPhase state machine
+│   │       └── views/
+│   │           ├── LobbyView.vue    # QR code + player list + Start button
+│   │           ├── QuestionView.vue # Timer ring + live answer count
+│   │           ├── RevealView.vue   # Correct answers + score delta + bar chart
+│   │           └── PodiumView.vue   # Final leaderboard
+│   └── player/                      # Vue 3 SPA — player UI (port 3032)
+│       ├── index.html
+│       ├── package.json
+│       ├── vite.config.ts
+│       ├── uno.config.ts
+│       └── src/
+│           ├── main.ts
+│           ├── App.vue
+│           ├── stores/
+│           │   └── game.ts          # Pinia store — PlayerPhase state machine
+│           └── views/
+│               ├── JoinView.vue     # Join code + pseudo/email form
+│               ├── LobbyView.vue    # Waiting room
+│               ├── QuestionView.vue # 2×2 answer grid + timer ring
+│               ├── FeedbackView.vue # Correct/wrong + points earned
+│               └── PodiumView.vue   # Final rank + score
+├── packages/
+│   ├── parser/                      # @quizv/parser
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   ├── src/
+│   │   │   ├── index.ts             # parseQuizFile, validateQuiz
+│   │   │   ├── types.ts             # Quiz, Question, Choice, ValidationResult
+│   │   │   ├── split.ts             # Split markdown blocks on ---
+│   │   │   └── parse-meta.ts        # Parse YAML frontmatter
+│   │   └── tests/
+│   │       └── parser.test.ts       # 13 tests
+│   ├── core/                        # @quizv/core
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   ├── src/
+│   │   │   ├── index.ts             # Barrel export
+│   │   │   ├── types.ts             # PlayerState, Score, PodiumEntry, QuestionPublic
+│   │   │   ├── events.ts            # GameEvent discriminated union + GameEvents builder
+│   │   │   ├── transport.ts         # IRealtimeTransport interface
+│   │   │   ├── scoring.ts           # calcPoints(timeRemaining, isCorrect)
+│   │   │   └── game.ts              # GameEngine state machine
+│   │   └── tests/
+│   │       └── game.test.ts         # 14 tests
+│   ├── transport-local/             # @quizv/transport-local
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   └── src/
+│   │       └── index.ts             # LocalTransport — Bun WS pub/sub
+│   ├── transport-supabase/          # @quizv/transport-supabase (stub — Phase 3)
+│   │   ├── package.json
+│   │   └── src/
+│   │       └── index.ts
+│   ├── server/                      # @quizv/server
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   └── src/
+│   │       ├── cli.ts               # CLI entry — `quizv dev | check`
+│   │       ├── server.ts            # QuizvServer — Bun HTTP + WebSocket
+│   │       └── dev.ts               # devCommand — spawns Vite apps
+│   ├── theme-default/               # @quizv/theme-default
+│   │   ├── package.json
+│   │   ├── index.ts
+│   │   └── styles/
+│   │       └── vars.css             # --qv-* CSS custom properties
+│   └── ui/                          # @quizv/ui
+│       ├── package.json
+│       ├── tsconfig.json
+│       └── src/
+│           ├── index.ts             # Barrel export
+│           ├── TimerRing.vue        # Animated SVG countdown ring
+│           ├── AnswerButton.vue     # Answer choice button (multi-state)
+│           ├── AnswerBarChart.vue   # Live answer distribution chart
+│           ├── PlayerList.vue       # Lobby player chips
+│           ├── Podium.vue           # Ranked leaderboard list
+│           └── QrCode.vue           # QR code canvas (wraps `qrcode`)
+└── examples/
+    └── demo.quizv.md                # Sample quiz file
 ```
 
 ---
 
-## Configuration Files
-
-### Project Configuration
+## Key Files
 
 | File | Purpose |
 |------|---------|
-| `package.json` | Dependencies, scripts, project metadata |
-| `bun.lock` | Locked dependency versions |
-| `.gitmoji.json` | Gitmoji-cli configuration |
-
-### Code Quality
-
-| File | Purpose |
-|------|---------|
-| `.markdownlint.json` | Markdown linting rules |
-| `.yamllint.yml` | YAML linting rules |
-| `.editorconfig` | Editor settings (if present) |
-
-### CI/CD
-
-| File | Purpose |
-|------|---------|
-| `.github/workflows/lint.yml` | Lint on push/PR |
-| `renovate.json` | Automatic dependency updates |
-| `.github/dependabot.yml` | Security updates |
-
-### Git Hooks
-
-| Directory | Purpose |
-|-----------|---------|
-| `.husky/` | Git hooks managed by Husky |
+| `package.json` (root) | Bun workspaces configuration |
+| `tsconfig.base.json` | Shared TypeScript strict config |
+| `packages/core/src/types.ts` | Shared types: `PlayerState`, `Score`, `PodiumEntry` |
+| `packages/core/src/events.ts` | `GameEvent` union + `GameEvents` builder |
+| `packages/core/src/game.ts` | `GameEngine` — authoritative game state machine |
+| `packages/server/src/server.ts` | Bun HTTP+WS server, handles all WS messages |
+| `packages/theme-default/styles/vars.css` | All `--qv-*` design tokens |
 
 ---
 
-## Documentation (`docs/`)
+## Port Allocation
 
-| File | Purpose |
+| Port | Process |
 |------|---------|
-| `AGENTS.md` | Main guide for AI assistants |
-| `PROJECT_STRUCTURE.md` | This file - directory layout |
-| `CONVENTIONS.md` | Code style and git conventions |
-| `TECHNICAL_GUIDE.md` | Technical implementation details |
-| `DESIGN_SYSTEM.md` | UI/UX design tokens |
-| `COMPONENT_REFERENCE.md` | Component documentation |
-| `FEATURES.md` | Epics and user stories |
-| `SCREEN_FLOW.md` | Navigation flows |
-| `TASKS.md` | Project task tracking |
+| 3030 | Bun WS/HTTP server (game logic) |
+| 3031 | Vite — `apps/host` |
+| 3032 | Vite — `apps/player` (binds `0.0.0.0` for LAN) |
 
 ---
 
-## GitHub Configuration (`.github/`)
-
-### Workflows
-
-- **`lint.yml`** - Runs all linters on push/PR
-
-### Issue Templates
-
-- **`bug_report.yml`** - Bug report template
-- **`feature_request.yml`** - Feature request template
-- **`config.yml`** - Issue template configuration
-
-### Pull Request
-
-- **`pull_request_template.md`** - PR template
-
----
-
-*Last updated: 2026-02-03*
+*Last updated: 2026-03-31*

@@ -33,12 +33,14 @@ export const useGameStore = defineStore('game', () => {
   let ws: WebSocket | null = null
 
   function connect() {
+    ws?.close()   // prevent leaking previous socket on reconnect
     const url = `ws://localhost:3030/ws?role=host`
     ws = new WebSocket(url)
     ws.onmessage = (e: MessageEvent<string>) => {
       handle(JSON.parse(e.data) as ServerMsg)
     }
     ws.onerror = () => { phase.value = 'connecting' }
+    ws.onclose = () => { phase.value = 'connecting' }
   }
 
   function handle(msg: ServerMsg) {

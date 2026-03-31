@@ -2,6 +2,9 @@
  * Calculate points for an answer.
  * Formula: correct ? max(10, round(50 + timeRemaining * 5)) : 0
  *
+ * timeRemaining is clamped to 0 at the floor: negative values (possible
+ * due to network latency) are treated as 0 time remaining → 10 pts minimum.
+ *
  * Examples:
  *   20s remaining → 150 pts
  *   10s remaining → 100 pts

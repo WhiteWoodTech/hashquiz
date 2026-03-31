@@ -1,0 +1,30 @@
+import matter from 'gray-matter'
+import type { QuizMeta } from './types'
+
+/**
+ * Parse the quiz-level frontmatter block (first `---` block in the file).
+ * The raw block may or may not have leading/trailing `---` lines.
+ * gray-matter expects a string starting with `---` and ending with `---`.
+ */
+export function parseMeta(rawBlock: string): QuizMeta {
+  // Ensure the block is wrapped in frontmatter delimiters
+  let wrapped: string
+  if (rawBlock.startsWith('---')) {
+    // Has opening delimiter — check if it also has a structural closing delimiter
+    // Only the first occurrence of a bare `---` line after line 0 counts.
+    const lines = rawBlock.split('\n')
+    const hasClosing = lines.slice(1).findIndex(l => l === '---') !== -1
+    wrapped = hasClosing ? rawBlock : `${rawBlock}\n---`
+  } else {
+    wrapped = `---\n${rawBlock}\n---`
+  }
+  const { data } = matter(wrapped)
+
+  return {
+    title: typeof data['title'] === 'string' ? data['title'] : '',
+    description: typeof data['description'] === 'string' ? data['description'] : undefined,
+    theme: typeof data['theme'] === 'string' ? data['theme'] : 'default',
+    author: typeof data['author'] === 'string' ? data['author'] : undefined,
+    tags: Array.isArray(data['tags']) ? (data['tags'] as string[]) : [],
+  }
+}

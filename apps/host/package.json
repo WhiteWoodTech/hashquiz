@@ -1,0 +1,22 @@
+{
+  "name": "@quizv/app-host",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@quizv/core": "workspace:*",
+    "@quizv/ui": "workspace:*",
+    "@quizv/theme-default": "workspace:*",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.27"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.5",
+    "typescript": "^5.4.5",
+    "unocss": "^0.61.0",
+    "vite": "^5.3.1"
+  }
+}

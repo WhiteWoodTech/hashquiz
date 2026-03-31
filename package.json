@@ -1,9 +1,8 @@
 {
-  "name": "github-repository-template",
-  "version": "1.0.0",
-  "description": "",
+  "name": "quizv",
+  "version": "2.0.0",
+  "description": "Kahoot-alternative real-time multiplayer quiz platform",
   "type": "module",
-  "main": "index.js",
   "author": "Maxime Lenne",
   "license": "MIT",
   "private": true,
@@ -11,11 +10,17 @@
     "node": ">=22.11.0"
   },
   "packageManager": "bun@1.1.45",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "bun run --filter='*' build",
+    "test": "bun test",
+    "dev": "bun run packages/server/src/cli.ts dev",
     "lint": "bun run lint:md && bun run lint:yaml",
-    "lint:md": "markdownlint '**/*.md' --ignore node_modules --ignore dist",
-    "lint:md:fix": "markdownlint '**/*.md' --ignore node_modules --ignore dist --fix",
+    "lint:md": "markdownlint '**/*.md' --ignore node_modules --ignore dist --ignore bun.lock",
+    "lint:md:fix": "markdownlint '**/*.md' --ignore node_modules --ignore dist --ignore bun.lock --fix",
     "lint:yaml": "yamllint .",
     "lint:commit": "commitlint --last -V",
     "prepare": "husky",
@@ -38,7 +43,8 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "markdownlint-cli": "^0.47.0",
-    "semantic-release": "^25.0.3"
+    "semantic-release": "^25.0.3",
+    "typescript": "^5.4.5"
   },
   "lint-staged": {
     "*.md": "markdownlint --fix",

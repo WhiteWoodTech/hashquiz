@@ -1,5 +1,5 @@
 <template>
-  <svg :width="size" :height="size" :viewBox="`0 0 ${size} ${size}`" aria-label="`${remaining} seconds remaining`">
+  <svg :width="size" :height="size" :viewBox="`0 0 ${size} ${size}`" :aria-label="`${remaining} seconds remaining`">
     <!-- Background track -->
     <circle
       :cx="cx" :cy="cy" :r="r"

@@ -21,7 +21,7 @@
       <h3>Scores this round</h3>
       <div v-for="s in game.scores.slice(0, 5)" :key="s.playerId" class="rv-score-row">
         <span>{{ s.pseudo }}</span>
-        <span class="rv-score-delta">+{{ s.delta }} pts</span>
+        <span :class="['rv-score-delta', s.delta === 0 ? 'rv-score-delta--zero' : '']">{{ s.delta > 0 ? '+' : '' }}{{ s.delta }} pts</span>
         <span class="rv-score-total">{{ s.score }}</span>
       </div>
     </div>
@@ -50,6 +50,7 @@ const game = useGameStore()
 .rv-score-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.4rem 0; border-bottom: 1px solid var(--qv-border); }
 .rv-score-row span:first-child { flex: 1; }
 .rv-score-delta { color: var(--qv-correct); font-weight: 600; }
+.rv-score-delta--zero { color: var(--qv-text-muted); }
 .rv-score-total { color: var(--qv-text-muted); font-size: 0.85rem; min-width: 4rem; text-align: right; }
 .rv-controls { margin-top: 1.5rem; }
 .qv-btn-action {

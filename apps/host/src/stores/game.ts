@@ -35,12 +35,14 @@ export const useGameStore = defineStore('game', () => {
   function connect() {
     ws?.close()   // prevent leaking previous socket on reconnect
     const url = `ws://localhost:3030/ws?role=host`
-    ws = new WebSocket(url)
-    ws.onmessage = (e: MessageEvent<string>) => {
+    const socket = new WebSocket(url)
+    ws = socket
+    socket.onmessage = (e: MessageEvent<string>) => {
       handle(JSON.parse(e.data) as ServerMsg)
     }
-    ws.onerror = () => { phase.value = 'connecting' }
-    ws.onclose = () => { phase.value = 'connecting' }
+    // Use socket identity so stale close/error events from a replaced socket don't reset phase
+    socket.onerror = () => { if (ws === socket) phase.value = 'connecting' }
+    socket.onclose = () => { if (ws === socket) phase.value = 'connecting' }
   }
 
   function handle(msg: ServerMsg) {

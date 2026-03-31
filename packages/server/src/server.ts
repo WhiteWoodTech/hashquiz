@@ -131,15 +131,17 @@ export class QuizvServer {
               )
             }
 
-            if (msg.type === 'host_start') {
+            const { role } = ws.data as { role: string }
+
+            if (role === 'host' && msg.type === 'host_start') {
               void self.engine.start()
             }
 
-            if (msg.type === 'host_reveal') {
+            if (role === 'host' && msg.type === 'host_reveal') {
               void self.engine.revealAnswer()
             }
 
-            if (msg.type === 'host_next') {
+            if (role === 'host' && msg.type === 'host_next') {
               void self.engine.nextQuestion()
             }
           } catch {

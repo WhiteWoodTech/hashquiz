@@ -64,6 +64,7 @@ export class GameEngine {
 
   /** Transition lobby → active, broadcast game_started + first question_started */
   async start(): Promise<void> {
+    if (this.state.status !== 'lobby') return
     this.state.status = 'active'
     await this.transport.broadcast(this.channel, GameEvents.gameStarted())
     await this._broadcastCurrentQuestion()
@@ -93,6 +94,7 @@ export class GameEngine {
    * Returns the Score[] for the current question.
    */
   async revealAnswer(): Promise<Score[]> {
+    if (this.state.status !== 'active') return []
     const q = this.quiz.questions[this.state.currentQuestionIdx]!
     const correctIds = q.choices.filter(c => c.isCorrect).map(c => c.id)
     const scores: Score[] = []
@@ -123,6 +125,7 @@ export class GameEngine {
    * Advance to the next question, or finish the game if no more questions.
    */
   async nextQuestion(): Promise<void> {
+    if (this.state.status !== 'active') return
     const nextIdx = this.state.currentQuestionIdx + 1
     if (nextIdx >= this.quiz.questions.length) {
       await this._finishGame()

@@ -168,3 +168,69 @@ describe('GameEngine — oneShoot propagation', () => {
     expect(qStarted?.question?.oneShoot).toBe(false)
   })
 })
+
+describe('GameEngine — question selection', () => {
+  const makeQuizWith5Questions = (): Quiz => ({
+    meta: { title: 'Test', theme: 'default', tags: [], oneShoot: true },
+    questions: [10, 20, 15, 30, 25].map((timer, i) => ({
+      type: 'single' as const,
+      timer,
+      difficulty: 'easy' as const,
+      tags: [],
+      text: `Q${i + 1}?`,
+      choices: [
+        { id: 'a', text: 'Right', isCorrect: true },
+        { id: 'b', text: 'Wrong', isCorrect: false },
+      ],
+    })),
+  })
+
+  test('max-questions limits total questions played', async () => {
+    const quiz: Quiz = { ...makeQuizWith5Questions(), meta: { ...makeQuizWith5Questions().meta, maxQuestions: 3 } }
+    const engine = new GameEngine(quiz, makeTransport(), 'SEL01')
+    await engine.start()
+    expect(engine.state.totalQuestions).toBe(3)
+  })
+
+  test('max-questions greater than pool uses all questions', async () => {
+    const quiz: Quiz = { ...makeQuizWith5Questions(), meta: { ...makeQuizWith5Questions().meta, maxQuestions: 99 } }
+    const engine = new GameEngine(quiz, makeTransport(), 'SEL02')
+    await engine.start()
+    expect(engine.state.totalQuestions).toBe(5)
+  })
+
+  test('max-time selects questions within time budget', async () => {
+    // timers: 10+20+15+30+25 = 100s total. Budget: 45s
+    const quiz: Quiz = { ...makeQuizWith5Questions(), meta: { ...makeQuizWith5Questions().meta, maxTimeSec: 45 } }
+    const engine = new GameEngine(quiz, makeTransport(), 'SEL03')
+    await engine.start()
+    expect(engine.state.totalQuestions).toBeGreaterThan(0)
+    expect(engine.state.totalQuestions).toBeLessThanOrEqual(5)
+  })
+
+  test('selected questions preserve original file order', async () => {
+    const quiz: Quiz = { ...makeQuizWith5Questions(), meta: { ...makeQuizWith5Questions().meta, maxQuestions: 3 } }
+    const transport = makeTransport()
+    const engine = new GameEngine(quiz, transport, 'SEL04')
+    await engine.start()
+    for (let i = 0; i < engine.state.totalQuestions - 1; i++) {
+      await engine.revealAnswer()
+      await engine.nextQuestion()
+    }
+    const broadcastMock = transport.broadcast as ReturnType<typeof mock>
+    const events = broadcastMock.mock.calls.map((c: unknown[]) => c[1]) as Array<{ type: string; question?: { text: string } }>
+    const questionTexts = events
+      .filter(e => e.type === 'question_started')
+      .map(e => e.question!.text)
+    const indices = questionTexts.map(t => parseInt(t.replace('Q', '').replace('?', ''), 10))
+    for (let i = 1; i < indices.length; i++) {
+      expect(indices[i]!).toBeGreaterThan(indices[i - 1]!)
+    }
+  })
+
+  test('no selection params plays all questions', async () => {
+    const engine = new GameEngine(makeQuizWith5Questions(), makeTransport(), 'SEL05')
+    await engine.start()
+    expect(engine.state.totalQuestions).toBe(5)
+  })
+})

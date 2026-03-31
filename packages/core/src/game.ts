@@ -36,6 +36,7 @@ export class GameEngine {
   private transport: IRealtimeTransport
   private channel: string
   private pendingAnswers: Map<string, PendingAnswer> = new Map()
+  private activeQuestions: Question[] = []
 
   constructor(quiz: Quiz, transport: IRealtimeTransport, joinCode: string) {
     this.quiz = quiz
@@ -63,17 +64,53 @@ export class GameEngine {
     void this.transport.broadcast(this.channel, GameEvents.playerLeft(playerId))
   }
 
+  private selectQuestions(): Question[] {
+    const { maxQuestions, maxTimeSec } = this.quiz.meta
+    const all = this.quiz.questions
+
+    if (maxQuestions === undefined && maxTimeSec === undefined) return all
+
+    // Fisher-Yates shuffle of indices to preserve original objects
+    const indices = all.map((_, i) => i)
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[indices[i], indices[j]] = [indices[j]!, indices[i]!]
+    }
+
+    let selectedIndices: number[]
+    if (maxQuestions !== undefined) {
+      selectedIndices = indices.slice(0, maxQuestions)
+    } else {
+      // max-time: accumulate while timer sum <= maxTimeSec
+      selectedIndices = []
+      let total = 0
+      for (const idx of indices) {
+        const timer = all[idx]!.timer
+        if (total + timer <= maxTimeSec!) {
+          selectedIndices.push(idx)
+          total += timer
+        }
+      }
+    }
+
+    // Restore original file order by sorting indices ascending
+    selectedIndices.sort((a, b) => a - b)
+    return selectedIndices.map(i => all[i]!)
+  }
+
   /** Transition lobby → active, broadcast game_started + first question_started */
   async start(): Promise<void> {
     if (this.state.status !== 'lobby') return
     this.state.status = 'active'
+    this.activeQuestions = this.selectQuestions()
+    this.state.totalQuestions = this.activeQuestions.length
     await this.transport.broadcast(this.channel, GameEvents.gameStarted())
     await this._broadcastCurrentQuestion()
   }
 
   private async _broadcastCurrentQuestion(): Promise<void> {
     this.pendingAnswers.clear()
-    const q = this.quiz.questions[this.state.currentQuestionIdx]!
+    const q = this.activeQuestions[this.state.currentQuestionIdx]!
     const oneShoot = this.quiz.meta.oneShoot ?? true
     await this.transport.broadcast(
       this.channel,
@@ -100,7 +137,7 @@ export class GameEngine {
    */
   async revealAnswer(): Promise<Score[]> {
     if (this.state.status !== 'active') return []
-    const q = this.quiz.questions[this.state.currentQuestionIdx]!
+    const q = this.activeQuestions[this.state.currentQuestionIdx]!
     const correctIds = q.choices.filter(c => c.isCorrect).map(c => c.id)
     const scores: Score[] = []
 
@@ -140,7 +177,7 @@ export class GameEngine {
   async nextQuestion(): Promise<void> {
     if (this.state.status !== 'active') return
     const nextIdx = this.state.currentQuestionIdx + 1
-    if (nextIdx >= this.quiz.questions.length) {
+    if (nextIdx >= this.activeQuestions.length) {
       await this._finishGame()
     } else {
       this.state.currentQuestionIdx = nextIdx

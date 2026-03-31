@@ -101,7 +101,13 @@ export class QuizvServer {
           const { role } = ws.data as { role: string; playerId: string }
           ws.subscribe(`game:${self.joinCode}`)
           if (role === 'host') {
-            ws.send(JSON.stringify({ type: 'host_connected', joinCode: self.joinCode }))
+            const localIP = getLocalIP()
+            ws.send(JSON.stringify({
+              type: 'host_connected',
+              joinCode: self.joinCode,
+              totalQuestions: self.engine.state.totalQuestions,
+              playerUrl: `http://${localIP}:3032?code=${self.joinCode}`,
+            }))
           }
         },
         message(ws, raw) {

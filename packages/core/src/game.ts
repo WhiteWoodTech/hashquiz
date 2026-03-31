@@ -114,9 +114,17 @@ export class GameEngine {
       scores.push({ playerId: player.id, pseudo: player.pseudo, score: player.score, delta })
     }
 
+    // Tally votes per choice id
+    const choiceCounts: Record<string, number> = {}
+    for (const [, pending] of this.pendingAnswers) {
+      for (const id of pending.choiceIds) {
+        choiceCounts[id] = (choiceCounts[id] ?? 0) + 1
+      }
+    }
+
     await this.transport.broadcast(
       this.channel,
-      GameEvents.answerRevealed(correctIds, q.explanation, scores)
+      GameEvents.answerRevealed(correctIds, q.explanation, scores, choiceCounts)
     )
     return scores
   }

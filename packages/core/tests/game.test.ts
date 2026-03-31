@@ -4,7 +4,7 @@ import type { Quiz } from '@quizv/parser'
 import type { IRealtimeTransport } from '../src/transport'
 
 const makeQuiz = (): Quiz => ({
-  meta: { title: 'Test', theme: 'default', tags: [] },
+  meta: { title: 'Test', theme: 'default', tags: [], oneShoot: true },
   questions: [
     {
       type: 'single',
@@ -141,5 +141,30 @@ describe('GameEngine', () => {
     expect(broadcastedEvents).toContainEqual(
       expect.objectContaining({ type: 'answer_revealed', choiceCounts: {} })
     )
+  })
+})
+
+describe('GameEngine — oneShoot propagation', () => {
+  test('question_started event carries oneShoot=true by default', async () => {
+    const transport = makeTransport()
+    const engine = new GameEngine(makeQuiz(), transport, 'TEST01')
+    await engine.start()
+
+    const broadcastMock = transport.broadcast as ReturnType<typeof mock>
+    const events = broadcastMock.mock.calls.map((c: unknown[]) => c[1]) as Array<{ type: string; question?: { oneShoot?: boolean } }>
+    const qStarted = events.find(e => e.type === 'question_started')
+    expect(qStarted?.question?.oneShoot).toBe(true)
+  })
+
+  test('question_started carries oneShoot=false when meta sets one-shoot: false', async () => {
+    const transport = makeTransport()
+    const quiz: Quiz = { ...makeQuiz(), meta: { ...makeQuiz().meta, oneShoot: false } }
+    const engine = new GameEngine(quiz, transport, 'TEST01')
+    await engine.start()
+
+    const broadcastMock = transport.broadcast as ReturnType<typeof mock>
+    const events = broadcastMock.mock.calls.map((c: unknown[]) => c[1]) as Array<{ type: string; question?: { oneShoot?: boolean } }>
+    const qStarted = events.find(e => e.type === 'question_started')
+    expect(qStarted?.question?.oneShoot).toBe(false)
   })
 })

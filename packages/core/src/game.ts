@@ -11,7 +11,7 @@ interface PendingAnswer {
 }
 
 /** Maps a Question to QuestionPublic (strips isCorrect from choices) */
-function toPublic(question: Question, idx: number): QuestionPublic {
+function toPublic(question: Question, idx: number, oneShoot: boolean): QuestionPublic {
   return {
     idx,
     type: question.type,
@@ -19,6 +19,7 @@ function toPublic(question: Question, idx: number): QuestionPublic {
     difficulty: question.difficulty,
     text: question.text,
     choices: question.choices.map(({ id, text }) => ({ id, text })),
+    oneShoot,
   }
 }
 
@@ -73,9 +74,13 @@ export class GameEngine {
   private async _broadcastCurrentQuestion(): Promise<void> {
     this.pendingAnswers.clear()
     const q = this.quiz.questions[this.state.currentQuestionIdx]!
+    const oneShoot = this.quiz.meta.oneShoot ?? true
     await this.transport.broadcast(
       this.channel,
-      GameEvents.questionStarted(toPublic(q, this.state.currentQuestionIdx), this.state.currentQuestionIdx)
+      GameEvents.questionStarted(
+        toPublic(q, this.state.currentQuestionIdx, oneShoot),
+        this.state.currentQuestionIdx,
+      ),
     )
   }
 

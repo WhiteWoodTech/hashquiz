@@ -28,6 +28,7 @@ export interface QuestionPublic {
   difficulty: 'easy' | 'medium' | 'hard'
   text: string
   choices: Array<{ id: string; text: string }>  // isCorrect stripped
+  oneShoot: boolean
 }
 
 export type GameStatus = 'idle' | 'lobby' | 'active' | 'finished'

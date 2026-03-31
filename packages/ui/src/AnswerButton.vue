@@ -1,7 +1,7 @@
 <template>
   <button
     :class="['qv-btn', `qv-btn--${colorId}`, `qv-btn--${state}`]"
-    :disabled="state !== 'idle'"
+    :disabled="state !== 'idle' && state !== 'selected'"
     @click="emit('select', id)"
   >
     <span class="qv-btn__badge">{{ id.toUpperCase() }}</span>

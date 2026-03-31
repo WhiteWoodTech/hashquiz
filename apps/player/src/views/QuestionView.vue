@@ -10,9 +10,12 @@
       <TimerRing :total="game.question.timer" :remaining="remaining" :size="100" />
     </div>
 
-    <!-- Answer time indicator (shown after submitting) -->
+    <!-- Answer time indicator (shown after auto-submit) -->
     <p v-if="game.answered" class="qv-answer-time">
       Answered in {{ Math.round(game.answerTimeMs / 1000) }}s / {{ game.question.timer }}s
+    </p>
+    <p v-else-if="timerExpired && selected.size === 0" class="qv-answer-time">
+      No answer submitted
     </p>
 
     <!-- Question text -->
@@ -27,7 +30,7 @@
         :text="choice.text"
         :color-id="(['a','b','c','d'][i] as 'a'|'b'|'c'|'d')"
         :state="btnState(choice.id)"
-        @select="submitAnswer(choice.id)"
+        @select="toggleChoice(choice.id)"
       />
     </div>
   </div>
@@ -39,33 +42,50 @@ import { useGameStore } from '../stores/game'
 import { TimerRing, AnswerButton } from '@quizv/ui'
 
 const game = useGameStore()
-const remaining = ref(game.question?.timer ?? 0)
-const selected  = ref<string | null>(null)
+const remaining       = ref(game.question?.timer ?? 0)
+const selected        = ref<Set<string>>(new Set())
+const timerExpired    = ref(false)
+const lastPressElapsed = ref(0)   // ms elapsed at the time of the last toggle
 let interval: ReturnType<typeof setInterval> | null = null
 
 watch(() => game.question, (q) => {
   if (!q) return
-  selected.value  = null
-  remaining.value = q.timer
+  selected.value       = new Set()
+  timerExpired.value   = false
+  lastPressElapsed.value = 0
+  remaining.value      = q.timer
   if (interval) clearInterval(interval)
   interval = setInterval(() => {
-    if (remaining.value > 0) remaining.value--
-    else if (interval) clearInterval(interval)
+    if (remaining.value > 0) {
+      remaining.value--
+    } else {
+      clearInterval(interval!)
+      interval = null
+      timerExpired.value = true
+      // Auto-submit with whatever is selected (empty = no answer)
+      if (selected.value.size > 0) {
+        game.submitAnswer([...selected.value], lastPressElapsed.value)
+      }
+    }
   }, 1000)
 }, { immediate: true })
 
 onUnmounted(() => { if (interval) clearInterval(interval) })
 
 function btnState(id: string): 'idle' | 'selected' | 'disabled' {
-  if (!game.answered) return 'idle'
-  return selected.value === id ? 'selected' : 'disabled'
+  if (timerExpired.value) return selected.value.has(id) ? 'selected' : 'disabled'
+  return selected.value.has(id) ? 'selected' : 'idle'
 }
 
-function submitAnswer(id: string) {
-  if (game.answered || !game.question) return
-  selected.value = id
-  const elapsed = (game.question.timer - remaining.value) * 1000
-  game.submitAnswer([id], elapsed)
+function toggleChoice(id: string) {
+  if (timerExpired.value || game.answered) return
+  // Record elapsed time at moment of this press
+  lastPressElapsed.value = (game.question!.timer - remaining.value) * 1000
+  // Toggle selection
+  const next = new Set(selected.value)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  selected.value = next
 }
 </script>
 

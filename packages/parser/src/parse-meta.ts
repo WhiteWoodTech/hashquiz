@@ -51,5 +51,8 @@ export function parseMeta(rawBlock: string): QuizMeta {
         ? data['max-questions']
         : undefined,
     maxTimeSec: parseMaxTime(data['max-time']),
+    targetDifficulty: ['easy', 'medium', 'hard'].includes(data['target-difficulty'] as string)
+      ? (data['target-difficulty'] as 'easy' | 'medium' | 'hard')
+      : undefined,
   }
 }

@@ -7,6 +7,7 @@ export interface QuizMeta {
   oneShoot: boolean       // one-shoot frontmatter, default true
   maxQuestions?: number   // max-questions frontmatter
   maxTimeSec?: number     // max-time frontmatter, stored in seconds
+  targetDifficulty?: 'easy' | 'medium' | 'hard'
 }
 
 export interface Choice {

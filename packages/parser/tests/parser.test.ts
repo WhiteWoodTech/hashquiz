@@ -251,4 +251,69 @@ difficulty: easy
     const quiz = parseQuizFile(fixture('valid.quizv.md'))
     expect(quiz.meta.maxTimeSec).toBeUndefined()
   })
+
+  test('target-difficulty is parsed as enum value', () => {
+    const content = `---
+title: T
+theme: default
+tags: []
+target-difficulty: hard
+---
+---
+type: single
+timer: 20
+difficulty: easy
+---
+# Q?
+- [x] A
+- [ ] B
+`
+    const quiz = parseQuizFile(content)
+    expect(quiz.meta.targetDifficulty).toBe('hard')
+  })
+
+  test('target-difficulty: medium is parsed', () => {
+    const content = `---
+title: T
+theme: default
+tags: []
+target-difficulty: medium
+---
+---
+type: single
+timer: 20
+difficulty: easy
+---
+# Q?
+- [x] A
+- [ ] B
+`
+    const quiz = parseQuizFile(content)
+    expect(quiz.meta.targetDifficulty).toBe('medium')
+  })
+
+  test('target-difficulty undefined when absent', () => {
+    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    expect(quiz.meta.targetDifficulty).toBeUndefined()
+  })
+
+  test('target-difficulty invalid value is ignored (undefined)', () => {
+    const content = `---
+title: T
+theme: default
+tags: []
+target-difficulty: extreme
+---
+---
+type: single
+timer: 20
+difficulty: easy
+---
+# Q?
+- [x] A
+- [ ] B
+`
+    const quiz = parseQuizFile(content)
+    expect(quiz.meta.targetDifficulty).toBeUndefined()
+  })
 })

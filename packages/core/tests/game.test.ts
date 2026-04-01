@@ -290,6 +290,10 @@ describe('GameEngine — target-difficulty', () => {
       const transport = makeTransport()
       const engine = new GameEngine(quiz, transport, `GUARD${trial}`)
       await engine.start()
+      for (let i = 0; i < engine.state.totalQuestions - 1; i++) {
+        await engine.revealAnswer()
+        await engine.nextQuestion()
+      }
       const broadcastMock = transport.broadcast as ReturnType<typeof mock>
       const events = broadcastMock.mock.calls.map((c: unknown[]) => c[1]) as Array<{ type: string; question?: { text: string } }>
       const texts = events.filter(e => e.type === 'question_started').map(e => e.question!.text)

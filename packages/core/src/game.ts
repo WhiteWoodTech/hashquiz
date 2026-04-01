@@ -116,7 +116,7 @@ export class GameEngine {
       const targetSample = targetPool.slice(0, targetCount)
       const belowSample  = belowPool.slice(0, belowCount)
 
-      // Step 5: Fallback — fill shortfall from target then below (never above)
+      // Step 5: Fallback — fill shortfall from remaining target/below (never above)
       const usedSet   = new Set<Question>([...guardrail, ...targetSample, ...belowSample])
       const shortfall = slots - targetSample.length - belowSample.length
       const fallback  = this.shuffle(
@@ -167,22 +167,14 @@ export class GameEngine {
     return selectedIndices.map(i => all[i]!)
   }
 
-  /** Transition lobby → active, broadcast game_started + all question_started events */
+  /** Transition lobby → active, broadcast game_started + first question_started event */
   async start(): Promise<void> {
     if (this.state.status !== 'lobby') return
     this.state.status = 'active'
     this.activeQuestions = this.selectQuestions()
     this.state.totalQuestions = this.activeQuestions.length
     await this.transport.broadcast(this.channel, GameEvents.gameStarted())
-    const oneShoot = this.quiz.meta.oneShoot ?? true
-    for (let i = 0; i < this.activeQuestions.length; i++) {
-      const q = this.activeQuestions[i]!
-      await this.transport.broadcast(
-        this.channel,
-        GameEvents.questionStarted(toPublic(q, i, oneShoot), i),
-      )
-    }
-    this.pendingAnswers.clear()
+    await this._broadcastCurrentQuestion()
   }
 
   private async _broadcastCurrentQuestion(): Promise<void> {
@@ -258,8 +250,7 @@ export class GameEngine {
       await this._finishGame()
     } else {
       this.state.currentQuestionIdx = nextIdx
-      this.pendingAnswers.clear()
-      await this.transport.broadcast(this.channel, GameEvents.nextQuestion(nextIdx))
+      await this._broadcastCurrentQuestion()
     }
   }
 

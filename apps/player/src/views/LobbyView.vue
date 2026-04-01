@@ -33,6 +33,10 @@
           <strong>{{ game.quizMeta.tags.length }}</strong>
           <span>tags</span>
         </div>
+        <div class="lobby__metric">
+          <strong>{{ game.playerCount }}</strong>
+          <span>players</span>
+        </div>
       </div>
 
       <DifficultyBar :distribution="game.quizMeta.difficultyDistribution" />
@@ -44,7 +48,6 @@
     <div class="lobby__wait">
       <div class="lobby__icon">⏳</div>
       <h2>Waiting for the host…</h2>
-      <p class="lobby__count">{{ game.playerCount }} player{{ game.playerCount !== 1 ? 's' : '' }} connected</p>
     </div>
   </div>
 </template>
@@ -104,7 +107,7 @@ const game = useGameStore()
 .lobby__target-badge--medium { background: color-mix(in srgb, var(--qv-warn)    15%, transparent); color: var(--qv-warn); }
 .lobby__target-badge--hard   { background: color-mix(in srgb, var(--qv-wrong)   15%, transparent); color: var(--qv-wrong); }
 
-.lobby__metrics { display: flex; gap: 1rem; }
+.lobby__metrics { display: flex; gap: 1rem; justify-content: center; }
 .lobby__metric {
   display: flex; flex-direction: column; align-items: center;
   background: var(--qv-surface);
@@ -120,5 +123,4 @@ const game = useGameStore()
 
 .lobby__wait { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center; padding: 1rem 0; }
 .lobby__icon { font-size: 2.5rem; }
-.lobby__count { color: var(--qv-text-muted); font-size: 0.9rem; }
 </style>

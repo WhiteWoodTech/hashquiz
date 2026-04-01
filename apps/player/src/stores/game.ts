@@ -3,9 +3,9 @@ import { ref } from 'vue'
 import type { QuestionPublic, Score, PodiumEntry, QuizInfo } from '@quizv/core'
 import type { GameEvent } from '@quizv/core'
 
-export type PlayerPhase = 'join' | 'lobby' | 'question' | 'feedback' | 'podium'
+export type PlayerPhase = 'join' | 'lobby' | 'question' | 'podium'
 
-interface JoinedMsg { type: 'joined'; player: { id: string }; quizMeta: QuizInfo }
+interface JoinedMsg { type: 'joined'; player: { id: string }; quizMeta: QuizInfo; playerCount: number }
 type ServerMsg = GameEvent | JoinedMsg
 
 export const useGameStore = defineStore('game', () => {
@@ -18,6 +18,7 @@ export const useGameStore = defineStore('game', () => {
   const answerTimeMs = ref(0)
   const totalScore   = ref(0)
   const lastDelta    = ref(0)
+  const correctIds   = ref<string[]>([])
   const podium       = ref<PodiumEntry[]>([])
   const connectError = ref('')
   const quizMeta     = ref<QuizInfo | null>(null)
@@ -43,6 +44,7 @@ export const useGameStore = defineStore('game', () => {
     if (msg.type === 'joined') {
       phase.value = 'lobby'
       quizMeta.value = msg.quizMeta
+      playerCount.value = msg.playerCount
       return
     }
     switch (msg.type) {
@@ -53,11 +55,12 @@ export const useGameStore = defineStore('game', () => {
         playerCount.value = Math.max(0, playerCount.value - 1)
         break
       case 'question_started':
-        question.value    = msg.question
-        questionIdx.value = msg.idx
-        answered.value    = false
+        question.value     = msg.question
+        questionIdx.value  = msg.idx
+        answered.value     = false
         answerTimeMs.value = 0
-        phase.value       = 'question'
+        correctIds.value   = []
+        phase.value        = 'question'
         break
       case 'answer_revealed': {
         const me = msg.scores.find((s: Score) => s.playerId === playerId.value)
@@ -65,7 +68,8 @@ export const useGameStore = defineStore('game', () => {
           lastDelta.value  = me.delta
           totalScore.value = me.score
         }
-        phase.value = 'feedback'
+        correctIds.value = msg.correct
+        // stay in 'question' phase — feedback shown inline
         break
       }
       case 'game_ended':
@@ -84,7 +88,7 @@ export const useGameStore = defineStore('game', () => {
 
   return {
     phase, playerId, playerCount, question, questionIdx,
-    answered, answerTimeMs, totalScore, lastDelta, podium, connectError,
+    answered, answerTimeMs, totalScore, lastDelta, correctIds, podium, connectError,
     quizMeta,
     connect, submitAnswer,
   }

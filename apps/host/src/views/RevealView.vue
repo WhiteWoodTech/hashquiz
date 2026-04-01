@@ -1,21 +1,40 @@
 <template>
   <div class="reveal-view" v-if="game.question">
-    <header class="rv-header">
-      <span>Q{{ game.questionIdx + 1 }} — Reveal</span>
-    </header>
+    <!-- Progress bar -->
+    <div class="rv-progress">
+      <span class="rv-progress__label">Q{{ game.questionIdx + 1 }}</span>
+      <div class="rv-progress__track">
+        <div
+          class="rv-progress__fill"
+          :style="{ width: ((game.questionIdx + 1) / game.totalQs * 100) + '%' }"
+        />
+      </div>
+      <span class="rv-progress__label">{{ game.totalQs }}</span>
+    </div>
 
     <h2 class="rv-question">{{ game.question.text.replace(/^#+\s/, '') }}</h2>
+
+    <!-- Correct answer + explanation together -->
+    <div class="rv-answer-block">
+      <div v-if="game.explanation" class="rv-explanation">
+        <span class="rv-correct__label">✓ Correct answer</span>
+        <div class="rv-correct__choices">
+          <span
+            v-for="choice in game.question.choices.filter(c => game.correctIds.includes(c.id))"
+            :key="choice.id"
+            class="rv-correct__choice"
+          >{{ choice.id.toUpperCase() }}. {{ choice.text }}</span>
+        </div>
+        <p class="rv-explanation__label">Explanation</p>
+        <p>{{ game.explanation }}</p>
+      </div>
+    </div>
 
     <AnswerBarChart
       :choices="game.question.choices"
       :counts="game.choiceCounts"
       :correct-ids="game.correctIds"
     />
-
-    <div v-if="game.explanation" class="rv-explanation">
-      <p class="rv-explanation__label">Explanation</p>
-      <p>{{ game.explanation }}</p>
-    </div>
 
     <div class="rv-scores">
       <h3>Scores this round</h3>
@@ -40,10 +59,26 @@ const game = useGameStore()
 
 <style scoped>
 .reveal-view { max-width: 960px; margin: 0 auto; }
-.rv-header { color: var(--qv-text-muted); margin-bottom: 1rem; font-size: 0.9rem; }
-.rv-question { font-size: 1.4rem; margin: 0 0 1.5rem; }
-.rv-explanation { background: var(--qv-surface-2); border-left: 3px solid var(--qv-accent-2); border-radius: var(--qv-radius-sm); padding: 1rem; margin: 1.5rem 0; }
-.rv-explanation__label { color: var(--qv-text-muted); font-size: 0.8rem; margin: 0 0 0.25rem; }
+
+.rv-progress { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem; }
+.rv-progress__label { font-size: 0.8rem; color: var(--qv-text-muted); min-width: 2rem; }
+.rv-progress__label:last-child { text-align: right; }
+.rv-progress__track { flex: 1; height: 4px; background: var(--qv-border); border-radius: 2px; overflow: hidden; }
+.rv-progress__fill { height: 100%; background: var(--qv-accent); border-radius: 2px; }
+
+.rv-question { font-size: 1.4rem; margin: 0 0 1rem; }
+
+.rv-explanation {
+  background: var(--qv-surface-2);
+  border-left: 3px solid var(--qv-accent-2);
+  border-radius: var(--qv-radius-sm);
+  padding: 1rem;
+  display: flex; flex-direction: column; gap: 0.4rem;
+}
+.rv-correct__label { color: var(--qv-correct); font-weight: 700; font-size: 0.85rem; }
+.rv-correct__choices { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.25rem; }
+.rv-correct__choice { font-weight: 600; color: var(--qv-correct); }
+.rv-explanation__label { color: var(--qv-text-muted); font-size: 0.8rem; margin: 0; }
 .rv-explanation p:last-child { margin: 0; }
 .rv-scores { margin: 1.5rem 0; }
 .rv-scores h3 { margin: 0 0 0.75rem; font-size: 1rem; color: var(--qv-text-muted); }
@@ -52,7 +87,8 @@ const game = useGameStore()
 .rv-score-delta { color: var(--qv-correct); font-weight: 600; }
 .rv-score-delta--zero { color: var(--qv-text-muted); }
 .rv-score-total { color: var(--qv-text-muted); font-size: 0.85rem; min-width: 4rem; text-align: right; }
-.rv-controls { margin-top: 1.5rem; }
+.rv-answer-block { margin-bottom: 1.25rem; }
+.rv-controls { margin-top: 1.5rem; display: flex; justify-content: center; }
 .qv-btn-action {
   padding: 0.8rem 1.5rem; background: var(--qv-accent); color: #fff;
   border: none; border-radius: var(--qv-radius);

@@ -29,6 +29,7 @@ export interface QuestionPublic {
   text: string
   choices: Array<{ id: string; text: string }>  // isCorrect stripped
   oneShoot: boolean
+  tags: string[]
 }
 
 export type GameStatus = 'idle' | 'lobby' | 'active' | 'finished'

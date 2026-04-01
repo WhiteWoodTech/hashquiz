@@ -20,6 +20,7 @@ function toPublic(question: Question, idx: number, oneShoot: boolean): QuestionP
     text: question.text,
     choices: question.choices.map(({ id, text }) => ({ id, text })),
     oneShoot,
+    tags: question.tags,
   }
 }
 

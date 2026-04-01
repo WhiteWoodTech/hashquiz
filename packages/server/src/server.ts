@@ -108,6 +108,7 @@ export class QuizvServer {
   private joinCode: string
   private port: number
   private quizFile: string
+  private quizMeta: QuizInfo
 
   constructor(options: QuizvServerOptions) {
     this.port = options.port ?? 3030
@@ -128,6 +129,7 @@ export class QuizvServer {
     }
 
     this.engine = new GameEngine(quiz, this.transport, this.joinCode)
+    this.quizMeta = buildQuizInfo(quiz)
   }
 
   start(): void {
@@ -174,6 +176,7 @@ export class QuizvServer {
               totalQuestions: self.engine.state.totalQuestions,
               // Port 3032 = dedicated player Vite dev server (apps/player) — see Phase 2 plan
               playerUrl: `http://${localIP}:3032?code=${self.joinCode}`,
+              quizMeta: self.quizMeta,
             }))
           }
         },
@@ -196,7 +199,7 @@ export class QuizvServer {
                 joinedAt: Date.now(),
               }
               self.engine.addPlayer(player)
-              ws.send(JSON.stringify({ type: 'joined', player }))
+              ws.send(JSON.stringify({ type: 'joined', player, quizMeta: self.quizMeta }))
             }
 
             if (msg.type === 'submit_answer') {

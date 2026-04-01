@@ -112,9 +112,9 @@ const game = useGameStore()
   font-weight: 700;
   letter-spacing: 0.05em;
 }
-.quiz-info__target-badge--easy   { background: rgba(34,197,94,0.15);  color: var(--qv-correct); }
-.quiz-info__target-badge--medium { background: rgba(249,115,22,0.15); color: var(--qv-warn); }
-.quiz-info__target-badge--hard   { background: rgba(239,68,68,0.15);  color: var(--qv-wrong); }
+.quiz-info__target-badge--easy   { background: color-mix(in srgb, var(--qv-correct) 15%, transparent); color: var(--qv-correct); }
+.quiz-info__target-badge--medium { background: color-mix(in srgb, var(--qv-warn)    15%, transparent); color: var(--qv-warn); }
+.quiz-info__target-badge--hard   { background: color-mix(in srgb, var(--qv-wrong)   15%, transparent); color: var(--qv-wrong); }
 .quiz-info__metrics { display: flex; gap: 1.5rem; margin-bottom: 0.75rem; }
 .quiz-info__metric { font-size: 0.8rem; color: var(--qv-text-muted); }
 </style>

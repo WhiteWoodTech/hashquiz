@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { PlayerState, QuestionPublic, Score, PodiumEntry } from '@quizv/core'
+import type { PlayerState, QuestionPublic, Score, PodiumEntry, QuizInfo } from '@quizv/core'
 import type { GameEvent } from '@quizv/core'
 
 export type HostPhase = 'connecting' | 'lobby' | 'question' | 'revealed' | 'finished'
@@ -11,6 +11,7 @@ interface HostConnectedMsg {
   joinCode: string
   totalQuestions: number
   playerUrl: string
+  quizMeta: QuizInfo
 }
 
 type ServerMsg = GameEvent | HostConnectedMsg
@@ -29,6 +30,7 @@ export const useGameStore = defineStore('game', () => {
   const explanation  = ref<string | undefined>()
   const scores       = ref<Score[]>([])
   const podium       = ref<PodiumEntry[]>([])
+  const quizMeta     = ref<QuizInfo | null>(null)
 
   let ws: WebSocket | null = null
 
@@ -51,6 +53,7 @@ export const useGameStore = defineStore('game', () => {
       playerUrl.value = msg.playerUrl
       totalQs.value   = msg.totalQuestions
       phase.value     = 'lobby'
+      quizMeta.value  = msg.quizMeta
       return
     }
     switch (msg.type) {
@@ -93,6 +96,7 @@ export const useGameStore = defineStore('game', () => {
     phase, joinCode, playerUrl, totalQs, players,
     question, questionIdx, answerCount, correctIds,
     choiceCounts, explanation, scores, podium,
+    quizMeta,
     connect, send,
   }
 })

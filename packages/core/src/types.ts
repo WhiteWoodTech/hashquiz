@@ -41,3 +41,16 @@ export interface GameState {
   currentQuestionIdx: number
   totalQuestions: number
 }
+
+export interface QuizInfo {
+  title: string
+  description?: string
+  tags: string[]
+  totalQuestions: number
+  targetDifficulty?: 'easy' | 'medium' | 'hard'
+  difficultyDistribution: {
+    easy: number    // pourcentage 0–100
+    medium: number
+    hard: number
+  }
+}

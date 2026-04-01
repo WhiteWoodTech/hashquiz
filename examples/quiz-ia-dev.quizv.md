@@ -1,11 +1,14 @@
 ---
 title: AI Dev Quiz
-description: Quiz sur l'IA et le développement IA — LLM, Prompt Engineering, Context Engineering, Agents, Agentic Coding, RAG
+description: >
+  Quiz sur l'IA et le développement IA — LLM, Prompt Engineering,
+  Context Engineering, Agents, Agentic Coding, RAG
 theme: default
 author: QuizV
 tags: [ia, llm, prompt, agents, rag, coding]
 one-shoot: true
 max-questions: 12
+target-difficulty: hard
 ---
 
 ---

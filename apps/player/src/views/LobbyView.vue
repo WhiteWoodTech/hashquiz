@@ -33,10 +33,6 @@
           <strong>{{ game.quizMeta.tags.length }}</strong>
           <span>tags</span>
         </div>
-        <div v-if="game.quizMeta.targetDifficulty" class="lobby__metric">
-          <strong>🎯</strong>
-          <span>{{ game.quizMeta.targetDifficulty }}</span>
-        </div>
       </div>
 
       <DifficultyBar :distribution="game.quizMeta.difficultyDistribution" />
@@ -47,17 +43,15 @@
     <!-- Waiting section -->
     <div class="lobby__wait">
       <div class="lobby__icon">⏳</div>
-      <h2>En attente du host…</h2>
-      <p class="lobby__count">
-        {{ game.playerCount }} joueur{{ game.playerCount !== 1 ? 's' : '' }} connecté{{ game.playerCount !== 1 ? 's' : '' }}
-      </p>
+      <h2>Waiting for the host…</h2>
+      <p class="lobby__count">{{ game.playerCount }} player{{ game.playerCount !== 1 ? 's' : '' }} connected</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useGameStore } from '../stores/game'
-import DifficultyBar from '../components/DifficultyBar.vue'
+import { DifficultyBar } from '@quizv/ui'
 const game = useGameStore()
 </script>
 
@@ -75,7 +69,7 @@ const game = useGameStore()
   display: inline-block;
   align-self: flex-start;
   background: linear-gradient(135deg, var(--qv-accent), var(--qv-accent-2));
-  color: #fff;
+  color: var(--qv-text);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.1em;

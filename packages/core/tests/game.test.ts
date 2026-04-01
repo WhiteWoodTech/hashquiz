@@ -234,3 +234,131 @@ describe('GameEngine — question selection', () => {
     expect(engine.state.totalQuestions).toBe(5)
   })
 })
+
+describe('GameEngine — target-difficulty', () => {
+  const makeQ = (
+    difficulty: 'easy' | 'medium' | 'hard',
+    tags: string[],
+    label: string,
+  ) => ({
+    type: 'single' as const,
+    timer: 10,
+    difficulty,
+    tags,
+    text: label,
+    choices: [
+      { id: 'a', text: 'Right', isCorrect: true },
+      { id: 'b', text: 'Wrong', isCorrect: false },
+    ],
+  })
+
+  // Pool: tag 'a' and tag 'b', each with 2 easy + 2 medium + 2 hard = 12 total
+  const makePool = (): Quiz => ({
+    meta: { title: 'Test', theme: 'default', tags: [], oneShoot: true },
+    questions: [
+      makeQ('easy',   ['a'], 'A-easy-1'),
+      makeQ('easy',   ['a'], 'A-easy-2'),
+      makeQ('medium', ['a'], 'A-med-1'),
+      makeQ('medium', ['a'], 'A-med-2'),
+      makeQ('hard',   ['a'], 'A-hard-1'),
+      makeQ('hard',   ['a'], 'A-hard-2'),
+      makeQ('easy',   ['b'], 'B-easy-1'),
+      makeQ('easy',   ['b'], 'B-easy-2'),
+      makeQ('medium', ['b'], 'B-med-1'),
+      makeQ('medium', ['b'], 'B-med-2'),
+      makeQ('hard',   ['b'], 'B-hard-1'),
+      makeQ('hard',   ['b'], 'B-hard-2'),
+    ],
+  })
+
+  test('hard guardrail: 1 hard per tag always included (run 20 times)', async () => {
+    // Pool where each tag has exactly ONE hard question — must always appear
+    const hardA = makeQ('hard', ['a'], 'A-only-hard')
+    const hardB = makeQ('hard', ['b'], 'B-only-hard')
+    const quiz: Quiz = {
+      meta: { title: 'T', theme: 'default', tags: [], oneShoot: true, targetDifficulty: 'hard', maxQuestions: 4 },
+      questions: [
+        makeQ('easy',   ['a'], 'A-easy-1'),
+        makeQ('easy',   ['a'], 'A-easy-2'),
+        makeQ('medium', ['b'], 'B-med-1'),
+        makeQ('medium', ['b'], 'B-med-2'),
+        hardA,
+        hardB,
+      ],
+    }
+    for (let trial = 0; trial < 20; trial++) {
+      const transport = makeTransport()
+      const engine = new GameEngine(quiz, transport, `GUARD${trial}`)
+      await engine.start()
+      const broadcastMock = transport.broadcast as ReturnType<typeof mock>
+      const events = broadcastMock.mock.calls.map((c: unknown[]) => c[1]) as Array<{ type: string; question?: { text: string } }>
+      const texts = events.filter(e => e.type === 'question_started').map(e => e.question!.text)
+      expect(texts).toContain('A-only-hard')
+      expect(texts).toContain('B-only-hard')
+    }
+  })
+
+  test('total questions respects max-questions with target-difficulty', async () => {
+    const quiz: Quiz = {
+      ...makePool(),
+      meta: { title: 'T', theme: 'default', tags: [], oneShoot: true, targetDifficulty: 'hard', maxQuestions: 6 },
+    }
+    const engine = new GameEngine(quiz, makeTransport(), 'DIFF01')
+    await engine.start()
+    expect(engine.state.totalQuestions).toBe(6)
+  })
+
+  test('questions sorted by difficulty ascending (easy before hard)', async () => {
+    const quiz: Quiz = {
+      ...makePool(),
+      meta: { title: 'T', theme: 'default', tags: [], oneShoot: true, targetDifficulty: 'hard', maxQuestions: 8 },
+    }
+    const RANK: Record<string, number> = { easy: 0, medium: 1, hard: 2 }
+    for (let trial = 0; trial < 10; trial++) {
+      const transport = makeTransport()
+      const engine = new GameEngine(quiz, transport, `ORD${trial}`)
+      await engine.start()
+      for (let i = 0; i < engine.state.totalQuestions - 1; i++) {
+        await engine.revealAnswer()
+        await engine.nextQuestion()
+      }
+      const broadcastMock = transport.broadcast as ReturnType<typeof mock>
+      const events = broadcastMock.mock.calls.map((c: unknown[]) => c[1]) as Array<{ type: string; question?: { difficulty: string } }>
+      const difficulties = events.filter(e => e.type === 'question_started').map(e => e.question!.difficulty)
+      for (let i = 1; i < difficulties.length; i++) {
+        expect(RANK[difficulties[i]!]!).toBeGreaterThanOrEqual(RANK[difficulties[i - 1]!]!)
+      }
+    }
+  })
+
+  test('target-difficulty: easy selects only easy questions plus hard guardrail', async () => {
+    const quiz: Quiz = {
+      ...makePool(),
+      meta: { title: 'T', theme: 'default', tags: [], oneShoot: true, targetDifficulty: 'easy', maxQuestions: 6 },
+    }
+    const transport = makeTransport()
+    const engine = new GameEngine(quiz, transport, 'EASY01')
+    await engine.start()
+    for (let i = 0; i < engine.state.totalQuestions - 1; i++) {
+      await engine.revealAnswer()
+      await engine.nextQuestion()
+    }
+    const broadcastMock = transport.broadcast as ReturnType<typeof mock>
+    const events = broadcastMock.mock.calls.map((c: unknown[]) => c[1]) as Array<{ type: string; question?: { difficulty: string } }>
+    const difficulties = events.filter(e => e.type === 'question_started').map(e => e.question!.difficulty)
+    // All questions must be easy or hard (hard = guardrail only)
+    for (const d of difficulties) {
+      expect(['easy', 'hard']).toContain(d)
+    }
+  })
+
+  test('no target-difficulty: original behavior unchanged', async () => {
+    const quiz: Quiz = {
+      ...makePool(),
+      meta: { title: 'T', theme: 'default', tags: [], oneShoot: true, maxQuestions: 4 },
+    }
+    const engine = new GameEngine(quiz, makeTransport(), 'NODIFF')
+    await engine.start()
+    expect(engine.state.totalQuestions).toBe(4)
+  })
+})

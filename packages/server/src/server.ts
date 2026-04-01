@@ -173,7 +173,7 @@ export class QuizvServer {
             ws.send(JSON.stringify({
               type: 'host_connected',
               joinCode: self.joinCode,
-              totalQuestions: self.engine.state.totalQuestions,
+              totalQuestions: self.quizMeta.totalQuestions,
               // Port 3032 = dedicated player Vite dev server (apps/player) — see Phase 2 plan
               playerUrl: `http://${localIP}:3032?code=${self.joinCode}`,
               quizMeta: self.quizMeta,

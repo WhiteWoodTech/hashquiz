@@ -54,9 +54,10 @@ describe('buildQuizInfo — with targetDifficulty', () => {
     const info = buildQuizInfo(quiz)
     expect(info.targetDifficulty).toBe('hard')
     // guardrailN = 2 (tags a et b), slots = 4, targetSlots = round(4*0.6)=2, belowSlots=2
-    // hardN = guardrailN(2) + targetSlots(2) = 4 → 4/6 ≈ 67%
-    expect(info.difficultyDistribution.hard).toBeCloseTo(67, 0)
-    expect(info.difficultyDistribution.easy + info.difficultyDistribution.medium).toBeCloseTo(33, 0)
+    // hardN = guardrailN(2) + targetSlots(2) = 4, easyN=1, mediumN=1, total=6
+    // easyPct = round(1/6*100)=17, mediumPct=17, hard = 100-17-17 = 66
+    expect(info.difficultyDistribution.hard).toBe(66)
+    expect(info.difficultyDistribution.easy + info.difficultyDistribution.medium).toBe(34)
   })
 
   test('medium target: guardrail hard + 60% medium + 40% easy', () => {
@@ -74,5 +75,23 @@ describe('buildQuizInfo — with targetDifficulty', () => {
     expect(info.difficultyDistribution.hard).toBeCloseTo(20, 0)   // 1/5
     expect(info.difficultyDistribution.medium).toBeCloseTo(40, 0) // 2/5
     expect(info.difficultyDistribution.easy).toBeCloseTo(40, 0)   // 2/5
+  })
+
+  test('easy target: guardrail hard + all remaining easy', () => {
+    // 3 hard (3 different tags) + 5 easy, totalN=10 (no maxQuestions)
+    const questions = [
+      q('hard', ['a']), q('hard', ['b']), q('hard', ['c']),
+      q('easy'), q('easy'), q('easy'), q('easy'), q('easy'),
+    ]
+    const quiz = makeQuiz({ targetDifficulty: 'easy' }, questions)
+    const info = buildQuizInfo(quiz)
+    expect(info.targetDifficulty).toBe('easy')
+    // guardrailN = 3 (tags a,b,c), slots = 5, targetSlots = round(5*0.6)=3, belowSlots=2
+    // easyN = targetSlots(3) + belowSlots(2) = 5, hardN = guardrailN(3)
+    // total = 8 → hard=3/8=37.5→38, easy=5/8=62.5→63, but hard = 100-63-0 = 37
+    expect(info.difficultyDistribution.medium).toBe(0)
+    expect(info.difficultyDistribution.easy + info.difficultyDistribution.hard).toBe(100)
+    expect(info.difficultyDistribution.hard).toBeCloseTo(37, 0)
+    expect(info.difficultyDistribution.easy).toBeCloseTo(63, 0)
   })
 })

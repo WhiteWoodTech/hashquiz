@@ -43,10 +43,12 @@ export function buildQuizInfo(quiz: Quiz): QuizInfo {
     const counts = { easy: 0, medium: 0, hard: 0 }
     for (const q of all) counts[q.difficulty]++
     const total = all.length || 1
+    const easyPct   = Math.round(counts.easy   / total * 100)
+    const mediumPct = Math.round(counts.medium / total * 100)
     dist = {
-      easy:   Math.round(counts.easy   / total * 100),
-      medium: Math.round(counts.medium / total * 100),
-      hard:   Math.round(counts.hard   / total * 100),
+      easy:   easyPct,
+      medium: mediumPct,
+      hard:   100 - easyPct - mediumPct,
     }
   } else {
     // Theoretical distribution: 60/40 split + guardrail
@@ -80,10 +82,12 @@ export function buildQuizInfo(quiz: Quiz): QuizInfo {
                   + (targetDifficulty === 'hard'    ? easyBelow  : 0)
 
     const total = (hardN + mediumN + easyN) || 1
+    const easyPct   = Math.round(easyN   / total * 100)
+    const mediumPct = Math.round(mediumN / total * 100)
     dist = {
-      easy:   easyN   / total * 100,
-      medium: mediumN / total * 100,
-      hard:   hardN   / total * 100,
+      easy:   easyPct,
+      medium: mediumPct,
+      hard:   100 - easyPct - mediumPct,
     }
   }
 

@@ -48,8 +48,9 @@ export interface QuizInfo {
   tags: string[]
   totalQuestions: number
   targetDifficulty?: 'easy' | 'medium' | 'hard'
+  /** Each value is a percentage in [0, 100]; the three values must sum to 100 */
   difficultyDistribution: {
-    easy: number    // pourcentage 0–100
+    easy: number
     medium: number
     hard: number
   }

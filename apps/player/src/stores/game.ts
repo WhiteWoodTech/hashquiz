@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { QuestionPublic, Score, PodiumEntry } from '@quizv/core'
+import type { QuestionPublic, Score, PodiumEntry, QuizInfo } from '@quizv/core'
 import type { GameEvent } from '@quizv/core'
 
 export type PlayerPhase = 'join' | 'lobby' | 'question' | 'feedback' | 'podium'
 
-interface JoinedMsg { type: 'joined'; player: { id: string } }
+interface JoinedMsg { type: 'joined'; player: { id: string }; quizMeta: QuizInfo }
 type ServerMsg = GameEvent | JoinedMsg
 
 export const useGameStore = defineStore('game', () => {
@@ -20,6 +20,7 @@ export const useGameStore = defineStore('game', () => {
   const lastDelta    = ref(0)
   const podium       = ref<PodiumEntry[]>([])
   const connectError = ref('')
+  const quizMeta     = ref<QuizInfo | null>(null)
 
   let ws: WebSocket | null = null
 
@@ -41,6 +42,7 @@ export const useGameStore = defineStore('game', () => {
   function handle(msg: ServerMsg) {
     if (msg.type === 'joined') {
       phase.value = 'lobby'
+      quizMeta.value = msg.quizMeta
       return
     }
     switch (msg.type) {
@@ -83,6 +85,7 @@ export const useGameStore = defineStore('game', () => {
   return {
     phase, playerId, playerCount, question, questionIdx,
     answered, answerTimeMs, totalScore, lastDelta, podium, connectError,
+    quizMeta,
     connect, submitAnswer,
   }
 })

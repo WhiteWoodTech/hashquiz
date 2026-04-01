@@ -1,6 +1,7 @@
 import { parseQuizFile, validateQuiz } from '@quizv/parser'
+import type { Quiz } from '@quizv/parser'
 import { GameEngine } from '@quizv/core'
-import type { PlayerState } from '@quizv/core'
+import type { PlayerState, QuizInfo } from '@quizv/core'
 import { LocalTransport } from '@quizv/transport-local'
 import { readFileSync } from 'node:fs'
 import { networkInterfaces } from 'node:os'
@@ -26,6 +27,67 @@ function generateJoinCode(): string {
 export interface QuizvServerOptions {
   port?: number
   quizFile: string
+}
+
+export function buildQuizInfo(quiz: Quiz): QuizInfo {
+  const { title, description, tags, maxQuestions, targetDifficulty } = quiz.meta
+  const all = quiz.questions
+  const totalN = maxQuestions !== undefined
+    ? Math.min(maxQuestions, all.length)
+    : all.length
+
+  let dist: { easy: number; medium: number; hard: number }
+
+  if (!targetDifficulty) {
+    // Raw distribution from all questions
+    const counts = { easy: 0, medium: 0, hard: 0 }
+    for (const q of all) counts[q.difficulty]++
+    const total = all.length || 1
+    dist = {
+      easy:   Math.round(counts.easy   / total * 100),
+      medium: Math.round(counts.medium / total * 100),
+      hard:   Math.round(counts.hard   / total * 100),
+    }
+  } else {
+    // Theoretical distribution: 60/40 split + guardrail
+    const RANK: Record<'easy' | 'medium' | 'hard', number> = { easy: 0, medium: 1, hard: 2 }
+    const targetRank = RANK[targetDifficulty]
+
+    // Guardrail: 1 hard question per unique tag that has at least 1 hard question
+    const uniqueTagsWithHard = new Set(
+      all.filter(q => q.difficulty === 'hard').flatMap(q => q.tags)
+    )
+    const guardrailN = Math.min(uniqueTagsWithHard.size, totalN)
+
+    const slots       = Math.max(0, totalN - guardrailN)
+    const targetSlots = Math.round(slots * 0.6)
+    const belowSlots  = slots - targetSlots
+
+    // For "below target" slots: distribute proportionally among below-target difficulties
+    const belowPool = all.filter(q => RANK[q.difficulty] < targetRank)
+    const belowTotal = belowPool.length || 1
+    const belowCounts: Record<string, number> = { easy: 0, medium: 0, hard: 0 }
+    for (const q of belowPool) belowCounts[q.difficulty]++
+
+    const easyBelow   = Math.round(belowCounts['easy']   / belowTotal * belowSlots)
+    const mediumBelow = belowSlots - easyBelow
+
+    const hardN   = guardrailN + (targetDifficulty === 'hard'   ? targetSlots : 0)
+    const mediumN = (targetDifficulty === 'medium' ? targetSlots : 0)
+                  + (targetDifficulty === 'hard'   ? mediumBelow : 0)
+    const easyN   = (targetDifficulty === 'easy'   ? targetSlots + belowSlots : 0)
+                  + (targetDifficulty === 'medium'  ? easyBelow  : 0)
+                  + (targetDifficulty === 'hard'    ? easyBelow  : 0)
+
+    const total = (hardN + mediumN + easyN) || 1
+    dist = {
+      easy:   easyN   / total * 100,
+      medium: mediumN / total * 100,
+      hard:   hardN   / total * 100,
+    }
+  }
+
+  return { title, description, tags, totalQuestions: totalN, targetDifficulty, difficultyDistribution: dist }
 }
 
 /**

@@ -59,8 +59,7 @@
 
 <script setup lang="ts">
 import { useGameStore } from '../stores/game'
-import { QrCode, PlayerList } from '@quizv/ui'
-import DifficultyBar from '../components/DifficultyBar.vue'
+import { QrCode, PlayerList, DifficultyBar } from '@quizv/ui'
 const game = useGameStore()
 </script>
 

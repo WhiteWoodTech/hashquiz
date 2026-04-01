@@ -199,7 +199,7 @@ export class QuizvServer {
                 joinedAt: Date.now(),
               }
               self.engine.addPlayer(player)
-              ws.send(JSON.stringify({ type: 'joined', player, quizMeta: self.quizMeta }))
+              ws.send(JSON.stringify({ type: 'joined', player, quizMeta: self.quizMeta, playerCount: self.engine.state.players.size }))
             }
 
             if (msg.type === 'submit_answer') {

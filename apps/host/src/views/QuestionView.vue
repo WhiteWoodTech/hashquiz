@@ -1,10 +1,35 @@
 <template>
   <div class="question-view" v-if="game.question">
+    <!-- Progress bar -->
+    <div class="qv-progress">
+      <span class="qv-progress__label">Q{{ game.questionIdx + 1 }}</span>
+      <div class="qv-progress__track">
+        <div
+          class="qv-progress__fill"
+          :style="{ width: ((game.questionIdx + 1) / game.totalQs * 100) + '%' }"
+        />
+      </div>
+      <span class="qv-progress__label">{{ game.totalQs }}</span>
+    </div>
+
     <header class="qv-header">
-      <span class="qv-header__q">Q{{ game.questionIdx + 1 }} / {{ game.totalQs }}</span>
       <TimerRing :total="game.question.timer" :remaining="remaining" :size="80" />
-      <span class="qv-header__answers">{{ game.answerCount }} / {{ game.players.length }} answered</span>
     </header>
+
+    <div class="qv-q-meta">
+      <div class="qv-q-meta__tags">
+        <span
+          v-for="tag in game.question.tags"
+          :key="tag"
+          class="qv-q-meta__tag"
+        >{{ tag }}</span>
+      </div>
+      <span :class="['qv-difficulty', `qv-difficulty--${game.question.difficulty}`]">
+        <span class="qv-difficulty__dot qv-difficulty__dot--1"></span>
+        <span class="qv-difficulty__dot qv-difficulty__dot--2"></span>
+        <span class="qv-difficulty__dot qv-difficulty__dot--3"></span>
+      </span>
+    </div>
 
     <h2 class="qv-question-text">{{ game.question.text.replace(/^#+\s/, '') }}</h2>
 
@@ -20,6 +45,7 @@
     </div>
 
     <div class="qv-controls">
+      <p class="qv-controls__answered">{{ game.answerCount }} / {{ game.players.length }} answered</p>
       <button class="qv-btn-action" @click="game.send('host_reveal')">
         🔍 Reveal Answer
       </button>
@@ -35,14 +61,22 @@ import { TimerRing } from '@quizv/ui'
 const game = useGameStore()
 const remaining = ref(game.question?.timer ?? 0)
 let interval: ReturnType<typeof setInterval> | null = null
+let startTime = 0
+let totalTime = 0
 
 function startTimer() {
   if (interval) clearInterval(interval)
-  remaining.value = game.question?.timer ?? 0
+  totalTime = game.question?.timer ?? 0
+  remaining.value = totalTime
+  startTime = Date.now()
   interval = setInterval(() => {
-    if (remaining.value > 0) remaining.value--
-    else if (interval) clearInterval(interval)
-  }, 1000)
+    const left = Math.max(0, Math.round((totalTime - (Date.now() - startTime) / 1000) * 10) / 10)
+    remaining.value = left
+    if (left <= 0) {
+      clearInterval(interval!)
+      interval = null
+    }
+  }, 100)
 }
 
 watch(() => game.question, () => startTimer(), { immediate: true })
@@ -51,8 +85,25 @@ onUnmounted(() => { if (interval) clearInterval(interval) })
 
 <style scoped>
 .question-view { max-width: 960px; margin: 0 auto; }
-.qv-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-.qv-header__q, .qv-header__answers { color: var(--qv-text-muted); font-size: 0.9rem; }
+.qv-progress { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; }
+.qv-progress__label { font-size: 0.8rem; color: var(--qv-text-muted); min-width: 2rem; }
+.qv-progress__label:last-child { text-align: right; }
+.qv-progress__track { flex: 1; height: 4px; background: var(--qv-border); border-radius: 2px; overflow: hidden; }
+.qv-progress__fill { height: 100%; background: var(--qv-accent); border-radius: 2px; transition: width 0.3s; }
+.qv-header { display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; }
+.qv-q-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+.qv-q-meta__tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.qv-q-meta__tag { background: var(--qv-bg); border: 1px solid var(--qv-border); border-radius: var(--qv-radius-sm); padding: 0.15rem 0.5rem; font-size: 0.75rem; color: var(--qv-text-muted); }
+/* 3-dot difficulty */
+.qv-difficulty { display: flex; gap: 3px; align-items: center; flex-shrink: 0; }
+.qv-difficulty__dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid currentColor; background: transparent; }
+.qv-difficulty--easy   { color: var(--qv-correct); }
+.qv-difficulty--medium { color: var(--qv-warn); }
+.qv-difficulty--hard   { color: var(--qv-wrong); }
+.qv-difficulty--easy   .qv-difficulty__dot--1 { background: currentColor; }
+.qv-difficulty--medium .qv-difficulty__dot--1,
+.qv-difficulty--medium .qv-difficulty__dot--2 { background: currentColor; }
+.qv-difficulty--hard   .qv-difficulty__dot { background: currentColor; }
 .qv-question-text { font-size: 1.6rem; margin: 0 0 1.5rem; line-height: 1.4; }
 .qv-choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
 .qv-choice-card { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-radius: var(--qv-radius); background: var(--qv-surface-2); }
@@ -61,7 +112,8 @@ onUnmounted(() => { if (interval) clearInterval(interval) })
 .qv-choice-card--c { border-left: 4px solid #d97706; }
 .qv-choice-card--d { border-left: 4px solid #059669; }
 .qv-choice-card__id { font-weight: 700; min-width: 1.5rem; }
-.qv-controls { display: flex; gap: 1rem; }
+.qv-controls { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+.qv-controls__answered { margin: 0; font-size: 0.9rem; color: var(--qv-text-muted); }
 .qv-btn-action {
   padding: 0.8rem 1.5rem; background: var(--qv-surface-2); color: var(--qv-text);
   border: 1px solid var(--qv-border); border-radius: var(--qv-radius);

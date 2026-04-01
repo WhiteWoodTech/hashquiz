@@ -3,7 +3,6 @@
     <JoinView     v-if="game.phase === 'join'"      />
     <LobbyView    v-else-if="game.phase === 'lobby'"     />
     <QuestionView v-else-if="game.phase === 'question'"  />
-    <FeedbackView v-else-if="game.phase === 'feedback'"  />
     <PodiumView   v-else-if="game.phase === 'podium'"    />
   </div>
 </template>
@@ -13,7 +12,6 @@ import { useGameStore } from './stores/game'
 import JoinView     from './views/JoinView.vue'
 import LobbyView    from './views/LobbyView.vue'
 import QuestionView from './views/QuestionView.vue'
-import FeedbackView from './views/FeedbackView.vue'
 import PodiumView   from './views/PodiumView.vue'
 
 const game = useGameStore()

@@ -1,5 +1,5 @@
 <template>
-  <svg :width="size" :height="size" :viewBox="`0 0 ${size} ${size}`" :aria-label="`${remaining} seconds remaining`">
+  <svg :width="size" :height="size" :viewBox="`0 0 ${size} ${size}`" :aria-label="`${remaining.toFixed(1)} seconds remaining`">
     <!-- Background track -->
     <circle
       :cx="cx" :cy="cy" :r="r"
@@ -17,7 +17,7 @@
       :stroke-dashoffset="offset"
       stroke-linecap="round"
       :transform="`rotate(-90 ${cx} ${cy})`"
-      style="transition: stroke-dashoffset 1s linear, stroke 0.4s ease"
+      style="transition: stroke-dashoffset 0.1s linear, stroke 0.4s ease"
     />
     <!-- Remaining seconds label -->
     <text
@@ -27,7 +27,7 @@
       :font-size="size * 0.3"
       font-weight="bold"
       font-family="inherit"
-    >{{ remaining }}</text>
+    >{{ remaining.toFixed(1) }}</text>
   </svg>
 </template>
 

@@ -242,7 +242,7 @@ difficulty: medium
 tags: [agents]
 ---
 
-# Que signifie MCP dans l'écosystème Anthropic / agents IA ?
+# Que signifie MCP dans l'écosystème agents IA ?
 
 - [ ] Multi-Chain Processing
 - [x] Model Context Protocol

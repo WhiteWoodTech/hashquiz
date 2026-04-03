@@ -104,8 +104,8 @@ onUnmounted(() => { if (interval) clearInterval(interval) })
 .qv-difficulty--medium .qv-difficulty__dot--1,
 .qv-difficulty--medium .qv-difficulty__dot--2 { background: currentColor; }
 .qv-difficulty--hard   .qv-difficulty__dot { background: currentColor; }
-.qv-question-text { font-size: 1.6rem; margin: 0 0 1.5rem; line-height: 1.4; }
-.qv-choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+.qv-question-text { font-size: 2rem; margin: 0 0 1.5rem; line-height: 1.4; }
+.qv-choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; font-size: 1.25rem; }
 .qv-choice-card { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-radius: var(--qv-radius); background: var(--qv-surface-2); }
 .qv-choice-card--a { border-left: 4px solid #7c3aed; }
 .qv-choice-card--b { border-left: 4px solid #0891b2; }

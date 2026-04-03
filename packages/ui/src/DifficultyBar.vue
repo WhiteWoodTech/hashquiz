@@ -34,7 +34,7 @@ defineProps<{
 .diff-bar__seg--easy   { background: var(--qv-correct); }
 .diff-bar__seg--medium { background: var(--qv-warn); }
 .diff-bar__seg--hard   { background: var(--qv-wrong); }
-.diff-bar__legend { margin: 0.4rem 0 0; font-size: 0.75rem; color: var(--qv-text-muted); display: flex; align-items: center; gap: 0.5rem; }
+.diff-bar__legend { margin: 0.4rem 0 0; font-size: 0.875rem; color: var(--qv-text-muted); display: flex; align-items: center; gap: 0.5rem; }
 .diff-bar__dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
 .diff-bar__dot--easy   { background: var(--qv-correct); }
 .diff-bar__dot--medium { background: var(--qv-warn); }

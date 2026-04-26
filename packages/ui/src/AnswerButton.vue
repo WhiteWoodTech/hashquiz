@@ -41,7 +41,9 @@ const emit = defineEmits<{ select: [id: string] }>()
 .qv-btn--c { --c: #d97706; }
 .qv-btn--d { --c: #059669; }
 
-.qv-btn:not(:disabled):hover       { border-color: var(--c); }
+@media (hover: hover) {
+  .qv-btn:not(:disabled):hover    { border-color: var(--c); }
+}
 .qv-btn--selected                  { border-color: var(--c); background: color-mix(in srgb, var(--c) 18%, var(--qv-surface-2)); }
 .qv-btn--correct                   { border-color: var(--qv-correct); background: color-mix(in srgb, var(--qv-correct) 18%, var(--qv-surface-2)); }
 .qv-btn--wrong                     { border-color: var(--qv-wrong); background: color-mix(in srgb, var(--qv-wrong) 12%, var(--qv-surface-2)); opacity: 0.65; }

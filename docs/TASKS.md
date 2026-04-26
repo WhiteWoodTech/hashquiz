@@ -12,6 +12,9 @@ Project task backlog for QuizV.
 
 ## Backlog
 
+- [ ] génération résultat fichier json
+- [ ] index comme dans slidev-decks?
+
 ### Phase 3 — Cloud / Supabase
 
 | # | Task | Description |

@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:slidev.dev)",
+      "WebFetch(domain:supabase.com)",
+      "WebSearch",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(bun test:*)",
+      "Bash(node -e \":*)",
+      "Bash(bun install:*)",
+      "Bash(node:*)",
+      "Bash(bun -e \"import { LocalTransport } from ''./packages/transport-local/src/index.ts''; console.log\\(''OK''\\)\")",
+      "Bash(bun -e \":*)",
+      "Bash(bun run:*)",
+      "Bash(git:*)",
+      "Bash(find /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv -maxdepth 3 -name *.md -type f)",
+      "Bash(ls:*)",
+      "Read(//Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv/packages/transport-supabase/**)",
+      "Read(//Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv/packages/transport-supabase/src/**)",
+      "Bash(done)",
+      "Bash(bunx tsc:*)",
+      "Bash(grep \"\\\\.md$\")",
+      "Bash(mkdir -p /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv/.claude/plugins/quizv/.claude-plugin)",
+      "Bash(mkdir -p /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv/.claude/plugins/quizv/commands)",
+      "Bash(mkdir -p /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv/.claude/plugins/quizv/skills/building-quizv-decks/references)",
+      "Bash(python3 -m json.tool)",
+      "Bash(claude plugins *)",
+      "Bash(claude plugin *)",
+      "Bash(grep -v '^\\\\$')",
+      "Bash(awk '{print $1}')",
+      "Bash(grep -E \"\\\\.md$|\\\\.txt$\")",
+      "Bash(find . *)",
+      "Bash(python3 *)"
+    ]
+  }
+}

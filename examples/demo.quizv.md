@@ -13,7 +13,7 @@ difficulty: easy
 tags: [web]
 ---
 
-# What does HTML stand for?
+## What does HTML stand for?
 
 - [ ] Hyper Transfer Markup Language
 - [x] HyperText Markup Language
@@ -29,7 +29,7 @@ difficulty: medium
 tags: [web]
 ---
 
-# Which HTTP status code means "Not Found"?
+## Which HTTP status code means "Not Found"?
 
 - [ ] 200
 - [ ] 301
@@ -45,7 +45,7 @@ difficulty: medium
 tags: [web]
 ---
 
-# Which are valid JavaScript array methods? (select all)
+## Which are valid JavaScript array methods? (select all)
 
 - [x] map
 - [x] filter
@@ -61,7 +61,7 @@ difficulty: hard
 tags: [web]
 ---
 
-# What is the time complexity of looking up an item in a JavaScript Map?
+## What is the time complexity of looking up an item in a JavaScript Map?
 
 - [ ] O(n)
 - [ ] O(n log n)

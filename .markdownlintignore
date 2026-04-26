@@ -1,2 +1,5 @@
-# Quiz files use a custom DSL format with multiple H1 headings and long lines
-examples/
+# Generated plans and specs
+docs/superpowers/
+
+# User-provided source documents (not generated, not linted)
+decks/*/sources/

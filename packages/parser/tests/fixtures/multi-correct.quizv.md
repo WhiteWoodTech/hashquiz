@@ -9,7 +9,7 @@ timer: 15
 difficulty: hard
 ---
 
-# Select all even numbers
+## Select all even numbers
 
 - [x] 2
 - [ ] 3

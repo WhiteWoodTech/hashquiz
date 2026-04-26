@@ -13,7 +13,7 @@ difficulty: easy
 tags: [basics]
 ---
 
-# What color is the sky?
+## What color is the sky?
 
 - [ ] Green
 - [x] Blue
@@ -28,7 +28,7 @@ timer: 30
 difficulty: medium
 ---
 
-# Which are primary colors?
+## Which are primary colors?
 
 - [x] Red
 - [ ] Orange

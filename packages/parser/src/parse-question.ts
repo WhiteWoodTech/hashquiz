@@ -13,7 +13,7 @@ const CHOICE_IDS = ['a', 'b', 'c', 'd', 'e', 'f']
  *   difficulty: easy
  *   ---
  *
- *   # Question text
+ *   ## Question text
  *
  *   - [ ] Wrong answer
  *   - [x] Correct answer
@@ -32,8 +32,8 @@ export function parseQuestion(rawBlock: string): Question {
     body = result.content.trim()
   }
 
-  // Extract question heading (first # line)
-  const headingMatch = body.match(/^# (.+)$/m)
+  // Extract question heading (first ## line)
+  const headingMatch = body.match(/^## (.+)$/m)
   const questionText = headingMatch ? headingMatch[1]!.trim() : ''
 
   // Extract choices from GFM task list items

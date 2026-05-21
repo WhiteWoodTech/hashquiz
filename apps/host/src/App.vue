@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, onBeforeUnmount } from 'vue'
 import { useGameStore } from './stores/game'
 import DeckSelectView from './views/DeckSelectView.vue'
 import LobbyView    from './views/LobbyView.vue'
@@ -22,6 +22,7 @@ import PodiumView   from './views/PodiumView.vue'
 
 const game = useGameStore()
 onMounted(() => game.connect())
+onBeforeUnmount(() => game.disposeSession?.())
 </script>
 
 <style>

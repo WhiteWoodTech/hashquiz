@@ -55,7 +55,7 @@ If sources seem insufficient:
 
 ### Step 5 — Generate Plan
 
-Create `decks/<slug>/plan.md` following the template from `references/plan-template.md`.
+Create `decks/<slug>/sources/plan.md` following the template from `references/plan-template.md`.
 
 For each planned question:
 
@@ -73,4 +73,4 @@ Present a summary to the user:
 - Tag/topic coverage
 - Any gaps or concerns
 
-Ask the user to review `plan.md` and make adjustments before proceeding to `/quizv:create`.
+Ask the user to review `sources/plan.md` and make adjustments before proceeding to `/quizv:create`.

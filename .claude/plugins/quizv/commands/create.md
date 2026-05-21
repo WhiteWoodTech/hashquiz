@@ -24,7 +24,7 @@ Verify that `decks/<slug>/index.quizv.md` exists.
 
 ### Step 2 — Read Plan and Context
 
-1. **Read `decks/<slug>/plan.md`** — this is the primary guide for question generation.
+1. **Read `decks/<slug>/sources/plan.md`** — this is the primary guide for question generation.
 If no plan exists, warn the user and suggest running `/quizv:plan` first. If they want to proceed without a plan,
 ask them what questions they want and generate directly.
 2. **Read the frontmatter** of `index.quizv.md` to get quiz metadata

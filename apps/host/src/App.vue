@@ -1,6 +1,7 @@
 <template>
   <div class="app">
-    <LobbyView    v-if="game.phase === 'lobby'"     />
+    <DeckSelectView v-if="game.phase === 'deck-select'" />
+    <LobbyView    v-else-if="game.phase === 'lobby'"     />
     <QuestionView v-else-if="game.phase === 'question'" />
     <RevealView   v-else-if="game.phase === 'revealed'" />
     <PodiumView   v-else-if="game.phase === 'finished'" />
@@ -13,6 +14,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useGameStore } from './stores/game'
+import DeckSelectView from './views/DeckSelectView.vue'
 import LobbyView    from './views/LobbyView.vue'
 import QuestionView from './views/QuestionView.vue'
 import RevealView   from './views/RevealView.vue'

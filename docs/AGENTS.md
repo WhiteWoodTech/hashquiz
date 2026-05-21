@@ -143,4 +143,13 @@ Design tokens from `@quizv/theme-default/styles/vars.css` are available as `var(
 
 ---
 
+## Deployment
+
+- Production target: **Vercel** (static frontends) + **Supabase Realtime** (message bus, no tables).
+- Transport is selected at runtime by `VITE_TRANSPORT` (`local` | `supabase`).
+- Local dev (`bun run dev`) keeps using the Bun WebSocket server in `packages/server` — Vercel does not host it.
+- Runbook: `docs/DEPLOY.md`.
+
+---
+
 *Last updated: 2026-03-31*

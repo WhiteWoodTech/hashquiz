@@ -17,9 +17,14 @@ quizv/
 │   │   └── src/
 │   │       ├── main.ts
 │   │       ├── App.vue
+│   │       ├── decks.ts             # Built-in deck definitions
 │   │       ├── stores/
 │   │       │   └── game.ts          # Pinia store — HostPhase state machine
+│   │       ├── session/
+│   │       │   ├── supabase-session.ts # Supabase Realtime session handler
+│   │       │   └── join-code.ts     # Join code generation and validation
 │   │       └── views/
+│   │           ├── DeckSelectView.vue  # Deck selection screen
 │   │           ├── LobbyView.vue    # QR code + player list + Start button
 │   │           ├── QuestionView.vue # Timer ring + live answer count
 │   │           ├── RevealView.vue   # Correct answers + score delta + bar chart
@@ -68,7 +73,7 @@ quizv/
 │   │   ├── tsconfig.json
 │   │   └── src/
 │   │       └── index.ts             # LocalTransport — Bun WS pub/sub
-│   ├── transport-supabase/          # @quizv/transport-supabase (stub — Phase 3)
+│   ├── transport-supabase/          # @quizv/transport-supabase
 │   │   ├── package.json
 │   │   └── src/
 │   │       └── index.ts
@@ -106,6 +111,7 @@ quizv/
 | File | Purpose |
 |------|---------|
 | `package.json` (root) | Bun workspaces configuration |
+| `vercel.json` | Vercel deployment configuration |
 | `tsconfig.base.json` | Shared TypeScript strict config |
 | `packages/core/src/types.ts` | Shared types: `PlayerState`, `Score`, `PodiumEntry` |
 | `packages/core/src/events.ts` | `GameEvent` union + `GameEvents` builder |
@@ -122,6 +128,12 @@ quizv/
 | 3030 | Bun WS/HTTP server (game logic) |
 | 3031 | Vite — `apps/host` |
 | 3032 | Vite — `apps/player` (binds `0.0.0.0` for LAN) |
+
+---
+
+## Build Output
+
+In production (Vercel), the build output is `dist/`, containing the compiled frontends and static assets.
 
 ---
 

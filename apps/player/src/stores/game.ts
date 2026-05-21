@@ -42,7 +42,7 @@ export const useGameStore = defineStore('game', () => {
 
     transport.subscribe(channelName, handle as (e: GameEvent) => void)
 
-    // Let presence sync briefly, then dedupe pseudo
+    // Let presence sync briefly, then dedupe pseudo to avoid conflicts
     await new Promise(r => setTimeout(r, 300))
     const existing = transport.presence.list(channelName).map(p => p.pseudo)
     let final = pseudo

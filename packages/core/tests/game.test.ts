@@ -235,6 +235,19 @@ describe('GameEngine — question selection', () => {
   })
 })
 
+describe('GameEvents.answerSubmit', () => {
+  test('builds an answer_submit event with the correct shape', () => {
+    const { GameEvents } = require('../src/events')
+    const ev = GameEvents.answerSubmit('p1', ['c2'], 7.5)
+    expect(ev).toEqual({
+      type: 'answer_submit',
+      playerId: 'p1',
+      choiceIds: ['c2'],
+      timeRemaining: 7.5,
+    })
+  })
+})
+
 describe('GameEngine — target-difficulty', () => {
   const makeQ = (
     difficulty: 'easy' | 'medium' | 'hard',

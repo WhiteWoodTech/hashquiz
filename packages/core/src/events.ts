@@ -6,6 +6,7 @@ export type GameEvent =
   | { type: 'game_started' }
   | { type: 'question_started'; question: QuestionPublic; idx: number }
   | { type: 'timer_tick';       remaining: number }
+  | { type: 'answer_submit';    playerId: string; choiceIds: string[]; timeRemaining: number }
   | { type: 'answer_submitted'; playerId: string }
   | { type: 'answer_revealed';  correct: string[]; explanation: string | undefined; scores: Score[]; choiceCounts: Record<string, number> }
   | { type: 'next_question';    idx: number }
@@ -19,6 +20,8 @@ export const GameEvents = {
   questionStarted: (question: QuestionPublic, idx: number): GameEvent =>
     ({ type: 'question_started', question, idx }),
   timerTick: (remaining: number): GameEvent => ({ type: 'timer_tick', remaining }),
+  answerSubmit: (playerId: string, choiceIds: string[], timeRemaining: number): GameEvent =>
+    ({ type: 'answer_submit', playerId, choiceIds, timeRemaining }),
   answerSubmitted: (playerId: string): GameEvent => ({ type: 'answer_submitted', playerId }),
   answerRevealed: (
     correct: string[],

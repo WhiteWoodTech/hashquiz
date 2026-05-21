@@ -37,10 +37,10 @@ export class SupabaseHostSession {
     const pct = (n: number) => Math.round((n / total) * 100)
     const quizInfo: QuizInfo = {
       title: opts.quiz.meta.title,
-      description: opts.quiz.meta.description,
+      ...(opts.quiz.meta.description !== undefined && { description: opts.quiz.meta.description }),
       tags: opts.quiz.meta.tags ?? [],
       totalQuestions: opts.quiz.questions.length,
-      targetDifficulty: opts.quiz.meta.targetDifficulty,
+      ...(opts.quiz.meta.targetDifficulty !== undefined && { targetDifficulty: opts.quiz.meta.targetDifficulty }),
       difficultyDistribution: {
         easy:   pct(easy),
         medium: pct(medium),

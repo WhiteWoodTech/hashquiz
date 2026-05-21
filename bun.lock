@@ -26,7 +26,9 @@
       "version": "0.0.1",
       "dependencies": {
         "@quizv/core": "workspace:*",
+        "@quizv/parser": "workspace:*",
         "@quizv/theme-default": "workspace:*",
+        "@quizv/transport-supabase": "workspace:*",
         "@quizv/ui": "workspace:*",
         "pinia": "^2.1.7",
         "vue": "^3.4.27",

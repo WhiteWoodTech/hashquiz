@@ -50,6 +50,7 @@ export const useGameStore = defineStore('game', () => {
       phase.value = 'deck-select'
       return
     }
+    session?.dispose()
     const transport = new SupabaseTransport({ url, anonKey })
     const code = generateJoinCode()
     session = new SupabaseHostSession({
@@ -137,11 +138,16 @@ export const useGameStore = defineStore('game', () => {
     if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type }))
   }
 
+  function disposeSession() {
+    session?.dispose()
+    session = null
+  }
+
   return {
     phase, joinCode, playerUrl, totalQs, players,
     question, questionIdx, answerCount, correctIds,
     choiceCounts, explanation, scores, podium,
     quizMeta,
-    connect, send, startWithDeck,
+    connect, send, startWithDeck, disposeSession,
   }
 })

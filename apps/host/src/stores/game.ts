@@ -2,8 +2,12 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { PlayerState, QuestionPublic, Score, PodiumEntry, QuizInfo } from '@quizv/core'
 import type { GameEvent } from '@quizv/core'
+import { SupabaseHostSession } from '../session/supabase-session'
+import { SupabaseTransport } from '@quizv/transport-supabase'
+import { generateJoinCode } from '../session/join-code'
+import type { BundledDeck } from '../decks'
 
-export type HostPhase = 'connecting' | 'lobby' | 'question' | 'revealed' | 'finished'
+export type HostPhase = 'deck-select' | 'connecting' | 'lobby' | 'question' | 'revealed' | 'finished'
 
 // host_connected is a custom server-only message, not part of GameEvent union
 interface HostConnectedMsg {
@@ -14,7 +18,10 @@ interface HostConnectedMsg {
   quizMeta: QuizInfo
 }
 
-type ServerMsg = GameEvent | HostConnectedMsg
+type ServerMsg =
+  | GameEvent
+  | HostConnectedMsg
+  | { type: 'host_ready'; joinCode: string; totalQuestions: number; playerUrl: string; quizMeta: QuizInfo }
 
 export const useGameStore = defineStore('game', () => {
   const phase        = ref<HostPhase>('connecting')
@@ -33,8 +40,42 @@ export const useGameStore = defineStore('game', () => {
   const quizMeta     = ref<QuizInfo | null>(null)
 
   let ws: WebSocket | null = null
+  let session: SupabaseHostSession | null = null
+
+  function startWithDeck(deck: BundledDeck) {
+    const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
+    if (!url || !anonKey) {
+      console.error('Missing Supabase credentials')
+      phase.value = 'deck-select'
+      return
+    }
+    const transport = new SupabaseTransport({ url, anonKey })
+    const code = generateJoinCode()
+    session = new SupabaseHostSession({
+      quiz: deck.quiz,
+      transport,
+      joinCode: code,
+      origin: location.origin,
+    })
+    session.on(e => handle(e as ServerMsg))
+    phase.value = 'lobby'
+  }
+
+  function sendSupabase(action: 'host_start' | 'host_reveal' | 'host_next') {
+    if (!session) return
+    if (action === 'host_start')  void session.start()
+    if (action === 'host_reveal') void session.reveal()
+    if (action === 'host_next')   void session.next()
+  }
 
   function connect() {
+    const mode = import.meta.env.VITE_TRANSPORT
+    if (mode === 'supabase') {
+      phase.value = 'deck-select'
+      return
+    }
+    // existing local-WS implementation continues below — unchanged
     ws?.close()   // prevent leaking previous socket on reconnect
     const url = `ws://localhost:3030/ws?role=host`
     const socket = new WebSocket(url)
@@ -48,12 +89,12 @@ export const useGameStore = defineStore('game', () => {
   }
 
   function handle(msg: ServerMsg) {
-    if (msg.type === 'host_connected') {
+    if (msg.type === 'host_connected' || msg.type === 'host_ready') {
       joinCode.value  = msg.joinCode
       playerUrl.value = msg.playerUrl
       totalQs.value   = msg.totalQuestions
       phase.value     = 'lobby'
-      quizMeta.value  = msg.quizMeta
+      quizMeta.value  = msg.quizMeta as QuizInfo
       return
     }
     switch (msg.type) {
@@ -89,6 +130,10 @@ export const useGameStore = defineStore('game', () => {
   }
 
   function send(type: 'host_start' | 'host_reveal' | 'host_next') {
+    if (import.meta.env.VITE_TRANSPORT === 'supabase') {
+      sendSupabase(type)
+      return
+    }
     if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type }))
   }
 
@@ -97,6 +142,6 @@ export const useGameStore = defineStore('game', () => {
     question, questionIdx, answerCount, correctIds,
     choiceCounts, explanation, scores, podium,
     quizMeta,
-    connect, send,
+    connect, send, startWithDeck,
   }
 })

@@ -2,6 +2,9 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { QuestionPublic, Score, PodiumEntry, QuizInfo } from '@quizv/core'
 import type { GameEvent } from '@quizv/core'
+import { SupabaseTransport } from '@quizv/transport-supabase'
+import { GameEvents } from '@quizv/core'
+import type { IRealtimeTransport, PlayerState } from '@quizv/core'
 
 export type PlayerPhase = 'join' | 'lobby' | 'question' | 'podium'
 
@@ -24,9 +27,60 @@ export const useGameStore = defineStore('game', () => {
   const quizMeta     = ref<QuizInfo | null>(null)
 
   let ws: WebSocket | null = null
+  let transport: IRealtimeTransport | null = null
+  let channelName = ''
+
+  async function connectSupabase(code: string, pseudo: string, email: string) {
+    const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
+    if (!url || !anonKey) {
+      connectError.value = 'Missing Supabase credentials'
+      return
+    }
+    transport = new SupabaseTransport({ url, anonKey })
+    channelName = `game:${code}`
+
+    transport.subscribe(channelName, handle as (e: GameEvent) => void)
+
+    // Let presence sync briefly, then dedupe pseudo
+    await new Promise(r => setTimeout(r, 300))
+    const existing = transport.presence.list(channelName).map(p => p.pseudo)
+    let final = pseudo
+    let n = 2
+    while (existing.includes(final)) { final = `${pseudo}-${n++}` }
+
+    const me: PlayerState = {
+      id: playerId.value,
+      pseudo: final,
+      email,
+      score: 0,
+      joinedAt: Date.now(),
+    }
+    await transport.presence.track(channelName, me)
+
+    // Wait briefly for at least one presence update from the host's channel
+    setTimeout(() => {
+      const list = transport!.presence.list(channelName)
+      if (list.length <= 1) {
+        connectError.value = 'No game found for this code'
+      } else {
+        phase.value = 'lobby'
+      }
+    }, 3000)
+  }
+
+  function submitAnswerSupabase(choiceIds: string[], timeRemaining: number) {
+    if (!transport) return
+    void transport.broadcast(channelName,
+      GameEvents.answerSubmit(playerId.value, choiceIds, timeRemaining))
+  }
 
   function connect(code: string, pseudo: string, email: string) {
     connectError.value = ''
+    if (import.meta.env.VITE_TRANSPORT === 'supabase') {
+      void connectSupabase(code, pseudo, email)
+      return
+    }
     const wsUrl = `ws://${location.hostname}:3030/ws?role=player&id=${playerId.value}&code=${encodeURIComponent(code)}`
     ws = new WebSocket(wsUrl)
     ws.onerror = () => {
@@ -80,9 +134,14 @@ export const useGameStore = defineStore('game', () => {
   }
 
   function submitAnswer(choiceIds: string[], elapsed: number) {
-    if (answered.value || !ws) return
-    answered.value    = true
+    if (answered.value) return
+    answered.value     = true
     answerTimeMs.value = elapsed
+    if (import.meta.env.VITE_TRANSPORT === 'supabase') {
+      submitAnswerSupabase(choiceIds, elapsed)
+      return
+    }
+    if (!ws) return
     ws.send(JSON.stringify({ type: 'submit_answer', choiceIds, answerTimeMs: elapsed }))
   }
 
@@ -90,6 +149,6 @@ export const useGameStore = defineStore('game', () => {
     phase, playerId, playerCount, question, questionIdx,
     answered, answerTimeMs, totalScore, lastDelta, correctIds, podium, connectError,
     quizMeta,
-    connect, submitAnswer,
+    connect, submitAnswer, submitAnswerSupabase,
   }
 })

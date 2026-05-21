@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@quizv/core": "workspace:*",
+    "@quizv/transport-supabase": "workspace:*",
     "@quizv/ui": "workspace:*",
     "@quizv/theme-default": "workspace:*",
     "canvas-confetti": "^1.9.3",

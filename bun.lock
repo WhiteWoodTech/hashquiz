@@ -46,6 +46,7 @@
       "dependencies": {
         "@quizv/core": "workspace:*",
         "@quizv/theme-default": "workspace:*",
+        "@quizv/transport-supabase": "workspace:*",
         "@quizv/ui": "workspace:*",
         "canvas-confetti": "^1.9.3",
         "pinia": "^2.1.7",

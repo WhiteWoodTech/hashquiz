@@ -7,8 +7,8 @@
 
     <div class="lobby__main">
       <div class="lobby__qr">
-        <QrCode :value="game.playerUrl" :size="220" />
-        <p class="lobby__url">{{ game.playerUrl }}</p>
+        <QrCode :value="qrUrl" :size="220" />
+        <p class="lobby__url">{{ qrUrl }}</p>
       </div>
 
       <div class="lobby__info">
@@ -30,9 +30,14 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useGameStore } from '../stores/game'
 import { QrCode, PlayerList, QuizInfoPanel } from '@quizv/ui'
+
 const game = useGameStore()
+const qrUrl = computed(() =>
+  game.playerUrl || `${location.origin}/?code=${game.joinCode}`
+)
 </script>
 
 <style scoped>

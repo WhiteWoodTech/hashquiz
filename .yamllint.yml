@@ -24,4 +24,5 @@ rules:
 ignore:
   - node_modules/
   - dist/
+  - docs/superpowers/
   - .git/

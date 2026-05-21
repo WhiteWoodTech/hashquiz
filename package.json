@@ -16,6 +16,7 @@
   ],
   "scripts": {
     "build": "bun run --filter='*' build",
+    "build:web": "bun run --filter='@quizv/app-host' build && bun run --filter='@quizv/app-player' build",
     "test": "bun test",
     "dev": "bun run packages/server/src/cli.ts dev",
     "lint": "bun run lint:md && bun run lint:yaml",

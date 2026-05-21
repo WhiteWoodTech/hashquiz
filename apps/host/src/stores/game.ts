@@ -94,7 +94,7 @@ export const useGameStore = defineStore('game', () => {
       playerUrl.value = msg.playerUrl
       totalQs.value   = msg.totalQuestions
       phase.value     = 'lobby'
-      quizMeta.value  = msg.quizMeta as QuizInfo
+      quizMeta.value  = msg.quizMeta
       return
     }
     switch (msg.type) {

@@ -1,10 +1,10 @@
 import { GameEngine } from '@quizv/core'
-import type { GameEvent, IRealtimeTransport, PlayerState } from '@quizv/core'
+import type { GameEvent, IRealtimeTransport, PlayerState, QuizInfo } from '@quizv/core'
 import type { Quiz } from '@quizv/parser'
 
 export type HostEvent =
   | GameEvent
-  | { type: 'host_ready'; joinCode: string; totalQuestions: number; playerUrl: string; quizMeta: Quiz['meta'] }
+  | { type: 'host_ready'; joinCode: string; totalQuestions: number; playerUrl: string; quizMeta: QuizInfo }
 
 export interface HostSessionOptions {
   quiz: Quiz
@@ -30,12 +30,29 @@ export class SupabaseHostSession {
     this.channel = `game:${opts.joinCode}`
     this.engine = new GameEngine(opts.quiz, opts.transport, opts.joinCode)
 
+    const easy   = opts.quiz.questions.filter(q => q.difficulty === 'easy').length
+    const medium = opts.quiz.questions.filter(q => q.difficulty === 'medium').length
+    const hard   = opts.quiz.questions.filter(q => q.difficulty === 'hard').length
+    const total  = opts.quiz.questions.length || 1
+    const pct = (n: number) => Math.round((n / total) * 100)
+    const quizInfo: QuizInfo = {
+      title: opts.quiz.meta.title,
+      description: opts.quiz.meta.description,
+      tags: opts.quiz.meta.tags ?? [],
+      totalQuestions: opts.quiz.questions.length,
+      targetDifficulty: opts.quiz.meta.targetDifficulty,
+      difficultyDistribution: {
+        easy:   pct(easy),
+        medium: pct(medium),
+        hard:   pct(hard),
+      },
+    }
+
     // Forward all events on the channel back to listeners, and feed answers into the engine
     this.offBroadcast = this.transport.subscribe(this.channel, event => {
       this.emit(event)
       if (event.type === 'answer_submit') {
         this.engine.submitAnswer(event.playerId, event.choiceIds, event.timeRemaining)
-        this.emit({ type: 'answer_submitted', playerId: event.playerId })
       }
     })
 
@@ -50,7 +67,7 @@ export class SupabaseHostSession {
         joinCode: opts.joinCode,
         totalQuestions: opts.quiz.questions.length,
         playerUrl: `${opts.origin}/?code=${opts.joinCode}`,
-        quizMeta: opts.quiz.meta,
+        quizMeta: quizInfo,
       })
     })
   }

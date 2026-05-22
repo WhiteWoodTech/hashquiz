@@ -1,0 +1,14 @@
+{
+  "name": "quizv-local",
+  "owner": {
+    "name": "Maxime Lenne",
+    "email": "hello@maxime-lenne.fr"
+  },
+  "plugins": [
+    {
+      "name": "quizv",
+      "source": "./.claude/plugins/quizv",
+      "description": "Create, plan, and generate QuizV quiz decks from sources and web research"
+    }
+  ]
+}

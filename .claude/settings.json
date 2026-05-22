@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "quizv-local": {
+      "source": {
+        "source": "directory",
+        "path": "."
+      }
+    }
+  },
+  "enabledPlugins": {
+    "quizv@quizv-local": true
+  }
+}

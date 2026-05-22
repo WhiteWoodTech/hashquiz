@@ -31,7 +31,26 @@
       "Bash(awk '{print $1}')",
       "Bash(grep -E \"\\\\.md$|\\\\.txt$\")",
       "Bash(find . *)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "Bash(bunx *)",
+      "Bash(grep *)",
+      "Bash(markdownlint *)",
+      "WebFetch(domain:quizv-phi.vercel.app)",
+      "Bash(curl -sL https://quizv-phi.vercel.app/host)",
+      "Bash(curl -sI https://quizv-phi.vercel.app/host)",
+      "Bash(curl -sI https://quizv-phi.vercel.app/host/assets/index-BT2TxlWS.js)",
+      "Bash(curl -sI https://quizv-phi.vercel.app/host/assets/index-DM_WIh72.css)",
+      "Bash(curl -sL https://quizv-phi.vercel.app/host/assets/index-BT2TxlWS.js)",
+      "Bash(bun *)",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__new_page",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__list_console_messages",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__list_network_requests",
+      "Bash(curl -sI http://localhost:8765/host)",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__navigate_page",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot",
+      "Bash(VITE_TRANSPORT=supabase VITE_SUPABASE_URL=https://example.supabase.co VITE_SUPABASE_ANON_KEY=dummy bun run build:web)",
+      "Bash(kill %1)",
+      "Bash(pkill -f \"serve dist\")"
     ]
   }
 }

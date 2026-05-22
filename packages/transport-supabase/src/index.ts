@@ -13,7 +13,6 @@ export class SupabaseTransport implements IRealtimeTransport {
   private channels: Map<string, RealtimeChannel> = new Map()
   private eventSubs: Map<string, Set<(event: GameEvent) => void>> = new Map()
   private presenceSubs: Map<string, Set<(players: PlayerState[]) => void>> = new Map()
-  private wiredPresenceChannels: Set<string> = new Set()
 
   constructor(opts: SupabaseTransportOptions) {
     if (opts.client) {
@@ -33,6 +32,13 @@ export class SupabaseTransport implements IRealtimeTransport {
       ch.on('broadcast', { event: 'gameEvent' }, ({ payload }: { payload: GameEvent }) => {
         const subs = this.eventSubs.get(name)
         if (subs) for (const cb of subs) cb(payload)
+      })
+      ch.on('presence', { event: 'sync' }, () => {
+        const subs = this.presenceSubs.get(name)
+        if (subs) {
+          const players = this.flattenPresence(name)
+          for (const cb of subs) cb(players)
+        }
       })
       ch.subscribe()
       this.channels.set(name, ch)
@@ -61,32 +67,21 @@ export class SupabaseTransport implements IRealtimeTransport {
     return Object.values(state).flat()
   }
 
-  private wirePresence(channel: string): void {
-    if (this.wiredPresenceChannels.has(channel)) return
-    this.wiredPresenceChannels.add(channel)
-    const ch = this.getChannel(channel)
-    ch.on('presence', { event: 'sync' }, () => {
-      const subs = this.presenceSubs.get(channel)
-      if (subs) {
-        const players = this.flattenPresence(channel)
-        for (const cb of subs) cb(players)
-      }
-    })
-  }
-
   presence = {
     track: async (channel: string, state: PlayerState): Promise<void> => {
       const ch = this.getChannel(channel)
-      this.wirePresence(channel)
       await ch.track(state)
     },
     untrack: async (channel: string): Promise<void> => {
       const ch = this.channels.get(channel)
       if (ch) await ch.untrack()
     },
-    list: (channel: string): PlayerState[] => this.flattenPresence(channel),
+    list: (channel: string): PlayerState[] => {
+      this.getChannel(channel)
+      return this.flattenPresence(channel)
+    },
     onChange: (channel: string, cb: (players: PlayerState[]) => void): Unsubscribe => {
-      this.wirePresence(channel)
+      this.getChannel(channel)
       if (!this.presenceSubs.has(channel)) this.presenceSubs.set(channel, new Set())
       this.presenceSubs.get(channel)!.add(cb)
       return () => {

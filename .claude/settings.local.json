@@ -50,7 +50,8 @@
       "mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot",
       "Bash(VITE_TRANSPORT=supabase VITE_SUPABASE_URL=https://example.supabase.co VITE_SUPABASE_ANON_KEY=dummy bun run build:web)",
       "Bash(kill %1)",
-      "Bash(pkill -f \"serve dist\")"
+      "Bash(pkill -f \"serve dist\")",
+      "Bash(npx markdownlint *)"
     ]
   }
 }

@@ -51,7 +51,10 @@
       "Bash(VITE_TRANSPORT=supabase VITE_SUPABASE_URL=https://example.supabase.co VITE_SUPABASE_ANON_KEY=dummy bun run build:web)",
       "Bash(kill %1)",
       "Bash(pkill -f \"serve dist\")",
-      "Bash(npx markdownlint *)"
+      "Bash(npx markdownlint *)",
+      "Skill(quizv:building-quizv-decks)",
+      "Bash(awk 'length > 120' decks/mcp-deep-dive/index.quizv.md)",
+      "Bash(awk 'length > 120' decks/cloud-gcp/index.quizv.md)"
     ]
   }
 }

@@ -3,3 +3,5 @@ docs/superpowers/
 
 # User-provided source documents (not generated, not linted)
 decks/*/sources/
+
+*/*/node_modules/*

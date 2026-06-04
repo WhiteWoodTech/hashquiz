@@ -57,31 +57,89 @@ bun install
 
 ### Start a game
 
+The `dev` command boots the WS server **and** both Vite frontends in one shot. Pass the path to a `.quizv.md` file:
+
 ```bash
+# Shortest form — uses the bun script
+bun run dev examples/demo.quizv.md
+
+# Equivalent direct CLI call
 bun run packages/server/src/cli.ts dev examples/demo.quizv.md
+
+# Launch one of the built-in decks (see deck index below)
+bun run dev decks/docker-fundamentals/index.quizv.md
+bun run dev decks/cloud-gcp/index.quizv.md
+
+# Override the WS / HTTP port (host and player apps stay on 3031 / 3032)
+bun run dev decks/mcp-deep-dive/index.quizv.md --port 4040
 ```
 
 This starts three servers simultaneously:
 
 | Server | URL | Role |
 |--------|-----|------|
-| WS / HTTP | `ws://localhost:3030` | Game logic |
+| WS / HTTP | `ws://localhost:3030` | Game logic + join codes |
 | Host app | `http://localhost:3031` | Desktop dashboard |
 | Player app | `http://localhost:3032` | Mobile client |
 
-Open `http://localhost:3031` on the host machine. Players scan the QR code or navigate to the printed player URL.
+Open `http://localhost:3031` on the host machine. Players scan the QR code or navigate to the printed player URL
+with the join code pre-filled.
+
+> Editing the loaded `.quizv.md` file prints a hot-reload notice — restart the server to apply the change.
 
 ### Validate a quiz file
 
+Quickly check syntax and structure without starting the game:
+
 ```bash
 bun run packages/server/src/cli.ts check examples/demo.quizv.md
+bun run packages/server/src/cli.ts check decks/genai-llm-introduction/index.quizv.md
 ```
 
-### Run tests
+Output: question count, theme, or a list of parsing errors with the offending question index.
+
+### Build & test
 
 ```bash
-bun test
+bun test                  # Run all tests (27+)
+bun run build             # Build every workspace package
+bun run build:web         # Build only the host + player SPAs
+bun run lint              # Lint markdown and YAML
+bun run lint:md:fix       # Auto-fix markdown
+bun run commit            # Interactive gitmoji commit
 ```
+
+## Deck Index
+
+Ready-to-play decks live in [`decks/`](decks/). Each folder contains an `index.quizv.md`, an `assets/` directory,
+and the raw `sources/` used to plan the quiz.
+
+| Deck | Title | Topics | Launch |
+|------|-------|--------|--------|
+| [`decks/cloud-gcp`](decks/cloud-gcp/) | Cloud & GCP | cloud, gcp, devops | `bun run dev decks/cloud-gcp/index.quizv.md` |
+| [`decks/docker-fundamentals`](decks/docker-fundamentals/) | Docker | image, container, dockerfile | `bun run dev decks/docker-fundamentals/index.quizv.md` |
+| [`decks/genai-llm-introduction`](decks/genai-llm-introduction/) | Fondamentaux de l'IA Générative | ia, llm, prompt, rag, agents, mcp | `bun run dev decks/genai-llm-introduction/index.quizv.md` |
+| [`decks/mcp-deep-dive`](decks/mcp-deep-dive/) | MCP — deep dive | mcp, protocol, genai, server | `bun run dev decks/mcp-deep-dive/index.quizv.md` |
+| [`decks/mcp-intro-and-overview`](decks/mcp-intro-and-overview/) | MCP intro and overview | mcp, ai, llm, integration | `bun run dev decks/mcp-intro-and-overview/index.quizv.md` |
+
+Example decks (smaller, for testing):
+
+| File | Description |
+|------|-------------|
+| [`examples/demo.quizv.md`](examples/demo.quizv.md) | Minimal demo — start here |
+| [`examples/quiz-ia-dev.quizv.md`](examples/quiz-ia-dev.quizv.md) | Larger sample on AI / dev topics |
+
+### Authoring a new deck
+
+Use the bundled Claude skills to scaffold a deck from scratch:
+
+```text
+/quizv:new           # Scaffold folder + frontmatter + assets/ + sources/
+/quizv:plan          # Plan content from sources and generate plan.md
+/quizv:create        # Generate questions in index.quizv.md from plan.md
+```
+
+Or write one by hand following the format below.
 
 ## Quiz File Format
 

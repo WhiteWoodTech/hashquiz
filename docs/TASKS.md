@@ -8,6 +8,22 @@ Project task backlog for QuizV.
 
 *(None currently)*
 
+### Persistence Postgres ou pur Realtime éphémère ?
+
+1. Pur Realtime (éphémère)
+Aucune table Postgres. Tout passe par les channels Realtime + presence. Si l'hôte recharge la page, la partie est perdue.
+Setup minimal, parfait pour MVP.
+
+2. Tables minimales (rooms + games)
+   Persiste : `rooms(code, host_id, created_at)`, `games(id, room_id, started_at, ended_at)`,
+   `final_scores(game_id, player_name, score)`.
+   Permet historique et leaderboards persistants. Pas de reconnexion mid-game.
+3. Tables complètes (avec reconnexion)
+   Toutes les tables : rooms, games, players, questions_state, answers. Permet reconnexion mid-game (joueur ou hôte).
+   Plus de travail, RLS plus complexe.
+
+Y a t'il un pb de divulgation des réponses au autres (WS) ?
+  
 ---
 
 ## Backlog

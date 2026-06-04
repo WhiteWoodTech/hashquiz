@@ -42,9 +42,12 @@ export const useGameStore = defineStore('game', () => {
 
     transport.subscribe(channelName, handle as (e: GameEvent) => void)
 
-    // Let presence sync briefly, then dedupe pseudo to avoid conflicts
+    // Let presence sync briefly, then dedupe pseudo against real players (ignoring the host entry)
     await new Promise(r => setTimeout(r, 300))
-    const existing = transport.presence.list(channelName).map(p => p.pseudo)
+    const HOST_PRESENCE_ID = '__host__'
+    const existing = transport.presence.list(channelName)
+      .filter(p => p.id !== HOST_PRESENCE_ID)
+      .map(p => p.pseudo)
     let final = pseudo
     let n = 2
     while (existing.includes(final)) { final = `${pseudo}-${n++}` }
@@ -58,10 +61,11 @@ export const useGameStore = defineStore('game', () => {
     }
     await transport.presence.track(channelName, me)
 
-    // Wait briefly for at least one presence update from the host's channel
+    // Confirm the game exists by checking the host presence entry — not by counting players.
     setTimeout(() => {
       const list = transport!.presence.list(channelName)
-      if (list.length <= 1) {
+      const hostPresent = list.some(p => p.id === HOST_PRESENCE_ID)
+      if (!hostPresent) {
         connectError.value = 'No game found for this code'
       } else {
         phase.value = 'lobby'

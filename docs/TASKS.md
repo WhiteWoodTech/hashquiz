@@ -36,6 +36,14 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
       et doit être au même niveau que les autres
 - [ ] génération résultat en fichier json
 - [ ] index comme dans slidev-decks?
+- [x] lors de l'affichage l'Explication de la correction en markdown brut et pas formaté avec gras et autres...
+- [x] lors de l'appuie sur join Game d'un participant, il y a un message d'erreur qui dit
+      no code found for this code
+- [ ] Dans l'écran des réponses, mets les lettres des bonnes réponses en vert
+- [ ] Passe la liste des réponse (bonne ou mauvaise) au dessus de chaque barre de progression (total réponses)
+      en gardant en vert les bonnes et enlève les de l'encart avec l'explication
+- [x] Dans l'affichage de la réponse Pour les listes de plusieurs réponses (multi select)
+      les affifcher avec un retour à la ligne entre chaque
 - [ ] Sur la base des correction précédentes. Améliore le cli check : 4 réponses maximum,
       check là où la bonne réponse saute aux yeux (formatage asymétrique)
 

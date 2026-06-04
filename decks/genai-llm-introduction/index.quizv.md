@@ -35,9 +35,9 @@ tags: [ia, concepts]
 
 ## Quel est le bon ordre du plus large au plus spécifique ?
 
-- [x] IA → ML → DL → Gen AI
 - [ ] Gen AI → IA → ML → DL
 - [ ] ML → IA → Gen AI → DL
+- [x] IA → ML → DL → Gen AI
 - [ ] DL → Gen AI → ML → IA
 
 > L'IA est le concept le plus large. Le ML (Machine Learning) en est un sous-ensemble. Le DL (Deep Learning) est un
@@ -53,10 +53,10 @@ tags: [ia, gen-ai]
 
 ## Quelles sont les 3 grandes familles de modèles d'IA Générative ? (sélectionnez 3)
 
-- [x] GAN (Generative Adversarial Networks)
 - [x] Modèles de diffusion
 - [x] LLM (Large Language Models)
 - [ ] CNN (Convolutional Neural Networks)
+- [x] GAN (Generative Adversarial Networks)
 
 > Les **3 familles** de Gen AI : **GAN** (images réalistes — deepfakes), **Modèles de diffusion** (Stable Diffusion,
 > DALL-E, Midjourney), et **LLM** (texte, code, raisonnement — Claude, GPT). Les CNN sont des réseaux de classification,
@@ -207,24 +207,6 @@ tags: [llm, modeles]
 > des tâches ciblées (distillation).
 
 ---
-type: multiple
-timer: 30
-difficulty: medium
-tags: [llm, modeles]
----
-
-## Parmi ces termes, lesquels désignent un **type de modèle LLM** selon leur usage ? (sélectionnez 3)
-
-- [x] Chat (conversationnel)
-- [x] Instruct (suit des instructions précises)
-- [x] Reasoning (raisonnement étendu interne)
-- [ ] Generative (génère du contenu)
-
-> Les **types** courants sont **Chat** (Claude.ai, ChatGPT), **Instruct** (format structuré, JSON),
-> **Reasoning** (Claude Extended Thinking, o1/o3 — chaîne de réflexion interne) et **Multimodal**
-> (GPT-4o, Gemini, Claude 3+). "Generative" est un terme générique, pas un type de modèle spécifique.
-
----
 type: single
 timer: 20
 difficulty: medium
@@ -297,24 +279,6 @@ tags: [prompt, patterns]
 > réduit les raccourcis de raisonnement.
 
 ---
-type: multiple
-timer: 30
-difficulty: medium
-tags: [prompt, strategies]
----
-
-## Lesquelles font partie des **stratégies Anthropic** pour structurer les usages des LLM ? (sélectionnez 3)
-
-- [x] Write (générer du contenu)
-- [x] Select (filtrer / classer)
-- [x] Compress (résumer / extraire)
-- [ ] Execute (exécuter du code)
-
-> Les **4 stratégies Anthropic** sont **Write** (créer), **Select** (trier/classer/router),
-> **Compress** (résumer/extraire) et **Isolate** (décomposer un pipeline multi-étapes, base du RAG).
-> En les combinant, on construit des workflows complexes. "Execute" n'en fait pas partie.
-
----
 type: single
 timer: 20
 difficulty: medium
@@ -349,6 +313,42 @@ tags: [prompt, cout]
 > La **règle des 30 secondes** : si une tâche (formater du JSON, renommer une variable, chercher une syntaxe basique)
 > prend moins de 30 secondes manuellement, utiliser l'outil natif est plus rapide et économique. L'IA est pertinente
 > pour les tâches à valeur ajoutée et répétitives.
+
+---
+type: single
+timer: 20
+difficulty: medium
+tags: [ia, concepts]
+---
+
+## Qu'est-ce que l'inférence dans le contexte d'un LLM ?
+
+- [ ] L'entraînement du modèle sur de nouvelles données
+- [ ] Le processus de fine-tuning pour spécialiser le modèle
+- [x] La génération d'une réponse par prédiction successive de tokens
+- [ ] La compression du modèle pour le déploiement en local
+
+> L'**inférence** = le processus par lequel le modèle entraîné *génère* une réponse. Le LLM prédit le token suivant de
+> manière auto-régressive (chaque token dépend de tous les précédents), en répétant jusqu'à la fin de séquence. C'est
+> l'étape qui coûte de l'argent (contrairement à l'entraînement).
+
+---
+type: single
+timer: 25
+difficulty: hard
+tags: [llm, modeles]
+---
+
+## Quelle stratégie adopter pour optimiser le coût de ses appels à l'API d'un LLM ?
+
+- [ ] Toujours utiliser le modèle le plus puissant pour garantir la qualité
+- [ ] Utiliser uniquement des modèles open source locaux
+- [x] Commencer par le modèle le plus léger et escalader vers des modèles plus puissants si nécessaire
+- [ ] Regrouper toutes les requêtes en une seule très longue requête
+
+> La **stratégie du modèle minimal viable** : Haiku/Flash pour les tâches simples (formatage, Q&A basique), Sonnet pour
+> l'usage quotidien, Opus uniquement pour le raisonnement complexe. Haiku peut coûter 20-50x moins cher qu'Opus.
+> Commencer léger, escalader si la qualité est insuffisante.
 
 ---
 type: single
@@ -504,12 +504,12 @@ tags: [mcp, architecture]
 
 - [ ] Prompt, Response, Action
 - [ ] Model, Context, Protocol
-- [x] Host, Protocol, Server
+- [x] Host, Client, Server
 - [ ] Input, Middleware, Output
 
-> L'architecture MCP : **Host** (client IA : Claude Code, Cursor) ↔ **Protocol** (JSON-RPC, communication) ↔ **Server**
-> (source de données : GitHub, Figma, Chrome DevTools, Supabase…). Les 3 capabilities d'un serveur MCP : **Tools**
-> (actions), **Resources** (données), **Prompts** (templates).
+> L'architecture MCP : **Host** (l'app IA : Claude Code, Cursor) → **Client** (composant logique interne qui porte
+> une connexion) → **Server** (source de données : GitHub, Figma, Chrome DevTools, Supabase…). Les 3 primitives d'un
+> serveur MCP : **Tools** (actions), **Resources** (données), **Prompts** (templates).
 
 ---
 type: multiple
@@ -528,57 +528,3 @@ tags: [mcp, outils]
 > **Context7**, **GitHub** et **Figma** sont des serveurs MCP essentiels. Context7 fournit la documentation à jour des
 > librairies. GitHub permet de lire/écrire du code et des PRs. Figma permet d'extraire les specs de design. React est un
 > framework frontend, pas un serveur MCP.
-
----
-type: single
-timer: 20
-difficulty: easy
-tags: [orientation, formations]
----
-
-## Pour quel profil la formation "AI Builders" est-elle principalement destinée ?
-
-- [ ] Des non-techniciens qui veulent utiliser l'IA dans leur métier
-- [ ] Des data scientists qui font du machine learning classique
-- [x] Des développeurs qui veulent passer du vibe coding à l'agentic coding
-- [ ] Des managers qui veulent piloter des projets IA
-
-> La **formation AI Builders** cible les développeurs (ou futurs développeurs) qui veulent maîtriser des outils comme
-> Cursor et Claude Code, comprendre l'agentic coding, et construire des applications IA de qualité production. Contraste
-> avec "Métiers" (usages no-code) et "AI Engineers" (création de RAG/agents from scratch).
-
----
-type: single
-timer: 20
-difficulty: medium
-tags: [ia, concepts]
----
-
-## Qu'est-ce que l'inférence dans le contexte d'un LLM ?
-
-- [ ] L'entraînement du modèle sur de nouvelles données
-- [ ] Le processus de fine-tuning pour spécialiser le modèle
-- [x] La génération d'une réponse par prédiction successive de tokens
-- [ ] La compression du modèle pour le déploiement en local
-
-> L'**inférence** = le processus par lequel le modèle entraîné *génère* une réponse. Le LLM prédit le token suivant de
-> manière auto-régressive (chaque token dépend de tous les précédents), en répétant jusqu'à la fin de séquence. C'est
-> l'étape qui coûte de l'argent (contrairement à l'entraînement).
-
----
-type: single
-timer: 25
-difficulty: hard
-tags: [llm, modeles]
----
-
-## Quelle stratégie adopter pour optimiser le coût de ses appels à l'API d'un LLM ?
-
-- [ ] Toujours utiliser le modèle le plus puissant pour garantir la qualité
-- [ ] Utiliser uniquement des modèles open source locaux
-- [x] Commencer par le modèle le plus léger et escalader vers des modèles plus puissants si nécessaire
-- [ ] Regrouper toutes les requêtes en une seule très longue requête
-
-> La **stratégie du modèle minimal viable** : Haiku/Flash pour les tâches simples (formatage, Q&A basique), Sonnet pour
-> l'usage quotidien, Opus uniquement pour le raisonnement complexe. Haiku peut coûter 20-50x moins cher qu'Opus.
-> Commencer léger, escalader si la qualité est insuffisante.

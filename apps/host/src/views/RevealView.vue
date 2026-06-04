@@ -17,16 +17,16 @@
     <!-- Correct answer + explanation together -->
     <div class="rv-answer-block">
       <div v-if="game.explanation" class="rv-explanation">
-        <span class="rv-correct__label">✓ Correct answer</span>
-        <div class="rv-correct__choices">
-          <span
-            v-for="choice in game.question.choices.filter(c => game.correctIds.includes(c.id))"
+        <span class="rv-correct__label">✓ {{ correctChoices.length > 1 ? 'Correct answers' : 'Correct answer' }}</span>
+        <ul class="rv-correct__choices">
+          <li
+            v-for="choice in correctChoices"
             :key="choice.id"
             class="rv-correct__choice"
-          >{{ choice.id.toUpperCase() }}. {{ choice.text }}</span>
-        </div>
+          >{{ choice.id.toUpperCase() }}. {{ choice.text }}</li>
+        </ul>
         <p class="rv-explanation__label">Explanation</p>
-        <p>{{ game.explanation }}</p>
+        <div class="rv-explanation__body" v-html="renderedExplanation" />
       </div>
     </div>
 
@@ -52,9 +52,22 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { marked } from 'marked'
 import { useGameStore } from '../stores/game'
 import { AnswerBarChart } from '@quizv/ui'
+
 const game = useGameStore()
+
+marked.setOptions({ breaks: true, gfm: true })
+
+const correctChoices = computed(() =>
+  game.question?.choices.filter(c => game.correctIds.includes(c.id)) ?? []
+)
+
+const renderedExplanation = computed(() =>
+  game.explanation ? marked.parse(game.explanation) as string : ''
+)
 </script>
 
 <style scoped>
@@ -76,10 +89,29 @@ const game = useGameStore()
   display: flex; flex-direction: column; gap: 0.4rem;
 }
 .rv-correct__label { color: var(--qv-correct); font-weight: 700; font-size: 0.85rem; }
-.rv-correct__choices { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.25rem; }
+.rv-correct__choices {
+  list-style: none;
+  margin: 0 0 0.25rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
 .rv-correct__choice { font-weight: 600; color: var(--qv-correct); }
 .rv-explanation__label { color: var(--qv-text-muted); font-size: 0.8rem; margin: 0; }
-.rv-explanation p:last-child { margin: 0; }
+.rv-explanation__body { line-height: 1.5; }
+.rv-explanation__body :deep(p) { margin: 0 0 0.5rem; }
+.rv-explanation__body :deep(p:last-child) { margin: 0; }
+.rv-explanation__body :deep(code) {
+  background: var(--qv-surface);
+  border: 1px solid var(--qv-border);
+  border-radius: var(--qv-radius-sm);
+  padding: 0.1rem 0.35rem;
+  font-size: 0.9em;
+}
+.rv-explanation__body :deep(strong) { color: var(--qv-text); }
+.rv-explanation__body :deep(ul),
+.rv-explanation__body :deep(ol) { margin: 0.25rem 0; padding-left: 1.25rem; }
 .rv-scores { margin: 1.5rem 0; }
 .rv-scores h3 { margin: 0 0 0.75rem; font-size: 1rem; color: var(--qv-text-muted); }
 .rv-score-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.4rem 0; border-bottom: 1px solid var(--qv-border); }

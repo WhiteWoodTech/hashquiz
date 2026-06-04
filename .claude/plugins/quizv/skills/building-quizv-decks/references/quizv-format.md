@@ -76,13 +76,25 @@ Each question block contains:
 
 ## Validation Rules
 
-| Rule | Constraint |
-|------|-----------|
-| Quiz title | Must not be empty |
-| At least one question | `questions.length > 0` |
-| Mutually exclusive limits | Cannot set both `max-questions` AND `max-time` |
-| Correct answers | Each question must have at least 1 correct answer |
-| Minimum choices | Each question must have at least 2 choices |
+| Rule | Constraint | Enforced by |
+|------|-----------|-------------|
+| Quiz title | Must not be empty | Parser |
+| At least one question | `questions.length > 0` | Parser |
+| Mutually exclusive limits | Cannot set both `max-questions` AND `max-time` | Parser |
+| Correct answers | Each question must have at least 1 correct answer | Parser |
+| Minimum choices | Each question must have at least 2 choices | Parser |
+| **Exact choice count** | **Each question MUST have exactly 4 choices** | **Authoring convention (UI is 2×2 grid)** |
+| At least one distractor | Each question keeps **≥1 wrong choice** (so ≤3 correct out of 4) | Authoring convention |
+| Multi-select phrasing | If the question says "select N" / "sélectionnez N", then `N < 4` | Authoring convention |
+
+The "exact choice count" rule is **not** enforced by the parser — verify manually before committing:
+
+```bash
+awk '/^##[^#]/ { if (q) print q ": " n; q=$0; n=0 } /^- \[[ x]\]/ { n++ } END { if (q) print q ": " n }' \
+  <file> | grep -v ": 4$"
+```
+
+Empty output means every question has exactly 4 choices.
 
 ## Choice IDs
 

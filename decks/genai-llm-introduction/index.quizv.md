@@ -213,17 +213,16 @@ difficulty: medium
 tags: [llm, modeles]
 ---
 
-## Quels sont les 4 types de modèles selon leur usage ? (sélectionnez 4)
+## Parmi ces termes, lesquels désignent un **type de modèle LLM** selon leur usage ? (sélectionnez 3)
 
 - [x] Chat (conversationnel)
 - [x] Instruct (suit des instructions précises)
 - [x] Reasoning (raisonnement étendu interne)
-- [x] Multimodal (texte + image + audio)
 - [ ] Generative (génère du contenu)
 
-> Les **4 types** : **Chat** (Claude.ai, ChatGPT), **Instruct** (format structuré, JSON), **Reasoning** (Claude Extended
-> Thinking, o1/o3 — chaîne de réflexion interne), **Multimodal** (GPT-4o, Gemini, Claude 3+). "Generative" est un terme
-> générique, pas un type de modèle spécifique.
+> Les **types** courants sont **Chat** (Claude.ai, ChatGPT), **Instruct** (format structuré, JSON),
+> **Reasoning** (Claude Extended Thinking, o1/o3 — chaîne de réflexion interne) et **Multimodal**
+> (GPT-4o, Gemini, Claude 3+). "Generative" est un terme générique, pas un type de modèle spécifique.
 
 ---
 type: single
@@ -304,17 +303,16 @@ difficulty: medium
 tags: [prompt, strategies]
 ---
 
-## Quelles sont les 4 stratégies Anthropic pour structurer les usages des LLM ? (sélectionnez 4)
+## Lesquelles font partie des **stratégies Anthropic** pour structurer les usages des LLM ? (sélectionnez 3)
 
 - [x] Write (générer du contenu)
 - [x] Select (filtrer / classer)
 - [x] Compress (résumer / extraire)
-- [x] Isolate (séparer les préoccupations)
 - [ ] Execute (exécuter du code)
 
-> Les **4 stratégies Anthropic** : **Write** (créer), **Select** (trier/classer/router), **Compress**
-> (résumer/extraire), **Isolate** (décomposer un pipeline multi-étapes, base du RAG). En les combinant, on peut
-> construire des workflows complexes. "Execute" n'est pas une des 4 stratégies.
+> Les **4 stratégies Anthropic** sont **Write** (créer), **Select** (trier/classer/router),
+> **Compress** (résumer/extraire) et **Isolate** (décomposer un pipeline multi-étapes, base du RAG).
+> En les combinant, on construit des workflows complexes. "Execute" n'en fait pas partie.
 
 ---
 type: single
@@ -522,11 +520,10 @@ tags: [mcp, outils]
 
 ## Parmi ces outils, lesquels sont des serveurs MCP couramment utilisés ? (sélectionnez 3)
 
-- [x] Context7 (documentation live)
 - [x] GitHub (code, PRs, issues)
-- [x] Figma (design ↔ code)
 - [ ] React (framework JavaScript)
-- [ ] PostgreSQL natif (sans serveur MCP)
+- [x] Context7 (documentation live)
+- [x] Figma (design ↔ code)
 
 > **Context7**, **GitHub** et **Figma** sont des serveurs MCP essentiels. Context7 fournit la documentation à jour des
 > librairies. GitHub permet de lire/écrire du code et des PRs. Figma permet d'extraire les specs de design. React est un

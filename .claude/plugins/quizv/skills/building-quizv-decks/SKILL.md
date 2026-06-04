@@ -104,6 +104,37 @@ bun run packages/server/src/cli.ts check decks/<slug>/index.quizv.md
 6. **`max-questions` and `max-time` are mutually exclusive** in quiz frontmatter
 7. **Explanations are mandatory** — every question must have a blockquote explanation
 8. **Timer values** should match difficulty: 15-20s easy, 20-25s medium, 25-35s hard
+9. **Choices must look visually identical** (same formatting, length, grammar) so the correct
+   answer doesn't stand out. See [Visual Homogeneity Rule](#visual-homogeneity-rule) below.
+
+## Visual Homogeneity Rule
+
+**Choices must look visually identical so the correct answer doesn't give itself away.** A common
+generation mistake is to elaborate only on the correct option (extra detail, parenthetical hint,
+bold emphasis…) while the distractors stay plain. Players spot the asymmetry, not the truth.
+
+### Anti-patterns to avoid
+
+| Anti-pattern | Example (bad) | Fix |
+|--------------|---------------|-----|
+| Only the correct answer has `**bold**` | `- [x] **HyperText Markup Language**` vs `- [ ] Hyper Transfer Markup Language` | Either bold all 4 or none |
+| Only the correct answer has *italic* | same idea | same fix |
+| Only the correct answer has `(parentheses)` with extra context | `- [x] Reasoning (raisonnement étendu interne)` vs `- [ ] Generative` | Parenthesise all 4 or none |
+| Only the correct answer uses `` `backticks` `` | `- [x]` `roles/cloudsql.client` ` vs `- [ ] Owner role` | Backtick all 4 or none |
+| Correct answer is noticeably longer or shorter | `- [x] A full sentence explaining…` vs three 2-word distractors | Match the verbosity across choices |
+| Correct answer has trailing punctuation when others don't | `- [x] HyperText Markup Language.` | Drop the period everywhere |
+| Different capitalisation / case style on the correct one | `- [x] OAuth 2.1` vs `- [ ] saml` | Apply the same style to every choice |
+| Correct answer is the only one starting with a verb / proper noun | `- [x] Apply patches automatically` vs three short noun phrases | Rephrase so all 4 start the same way |
+
+### Checklist before committing a question
+
+- [ ] All 4 choices use the **same markdown formatting** (bold/italic/code spans on all or none)
+- [ ] All 4 choices have **similar length** (within ~30%)
+- [ ] All 4 choices follow the **same grammatical pattern** (same starter, same tense, same punctuation)
+- [ ] Move any extra context (definitions, parenthetical hints) from the choice **into the `>` explanation block**
+
+The right place to give pedagogical context is the explanation that appears AFTER reveal — not the
+choice itself.
 
 ## Choice Count Rule
 

@@ -94,7 +94,7 @@ tags: [concepts, finops, cloud-run]
 Une équipe oublie un service Cloud Run sur leur projet GCP de TP avec `--min-instances=10`.
 Au bout du week-end, ils découvrent une facture de ~200 €. Quelle est la **cause technique précise** ?
 
-- [x] `--min-instances=10` maintient **10 instances chaudes facturées 24/7** — scale-to-zero annulé
+- [x] Ce flag maintient 10 instances chaudes facturées 24/7 — scale-to-zero annulé
 - [ ] Cloud Run a facturé les requêtes des bots et crawlers qui ont scrapé l'URL publique
 - [ ] Le Load Balancer Google intégré à Cloud Run a une facturation horaire qui s'ajoute au compute
 - [ ] Le scale-to-zero de Cloud Run ne s'applique pas le week-end (politique de Google par défaut)
@@ -138,7 +138,7 @@ Tu as créé un projet avec l'ID `simlpon-rag-prod` (typo : « simlpon »). Tu r
 
 - [ ] Oui, via `gcloud projects rename simlpon-rag-prod simplon-rag-prod`
 - [ ] Oui, en supprimant et recréant — les ressources sont migrées automatiquement
-- [x] **Non**, le Project ID est **unique mondialement et immutable** — seul le « display name » change
+- [x] Non, le Project ID est unique mondialement et immutable — seul le « display name » change
 - [ ] Oui, mais uniquement dans les 30 premiers jours après la création
 
 > Le **Project ID** est **immutable** une fois créé et **globalement unique** sur GCP. Tu peux changer
@@ -161,7 +161,7 @@ Quelle architecture GCP permet de donner à ton Cloud Run une IP de sortie **sta
 
 - [ ] Activer `--min-instances=1` pour figer l'instance et son IP
 - [ ] Déclarer une IP statique via `gcloud compute addresses create` et l'attacher au Cloud Run
-- [x] **VPC Connector** branché au Cloud Run + **Cloud NAT** en sortie du VPC avec une **IP statique réservée**
+- [x] VPC Connector branché au Cloud Run + Cloud NAT en sortie du VPC avec une IP statique réservée
 - [ ] Utiliser un Cloud Load Balancer externe en sortie d'API
 
 > Par défaut, Cloud Run sort sur une **IP dynamique** appartenant au pool Google : impossible à
@@ -181,7 +181,7 @@ tags: [cloud-run, revisions]
 ## 3ᵉ `gcloud run deploy` : que deviennent les deux révisions précédentes ?
 
 - [ ] Elles sont supprimées automatiquement pour libérer du quota
-- [x] Elles restent **activables pour un rollback** — seule la nouvelle reçoit 100 % du trafic par défaut
+- [x] Elles restent activables pour un rollback — seule la nouvelle reçoit 100 % du trafic par défaut
 - [ ] Elles sont archivées dans un bucket GCS dédié au service
 - [ ] Elles continuent à recevoir 33 % du trafic chacune pour une bascule progressive
 
@@ -204,7 +204,7 @@ Tu builds ton image Docker sur ton MacBook M3, tu la pushes vers Artifact Regist
 déploiement Cloud Run plante avec `exec format error`. Cause et fix ?
 
 - [ ] Le runtime Docker du Mac est cassé — il faut redémarrer Docker Desktop
-- [x] Build **arm64** (natif M-series) au lieu de **linux/amd64** — `docker buildx build --platform linux/amd64`
+- [x] Build arm64 par défaut au lieu de linux/amd64 — utiliser `docker buildx build --platform linux/amd64`
 - [ ] Cloud Run ne supporte pas les images poussées depuis un Mac — `gcloud builds submit` obligatoire
 - [ ] L'`ENTRYPOINT` du Dockerfile doit être préfixé par `/bin/sh -c` sur Mac
 
@@ -296,7 +296,7 @@ tags: [cloud-sql, security]
 
 - [ ] Parce que `postgres` est plus lent — Cloud SQL applique un throttling sur ce user
 - [ ] Parce que `postgres` ne peut pas utiliser l'extension pgvector
-- [x] **Principle of least privilege** — borner l'app à `SELECT/INSERT/UPDATE/DELETE` réduit le blast radius
+- [x] Principle of least privilege — borner l'app à `SELECT/INSERT/UPDATE/DELETE` réduit le blast radius
 - [ ] Par convention historique des tutoriels Postgres, sans impact réel
 
 > `postgres` est **superuser** : il peut tout — `DROP DATABASE`, `CREATE EXTENSION`, `CREATE USER`,
@@ -362,7 +362,7 @@ Tu charges un PDF en classe **Coldline** dans un bucket GCS, puis tu le supprime
 **10 jours**. Que paies-tu ?
 
 - [ ] Rien — le stockage est facturé uniquement après les 90 jours de rétention minimum
-- [x] **90 jours de stockage Coldline** quand même — c'est la **rétention minimum facturée** de la classe
+- [x] 90 jours de stockage Coldline quand même — c'est la rétention minimum facturée de la classe
 - [ ] 10 jours Coldline + 80 jours Archive par rétrogradation automatique
 - [ ] 10 jours de stockage Coldline + des frais de suppression anticipée fixes (1 $)
 
@@ -387,7 +387,7 @@ sur un bucket privé d'entreprise ?
 
 - [ ] Uniquement `--uniform-bucket-level-access` à la création
 - [ ] Uniquement choisir une région européenne (`europe-west1` ou `europe-west9`)
-- [x] **`--uniform-bucket-level-access`** + **`publicAccessPrevention: enforced`** combinés
+- [x] `--uniform-bucket-level-access` + `publicAccessPrevention: enforced` combinés
 - [ ] Désactiver l'API `storage.googleapis.com` au niveau du projet
 
 > Les deux paramètres sont **complémentaires**. **`--uniform-bucket-level-access`** force une seule
@@ -434,7 +434,7 @@ Pourquoi le brief impose-t-il **Workload Identity Federation** (WIF) plutôt qu'
 de service account pour l'authentification GitHub Actions → GCP ?
 
 - [ ] WIF est plus rapide à configurer que la clé JSON (1 commande au lieu de plusieurs)
-- [x] **Aucun secret au repos** : échange OIDC → token GCP **court (1 h)**, filtrable repo/branche, auditable
+- [x] Aucun secret au repos : échange OIDC → token GCP court (1 h), filtrable repo/branche, auditable
 - [ ] WIF est obligatoire depuis la version `gcloud` 500.0 publiée fin 2025
 - [ ] WIF permet d'éviter d'activer les APIs GCP côté projet cible
 
@@ -460,7 +460,7 @@ concret ouvres-tu ?
 
 - [ ] Aucun risque — l'`attribute-condition` est purement informatif, utilisé uniquement pour les logs
 - [ ] Le provider est bloqué à la création depuis 2023 : la commande échoue tant qu'aucune condition n'est précisée
-- [x] **N'importe quel repo GitHub** peut s'authentifier sur ton provider et **impersonner ta SA cible**
+- [x] N'importe quel repo GitHub peut s'authentifier sur ton provider et impersonner ta SA cible
 - [ ] L'`attribute-condition` mappe les claims OIDC vers des rôles IAM ; sans elle, GCP refuse l'échange
 
 > GitHub Actions émet des **JWT OIDC signés** pour **tous** les workflows GitHub du monde — pas

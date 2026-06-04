@@ -56,7 +56,7 @@ tags: [ia, llm]
 ## Quelle est la différence clé entre un modèle de type GPT-4 et un modèle "reasoning" de type o1/o3 ?
 
 - [ ] o1 génère uniquement du code
-- [x] o1 utilise une chaîne de réflexion interne avant de répondre
+- [x] o1 utilise une chaîne de réflexion interne
 - [ ] o1 a une fenêtre de contexte plus petite
 - [ ] o1 est open-source contrairement à GPT-4
 
@@ -109,7 +109,7 @@ tags: [prompt]
 
 - [ ] RAG
 - [ ] Tree of Thought
-- [x] Chain-of-Thought (CoT)
+- [x] Chain-of-Thought
 - [ ] RLHF
 
 > **Chain-of-Thought (CoT)** : en ajoutant "pense étape par étape" ou en montrant des exemples de raisonnement
@@ -125,7 +125,7 @@ tags: [prompt]
 ## Quel est le rôle du System Prompt dans l'API Claude ou OpenAI ?
 
 - [ ] Injecter uniquement des données RAG
-- [x] Définir le persona, les règles et le contexte global du modèle
+- [x] Définir le persona, les règles et le contexte du modèle
 - [ ] Spécifier la température d'inférence
 - [ ] Lister exclusivement les outils disponibles
 
@@ -193,7 +193,7 @@ tags: [context]
 ## Quelle stratégie permet de gérer des conversations très longues qui dépassent la context window ?
 
 - [ ] Augmenter la température du modèle
-- [x] Sliding window + résumé compressé des échanges précédents
+- [x] Sliding window + résumé compressé
 - [ ] Réduire max_tokens
 - [ ] Passer à un modèle plus petit
 
@@ -210,7 +210,7 @@ tags: [context]
 ## Qu'est-ce que le "KV Cache" dans l'inférence d'un LLM ?
 
 - [ ] Un cache Redis pour les résultats d'API
-- [x] La mise en cache des matrices Key/Value d'attention pour les préfixes communs
+- [x] La mise en cache des Key/Value des préfixes communs
 - [ ] Un cache de vecteurs d'embeddings
 - [ ] Un cache HTTP pour les requêtes LLM
 
@@ -245,7 +245,7 @@ tags: [agents]
 ## Qu'est-ce que le pattern "ReAct" dans le contexte des agents LLM ?
 
 - [ ] Un framework React.js pour les UIs d'agents
-- [x] Un pattern Reasoning + Acting alternant réflexion et actions outillées
+- [x] Un pattern Reasoning + Acting alternant réflexion et actions
 - [ ] Un algorithme de reinforcement learning
 - [ ] Un protocole de communication inter-agents
 
@@ -280,7 +280,7 @@ tags: [agents]
 ## Dans un système multi-agents, quelle est la différence entre un orchestrateur et un "swarm" ?
 
 - [ ] Le swarm est systématiquement plus rapide
-- [x] L'orchestrateur centralise le contrôle ; le swarm opère de façon décentralisée avec des agents autonomes
+- [x] L'orchestrateur centralise le contrôle ; le swarm est décentralisé
 - [ ] Le swarm utilise toujours plus d'agents
 - [ ] L'orchestrateur ne peut gérer qu'un seul sous-agent
 
@@ -314,10 +314,10 @@ tags: [coding]
 
 ## En agentic coding (Claude Code, Cursor...), quel fichier définit les conventions du projet ?
 
-- [ ] .env
+- [ ] .env / config.json / settings.yml
 - [x] CLAUDE.md / CONVENTIONS.md / .cursorrules
-- [ ] package.json
-- [ ] Dockerfile
+- [ ] package.json / package-lock.json / yarn.lock
+- [ ] Dockerfile / docker-compose.yml / .dockerignore
 
 > Des fichiers comme **CLAUDE.md** (Claude Code), **.cursorrules** (Cursor) ou **CONVENTIONS.md** servent de "mémoire
 > projet" : l'agent les lit au démarrage pour respecter l'architecture, les patterns de code et les règles métier.
@@ -349,7 +349,7 @@ tags: [coding]
 ## Qu'est-ce que le "vibe coding" et sa principale limite en production ?
 
 - [ ] Une méthode agile basée sur l'ambiance d'équipe
-- [x] Générer du code par description langage naturel sans le lire — limite : dette technique invisible et code incompris
+- [x] Générer du code par prompts sans le relire — dette technique invisible
 - [ ] Un style de pair programming asynchrone
 - [ ] Un framework de test basé sur l'expérience utilisateur
 
@@ -384,7 +384,7 @@ tags: [rag]
 ## Quelle est la fonction principale d'un modèle d'embedding dans un pipeline RAG ?
 
 - [ ] Compresser et résumer les PDF
-- [x] Convertir du texte en vecteurs pour la recherche sémantique
+- [x] Convertir le texte en vecteurs sémantiques
 - [ ] Générer la réponse finale de l'assistant
 - [ ] Chiffrer les données stockées en base
 
@@ -419,7 +419,7 @@ tags: [rag]
 ## Qu'est-ce que le "Hybrid Search" dans un RAG et pourquoi est-il souvent supérieur à la recherche vectorielle seule ?
 
 - [ ] Rechercher simultanément dans plusieurs LLM
-- [x] Combiner recherche dense (vectorielle) + sparse (BM25) via RRF, capturant sémantique ET correspondances exactes
+- [x] Combiner recherche dense + sparse via RRF
 - [ ] Une technique de chunking adaptative
 - [ ] Chercher en parallèle dans plusieurs bases vectorielles
 

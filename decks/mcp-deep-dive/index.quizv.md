@@ -24,7 +24,7 @@ tags: [intro, mcp]
 
 - [ ] N + 1 (un hub central, type bus de messages)
 - [ ] N × log(M) (un dispatcher par tiers de catégorie)
-- [x] **N × M** — chaque app réimplémente l'intégration de chaque service
+- [x] N × M — chaque app réimplémente l'intégration de chaque service
 - [ ] 1 — un wrapper REST/OpenAPI universel suffit
 
 > Avant MCP, chaque application LLM réécrit son propre protocole de tool calling pour chaque
@@ -44,7 +44,7 @@ tags: [intro, mcp, protocol]
 
 - [ ] Parce qu'USB-C est plus rapide que JSON-RPC sur stdio
 - [ ] Parce qu'USB-C est propriétaire et MCP est open-source
-- [x] USB-C reste un **câble** ; MCP est un **protocole stateful** avec lifecycle (LSP / SMTP / IMAP)
+- [x] USB-C reste un câble ; MCP est un protocole stateful avec lifecycle
 - [ ] Parce qu'USB-C ne supporte qu'un transport, alors que MCP n'en supporte aucun nativement
 
 > L'analogie USB-C aide à vendre l'idée d'un connecteur universel, mais elle écrase une
@@ -65,7 +65,7 @@ tags: [intro, mcp, protocol]
 - [ ] MCP est une **API REST** documentée par une spec OpenAPI partagée par tous les LLM
 - [ ] MCP est un **SDK officiel Anthropic** étendu plus tard aux autres LLM
 - [ ] MCP est un **format de tool calling** propre à Claude, indépendant du transport
-- [x] MCP est un **protocole stateful** (JSON-RPC + lifecycle + capabilities + primitives), pas une API
+- [x] MCP est un **protocole stateful** avec JSON-RPC, lifecycle, capabilities et primitives
 
 > La phrase choc de la session : **« MCP n'est pas une API. C'est un protocole stateful. »** Une
 > API REST est sans état, sans handshake, sans négociation. MCP a un **lifecycle** explicite
@@ -84,7 +84,7 @@ tags: [architecture]
 ## Les trois composants de l'architecture MCP
 
 - [ ] Broker / Producer / Consumer
-- [x] **Host** (l'app IA) → **Client** (composant logique interne) → **Server** (programme indépendant)
+- [x] Host → Client → Server
 - [ ] Frontend / Backend / Database
 - [ ] LLM / Runtime / API Gateway
 
@@ -105,7 +105,7 @@ tags: [architecture]
 ## La relation entre Host, Client et Server sur une connexion donnée
 
 - [ ] 1 host → 1 client → N servers (un client peut multiplexer plusieurs servers)
-- [x] **1 host → N clients → N servers** avec **1 client = 1 connexion = 1 server** (1:1:1)
+- [x] 1 host → N clients → N servers avec 1 client = 1 connexion = 1 server (1:1:1)
 - [ ] 1 host → N clients → 1 server unique partagé entre tous les clients
 - [ ] Les servers se voient entre eux et coordonnent leurs réponses
 
@@ -126,7 +126,7 @@ tags: [architecture, transport]
 
 - [ ] HTTP/2 sur Unix socket, multi-client par design
 - [ ] WebSocket localhost avec authentification bearer
-- [x] **Process forké par le host**, **stdin/stdout**, **mono-client** (1 server = 1 process), pas d'auth
+- [x] Process forké par le host, stdin/stdout, mono-client, pas d'auth
 - [ ] Stdin/stdout chiffrés en TLS avec rotation de clés à chaque message
 
 > Le transport **stdio** = le host **fork un process** pour chaque server et **pipe
@@ -146,7 +146,7 @@ tags: [architecture, transport]
 
 - [ ] WebSocket bidirectionnel obligatoire, sans fallback HTTP
 - [ ] gRPC streaming exclusivement, avec auth mTLS imposée
-- [x] **HTTP POST + Server-Sent Events (SSE) optionnel**, **multi-client**, **OAuth 2.1 recommandé**
+- [x] HTTP POST + SSE optionnel, multi-client, OAuth 2.1 recommandé
 - [ ] HTTP/3 + QUIC obligatoire, auth via header `X-MCP-Key` propriétaire
 
 > Le transport **Streamable HTTP** = un serveur HTTP autonome (potentiellement managé / SaaS).
@@ -167,7 +167,7 @@ tags: [architecture, layers]
 
 - [ ] Le transport layer (stdio/HTTP) est invariant, le data layer change selon le SDK
 - [ ] Les capabilities négociées dépendent du transport choisi
-- [x] **Data layer** (JSON-RPC + lifecycle + primitives) **invariant** ; **transport** swappable sans le toucher
+- [x] Data layer (JSON-RPC + lifecycle + primitives) invariant ; transport swappable sans le toucher
 - [ ] Stdio ne supporte pas les notifications — il faut passer à HTTP pour les utiliser
 
 > MCP sépare proprement **data layer** (JSON-RPC 2.0, lifecycle, capabilities, primitives,
@@ -187,7 +187,7 @@ tags: [spec, json-rpc]
 
 - [ ] `event` / `command` / `query`
 - [ ] `request` / `ack` / `nak`
-- [x] **`request` (avec `id`)** / **`response` (même `id`)** / **`notification` (sans `id`, sans réponse)**
+- [x] `request` / `response` / `notification`
 - [ ] 4 types : request, response, notification, broadcast
 
 > JSON-RPC 2.0 se résume à trois types : la **request** porte un `id` corrélé et `method` +
@@ -206,7 +206,7 @@ tags: [spec, lifecycle]
 ## Ordre obligatoire du handshake MCP avant tout appel métier
 
 - [ ] `tools/list` → `tools/call` → `initialize` (l'init n'est qu'un opt-in tardif)
-- [x] `initialize` → `initialize result` → **`notifications/initialized`** → puis seulement les ops métier
+- [x] `initialize` → `initialize result` → `notifications/initialized` → puis seulement les ops métier
 - [ ] `notifications/initialized` → `initialize` → `tools/list` (la notif vient en premier)
 - [ ] Pas de handshake — chaque request porte ses propres credentials
 
@@ -229,7 +229,7 @@ tags: [spec, capabilities]
 - [ ] Elle optimise la latence réseau en pré-cachant les résultats des prochains appels
 - [ ] Elle remplace le versioning sémantique du protocole
 - [ ] Elle est exigée par OAuth 2.1 — sans elle, l'auth échoue
-- [x] Chaque pair n'expose que ce qu'il supporte — un client ne doit jamais appeler une méthode non-négociée
+- [x] Chaque pair n'expose que ce qu'il supporte — pas d'appel non négocié
 
 > Sans négociation, un client appellerait des méthodes que le server n'implémente pas (par
 > exemple `prompts/list` sur un server qui ne fait pas de prompts) → erreurs « inconnues »
@@ -268,7 +268,7 @@ tags: [spec, sdk]
 ## Version stable cible et SDKs officiels en 2026
 
 - [ ] Version `1.4.2` (semver), SDK uniquement Python (propriétaire Anthropic)
-- [x] Version **`2025-11-25`** (versioning par date) ; SDKs TS, Python (FastMCP mergé), Kotlin, Java, C#, Swift
+- [x] Version `2025-11-25` (versioning par date) ; SDKs TS, Python (FastMCP mergé), Kotlin, Java, C#, Swift
 - [ ] Version `v3` (entier), SDK unique en Rust pour des raisons de perf
 - [ ] Pas de version stable — le protocole change chaque semaine en `main`
 
@@ -289,7 +289,7 @@ tags: [server, primitives, tools, resources, prompts]
 
 - [ ] `functions` / `files` / `sessions`
 - [ ] `endpoints` / `events` / `queries`
-- [x] **`tools`** (actions invocables) / **`resources`** (données) / **`prompts`** (templates de workflows)
+- [x] `tools` / `resources` / `prompts`
 - [ ] `actions` / `state` / `templates`
 
 > Un server MCP expose **3 primitives** distinctes : **Tools** = actions exécutables (le LLM
@@ -330,7 +330,7 @@ tags: [server, resources]
 
 - [ ] Resources directes = lecture seule, templates = écriture autorisée
 - [ ] Templates = format JSON Schema, directes = JSON brut
-- [x] Directes = URI **fixe** (`resources/list` + `resources/read`) ; templates = URI **paramétrée** (`resources/templates/list`)
+- [x] Directes = URI fixe ; templates = URI paramétrée
 - [ ] Aucune différence dans la spec — `templates` est un alias historique de `list`
 
 > Les **resources directes** ont une **URI fixe** vers une donnée précise
@@ -351,7 +351,7 @@ tags: [server, notifications, capabilities]
 
 - [ ] Toujours par défaut — c'est un comportement standard du JSON-RPC
 - [ ] Uniquement en transport HTTP (stdio n'expose pas les notifications)
-- [x] Seulement si le server a déclaré **`"listChanged": true`** au handshake — sinon polling manuel
+- [x] Seulement si le server a déclaré `"listChanged": true` au handshake — sinon polling manuel
 - [ ] Uniquement si le client force la subscription via un header HTTP `X-MCP-Subscribe`
 
 > Les notifications de type `list_changed` (tools, resources, prompts) sont **capability-based**
@@ -393,7 +393,7 @@ tags: [client, primitives]
 
 - [ ] À envoyer des logs de debug à un service externe (Sentry / Datadog)
 - [ ] Elles n'existent pas dans la spec stable — uniquement dans des drafts
-- [x] À **inverser le flux** : le server initie, le client répond (sampling, elicitation, logs)
+- [x] À inverser le flux : le server initie, le client répond (sampling, elicitation, logs)
 - [ ] Elles sont identiques aux primitives server, juste exposées de l'autre côté
 
 > Les primitives **client** sont l'élégance cachée de MCP : elles **inversent le flux habituel**
@@ -436,7 +436,7 @@ tags: [client, elicitation, security]
 - [ ] Elicitation peut demander un password si la connexion est chiffrée TLS 1.3
 - [ ] Elicitation est purement informative — le client n'a aucune validation à faire
 - [ ] La règle ne s'applique qu'en transport remote (HTTP), pas en stdio local
-- [x] **Elicitation ne demande JAMAIS un password ni une clé API** — le client doit refuser ou alerter
+- [x] Elicitation ne demande JAMAIS un password ni une clé API — le client doit refuser ou alerter
 
 > Règle dure de la spec : **`elicitation` ne demande JAMAIS un password ni une clé API**, peu
 > importe le transport ou le niveau de chiffrement. Le **client est tenu de refuser ou
@@ -478,7 +478,7 @@ tags: [extensions, auth, security]
 - [ ] OAuth 2.1 obligatoire même en stdio local (uniformité du flow)
 - [ ] mTLS exclusivement, bearer tokens interdits par la spec
 - [ ] Aucune auth supportée en remote — il faut placer un reverse proxy devant
-- [x] **Stdio = pas d'auth** (OS suffit) ; **Streamable HTTP multi-tenant = auth obligatoire** (OAuth 2.1)
+- [x] Stdio = pas d'auth (OS suffit) ; Streamable HTTP multi-tenant = auth obligatoire (OAuth 2.1)
 
 > Sur **stdio**, le contrôle d'accès est assuré par l'**OS** (le user qui lance le process) —
 > pas besoin d'auth dans le protocole. Sur **Streamable HTTP multi-tenant**, l'**auth est
@@ -498,7 +498,7 @@ tags: [extensions]
 
 - [ ] Toutes stables : Auth, Apps, Tasks — prêtes pour la prod multi-tenant
 - [ ] Toutes expérimentales : aucune n'est encore stable
-- [x] **Auth stable** · **Apps stable** (tooling jeune) · **Tasks expérimental** (à manier avec prudence)
+- [x] Auth stable · Apps stable · Tasks expérimental
 - [ ] Apps a été retiré de la spec en 2026 ; seules Auth et Tasks subsistent
 
 > Statut actuel des extensions : **Auth** = stable (OAuth 2.1 + bearer + API keys), **obligatoire**
@@ -519,7 +519,7 @@ tags: [fastmcp]
 
 - [ ] Un SDK propriétaire écrit en Rust, ~10 % du marché
 - [ ] Un fork TypeScript du SDK officiel, ~30 % du marché
-- [x] Le **framework Python de référence** — **~70 %** des servers, **mergé dans le SDK Python officiel**
+- [x] Le framework Python de référence, ~70 % des servers MCP
 - [ ] Une bibliothèque Java/Spring pour les entreprises, < 5 % du marché
 
 > **FastMCP** est le framework Python de référence : il propulse **~70 % des servers MCP en
@@ -562,7 +562,7 @@ tags: [fastmcp, swe]
 - [ ] MCP fournit automatiquement les tests d'intégration — pas besoin d'en écrire
 - [ ] Pas besoin de versioning, la négociation de capabilities suffit
 - [ ] Le rate-limiting est interdit par la spec (le client doit accepter tout débit)
-- [x] **Server MCP = service comme un autre** : tests, CI/CD, versioning, registry, obs, auth, rate-limiting
+- [x] Server MCP = service comme un autre : tests, CI/CD, versioning, registry, obs, auth, rate-limiting
 
 > Message anti-hype : **MCP n'exempte d'aucune des bonnes pratiques SWE**. Un server MCP en
 > prod demande la **checklist classique** : tests unitaires + intégration (mock client MCP),
@@ -584,7 +584,7 @@ tags: [ecosystem, swe]
 - [ ] Il faut un adaptateur propriétaire Anthropic pour les autres frameworks
 - [ ] LangChain et LangGraph utilisent un protocole propriétaire incompatible avec MCP
 - [ ] OpenAI ne supporte pas MCP — il faut un wrapper REST custom
-- [x] **Un même server MCP** fonctionne sans modification avec Claude, LangChain, OpenAI Agents, Vercel, Pydantic AI…
+- [x] Un même server MCP fonctionne sans modification avec Claude, LangChain, OpenAI Agents, Vercel…
 
 > Slogan **« write once, plug anywhere »** : un même server MCP (FastMCP ou autre) fonctionne
 > **sans modification** avec tous les grands frameworks AI 2026 — **Claude Code**, **LangChain
@@ -626,7 +626,7 @@ tags: [ecosystem, openapi]
 - [ ] Ils ne supportent que les verbes HTTP `GET`
 - [ ] Ils sont limités à 50 endpoints par server par limitation de la spec
 - [ ] Ils sont interdits par la spec MCP (seul FastMCP est officiellement supporté)
-- [x] Descriptions OpenAPI **trop pauvres** pour le LLM, **auth/security à mapper**, **patterns non-CRUD** mal traduits
+- [x] Descriptions OpenAPI trop pauvres, auth à mapper, patterns non-CRUD mal traduits
 
 > Les générateurs et proxies OpenAPI → MCP (Higress, `openapi-mcp-generator`,
 > `mcp-openapi-proxy`, Kong AI MCP Proxy…) sont une voie tentante pour exposer une API REST

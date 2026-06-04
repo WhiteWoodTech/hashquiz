@@ -23,7 +23,7 @@ tags: [docker, image]
 - [ ] Un conteneur en cours d'exécution sur le système hôte
 - [ ] Un fichier de configuration réseau pour Docker
 - [ ] Un volume de stockage persistant
-- [x] Un ensemble de couches en lecture seule servant de modèle pour créer des conteneurs
+- [x] Un modèle en lecture seule pour créer des conteneurs
 
 > Une **image Docker** est un ensemble de couches (layers) en **lecture seule** qui contient tout le nécessaire pour
 > exécuter une application (librairies, binaires, configurations). Elle sert de modèle immuable à partir duquel on lance
@@ -176,7 +176,7 @@ tags: [docker, registry]
 ## Qu'est-ce que Docker Hub ?
 
 - [ ] Un outil en ligne de commande pour gérer les conteneurs
-- [x] Le registre public par défaut permettant de stocker et distribuer des images Docker
+- [x] Le registre public par défaut pour stocker et distribuer des images
 - [ ] L'interface graphique de Docker Desktop
 - [ ] Un système de fichiers utilisé par les conteneurs
 
@@ -229,7 +229,7 @@ tags: [docker, installation]
 
 ## Quel composant est nécessaire pour faire fonctionner Docker Desktop sur Windows ?
 
-- [x] WSL 2 (Windows Subsystem for Linux 2)
+- [x] WSL 2
 - [ ] VirtualBox
 - [ ] VMware Workstation
 - [ ] Cygwin
@@ -249,7 +249,7 @@ tags: [docker, image]
 - [ ] Pour rendre les images plus difficiles à copier
 - [ ] Pour chiffrer les données contenues dans l'image
 - [ ] Pour permettre l'exécution simultanée de plusieurs conteneurs
-- [x] Pour permettre le partage et la réutilisation de couches communes entre images, économisant ainsi de l'espace disque
+- [x] Pour partager des couches communes entre images et économiser de l'espace
 
 > Docker utilise un **Union File System** pour fusionner les couches. Chaque instruction du Dockerfile crée une nouvelle
 > couche. Les images qui partagent une base commune (ex. `ubuntu:latest`) **réutilisent les mêmes couches**, ce qui
@@ -442,7 +442,7 @@ tags: [docker, dockerfile]
 ## Quelle est la différence entre `COPY` et `ADD` dans un Dockerfile ?
 
 - [ ] `COPY` est plus rapide que `ADD`
-- [x] `ADD` peut décompresser automatiquement des archives et récupérer des URLs, contrairement à `COPY`
+- [x] `ADD` peut décompresser des archives et télécharger des URLs
 - [ ] `ADD` ne peut copier que des fichiers locaux
 - [ ] `COPY` est déprécié au profit de `ADD`
 
@@ -512,7 +512,7 @@ tags: [docker, network]
 
 ## Dans quel cas utilise-t-on un réseau Docker de type `overlay` ?
 
-- [x] Pour permettre la communication entre conteneurs répartis sur plusieurs hôtes Docker
+- [x] Pour faire communiquer des conteneurs sur plusieurs hôtes Docker
 - [ ] Pour isoler totalement un conteneur du réseau
 - [ ] Pour partager l'interface réseau de l'hôte avec un conteneur
 - [ ] Pour remplacer le réseau bridge par défaut

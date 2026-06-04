@@ -116,7 +116,7 @@ tags: [mcp-why]
 ## Quel problème central MCP cherche-t-il à résoudre ?
 
 - [ ] Le coût élevé des tokens des LLM
-- [x] La multiplication des intégrations N×M entre apps IA et services
+- [x] Les intégrations N×M entre apps IA et services
 - [ ] Le manque de modèles open source performants
 - [ ] La latence des APIs LLM
 
@@ -136,7 +136,7 @@ tags: [mcp-why]
 
 - [ ] Une API REST standardisée pour les LLM
 - [ ] Un format de fichier de configuration
-- [x] Un protocole stateful avec lifecycle et négociation de capabilities
+- [x] Un protocole stateful avec lifecycle et capabilities
 - [ ] Une bibliothèque Python d'inférence LLM
 
 > MCP **n'est pas une API** au sens REST. C'est un **protocole stateful** (basé sur **JSON-RPC 2.0**)
@@ -288,15 +288,16 @@ tags: [transport, http]
 
 ## Quel mécanisme d'authentification est recommandé pour un serveur MCP **remote** (transport HTTP) ?
 
-- [ ] Aucune authentification — le protocole s'en charge
-- [ ] Une API Key transmise en clair dans l'URL
+- [ ] HTTP Basic Auth
+- [ ] API Key dans l'URL
 - [x] OAuth 2.1
-- [ ] SAML
+- [ ] SAML 2.0
 
 > Pour un server MCP **remote** accessible par plusieurs hosts via HTTP, **OAuth 2.1** est l'auth
 > recommandée — elle gère l'autorisation déléguée, le refresh de tokens et s'aligne sur les pratiques
 > modernes du web. Un server **local** (stdio) ne nécessite pas d'auth puisqu'il tourne déjà sur la
-> machine de l'utilisateur. Les API keys en URL et SAML sont soit insécures, soit inadaptés à ce cas.
+> machine de l'utilisateur. Basic Auth, API keys en URL et SAML sont soit insécures, soit inadaptés
+> à ce cas.
 
 ---
 type: single

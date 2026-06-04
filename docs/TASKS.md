@@ -28,15 +28,16 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
 ## Backlog
 
-- [ ] Agrandir le qr code
-- [ ] version sur mobile agancer les questions les une en dessous des autres (laisser tels quels sur  desktop)
+- [x] Agrandir le qr code
+- [x] version sur mobile agancer les questions les une en dessous des autres (laisser tels quels sur  desktop)
 - [ ] Maximum de longeurs des réponses à mettre dans la skills.
 - [ ] vérifier le randomize les propositions a, b, c, d → si quizz fait plusieurs fois ca tourne
-- [ ] La réponse ne doit pas sauter au yeux visuelement (la seul avec parenthèse, gras, italique...)
+- [x] La réponse ne doit pas sauter au yeux visuelement (la seul avec parenthèse, gras, italique...)
       et doit être au même niveau que les autres
 - [ ] génération résultat en fichier json
 - [ ] index comme dans slidev-decks?
-- [ ] Améliorer le cli check (4 réponses maximum...)
+- [ ] Sur la base des correction précédentes. Améliore le cli check : 4 réponses maximum,
+      check là où la bonne réponse saute aux yeux (formatage asymétrique)
 
 ### Phase 3 — Cloud / Supabase
 

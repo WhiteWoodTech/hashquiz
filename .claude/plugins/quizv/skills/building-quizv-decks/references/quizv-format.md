@@ -86,6 +86,7 @@ Each question block contains:
 | **Exact choice count** | **Each question MUST have exactly 4 choices** | **Authoring convention (UI is 2×2 grid)** |
 | At least one distractor | Each question keeps **≥1 wrong choice** (so ≤3 correct out of 4) | Authoring convention |
 | Multi-select phrasing | If the question says "select N" / "sélectionnez N", then `N < 4` | Authoring convention |
+| **Visual homogeneity** | All 4 choices use the **same markdown formatting, length and grammar** — the correct answer must not stand out | Authoring convention |
 
 The "exact choice count" rule is **not** enforced by the parser — verify manually before committing:
 

@@ -63,9 +63,10 @@ theme: dark
 ---timer: 20
 ```
 
-> **Authoring rule** — every question must have **exactly 4 choices** (the player UI is a 2×2 grid).
-> The parser only enforces ≥2; respect the 4-choice convention when writing or generating decks. See
-> the `building-quizv-decks` skill for details.
+> **Authoring rules** — every question must have **exactly 4 choices** (the player UI is a 2×2 grid).
+> All 4 choices must look **visually identical** (same markdown formatting, length and grammar) so
+> the correct answer doesn't stand out. The parser only enforces ≥2; respect both conventions when
+> writing or generating decks. See the `building-quizv-decks` skill for details.
 
 ### `@quizv/core`
 

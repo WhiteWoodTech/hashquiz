@@ -163,7 +163,7 @@ tags: [llm, contexte]
 
 - [ ] La taille maximale du fichier d'entraînement
 - [ ] Le nombre de langues que le modèle peut comprendre
-- [x] Tout ce que le modèle "voit" à un instant donné (prompt + historique)
+- [x] Tout ce que le modèle "voit" à un instant donné
 - [ ] La limite de tokens qu'un utilisateur peut envoyer par jour
 
 > La **fenêtre de contexte** = la "mémoire de travail" du modèle : system prompt + historique de conversation + message
@@ -325,7 +325,7 @@ tags: [prompt, system]
 
 - [ ] Le system prompt est en anglais, le user prompt dans la langue de l'utilisateur
 - [ ] Le system prompt est envoyé après chaque message utilisateur
-- [x] Le system prompt définit le rôle/règles de l'IA (invisible à l'utilisateur), le user prompt est le message de l'utilisateur
+- [x] Le system prompt fixe les règles de l'IA, le user prompt est ce que l'utilisateur tape
 - [ ] Les deux sont identiques, c'est juste une question de nomenclature
 
 > Le **system prompt** = "notice d'instructions" invisible à l'utilisateur final, définie par le développeur (rôle,
@@ -343,7 +343,7 @@ tags: [prompt, cout]
 
 - [ ] Quand on travaille sur un projet personnel
 - [ ] Quand la question est en français
-- [x] Quand la tâche prend moins de 30 secondes à faire manuellement
+- [x] Quand la tâche prend moins de 30 secondes à la main
 - [ ] Quand on utilise un modèle open source
 
 > La **règle des 30 secondes** : si une tâche (formater du JSON, renommer une variable, chercher une syntaxe basique)
@@ -379,7 +379,7 @@ tags: [rag, embeddings]
 
 - [ ] À accélérer la génération de tokens
 - [ ] À compresser les documents pour réduire les coûts
-- [x] À représenter le sens d'un texte sous forme de vecteur pour la recherche sémantique
+- [x] À encoder le sens d'un texte en vecteur pour la recherche sémantique
 - [ ] À traduire les documents dans la langue du modèle
 
 > Les **embeddings** convertissent un texte en **vecteur numérique** représentant son sens. Textes similaires → vecteurs
@@ -398,7 +398,7 @@ tags: [rag, usage]
 - [ ] Les hallucinations sur tous les sujets
 - [ ] La lenteur de génération des réponses
 - [ ] Le coût élevé des tokens d'output
-- [x] La connaissance figée et l'absence de mémoire sur vos données internes
+- [x] La connaissance figée et l'accès à vos données internes
 
 > Le RAG adresse deux limites : la **connaissance figée** (date de coupure) et l'**absence de mémoire** sur vos
 > documents internes (politiques RH, documentation produit, emails…). Le modèle ne change pas — on lui donne les bonnes
@@ -415,7 +415,7 @@ tags: [agents, concepts]
 
 - [ ] Un agent IA parle plusieurs langues, un chatbot une seule
 - [ ] Un chatbot est plus intelligent qu'un agent IA
-- [x] Un chatbot répond à des questions, un agent accomplit des tâches en exécutant des actions
+- [x] Un chatbot répond à des questions, un agent exécute des actions
 - [ ] Un agent IA est toujours plus coûteux qu'un chatbot
 
 > **Chatbot** : réactif, répond à des questions, ne prend pas d'initiative. **Agent IA** : autonome, planifie les
@@ -469,7 +469,7 @@ tags: [mcp, concepts]
 
 - [ ] Le GPS de l'IA
 - [ ] Le Wi-Fi de l'IA
-- [x] L'USB-C de l'IA — un connecteur universel
+- [x] L'USB-C de l'IA
 - [ ] Le système d'exploitation de l'IA
 
 > **MCP = "L'USB-C de l'IA"**. Avant l'USB-C, chaque appareil avait son câble propriétaire. Avant MCP, chaque outil IA
@@ -504,7 +504,7 @@ tags: [mcp, architecture]
 
 - [ ] Prompt, Response, Action
 - [ ] Model, Context, Protocol
-- [x] Host (client IA), Protocol (JSON-RPC), Server (source de données)
+- [x] Host, Protocol, Server
 - [ ] Input, Middleware, Output
 
 > L'architecture MCP : **Host** (client IA : Claude Code, Cursor) ↔ **Protocol** (JSON-RPC, communication) ↔ **Server**

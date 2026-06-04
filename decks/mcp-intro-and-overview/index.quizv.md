@@ -40,9 +40,7 @@ tags: [genai]
 - [x] Les GAN (réseaux adversariaux)
 - [x] Les modèles de diffusion
 - [x] Les LLM (Large Language Models)
-- [ ] Les RNN récurrents
 - [ ] Le Reinforcement Learning
-- [ ] Les CNN convolutifs
 
 > Les trois familles de l'IA générative sont les **GAN** (deux réseaux en compétition, ex. deepfakes,
 > StyleGAN), les **modèles de diffusion** (partent du bruit, ex. Stable Diffusion, Midjourney) et les
@@ -62,9 +60,7 @@ tags: [llm-limits]
 - [x] Ils peuvent halluciner — inventer des faits avec confiance
 - [x] Ils ont une date de coupure des données d'entraînement
 - [x] Leur fenêtre de contexte est limitée
-- [x] Ils font des erreurs sur les calculs arithmétiques complexes
 - [ ] Ils accèdent en permanence à Internet en temps réel
-- [ ] Ils parlent toutes les langues du monde avec une qualité parfaite
 
 > Les LLM **hallucinent** (inventent des faits), ont une **date de coupure** (ils ignorent les événements
 > postérieurs à leur entraînement), une **fenêtre de contexte limitée** (ils ne voient que le contexte
@@ -237,7 +233,6 @@ tags: [architecture, host]
 - [x] Appliquer les politiques (auth, permissions, sampling)
 - [x] Consolider les capacités de tous les servers pour le modèle
 - [ ] Exécuter directement le code des tools à la place du server
-- [ ] Stocker les embeddings vectoriels
 
 > Le **Host** est la couche de coordination : il **instancie les clients**, **applique les politiques**
 > (auth, permissions, sampling) et **agrège les capabilities** des différents servers pour les rendre
@@ -275,10 +270,7 @@ tags: [data-layer, json-rpc, primitives]
 
 - [x] Le protocole JSON-RPC 2.0
 - [x] Le lifecycle (initialize, shutdown)
-- [x] La négociation des capabilities
 - [x] Les primitives tools / resources / prompts
-- [ ] Les streams stdin/stdout
-- [ ] L'authentification OAuth
 - [ ] Le framing HTTP / Server-Sent Events
 
 > Le **data layer** est l'« oignon intérieur » du protocole : **JSON-RPC 2.0**, **lifecycle**,
@@ -394,8 +386,6 @@ tags: [primitives, architecture]
 - [x] Resources (données accessibles)
 - [x] Prompts (templates réutilisables)
 - [ ] Sampling
-- [ ] Elicitation
-- [ ] Roots
 
 > Côté **server**, MCP définit trois primitives : **tools** (actions exécutables, ex. créer un fichier,
 > requête SQL), **resources** (données accessibles, ex. doc, schéma DB) et **prompts** (templates de

@@ -161,6 +161,11 @@ theme: dark
 ---timer: 20
 ```
 
+> **Each question must have exactly 4 choices** — the player UI is a 2×2 grid. Keep at least one
+> distractor (so ≤3 correct answers per question). For multi-select, phrase as "select 2" or
+> "select 3", never "select 4". See [`docs/TECHNICAL_GUIDE.md`](docs/TECHNICAL_GUIDE.md) and the
+> `building-quizv-decks` skill.
+
 ## Project Structure
 
 ```text

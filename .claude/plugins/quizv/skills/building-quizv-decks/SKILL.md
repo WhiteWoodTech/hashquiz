@@ -98,7 +98,40 @@ bun run packages/server/src/cli.ts check decks/<slug>/index.quizv.md
 1. **One question at a time** when gathering information from the user
 2. **Always respect the `.quizv.md` format** — see format reference
 3. **Language is set at scaffold time** and respected throughout plan and generation
-4. **Questions must have** at least 2 choices and at least 1 correct answer
-5. **`max-questions` and `max-time` are mutually exclusive** in quiz frontmatter
-6. **Explanations are mandatory** — every question must have a blockquote explanation
-7. **Timer values** should match difficulty: 15-20s easy, 20-25s medium, 25-35s hard
+4. **Every question must have exactly 4 choices** — no more, no less. This is a hard UI constraint
+   (the player app renders a 2×2 grid). See [Choice Count Rule](#choice-count-rule) below.
+5. **Each question must have at least 1 correct answer** (and at most 3, so there is always at least 1 distractor)
+6. **`max-questions` and `max-time` are mutually exclusive** in quiz frontmatter
+7. **Explanations are mandatory** — every question must have a blockquote explanation
+8. **Timer values** should match difficulty: 15-20s easy, 20-25s medium, 25-35s hard
+
+## Choice Count Rule
+
+**Every question MUST have exactly 4 choices.** This is non-negotiable — the host and player UIs are
+designed around a 2×2 answer grid, and questions with more or fewer options break the layout.
+
+### How to fit a topic into 4 choices
+
+| Situation | What to do |
+|-----------|------------|
+| You wrote 5+ options | Drop the weakest distractors (the most obviously wrong, or duplicates of a stronger one) |
+| Topic has 5+ correct items | Pick the 3 best correct ones + 1 strong distractor, rephrase to "sélectionnez 3" / "select 3" |
+| Topic has only 2-3 real options | Add 1-2 plausible distractors (common misconceptions, near-misses, fake-but-believable terms) |
+| You want all-correct (no distractor) | Don't — always keep ≥1 wrong choice so the question stays a quiz, not a check-the-box list |
+
+### Phrasing rule for multi-select
+
+When the question asks "select N", `N` must be **strictly less than 4** (so there is always at least
+one distractor). Use `sélectionnez 2` or `sélectionnez 3` — never `sélectionnez 4`.
+
+### Validation
+
+The CLI `check` command does **not** enforce this rule (the parser only requires ≥2 choices). You must
+verify manually or with a one-liner:
+
+```bash
+awk '/^##[^#]/ { if (q) print q ": " n; q=$0; n=0 } /^- \[[ x]\]/ { n++ } END { if (q) print q ": " n }' \
+  decks/<slug>/index.quizv.md | grep -v ": 4$"
+```
+
+This prints any question whose choice count differs from 4. Empty output = all good.

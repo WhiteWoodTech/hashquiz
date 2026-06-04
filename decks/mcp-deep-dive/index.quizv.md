@@ -250,9 +250,7 @@ tags: [spec, capabilities, server, client]
 - [x] **`tools`** est une capability **server**
 - [x] **`prompts`** est une capability **server**
 - [x] **`sampling`** est une capability **client**
-- [x] **`elicitation`** est une capability **client**
 - [ ] `tools` est une capability **client** (le client expose ses propres tools au server)
-- [ ] `oauth` est une capability **server** négociée à l'`initialize`
 
 > Les capabilities MCP sont **asymétriques** par design : côté **server** on trouve `tools`,
 > `resources`, `prompts`, `logging`, `completions` ; côté **client** on trouve `sampling`,
@@ -313,7 +311,6 @@ tags: [server, primitives]
 - [x] **Tools** sont contrôlés par le **modèle** (le LLM décide d'appeler)
 - [x] **Resources** sont contrôlées par l'**application** (l'app sélectionne ce qu'elle envoie)
 - [x] **Prompts** sont contrôlés par l'**utilisateur** (invocation explicite, type slash command)
-- [ ] **Tools** sont contrôlés par l'utilisateur uniquement (jamais d'autonomie modèle)
 - [ ] **Resources** sont contrôlées par le modèle qui décide quoi lire
 
 > C'est **la** distinction philosophique de MCP : **3 primitives = 3 niveaux de contrôle**.
@@ -374,11 +371,9 @@ tags: [server, notifications]
 ## Notifications usuelles côté server
 
 - [x] `notifications/tools/list_changed`
-- [x] `notifications/resources/list_changed`
 - [x] `notifications/resources/updated` (un fichier souscrit a changé)
 - [x] `notifications/progress` (progression d'une opération longue)
 - [ ] `notifications/heartbeat` (keep-alive émis toutes les 30 s)
-- [ ] `notifications/tools/error_rate` (métrique d'erreur du server)
 
 > Les notifications standard côté server permettent de **synchroniser en temps réel** sans
 > polling : `tools/list_changed` et `resources/list_changed` quand le catalogue évolue,
@@ -420,8 +415,6 @@ tags: [client, primitives, sampling, elicitation, roots]
 - [x] **`sampling/createMessage`** : le server demande au client de faire un appel LLM
 - [x] **`elicitation/create`** : le server demande une info à l'utilisateur via le client
 - [x] **`roots/list`** : le client annonce les dossiers (`file://`) en scope au server
-- [x] **`logging`** : le server envoie ses logs structurés vers le client
-- [ ] **`roots/list`** : définit les rôles d'authentification (auth roots) du provider OAuth
 - [ ] **`sampling`** : permet au server de fine-tuner le modèle utilisé par le client
 
 > Mapping correct : **Sampling** = le server délègue un appel LLM au client (le server reste
@@ -547,9 +540,7 @@ tags: [fastmcp, primitives]
 
 - [x] **`@mcp.tool`** déclare une fonction comme tool MCP exposé
 - [x] **`@mcp.resource("uri://template/{param}")`** déclare une resource (URI directe ou template)
-- [x] **`@mcp.prompt`** déclare un workflow réutilisable invocable par l'utilisateur
 - [x] Le **schema JSON** est **généré depuis les type hints Python** (description = docstring)
-- [ ] `@mcp.endpoint` — équivalent FastAPI pour exposer des routes REST côté MCP
 - [ ] `@mcp.handler` — décorateur obligatoire à ajouter en plus de `@mcp.tool`
 
 > FastMCP repose sur trois décorateurs (`@mcp.tool`, `@mcp.resource`, `@mcp.prompt`) qui mappent
@@ -614,9 +605,7 @@ tags: [ecosystem, langchain]
 - [x] **LangChain / LangGraph** via `langchain-mcp-adapters` (MultiServerMCPClient inclus)
 - [x] **OpenAI Agents SDK** via `MCPServerStdio` / `MCPServerSse`
 - [x] **Vercel AI SDK** via `experimental_createMCPClient`
-- [x] **Pydantic AI** via `pydantic_ai.mcp` (intégration native)
 - [ ] **jQuery** dispose d'un plugin officiel `jquery-mcp-adapter`
-- [ ] **NumPy** intègre nativement un client MCP via `numpy.mcp`
 
 > En 2026, l'adoption MCP côté client est **fulgurante** : LangChain/LangGraph, OpenAI Agents
 > SDK, Vercel AI SDK, Pydantic AI, mais aussi CrewAI, AutoGen, LlamaIndex, Mastra, Strands AWS,

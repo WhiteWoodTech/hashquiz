@@ -56,11 +56,16 @@ theme: dark
 - [x] Correct answer
 - [ ] Wrong answer A
 - [ ] Wrong answer B
+- [ ] Wrong answer C
 
 > Optional explanation
 
 ---timer: 20
 ```
+
+> **Authoring rule** — every question must have **exactly 4 choices** (the player UI is a 2×2 grid).
+> The parser only enforces ≥2; respect the 4-choice convention when writing or generating decks. See
+> the `building-quizv-decks` skill for details.
 
 ### `@quizv/core`
 

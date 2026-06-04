@@ -52,8 +52,6 @@ installerais et opérerais toi-même sur une VM Compute Engine ?
 - [x] Les **backups quotidiens** sont automatiques, avec rétention configurable
 - [x] Les **patchs OS et CVE Postgres** sont appliqués automatiquement (fenêtre configurable)
 - [x] L'**HA multi-zone** s'active en changeant un paramètre, sans réécrire l'archi
-- [x] Les **métriques d'instance** (CPU, locks, vacuum, connexions) sont collectées sans agent
-- [ ] Cloud SQL **écrit tes requêtes SQL** à la place de l'équipe applicative
 - [ ] Cloud SQL **optimise et crée les index** à partir des plans d'exécution observés
 
 > Cloud SQL prend en charge tout le **plan opérationnel** de Postgres : backups, patchs, HA, métriques,
@@ -76,9 +74,7 @@ selon le NIST ?
 - [x] **On-demand self-service** — tu provisionnes sans intervention humaine du fournisseur
 - [x] **Rapid elasticity** — tu scales up/down rapidement, parfois automatiquement
 - [x] **Measured service** — facturation à la consommation (pay-as-you-go)
-- [x] **Resource pooling** — mutualisation multi-tenant des ressources physiques
 - [ ] **Contrat d'engagement** de 36 mois minimum signé avec le fournisseur
-- [ ] **Hébergement sur-mesure dédié** à un seul client (mono-tenant exclusif)
 
 > Le NIST définit 5 caractéristiques : *on-demand self-service*, *broad network access*,
 > *resource pooling*, *rapid elasticity*, *measured service*. **Si l'une manque, ce n'est pas du
@@ -233,7 +229,6 @@ Quelles contraintes ton container **doit-il respecter** pour fonctionner correct
 - [x] Écouter sur le port défini par la variable d'environnement `$PORT` (par défaut `8080`)
 - [x] Être **stateless** — pas de fichier persistant local entre instances ni entre requêtes
 - [x] Démarrer en **moins de 5 minutes** (cold start max)
-- [ ] Être basé sur une image **Alpine Linux** uniquement
 - [ ] S'exécuter en **root** pour pouvoir binder le port 80
 
 > Cloud Run impose un cadre clair : **écouter sur `$PORT`**, **stateless** (le file system est éphémère
@@ -417,13 +412,11 @@ quels rôles IAM la **SA dédiée `rag-api`** doit-elle avoir en suivant le prin
 - [x] `roles/cloudsql.client` (au niveau du projet)
 - [x] `roles/secretmanager.secretAccessor` (au niveau du projet, ou par secret)
 - [x] `roles/storage.objectViewer` (sur le bucket corpus uniquement)
-- [x] `roles/logging.logWriter` (au niveau du projet)
 - [ ] `roles/owner` (au niveau du projet) « pour simplifier le débogage »
-- [ ] `roles/editor` (au niveau du projet) « parce que c'est la valeur par défaut de la SA Compute »
 
-> Les **4 rôles predefined** ci-dessus suffisent strictement aux besoins du service.
-> **`roles/owner` et `roles/editor` sont des rôles « basic » à proscrire** sur une SA applicative :
-> ils donnent la capacité de **supprimer le projet**, **s'auto-attribuer d'autres rôles**
+> Les **3 rôles predefined** ci-dessus couvrent les besoins du service (auxquels on ajoute en pratique
+> `roles/logging.logWriter`). **`roles/owner` est un rôle « basic » à proscrire** sur une SA applicative :
+> il donne la capacité de **supprimer le projet**, **s'auto-attribuer d'autres rôles**
 > (escalade de privilèges), **modifier l'IAM**, etc. — bombe à retardement en cas de compromission.
 > La SA Compute par défaut a `roles/editor` héritée d'avant 2017 : c'est précisément pour ça qu'on
 > crée **une SA dédiée par service**.

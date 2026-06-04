@@ -191,6 +191,9 @@ function validateMultiple() {
 .qv-timer-wrap { margin: 0.5rem 0; }
 .qv-q-text { font-size: 1.25rem; text-align: center; margin: 0.5rem 0; line-height: 1.4; }
 .qv-grid { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+@media (max-width: 640px) {
+  .qv-grid { grid-template-columns: 1fr; }
+}
 
 /* Inline feedback reveal */
 .qv-reveal {

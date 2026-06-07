@@ -4,6 +4,8 @@ export interface PlayerState {
   email: string
   score: number
   joinedAt: number  // Unix ms
+  /** Unix ms when the socket closed; absent while connected. Used for grace-period cleanup. */
+  disconnectedAt?: number
 }
 
 export interface Score {
@@ -41,6 +43,8 @@ export interface GameState {
   players: Map<string, PlayerState>
   currentQuestionIdx: number
   totalQuestions: number
+  /** Unix ms at which the current question's timer expires. Absent outside the question phase. */
+  currentQuestionDeadlineMs?: number
 }
 
 export interface QuizInfo {

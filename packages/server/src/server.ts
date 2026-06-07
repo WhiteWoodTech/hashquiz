@@ -27,6 +27,19 @@ function generateJoinCode(): string {
 export interface QuizvServerOptions {
   port?: number
   quizFile: string
+  /** Grace period in ms before a disconnected player is removed. Defaults to QUIZV_GRACE_MS env var or 60000. */
+  graceMs?: number
+}
+
+const DEFAULT_GRACE_MS = 60_000
+function resolveGraceMs(opt?: number): number {
+  if (typeof opt === 'number' && Number.isFinite(opt) && opt >= 0) return opt
+  const raw = process.env['QUIZV_GRACE_MS']
+  if (raw) {
+    const n = Number(raw)
+    if (Number.isFinite(n) && n >= 0) return n
+  }
+  return DEFAULT_GRACE_MS
 }
 
 export function buildQuizInfo(quiz: Quiz): QuizInfo {
@@ -109,12 +122,15 @@ export class QuizvServer {
   private port: number
   private quizFile: string
   private quizMeta: QuizInfo
+  private graceMs: number
+  private graceTimers: Map<string, ReturnType<typeof setTimeout>> = new Map()
 
   constructor(options: QuizvServerOptions) {
     this.port = options.port ?? 3030
     this.quizFile = options.quizFile
     this.joinCode = generateJoinCode()
     this.transport = new LocalTransport()
+    this.graceMs = resolveGraceMs(options.graceMs)
 
     const content = readFileSync(options.quizFile, 'utf-8')
     const quiz = parseQuizFile(content)
@@ -166,7 +182,7 @@ export class QuizvServer {
       },
       websocket: {
         open(ws) {
-          const { role } = ws.data as { role: string; playerId: string }
+          const { role, playerId } = ws.data as { role: string; playerId: string }
           ws.subscribe(`game:${self.joinCode}`)
           if (role === 'host') {
             const localIP = getLocalIP()
@@ -178,6 +194,9 @@ export class QuizvServer {
               playerUrl: `http://${localIP}:3032?code=${self.joinCode}`,
               quizMeta: self.quizMeta,
             }))
+          } else if (role === 'player') {
+            // A new socket replaces any pending disconnect for this playerId.
+            self._cancelGraceTimer(playerId)
           }
         },
         message(ws, raw) {
@@ -190,20 +209,50 @@ export class QuizvServer {
               answerTimeMs?: number
             }
 
-            if (msg.type === 'player_join') {
-              const player: PlayerState = {
-                id: (ws.data as { playerId: string }).playerId,
+            const { playerId } = ws.data as { playerId: string }
+
+            if (msg.type === 'player_join' || msg.type === 'player_rejoin') {
+              self._cancelGraceTimer(playerId)
+              const existing = self.engine.state.players.get(playerId)
+              const player: PlayerState = existing ?? {
+                id: playerId,
                 pseudo: msg.pseudo ?? 'Anonymous',
                 email: msg.email ?? '',
                 score: 0,
                 joinedAt: Date.now(),
               }
-              self.engine.addPlayer(player)
-              ws.send(JSON.stringify({ type: 'joined', player, quizMeta: self.quizMeta, playerCount: self.engine.state.players.size }))
+              if (existing) {
+                // Update mutable fields on rejoin if the client provided them
+                if (msg.pseudo) existing.pseudo = msg.pseudo
+                if (msg.email)  existing.email  = msg.email
+                delete existing.disconnectedAt
+              }
+              const isRejoin = self.engine.addPlayer(player)
+              if (isRejoin) {
+                ws.send(JSON.stringify({
+                  type: 'state_snapshot',
+                  playerId,
+                  snapshot: self.engine.buildSnapshot(playerId, self.quizMeta),
+                }))
+              } else {
+                ws.send(JSON.stringify({
+                  type: 'joined',
+                  player,
+                  quizMeta: self.quizMeta,
+                  playerCount: self.engine.state.players.size,
+                }))
+              }
+            }
+
+            if (msg.type === 'state_request') {
+              ws.send(JSON.stringify({
+                type: 'state_snapshot',
+                playerId,
+                snapshot: self.engine.buildSnapshot(playerId, self.quizMeta),
+              }))
             }
 
             if (msg.type === 'submit_answer') {
-              const { playerId } = ws.data as { playerId: string }
               self.engine.submitAnswer(
                 playerId,
                 msg.choiceIds ?? [],
@@ -230,7 +279,21 @@ export class QuizvServer {
         },
         close(ws) {
           const { role, playerId } = ws.data as { role: string; playerId: string }
-          if (role !== 'host') self.engine.removePlayer(playerId)
+          if (role === 'host') return
+          if (!self.engine.state.players.has(playerId)) return
+          self.engine.markPlayerDisconnected(playerId)
+          if (self.graceMs === 0) {
+            self.engine.removePlayer(playerId)
+            return
+          }
+          self._cancelGraceTimer(playerId)
+          const t = setTimeout(() => {
+            self.graceTimers.delete(playerId)
+            // Only remove if still disconnected (no rejoin happened in the meantime)
+            const p = self.engine.state.players.get(playerId)
+            if (p?.disconnectedAt) self.engine.removePlayer(playerId)
+          }, self.graceMs)
+          self.graceTimers.set(playerId, t)
         },
       },
     })
@@ -251,6 +314,15 @@ export class QuizvServer {
   Share the URL or join code with players.
   Press Ctrl+C to stop.
 `)
+  }
+
+  /** Cancel any pending removal-on-grace-expiry timer for this player. */
+  private _cancelGraceTimer(playerId: string): void {
+    const t = this.graceTimers.get(playerId)
+    if (t) {
+      clearTimeout(t)
+      this.graceTimers.delete(playerId)
+    }
   }
 
   private _hostHTML(): string {

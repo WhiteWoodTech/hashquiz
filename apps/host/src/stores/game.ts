@@ -100,7 +100,15 @@ export const useGameStore = defineStore('game', () => {
     }
     switch (msg.type) {
       case 'player_joined':
-        players.value.push(msg.player)
+        // Guard against duplicates (e.g. presence re-sync replaying joins for known ids)
+        if (!players.value.some(p => p.id === msg.player.id)) {
+          players.value.push(msg.player)
+        }
+        break
+      case 'player_rejoined':
+      case 'state_request':
+      case 'state_snapshot':
+        // No UI effect on the host
         break
       case 'player_left':
         players.value = players.value.filter(p => p.id !== msg.playerId)

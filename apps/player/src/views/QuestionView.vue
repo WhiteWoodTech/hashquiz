@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useGameStore } from '../stores/game'
 import { TimerRing, AnswerButton } from '@quizv/ui'
 
@@ -84,37 +84,70 @@ const selected         = ref<Set<string>>(new Set())
 const timerExpired     = ref(false)
 const lastPressElapsed = ref(0)
 let interval: ReturnType<typeof setInterval> | null = null
-let startTime = 0
 let totalTime = 0
+let deadlineAt = 0   // Unix ms
 
 const oneShoot   = computed(() => game.question?.oneShoot ?? true)
 const isMultiple = computed(() => game.question?.type === 'multiple')
 const revealed   = computed(() => game.correctIds.length > 0)
 const isCorrect  = computed(() => game.correctIds.some(id => selected.value.has(id)))
 
-watch(() => game.question, (q) => {
-  if (!q) return
-  selected.value         = new Set()
-  timerExpired.value     = false
-  lastPressElapsed.value = 0
-  totalTime              = q.timer
-  remaining.value        = totalTime
-  startTime              = Date.now()
+function startTimerLoop() {
   if (interval) clearInterval(interval)
   interval = setInterval(() => {
-    const left = Math.max(0, Math.round((totalTime - (Date.now() - startTime) / 1000) * 10) / 10)
+    const left = Math.max(0, Math.round((deadlineAt - Date.now()) / 100) / 10)
     remaining.value = left
     if (left <= 0) {
       clearInterval(interval!)
       interval = null
       timerExpired.value = true
-      // Auto-submit whatever is selected (all modes)
       if (selected.value.size > 0 && !game.answered) {
         game.submitAnswer([...selected.value], lastPressElapsed.value)
       }
     }
   }, 100)
-}, { immediate: true })
+}
+
+// Reset per-question UI state when the question changes (new round or rehydration of a different idx)
+watch(
+  () => game.question?.idx,
+  () => {
+    selected.value         = new Set()
+    timerExpired.value     = false
+    lastPressElapsed.value = 0
+  },
+  { immediate: true },
+)
+
+// Recompute deadline whenever the question changes OR the server-provided deadline updates
+// (e.g. after a state_snapshot following a reconnect, or null after reveal)
+watch(
+  () => [game.question?.idx, game.deadlineMs] as const,
+  ([, dl]) => {
+    const q = game.question
+    if (!q) return
+    totalTime  = q.timer
+    if (dl === null || dl === undefined) {
+      // Round is over (reveal) or no server-authoritative deadline yet — stop the timer.
+      if (interval) { clearInterval(interval); interval = null }
+      return
+    }
+    deadlineAt      = dl
+    remaining.value = Math.max(0, Math.round((deadlineAt - Date.now()) / 100) / 10)
+    if (remaining.value <= 0) {
+      timerExpired.value = true
+      if (interval) { clearInterval(interval); interval = null }
+    } else {
+      startTimerLoop()
+    }
+  },
+  { immediate: true },
+)
+
+// On mount, if we already have a question (rehydrated from snapshot), make sure the timer is live
+onMounted(() => {
+  if (game.question && deadlineAt > Date.now() && !interval) startTimerLoop()
+})
 
 onUnmounted(() => { if (interval) clearInterval(interval) })
 

@@ -1,13 +1,20 @@
 import type { Quiz, Question } from '@quizv/parser'
 import type { IRealtimeTransport } from './transport'
-import { GameEvents } from './events'
+import { GameEvents, type StateSnapshot } from './events'
 import { calcPoints } from './scoring'
-import type { GameState, PlayerState, Score, PodiumEntry, QuestionPublic } from './types'
+import type { GameState, PlayerState, Score, PodiumEntry, QuestionPublic, QuizInfo } from './types'
 
 interface PendingAnswer {
   playerId: string
   choiceIds: string[]
   answerTimeMs: number
+}
+
+interface RevealPayload {
+  correct: string[]
+  explanation: string | undefined
+  scores: Score[]
+  choiceCounts: Record<string, number>
 }
 
 /** Maps a Question to QuestionPublic (strips isCorrect from choices) */
@@ -38,6 +45,9 @@ export class GameEngine {
   private channel: string
   private pendingAnswers: Map<string, PendingAnswer> = new Map()
   private activeQuestions: Question[] = []
+  private revealedForIdx: number = -1
+  private lastReveal: RevealPayload | null = null
+  private podium: PodiumEntry[] | null = null
 
   constructor(quiz: Quiz, transport: IRealtimeTransport, joinCode: string) {
     this.quiz = quiz
@@ -53,14 +63,36 @@ export class GameEngine {
     }
   }
 
-  /** Add a player to the session (call during lobby phase) */
-  addPlayer(player: PlayerState): void {
+  /**
+   * Add a player, or re-attach an existing one (preserving score).
+   * Returns true if this was a rejoin of a known player (broadcasts player_rejoined),
+   * false for a fresh player (broadcasts player_joined).
+   */
+  addPlayer(player: PlayerState): boolean {
+    const existing = this.state.players.get(player.id)
+    if (existing) {
+      // Preserve server-authoritative score and joinedAt; update mutable identity fields
+      // and clear any disconnect marker so the grace timer is effectively cancelled.
+      existing.pseudo = player.pseudo
+      existing.email  = player.email
+      delete existing.disconnectedAt
+      void this.transport.broadcast(this.channel, GameEvents.playerRejoined(player.id))
+      return true
+    }
     this.state.players.set(player.id, player)
     void this.transport.broadcast(this.channel, GameEvents.playerJoined(player))
+    return false
   }
 
-  /** Remove a player (disconnected) */
+  /** Mark a player as disconnected without removing them, so grace-period cleanup can handle it. */
+  markPlayerDisconnected(playerId: string, atMs: number = Date.now()): void {
+    const p = this.state.players.get(playerId)
+    if (p) p.disconnectedAt = atMs
+  }
+
+  /** Remove a player (disconnected past grace period, or kicked) */
   removePlayer(playerId: string): void {
+    if (!this.state.players.has(playerId)) return
     this.state.players.delete(playerId)
     void this.transport.broadcast(this.channel, GameEvents.playerLeft(playerId))
   }
@@ -180,13 +212,17 @@ export class GameEngine {
 
   private async _broadcastCurrentQuestion(): Promise<void> {
     this.pendingAnswers.clear()
+    this.lastReveal = null
     const q = this.activeQuestions[this.state.currentQuestionIdx]!
     const oneShoot = this.quiz.meta.oneShoot ?? true
+    const deadlineMs = Date.now() + q.timer * 1000
+    this.state.currentQuestionDeadlineMs = deadlineMs
     await this.transport.broadcast(
       this.channel,
       GameEvents.questionStarted(
         toPublic(q, this.state.currentQuestionIdx, oneShoot),
         this.state.currentQuestionIdx,
+        deadlineMs,
       ),
     )
   }
@@ -194,9 +230,11 @@ export class GameEngine {
   /**
    * Record a player's answer for the current question.
    * Safe to call multiple times; only the first submission is recorded.
+   * Refused once the answer has been revealed for this question.
    */
   submitAnswer(playerId: string, choiceIds: string[], answerTimeMs: number): void {
-    if (this.pendingAnswers.has(playerId)) return  // already answered
+    if (this.revealedForIdx === this.state.currentQuestionIdx) return  // already revealed
+    if (this.pendingAnswers.has(playerId)) return                      // already answered
     this.pendingAnswers.set(playerId, { playerId, choiceIds, answerTimeMs })
     void this.transport.broadcast(this.channel, GameEvents.answerSubmitted(playerId))
   }
@@ -234,6 +272,10 @@ export class GameEngine {
       }
     }
 
+    this.lastReveal = { correct: correctIds, explanation: q.explanation, scores, choiceCounts }
+    this.revealedForIdx = this.state.currentQuestionIdx
+    delete this.state.currentQuestionDeadlineMs
+
     await this.transport.broadcast(
       this.channel,
       GameEvents.answerRevealed(correctIds, q.explanation, scores, choiceCounts)
@@ -257,9 +299,66 @@ export class GameEngine {
 
   private async _finishGame(): Promise<void> {
     this.state.status = 'finished'
+    delete this.state.currentQuestionDeadlineMs
     const podium: PodiumEntry[] = Array.from(this.state.players.values())
       .sort((a, b) => b.score - a.score)
       .map((p, i) => ({ rank: i + 1, playerId: p.id, pseudo: p.pseudo, score: p.score }))
+    this.podium = podium
     await this.transport.broadcast(this.channel, GameEvents.gameEnded(podium))
+  }
+
+  /**
+   * Build a snapshot of the current game state targeted at a specific player.
+   * Used to re-hydrate a reconnecting player's UI.
+   */
+  buildSnapshot(playerId: string, quizMeta: QuizInfo): StateSnapshot {
+    const player = this.state.players.get(playerId)
+    const totalScore = player?.score ?? 0
+    const playerCount = Array.from(this.state.players.values())
+      .filter(p => !p.disconnectedAt).length
+    const status = this.state.status
+    const currentIdx = this.state.currentQuestionIdx
+    const oneShoot = this.quiz.meta.oneShoot ?? true
+
+    if (status === 'finished') {
+      return {
+        phase: 'finished',
+        quizMeta,
+        totalScore,
+        playerCount,
+        ...(this.podium ? { podium: this.podium } : {}),
+      }
+    }
+
+    if (status === 'active') {
+      const isRevealed = this.revealedForIdx === currentIdx
+      const q = this.activeQuestions[currentIdx]
+      const question = q ? toPublic(q, currentIdx, oneShoot) : undefined
+
+      if (isRevealed && this.lastReveal) {
+        return {
+          phase: 'revealed',
+          quizMeta,
+          totalScore,
+          playerCount,
+          ...(question ? { question, questionIdx: currentIdx } : {}),
+          reveal: this.lastReveal,
+        }
+      }
+
+      return {
+        phase: 'question',
+        quizMeta,
+        totalScore,
+        playerCount,
+        ...(question ? { question, questionIdx: currentIdx } : {}),
+        ...(this.state.currentQuestionDeadlineMs !== undefined
+          ? { deadlineMs: this.state.currentQuestionDeadlineMs }
+          : {}),
+      }
+    }
+
+    // lobby or idle
+    return { phase: 'lobby', quizMeta, totalScore, playerCount }
   }
 }

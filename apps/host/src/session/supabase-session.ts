@@ -1,5 +1,6 @@
 import { GameEngine } from '@quizv/core'
 import type { GameEvent, IRealtimeTransport, PlayerState, QuizInfo } from '@quizv/core'
+import { GameEvents } from '@quizv/core'
 import type { Quiz } from '@quizv/parser'
 
 export const HOST_PRESENCE_ID = '__host__'
@@ -13,6 +14,19 @@ export interface HostSessionOptions {
   transport: IRealtimeTransport
   joinCode: string
   origin: string
+  /** Grace period before a player who disappeared from presence is removed. Defaults to 60_000ms. */
+  graceMs?: number
+}
+
+function resolveGraceMs(opt?: number): number {
+  if (typeof opt === 'number' && Number.isFinite(opt) && opt >= 0) return opt
+  // Vite exposes env vars via import.meta.env, but allow a runtime fallback for tests.
+  const fromEnv = (import.meta.env?.VITE_QUIZV_GRACE_MS as string | undefined)
+  if (fromEnv) {
+    const n = Number(fromEnv)
+    if (Number.isFinite(n) && n >= 0) return n
+  }
+  return 60_000
 }
 
 /**
@@ -26,18 +40,22 @@ export class SupabaseHostSession {
   private listeners: Array<(e: HostEvent) => void> = []
   private offBroadcast?: () => void
   private offPresence?: () => void
+  private quizInfo: QuizInfo
+  private graceMs: number
+  private graceTimers: Map<string, ReturnType<typeof setTimeout>> = new Map()
 
   constructor(opts: HostSessionOptions) {
     this.transport = opts.transport
     this.channel = `game:${opts.joinCode}`
     this.engine = new GameEngine(opts.quiz, opts.transport, opts.joinCode)
+    this.graceMs = resolveGraceMs(opts.graceMs)
 
     const easy   = opts.quiz.questions.filter(q => q.difficulty === 'easy').length
     const medium = opts.quiz.questions.filter(q => q.difficulty === 'medium').length
     const hard   = opts.quiz.questions.filter(q => q.difficulty === 'hard').length
     const total  = opts.quiz.questions.length || 1
     const pct = (n: number) => Math.round((n / total) * 100)
-    const quizInfo: QuizInfo = {
+    this.quizInfo = {
       title: opts.quiz.meta.title,
       ...(opts.quiz.meta.description !== undefined && { description: opts.quiz.meta.description }),
       tags: opts.quiz.meta.tags ?? [],
@@ -55,6 +73,12 @@ export class SupabaseHostSession {
       this.emit(event)
       if (event.type === 'answer_submit') {
         this.engine.submitAnswer(event.playerId, event.choiceIds, event.timeRemaining)
+      }
+      if (event.type === 'state_request') {
+        void this.transport.broadcast(
+          this.channel,
+          GameEvents.stateSnapshot(event.playerId, this.engine.buildSnapshot(event.playerId, this.quizInfo)),
+        )
       }
     })
 
@@ -78,18 +102,36 @@ export class SupabaseHostSession {
         joinCode: opts.joinCode,
         totalQuestions: opts.quiz.questions.length,
         playerUrl: `${opts.origin}/?code=${opts.joinCode}`,
-        quizMeta: quizInfo,
+        quizMeta: this.quizInfo,
       })
     })
   }
 
   private syncPlayers(presence: PlayerState[]): void {
-    const known = new Set(this.engine.state.players.keys())
+    const presenceIds = new Set(presence.map(p => p.id))
+    // New or returning players: re-add (engine handles dedup + score preservation)
     for (const p of presence) {
-      if (!known.has(p.id)) this.engine.addPlayer(p)
-      known.delete(p.id)
+      this.cancelGrace(p.id)
+      this.engine.addPlayer(p)
     }
-    for (const goneId of known) this.engine.removePlayer(goneId)
+    // Players who disappeared from presence: start (or keep) grace timer.
+    for (const id of this.engine.state.players.keys()) {
+      if (presenceIds.has(id)) continue
+      if (this.graceTimers.has(id)) continue
+      this.engine.markPlayerDisconnected(id)
+      if (this.graceMs === 0) { this.engine.removePlayer(id); continue }
+      const t = setTimeout(() => {
+        this.graceTimers.delete(id)
+        const p = this.engine.state.players.get(id)
+        if (p?.disconnectedAt) this.engine.removePlayer(id)
+      }, this.graceMs)
+      this.graceTimers.set(id, t)
+    }
+  }
+
+  private cancelGrace(id: string): void {
+    const t = this.graceTimers.get(id)
+    if (t) { clearTimeout(t); this.graceTimers.delete(id) }
   }
 
   on(cb: (e: HostEvent) => void): () => void {
@@ -110,5 +152,7 @@ export class SupabaseHostSession {
   dispose(): void {
     this.offBroadcast?.()
     this.offPresence?.()
+    for (const t of this.graceTimers.values()) clearTimeout(t)
+    this.graceTimers.clear()
   }
 }

@@ -35,6 +35,18 @@ const email  = ref('')
 onMounted(() => {
   const param = new URLSearchParams(location.search).get('code')
   if (param) code.value = param.toUpperCase()
+  // Auto-rejoin if a persisted session exists for this code (sessionStorage survives reload and screen-lock)
+  try {
+    const raw = sessionStorage.getItem('quizv:player-session')
+    if (raw && code.value) {
+      const s = JSON.parse(raw) as { code: string; pseudo: string; email: string }
+      if (s.code === code.value) {
+        pseudo.value = s.pseudo
+        email.value  = s.email
+        game.connect(code.value, s.pseudo, s.email)
+      }
+    }
+  } catch { /* ignore */ }
 })
 
 function joinGame() {

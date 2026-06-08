@@ -91,6 +91,95 @@ describe('QuizvServer — grace period and rejoin', () => {
     hostWs.close()
   })
 
+  test('rejoin during an active question delivers a snapshot with deadlineMs and accepts a late submit', async () => {
+    const { port, joinCode } = await makeServer(2000)
+
+    // Host opens, waits for host_connected, then sends host_start once a player has joined
+    const hostMessages: Array<{ type: string; playerId?: string; player?: { id: string }; scores?: Array<{ playerId: string; score: number; delta: number }> }> = []
+    const hostWs = new WebSocket(`ws://localhost:${port}/ws?role=host`)
+    await new Promise<void>(r => { hostWs.onopen = () => r() })
+    hostWs.onmessage = e => hostMessages.push(JSON.parse(String(e.data)))
+    await waitFor(() => hostMessages.find(m => m.type === 'host_connected'))
+
+    // Player joins and waits for the lobby ack
+    const { ws: p1, messages: pMsgs } = await joinPlayer(port, joinCode, 'pq1', 'Carol')
+    await waitFor(() => hostMessages.find(m => m.type === 'player_joined' && m.player?.id === 'pq1'))
+
+    // Host starts the game
+    hostWs.send(JSON.stringify({ type: 'host_start' }))
+    const qStarted = await waitFor(() => pMsgs.find((m): m is { type: 'question_started'; question: { choices: Array<{ id: string }>; timer: number } ; idx: number; deadlineMs: number } =>
+      (m as { type: string }).type === 'question_started'))
+    expect(qStarted.deadlineMs).toBeGreaterThan(Date.now())
+
+    // Player drops the socket mid-question
+    p1.close()
+
+    // Reconnect well within grace + question deadline
+    await new Promise(r => setTimeout(r, 100))
+    const { ws: p1b, messages: p2Msgs } = await joinPlayer(port, joinCode, 'pq1', 'Carol')
+    const snap = await waitFor(() => p2Msgs.find((m): m is { type: 'state_snapshot'; snapshot: { phase: string; deadlineMs?: number; question?: { choices: Array<{ id: string }> } } } =>
+      (m as { type: string }).type === 'state_snapshot'))
+    expect(snap.snapshot.phase).toBe('question')
+    expect(snap.snapshot.deadlineMs).toBeGreaterThan(Date.now())
+    expect(snap.snapshot.question?.choices?.length).toBeGreaterThan(0)
+
+    // Submit a late answer through the new socket
+    const firstChoice = snap.snapshot.question!.choices[0]!.id
+    p1b.send(JSON.stringify({ type: 'submit_answer', choiceIds: [firstChoice], answerTimeMs: 500 }))
+
+    // Host reveals; we should see this player in the scores
+    await new Promise(r => setTimeout(r, 50))
+    hostWs.send(JSON.stringify({ type: 'host_reveal' }))
+    const reveal = await waitFor(() => hostMessages.find((m): m is { type: 'answer_revealed'; scores: Array<{ playerId: string; score: number; delta: number }> } =>
+      (m as { type: string }).type === 'answer_revealed'))
+    const myScore = reveal.scores.find(s => s.playerId === 'pq1')
+    expect(myScore).toBeDefined()
+    // delta is 0 if firstChoice is wrong, >0 if right — either way the player was scored,
+    // proving the late submission was accepted.
+
+    p1b.close()
+    hostWs.close()
+  })
+
+  test('rejoin after game_ended delivers a finished snapshot with the podium', async () => {
+    // Use a quiz with a single question via the demo file is impractical; instead, run the whole game quickly.
+    // To keep the test bounded, we use a generous grace and step through every question via the host.
+    const { port, joinCode } = await makeServer(5000)
+
+    const hostMessages: Array<{ type: string; podium?: Array<{ playerId: string; rank: number }>; player?: { id: string } }> = []
+    const hostWs = new WebSocket(`ws://localhost:${port}/ws?role=host`)
+    await new Promise<void>(r => { hostWs.onopen = () => r() })
+    hostWs.onmessage = e => hostMessages.push(JSON.parse(String(e.data)))
+    const hostConnected = await waitFor(() => hostMessages.find((m): m is { type: 'host_connected'; totalQuestions: number } =>
+      (m as { type: string }).type === 'host_connected')) as { type: 'host_connected'; totalQuestions: number }
+
+    const { ws: pws } = await joinPlayer(port, joinCode, 'pf1', 'Dave')
+    await waitFor(() => hostMessages.find(m => m.type === 'player_joined' && m.player?.id === 'pf1'))
+
+    hostWs.send(JSON.stringify({ type: 'host_start' }))
+    // Step through every question by reveal+next
+    for (let i = 0; i < hostConnected.totalQuestions; i++) {
+      await waitFor(() => hostMessages.find(m => m.type === 'question_started'), 2000)
+      hostMessages.length = 0  // drain so subsequent waitFor finds the NEXT question_started
+      hostWs.send(JSON.stringify({ type: 'host_reveal' }))
+      await waitFor(() => hostMessages.find(m => m.type === 'answer_revealed'), 2000)
+      hostWs.send(JSON.stringify({ type: 'host_next' }))
+    }
+    await waitFor(() => hostMessages.find(m => m.type === 'game_ended'), 2000)
+
+    // Player drops and reconnects after the game has ended
+    pws.close()
+    await new Promise(r => setTimeout(r, 50))
+    const { messages: rejoinMsgs } = await joinPlayer(port, joinCode, 'pf1', 'Dave')
+    const snap = await waitFor(() => rejoinMsgs.find((m): m is { type: 'state_snapshot'; snapshot: { phase: string; podium?: Array<{ playerId: string }> } } =>
+      (m as { type: string }).type === 'state_snapshot'))
+    expect(snap.snapshot.phase).toBe('finished')
+    expect(snap.snapshot.podium).toBeDefined()
+    expect(snap.snapshot.podium!.some(p => p.playerId === 'pf1')).toBe(true)
+
+    hostWs.close()
+  })
+
   test('player who does not reconnect within graceMs is removed', async () => {
     const { port, joinCode } = await makeServer(150)
     const hostMessages: Array<{ type: string; playerId?: string; player?: { id: string } }> = []

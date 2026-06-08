@@ -43,6 +43,21 @@ const makeTransport = (): IRealtimeTransport => ({
   },
 })
 
+/**
+ * After a question_started broadcast, derive the now-positional IDs of the
+ * "Right" and "Wrong" choices from the latest broadcast (engine shuffles
+ * choices at start(), so IDs are no longer tied to the source order).
+ */
+function currentChoiceIds(transport: IRealtimeTransport): { correct: string; wrong: string } {
+  const broadcastMock = transport.broadcast as ReturnType<typeof mock>
+  const events = broadcastMock.mock.calls.map((c: unknown[]) => c[1]) as Array<{ type: string; question?: { choices: Array<{ id: string; text: string }> } }>
+  const last = [...events].reverse().find(e => e.type === 'question_started')!
+  return {
+    correct: last.question!.choices.find(c => c.text === 'Right')!.id,
+    wrong:   last.question!.choices.find(c => c.text === 'Wrong')!.id,
+  }
+}
+
 describe('GameEngine', () => {
   test('starts in lobby status', () => {
     const engine = new GameEngine(makeQuiz(), makeTransport(), 'ABCD12')
@@ -72,20 +87,24 @@ describe('GameEngine', () => {
   })
 
   test('submitAnswer updates player score', async () => {
-    const engine = new GameEngine(makeQuiz(), makeTransport(), 'TEST01')
+    const transport = makeTransport()
+    const engine = new GameEngine(makeQuiz(), transport, 'TEST01')
     engine.addPlayer({ id: 'p1', pseudo: 'Alice', email: 'alice@test.com', score: 0, joinedAt: Date.now() })
     await engine.start()
-    engine.submitAnswer('p1', ['b'], 10000)  // 10s remaining
+    const { correct } = currentChoiceIds(transport)
+    engine.submitAnswer('p1', [correct], 10000)  // 10s remaining
     const revealed = await engine.revealAnswer()
     expect(revealed.find(s => s.playerId === 'p1')?.delta).toBe(100)
     expect(engine.state.players.get('p1')?.score).toBe(100)
   })
 
   test('revealAnswer returns 0 delta for wrong answer', async () => {
-    const engine = new GameEngine(makeQuiz(), makeTransport(), 'TEST01')
+    const transport = makeTransport()
+    const engine = new GameEngine(makeQuiz(), transport, 'TEST01')
     engine.addPlayer({ id: 'p1', pseudo: 'Alice', email: 'alice@test.com', score: 0, joinedAt: Date.now() })
     await engine.start()
-    engine.submitAnswer('p1', ['a'], 10000)  // wrong answer
+    const { wrong } = currentChoiceIds(transport)
+    engine.submitAnswer('p1', [wrong], 10000)  // wrong answer
     const revealed = await engine.revealAnswer()
     expect(revealed.find(s => s.playerId === 'p1')?.delta).toBe(0)
   })
@@ -116,15 +135,15 @@ describe('GameEngine', () => {
     engine.addPlayer({ id: 'p1', pseudo: 'Alice', email: 'alice@test.com', score: 0, joinedAt: Date.now() })
     engine.addPlayer({ id: 'p2', pseudo: 'Bob', email: 'bob@test.com', score: 0, joinedAt: Date.now() })
     await engine.start()
-    // p1 picks 'b' (correct), p2 picks 'a' (wrong)
-    engine.submitAnswer('p1', ['b'], 10000)
-    engine.submitAnswer('p2', ['a'], 10000)
+    const { correct, wrong } = currentChoiceIds(transport)
+    engine.submitAnswer('p1', [correct], 10000)
+    engine.submitAnswer('p2', [wrong], 10000)
     await engine.revealAnswer()
 
     const broadcastMock = transport.broadcast as ReturnType<typeof mock>
     const broadcastedEvents = broadcastMock.mock.calls.map((call: unknown[]) => call[1])
     expect(broadcastedEvents).toContainEqual(
-      expect.objectContaining({ type: 'answer_revealed', choiceCounts: { b: 1, a: 1 } })
+      expect.objectContaining({ type: 'answer_revealed', choiceCounts: { [correct]: 1, [wrong]: 1 } })
     )
   })
 

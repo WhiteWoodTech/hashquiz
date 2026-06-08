@@ -43,6 +43,16 @@ const makeTransport = (): IRealtimeTransport => ({
   },
 })
 
+function currentChoiceIds(transport: IRealtimeTransport): { correct: string; wrong: string } {
+  const broadcastMock = transport.broadcast as ReturnType<typeof mock>
+  const events = broadcastMock.mock.calls.map((c: unknown[]) => c[1]) as Array<{ type: string; question?: { choices: Array<{ id: string; text: string }> } }>
+  const last = [...events].reverse().find(e => e.type === 'question_started')!
+  return {
+    correct: last.question!.choices.find(c => c.text === 'Right')!.id,
+    wrong:   last.question!.choices.find(c => c.text === 'Wrong')!.id,
+  }
+}
+
 const quizMeta: QuizInfo = {
   title: 'T', tags: [], totalQuestions: 2,
   difficultyDistribution: { easy: 100, medium: 0, hard: 0 },
@@ -55,7 +65,8 @@ describe('GameEngine — rejoin protocol', () => {
     const isFresh = engine.addPlayer({ id: 'p1', pseudo: 'Alice', email: '', score: 0, joinedAt: 1 })
     expect(isFresh).toBe(false)
     await engine.start()
-    engine.submitAnswer('p1', ['b'], 5000)
+    const { correct } = currentChoiceIds(transport)
+    engine.submitAnswer('p1', [correct], 5000)
     await engine.revealAnswer()
     const scoreBefore = engine.state.players.get('p1')!.score
     expect(scoreBefore).toBeGreaterThan(0)
@@ -90,19 +101,22 @@ describe('GameEngine — rejoin protocol', () => {
   })
 
   test('submitAnswer accepted after deadline but refused after reveal', async () => {
-    const engine = new GameEngine(makeQuiz(), makeTransport(), 'LATE')
+    const transport = makeTransport()
+    const engine = new GameEngine(makeQuiz(), transport, 'LATE')
     engine.addPlayer({ id: 'p1', pseudo: 'A', email: '', score: 0, joinedAt: 1 })
     await engine.start()
-    // Simulate a late answer (after the timer would've expired in real time, but before reveal)
-    engine.submitAnswer('p1', ['b'], 20000)
+    const { correct, wrong } = currentChoiceIds(transport)
+    // Simulate a late answer (after the timer would've expired in real time, but before reveal).
+    // 20 000ms answerTimeMs with a 20s timer means 0 time remaining → delta uses the "took too long" floor,
+    // but the correct flag still applies, so the score reflects a correct-but-slow answer.
+    engine.submitAnswer('p1', [correct], 20000)
     await engine.revealAnswer()
-    expect(engine.state.players.get('p1')!.score).toBeGreaterThanOrEqual(0)
+    const scoreAfterReveal = engine.state.players.get('p1')!.score
+    expect(scoreAfterReveal).toBeGreaterThanOrEqual(0)
 
     // After reveal, submitAnswer for the current question is a no-op
-    engine.submitAnswer('p1', ['a'], 100)
-    // No new broadcast for answer_submitted after reveal
-    // (the actual assertion: score didn't change because reveal already scored)
-    expect(engine.state.players.get('p1')!.score).toBeGreaterThan(0)
+    engine.submitAnswer('p1', [wrong], 100)
+    expect(engine.state.players.get('p1')!.score).toBe(scoreAfterReveal)
   })
 
   test('buildSnapshot for a player in lobby returns lobby phase', () => {
@@ -126,26 +140,31 @@ describe('GameEngine — rejoin protocol', () => {
   })
 
   test('buildSnapshot after reveal returns reveal payload', async () => {
-    const engine = new GameEngine(makeQuiz(), makeTransport(), 'SNAP03')
+    const transport = makeTransport()
+    const engine = new GameEngine(makeQuiz(), transport, 'SNAP03')
     engine.addPlayer({ id: 'p1', pseudo: 'A', email: '', score: 0, joinedAt: 1 })
     await engine.start()
-    engine.submitAnswer('p1', ['b'], 5000)
+    const { correct } = currentChoiceIds(transport)
+    engine.submitAnswer('p1', [correct], 5000)
     await engine.revealAnswer()
     const snap = engine.buildSnapshot('p1', quizMeta)
     expect(snap.phase).toBe('revealed')
-    expect(snap.reveal?.correct).toEqual(['b'])
+    expect(snap.reveal?.correct).toEqual([correct])
     expect(snap.reveal?.scores.find(s => s.playerId === 'p1')?.score).toBeGreaterThan(0)
     expect(snap.deadlineMs).toBeUndefined()
   })
 
   test('buildSnapshot after finish returns podium', async () => {
-    const engine = new GameEngine(makeQuiz(), makeTransport(), 'SNAP04')
+    const transport = makeTransport()
+    const engine = new GameEngine(makeQuiz(), transport, 'SNAP04')
     engine.addPlayer({ id: 'p1', pseudo: 'A', email: '', score: 0, joinedAt: 1 })
     await engine.start()
-    engine.submitAnswer('p1', ['b'], 5000)
+    const q1 = currentChoiceIds(transport)
+    engine.submitAnswer('p1', [q1.correct], 5000)
     await engine.revealAnswer()
     await engine.nextQuestion()
-    engine.submitAnswer('p1', ['a'], 5000)
+    const q2 = currentChoiceIds(transport)
+    engine.submitAnswer('p1', [q2.correct], 5000)
     await engine.revealAnswer()
     await engine.nextQuestion()
     expect(engine.state.status).toBe('finished')

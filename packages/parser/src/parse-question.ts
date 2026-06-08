@@ -1,7 +1,7 @@
 import matter from 'gray-matter'
 import type { Question, Choice } from './types'
 
-const CHOICE_IDS = ['a', 'b', 'c', 'd', 'e', 'f']
+const CHOICE_IDS = ['a', 'b', 'c', 'd']
 
 /**
  * Parse one question block (frontmatter + markdown body).

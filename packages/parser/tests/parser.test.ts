@@ -111,6 +111,60 @@ difficulty: easy
     expect(result.errors.some(e => e.field === 'max-questions')).toBe(true)
   })
 
+  test('returns error when question has more than 4 choices', () => {
+    const content = `---
+title: Bad Quiz
+theme: default
+tags: []
+---
+
+---
+type: single
+timer: 20
+difficulty: easy
+---
+
+# Too many choices?
+
+- [ ] One
+- [ ] Two
+- [ ] Three
+- [ ] Four
+- [x] Five
+`
+    const quiz = parseQuizFile(content)
+    const result = validateQuiz(quiz)
+    expect(result.valid).toBe(false)
+    expect(result.errors.some(e =>
+      e.field === 'choices' && e.questionIndex === 0 && e.message.includes('at most 4'),
+    )).toBe(true)
+  })
+
+  test('accepts a question with exactly 4 choices', () => {
+    const content = `---
+title: OK
+theme: default
+tags: []
+---
+
+---
+type: single
+timer: 20
+difficulty: easy
+---
+
+# Four is fine?
+
+- [x] One
+- [ ] Two
+- [ ] Three
+- [ ] Four
+`
+    const quiz = parseQuizFile(content)
+    const result = validateQuiz(quiz)
+    expect(result.valid).toBe(true)
+  })
+
   test('returns error when question has no correct answer', () => {
     const content = `---
 title: Bad Quiz

@@ -17,8 +17,8 @@ interface RevealPayload {
   choiceCounts: Record<string, number>
 }
 
-/** Position-keyed IDs reassigned to choices after shuffling. Matches CHOICE_IDS in the parser. */
-const POSITIONAL_IDS = ['a', 'b', 'c', 'd', 'e', 'f']
+/** Position-keyed IDs reassigned to choices after shuffling. Questions are capped at 4 choices. */
+const POSITIONAL_IDS = ['a', 'b', 'c', 'd'] as const
 
 /**
  * Shuffle a question's choices and reassign positional IDs (a/b/c/d) so the badge letter

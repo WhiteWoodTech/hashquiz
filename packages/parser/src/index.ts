@@ -60,6 +60,13 @@ export function validateQuiz(quiz: Quiz): ValidationResult {
         message: `Question ${i + 1} must have at least 2 choices`,
       })
     }
+    if (q.choices.length > 4) {
+      errors.push({
+        questionIndex: i,
+        field: 'choices',
+        message: `Question ${i + 1} has ${q.choices.length} choices; QuizV supports at most 4`,
+      })
+    }
   }
 
   return { valid: errors.length === 0, errors }

@@ -17,6 +17,24 @@ interface RevealPayload {
   choiceCounts: Record<string, number>
 }
 
+/** Position-keyed IDs reassigned to choices after shuffling. Matches CHOICE_IDS in the parser. */
+const POSITIONAL_IDS = ['a', 'b', 'c', 'd', 'e', 'f']
+
+/**
+ * Shuffle a question's choices and reassign positional IDs (a/b/c/d) so the badge letter
+ * displayed by the UI keeps matching the visual position while the correct answer's letter
+ * varies between games. Pure: returns a new Question, leaves the input untouched.
+ */
+function shuffleChoices(question: Question): Question {
+  const arr = [...question.choices]
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[arr[i], arr[j]] = [arr[j]!, arr[i]!]
+  }
+  const renamed = arr.map((c, i) => ({ ...c, id: POSITIONAL_IDS[i] ?? c.id }))
+  return { ...question, choices: renamed }
+}
+
 /** Maps a Question to QuestionPublic (strips isCorrect from choices) */
 function toPublic(question: Question, idx: number, oneShoot: boolean): QuestionPublic {
   return {
@@ -204,7 +222,9 @@ export class GameEngine {
   async start(): Promise<void> {
     if (this.state.status !== 'lobby') return
     this.state.status = 'active'
-    this.activeQuestions = this.selectQuestions()
+    // Shuffle each question's choices once at start so the correct answer's letter varies
+    // between games but stays frozen for the whole session (cohérent across host/player/rejoin).
+    this.activeQuestions = this.selectQuestions().map(q => shuffleChoices(q))
     this.state.totalQuestions = this.activeQuestions.length
     await this.transport.broadcast(this.channel, GameEvents.gameStarted())
     await this._broadcastCurrentQuestion()

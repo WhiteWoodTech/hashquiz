@@ -28,23 +28,21 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
 ## Backlog
 
-- [x] Agrandir le qr code
-- [x] version sur mobile agancer les questions les une en dessous des autres (laisser tels quels sur  desktop)
-- [ ] Maximum de longeurs des réponses à mettre dans la skills.
-- [ ] vérifier le randomize les propositions a, b, c, d → si quizz fait plusieurs fois ca tourne
-- [x] La réponse ne doit pas sauter au yeux visuelement (la seul avec parenthèse, gras, italique...)
-      et doit être au même niveau que les autres
-- [ ] génération résultat en fichier json
-- [ ] index comme dans slidev-decks?
-- [x] lors de l'affichage l'Explication de la correction en markdown brut et pas formaté avec gras et autres...
-- [x] lors de l'appuie sur join Game d'un participant, il y a un message d'erreur qui dit
-      no code found for this code
+- [ ] Aprés le podium, nouvelle page métrics avec un encart de métrics Global :
+    - nb total bonne réponse
+    - pourcentage bonne réponse
+    - temps moyen réponse
+    - bonne réponse le plus rapide (head shoot avec pseudo et position)
+    - total temps de réponse le plus long (escargot, avec pseudo et position)
+- [ ] Ajouter dans la page métrics, des métrics par personne : nb bonne réponse, pourcentage bonne réponse, temps moyen réponse, temps le plus rapide
+- [ ] génération résultat et métrics en fichier json téléchargeable
+- [ ] Revoir l'index avec une grille de card (même design que le reste, et card proche type QuizInfoPanel) des différents quizz, avec titre, description, tags, max-questions et target-difficulty.
+- [ ] l'affichage des choix sort en markdown brut et n'est pas formaté avec gras et autres...
+- [ ] Maximum de longueurs des choix / réponses à mettre dans la skills (éviter le débordement sur mobile surtout).
 - [ ] Dans l'écran des réponses, mets les lettres des bonnes réponses en vert
-- [ ] Passe la liste des réponse (bonne ou mauvaise) au dessus de chaque barre de progression (total réponses)
+- [ ] Passe la liste des réponses (bonne ou mauvaise) au dessus de chaque barre de progression (total réponses)
       en gardant en vert les bonnes et enlève les de l'encart avec l'explication
-- [x] Dans l'affichage de la réponse Pour les listes de plusieurs réponses (multi select)
-      les affifcher avec un retour à la ligne entre chaque
-- [ ] Sur la base des correction précédentes. Améliore le cli check : 4 réponses maximum,
+- [ ] Sur la base des corrections précédentes. Améliore le cli check : 4 réponses maximum,
       check là où la bonne réponse saute aux yeux (formatage asymétrique)
 
 ### Phase 3 — Cloud / Supabase
@@ -83,14 +81,16 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
 ## Completed
 
-### Phase 1 — Core Engine
-
-- [x] Initialize monorepo (`quizv/` with Bun workspaces)
-- [x] `@quizv/parser` — `parseQuizFile()` + `validateQuiz()` + 13 tests
-- [x] `@quizv/core` — `GameEngine`, `GameEvent`, `IRealtimeTransport`, scoring + 14 tests
-- [x] `@quizv/transport-local` — `LocalTransport` (Bun WS pub/sub)
-- [x] `@quizv/server` — Bun HTTP+WS server + `quizv dev | check` CLI
-- [x] `examples/demo.quizv.md` — sample quiz
+- [x] Agrandir le qr code
+- [x] version sur mobile agencer les questions les une en dessous des autres (laisser tels quels sur  desktop)
+- [x] vérifier le randomize les propositions a, b, c, d → si quizz fait plusieurs fois ca tourne
+- [x] La réponse ne doit pas sauter au yeux visuelement (la seul avec parenthèse, gras, italique...)
+  et doit être au même niveau que les autres
+- [x] lors de l'affichage l'Explication de la correction en markdown brut et pas formaté avec gras et autres...
+- [x] lors de l'appuie sur join Game d'un participant, il y a un message d'erreur qui dit
+  no code found for this code
+- [x] Dans l'affichage de la réponse Pour les listes de plusieurs réponses (multi select)
+  les affifcher avec un retour à la ligne entre chaque
 
 ### Phase 2 — Vue Apps
 
@@ -106,6 +106,15 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 - [x] Fix: `TimerRing` `aria-label` binding (`:aria-label` dynamic binding)
 - [x] Fix: `AnswerButton` multi-select (selected state remains interactive)
 - [x] Fix: RevealView score delta zero shown as muted instead of green
+
+### Phase 1 — Core Engine
+
+- [x] Initialize monorepo (`quizv/` with Bun workspaces)
+- [x] `@quizv/parser` — `parseQuizFile()` + `validateQuiz()` + 13 tests
+- [x] `@quizv/core` — `GameEngine`, `GameEvent`, `IRealtimeTransport`, scoring + 14 tests
+- [x] `@quizv/transport-local` — `LocalTransport` (Bun WS pub/sub)
+- [x] `@quizv/server` — Bun HTTP+WS server + `quizv dev | check` CLI
+- [x] `examples/demo.quizv.md` — sample quiz
 
 ---
 

@@ -68,7 +68,7 @@ bun run packages/server/src/cli.ts dev examples/demo.quizv.md
 
 # Launch one of the built-in decks (see deck index below)
 bun run dev decks/docker-fundamentals/index.quizv.md
-bun run dev decks/cloud-gcp/index.quizv.md
+bun run dev decks/cloud-gcp-fundamentals/index.quizv.md
 
 # Override the WS / HTTP port (host and player apps stay on 3031 / 3032)
 bun run dev decks/mcp-deep-dive/index.quizv.md --port 4040
@@ -116,7 +116,7 @@ and the raw `sources/` used to plan the quiz.
 
 | Deck | Title | Topics | Launch |
 |------|-------|--------|--------|
-| [`decks/cloud-gcp`](decks/cloud-gcp/) | Cloud & GCP | cloud, gcp, devops | `bun run dev decks/cloud-gcp/index.quizv.md` |
+| [`decks/cloud-gcp`](decks/cloud-gcp-fundamentals/) | Cloud & GCP | cloud, gcp, devops | `bun run dev decks/cloud-gcp/index.quizv.md` |
 | [`decks/docker-fundamentals`](decks/docker-fundamentals/) | Docker | image, container, dockerfile | `bun run dev decks/docker-fundamentals/index.quizv.md` |
 | [`decks/genai-llm-introduction`](decks/genai-llm-introduction/) | Fondamentaux de l'IA Générative | ia, llm, prompt, rag, agents, mcp | `bun run dev decks/genai-llm-introduction/index.quizv.md` |
 | [`decks/mcp-deep-dive`](decks/mcp-deep-dive/) | MCP — deep dive | mcp, protocol, genai, server | `bun run dev decks/mcp-deep-dive/index.quizv.md` |

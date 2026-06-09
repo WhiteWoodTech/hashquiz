@@ -13,14 +13,14 @@ Une seule bonne réponse par question, sauf indication contraire. Plusieurs rép
 
 - [ ] A. On-demand self-service
 - [ ] B. Broad network access
-- [ ] C. **Stockage perpétuel et gratuit**
+- [s] C. Stockage perpétuel et gratuit
 - [ ] D. Measured service
 - [ ] E. Rapid elasticity
 
-### 2. Sur un Cloud Run (CaaS), qui est responsable de patcher l'OS du noeud sous-jacent ?
+### 2. Sur un CaaS, qui est responsable de patcher l'OS du noeud sous-jacent ?
 
 - [ ] A. Toi (le développeur)
-- [ ] B. **Google (le fournisseur)**
+- [x] B. Google (le fournisseur)
 - [ ] C. C'est partagé selon le SLA
 - [ ] D. Personne, il n'y a pas d'OS sur Cloud Run
 
@@ -28,7 +28,7 @@ Une seule bonne réponse par question, sauf indication contraire. Plusieurs rép
 
 - [ ] A. IaaS (VM permanente)
 - [ ] B. PaaS (App Engine)
-- [ ] C. **FaaS (Cloud Functions)**
+- [x] C. FaaS (Cloud Functions)
 - [ ] D. SaaS
 
 ### 4. Quelle est la principale différence entre **PaaS** et **CaaS** ?
@@ -38,17 +38,10 @@ Une seule bonne réponse par question, sauf indication contraire. Plusieurs rép
 - [ ] C. Le CaaS ne supporte que Python
 - [ ] D. Le PaaS scale plus vite
 
-### 5. Sur Cloud Run, si tu mets `--min-instances=0`, que se passe-t-il après 15 min sans trafic ?
-
-- [ ] A. Le service reste actif et facturé
-- [ ] B. **0 instance tourne, 0 € facturé**
-- [ ] C. Le service est supprimé
-- [ ] D. Une instance "spot" est lancée
-
 ### 6. Quel est l'avantage majeur de l'**immutable infrastructure** par rapport à la mutable ?
 
 - [ ] A. C'est plus rapide
-- [ ] B. **Pas de "snowflake servers", rollback trivial**
+- [x] B. Pas de "snowflake servers", rollback trivial
 - [ ] C. C'est moins cher
 - [ ] D. Ça marche sans Docker
 
@@ -56,7 +49,7 @@ Une seule bonne réponse par question, sauf indication contraire. Plusieurs rép
 
 - [ ] A. Une région contient plusieurs zones
 - [ ] B. Une zone = un datacenter physique
-- [ ] C. **Une zone contient plusieurs régions**
+- [x] C. Une zone contient plusieurs régions
 - [ ] D. La HA passe par la réplication multi-zone
 
 ### 8. Tu vois ce code Terraform :
@@ -71,29 +64,29 @@ resource "google_storage_bucket" "logs" {
 C'est :
 
 - [ ] A. De l'IaC impératif
-- [ ] B. **De l'IaC déclaratif**
+- [x] B. De l'IaC déclaratif
 - [ ] C. Un script Bash
 - [ ] D. Un fichier YAML
 
 ### 9. **Plusieurs réponses possibles** — Quels sont des avantages du GitOps ?
 
-- [ ] A. **Traçabilité (qui a changé quoi)**
-- [ ] B. **Revue par PR avant déploiement**
+- [x] A. Traçabilité (qui a changé quoi)
+- [x] B. Revue par PR avant déploiement
 - [ ] C. Pas besoin de tests
-- [ ] D. **Rollback via `git revert`**
+- [x] D. Rollback via `git revert`
 - [ ] E. Coût d'infra inférieur
 
 ### 10. Le **shared responsibility model** dit que :
 
 - [ ] A. Le fournisseur est responsable de tout, c'est le principe du cloud
-- [ ] B. **Le partage des responsabilités dépend du modèle XaaS choisi**
+- [x] B. Le partage des responsabilités dépend du modèle XaaS choisi
 - [ ] C. Tu es responsable de tout, le cloud n'apporte rien
 - [ ] D. Seules les données sont à ta charge, jamais l'identité
 
 ### 11. Quel terme désigne le **trafic réseau qui sort de GCP vers Internet** ?
 
 - [ ] A. Ingress
-- [ ] B. **Egress**
+- [x] B. Egress
 - [ ] C. Throughput
 - [ ] D. Backbone
 
@@ -102,27 +95,13 @@ C'est :
 - [ ] A. AWS Frankfurt
 - [ ] B. GCP `europe-west9` (Paris)
 - [ ] C. Azure France Central
-- [ ] D. **OVH SecNumCloud / Bleu / Numspot**
-
-### 13. Sur un projet GCP de TP, quelle est la **première** mesure de sécurité à prendre ?
-
-- [ ] A. Mettre en place un firewall
-- [ ] B. Créer un VPC custom
-- [ ] C. **Créer une alerte de budget**
-- [ ] D. Activer Cloud Armor
-
-### 14. Tu choisis `db-f1-micro` pour ta base Cloud SQL. Ce choix est adapté à :
-
-- [ ] A. Production légère
-- [ ] B. **Formation, prototypage**
-- [ ] C. Workload BI 1To
-- [ ] D. Streaming temps réel
+- [x] D. Scaleway / Bleu / Numspot / OVH SecNumCloud 
 
 ### 15. Lequel de ces outils est **principalement** un outil de configuration management (impératif), pas un outil de provisioning ?
 
 - [ ] A. Terraform
 - [ ] B. Pulumi
-- [ ] C. **Ansible**
+- [x] C. Ansible
 - [ ] D. Crossplane
 
 ---
@@ -152,7 +131,6 @@ au moins 1 limite ou risque qu'apporte l'IaC.
 | 2 | B |
 | 3 | C |
 | 4 | B |
-| 5 | B |
 | 6 | B |
 | 7 | C |
 | 8 | B |
@@ -160,8 +138,6 @@ au moins 1 limite ou risque qu'apporte l'IaC.
 | 10 | B |
 | 11 | B |
 | 12 | D |
-| 13 | C |
-| 14 | B |
 | 15 | C |
 
 **Q16 — éléments attendus** :

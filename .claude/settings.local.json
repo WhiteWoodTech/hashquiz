@@ -68,7 +68,9 @@
       "Bash(cp \"/Users/maxime-lenne/Desktop/Capture d’écran 2026-06-04 à 16.36.53.png\" /tmp/join-error.png)",
       "Read(//tmp/**)",
       "Bash(xargs -r kill -9)",
-      "Bash(awk *)"
+      "Bash(awk *)",
+      "Skill(quizv:new)",
+      "Skill(quizv:plan)"
     ]
   }
 }

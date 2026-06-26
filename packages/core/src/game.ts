@@ -271,7 +271,8 @@ export class GameEngine {
 
     for (const [, player] of this.state.players) {
       const pending = this.pendingAnswers.get(player.id)
-      const answerTimeMs = pending?.answerTimeMs ?? q.timer * 1000
+      const rawMs = pending?.answerTimeMs ?? q.timer * 1000
+      const answerTimeMs = Math.min(q.timer * 1000, Math.max(0, rawMs))
       const timeRemaining = Math.max(0, q.timer - answerTimeMs / 1000)
 
       const isCorrect = pending

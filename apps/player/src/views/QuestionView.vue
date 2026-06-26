@@ -95,7 +95,7 @@ const isCorrect  = computed(() => game.correctIds.some(id => selected.value.has(
 function startTimerLoop() {
   if (interval) clearInterval(interval)
   interval = setInterval(() => {
-    const left = Math.max(0, Math.round((deadlineAt - Date.now()) / 100) / 10)
+    const left = Math.min(totalTime, Math.max(0, Math.round((deadlineAt - Date.now()) / 100) / 10))
     remaining.value = left
     if (left <= 0) {
       clearInterval(interval!)
@@ -133,7 +133,7 @@ watch(
       return
     }
     deadlineAt      = dl
-    remaining.value = Math.max(0, Math.round((deadlineAt - Date.now()) / 100) / 10)
+    remaining.value = Math.min(totalTime, Math.max(0, Math.round((deadlineAt - Date.now()) / 100) / 10))
     if (remaining.value <= 0) {
       timerExpired.value = true
       if (interval) { clearInterval(interval); interval = null }

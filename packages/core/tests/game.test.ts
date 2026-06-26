@@ -147,6 +147,20 @@ describe('GameEngine', () => {
     )
   })
 
+  test('clock skew: negative answerTimeMs is clamped — no score explosion', async () => {
+    const transport = makeTransport()
+    const engine = new GameEngine(makeQuiz(), transport, 'TEST01')
+    engine.addPlayer({ id: 'p1', pseudo: 'Alice', email: 'alice@test.com', score: 0, joinedAt: Date.now() })
+    await engine.start()
+    const { correct } = currentChoiceIds(transport)
+    // Client clock behind server by ~2h → elapsed = -7188000ms
+    engine.submitAnswer('p1', [correct], -7_188_000)
+    const revealed = await engine.revealAnswer()
+    // Must not exceed max possible score for a 20s question (50 + 20*5 = 150)
+    expect(revealed.find(s => s.playerId === 'p1')?.delta).toBeLessThanOrEqual(150)
+    expect(revealed.find(s => s.playerId === 'p1')?.delta).toBeGreaterThanOrEqual(0)
+  })
+
   test('revealAnswer broadcasts answer_revealed with empty choiceCounts when no answers submitted', async () => {
     const transport = makeTransport()
     const engine = new GameEngine(makeQuiz(), transport, 'TEST01')

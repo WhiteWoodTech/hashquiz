@@ -28,7 +28,7 @@ export class SupabaseTransport implements IRealtimeTransport {
   private getChannel(name: string): RealtimeChannel {
     let ch = this.channels.get(name)
     if (!ch) {
-      ch = this.client.channel(name, { config: { broadcast: { self: true } } })
+      ch = this.client.channel(name, { config: { broadcast: { self: false } } })
       ch.on('broadcast', { event: 'gameEvent' }, ({ payload }: { payload: GameEvent }) => {
         const subs = this.eventSubs.get(name)
         if (subs) for (const cb of subs) cb(payload)
@@ -47,6 +47,11 @@ export class SupabaseTransport implements IRealtimeTransport {
   }
 
   async broadcast(channel: string, event: GameEvent): Promise<void> {
+    // Deliver to local subscribers immediately — no Supabase roundtrip needed for host's own events.
+    // With self: false, the Supabase channel no longer echoes back our own broadcasts, so local
+    // delivery here is the only way the engine's events reach the host store reliably.
+    const localSubs = this.eventSubs.get(channel)
+    if (localSubs) for (const cb of [...localSubs]) cb(event)
     const ch = this.getChannel(channel)
     await ch.send({ type: 'broadcast', event: 'gameEvent', payload: event })
   }

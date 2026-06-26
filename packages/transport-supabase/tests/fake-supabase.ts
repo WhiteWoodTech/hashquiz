@@ -22,7 +22,12 @@ export class FakeChannel {
 
   async send(msg: { type: string; event: string; payload: GameEvent }): Promise<void> {
     this.sent.push(msg)
-    for (const cb of this.broadcastListeners) cb({ payload: msg.payload })
+    // No self-echo: self: false means the sender does not receive its own broadcasts via the channel.
+  }
+
+  /** Simulate a broadcast arriving from another client (for tests). */
+  simulateIncoming(payload: GameEvent): void {
+    for (const cb of this.broadcastListeners) cb({ payload })
   }
 
   async track(state: PlayerState): Promise<void> {

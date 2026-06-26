@@ -20,12 +20,30 @@ describe('SupabaseTransport.broadcast', () => {
 })
 
 describe('SupabaseTransport.subscribe', () => {
-  it('invokes the callback when a broadcast event arrives', async () => {
+  it('delivers local broadcast to subscriber immediately (no Supabase roundtrip)', async () => {
     const { transport } = makeTransport()
     const received: GameEvent[] = []
     transport.subscribe('game:XYZ', e => received.push(e))
     await transport.broadcast('game:XYZ', GameEvents.gameStarted())
     expect(received).toEqual([{ type: 'game_started' }])
+  })
+
+  it('delivers incoming remote event (from another client) to subscriber', () => {
+    const { transport, fake } = makeTransport()
+    const received: GameEvent[] = []
+    transport.subscribe('game:XYZ', e => received.push(e))
+    fake.channels['game:XYZ']!.simulateIncoming(GameEvents.gameStarted())
+    expect(received).toEqual([{ type: 'game_started' }])
+  })
+
+  it('local broadcast does not reach Supabase channel as self-echo', async () => {
+    const { transport, fake } = makeTransport()
+    const received: GameEvent[] = []
+    transport.subscribe('game:XYZ', e => received.push(e))
+    await transport.broadcast('game:XYZ', GameEvents.gameStarted())
+    // Only one delivery: local. A second event from simulateIncoming adds a second entry.
+    fake.channels['game:XYZ']!.simulateIncoming(GameEvents.gameStarted())
+    expect(received).toHaveLength(2)
   })
 
   it('returns an unsubscribe that stops invocations', async () => {

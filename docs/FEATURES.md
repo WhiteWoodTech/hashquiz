@@ -19,7 +19,7 @@ Feature list and roadmap for QuizV, organized by phase.
 | Scoring formula | ✅ | 500–1000 pts based on answer speed |
 | `quizv dev` CLI | ✅ | Starts WS server from a `.quizv.md` file |
 | `quizv check` CLI | ✅ | Validates a quiz file and reports errors |
-| Unit tests (27) | ✅ | Parser (13) + Core (14), 0 failures |
+| Unit tests | ✅ | 88 tests across 9 files (parser, core, transports, apps), 0 failures |
 
 ---
 
@@ -50,16 +50,20 @@ Feature list and roadmap for QuizV, organized by phase.
 
 ---
 
-## Phase 3 — Cloud / Supabase (planned)
+## Phase 3 — Cloud / Supabase (in progress)
+
+Realtime-only MVP is shipped: no Postgres tables, Supabase Realtime channels + presence only.
+See [`DEPLOY.md`](DEPLOY.md) for setup.
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| `@quizv/transport-supabase` | ⬜ | Supabase Realtime transport |
+| `@quizv/transport-supabase` | ✅ | Supabase Realtime Broadcast + presence transport (unit-tested with a fake client) |
+| Host/player apps on Supabase | ✅ | `VITE_TRANSPORT=supabase` switches both apps from local WS to Supabase |
+| Vercel deployment | ✅ | `vercel.json` + `bun run build:web`, host at `/host`, player at `/` |
+| Internet multiplayer | ✅ | Players join from anywhere via URL / QR code |
 | Host authentication | ⬜ | Supabase Auth (magic link) |
 | Quiz persistence | ⬜ | Save/load quizzes from Supabase Postgres |
 | `quizv upload` CLI | ⬜ | Push quiz to Supabase |
-| Vercel deployment | ⬜ | Deploy host + player apps |
-| Internet multiplayer | ⬜ | Players join from anywhere via URL |
 
 ---
 
@@ -80,9 +84,9 @@ Feature list and roadmap for QuizV, organized by phase.
 |-----------|--------|
 | `crypto.randomUUID()` not used | Fails on HTTP over LAN (non-secure context) |
 | No Vue Router | Linear game flow — `v-if` on phase is sufficient |
-| `@quizv/transport-supabase` is a stub | Planned for Phase 3 |
+| Supabase mode is ephemeral | No Postgres tables: a host page reload loses the game |
 | `playerUrl` hardcoded to port 3032 | Dedicated Vite player dev server |
 
 ---
 
-*Last updated: 2026-03-31*
+*Last updated: 2026-11-24*

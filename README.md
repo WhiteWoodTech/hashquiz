@@ -101,7 +101,7 @@ Output: question count, theme, or a list of parsing errors with the offending qu
 ### Build & test
 
 ```bash
-bun test                  # Run all tests (27+)
+bun test                  # Run all tests (88)
 bun run build             # Build every workspace package
 bun run build:web         # Build only the host + player SPAs
 bun run lint              # Lint markdown and YAML
@@ -116,11 +116,14 @@ and the raw `sources/` used to plan the quiz.
 
 | Deck | Title | Topics | Launch |
 |------|-------|--------|--------|
-| [`decks/cloud-gcp`](decks/cloud-gcp-fundamentals/) | Cloud & GCP | cloud, gcp, devops | `bun run dev decks/cloud-gcp/index.quizv.md` |
-| [`decks/docker-fundamentals`](decks/docker-fundamentals/) | Docker | image, container, dockerfile | `bun run dev decks/docker-fundamentals/index.quizv.md` |
-| [`decks/genai-llm-introduction`](decks/genai-llm-introduction/) | Fondamentaux de l'IA Générative | ia, llm, prompt, rag, agents, mcp | `bun run dev decks/genai-llm-introduction/index.quizv.md` |
-| [`decks/mcp-deep-dive`](decks/mcp-deep-dive/) | MCP — deep dive | mcp, protocol, genai, server | `bun run dev decks/mcp-deep-dive/index.quizv.md` |
+| [`decks/agentic-coding`](decks/agentic-coding/) | Agentic Coding | agentic-coding, context-engineering, subagents, MCP, SDD, CLI, gen-ai | `bun run dev decks/agentic-coding/index.quizv.md` |
+| [`decks/cloud-fundamentals`](decks/cloud-fundamentals/) | Cloud Platforms Overview | cloud, devops, infrastructure, XaaS | `bun run dev decks/cloud-fundamentals/index.quizv.md` |
+| [`decks/cloud-gcp-fundamentals`](decks/cloud-gcp-fundamentals/) | GCP Fundamentals | cloud, gcp, devops | `bun run dev decks/cloud-gcp-fundamentals/index.quizv.md` |
+| [`decks/docker-fundamentals`](decks/docker-fundamentals/) | Docker | docker-fundamentals, image, container | `bun run dev decks/docker-fundamentals/index.quizv.md` |
+| [`decks/genai-llm-introduction`](decks/genai-llm-introduction/) | Fondamentaux de l'IA Générative | ia, llm, prompt, rag, agents, mcp, gen-ai | `bun run dev decks/genai-llm-introduction/index.quizv.md` |
+| [`decks/mcp-deep-dive`](decks/mcp-deep-dive/) | MCP — deep dive | mcp, ai, protocol, genai, server | `bun run dev decks/mcp-deep-dive/index.quizv.md` |
 | [`decks/mcp-intro-and-overview`](decks/mcp-intro-and-overview/) | MCP intro and overview | mcp, ai, llm, integration | `bun run dev decks/mcp-intro-and-overview/index.quizv.md` |
+| [`decks/observability`](decks/observability/) | Observability | observabilité, métriques, logs, traces, monitoring, alerting, apm, prometheus, grafana | `bun run dev decks/observability/index.quizv.md` |
 
 Example decks (smaller, for testing):
 

@@ -13,6 +13,7 @@ Project task backlog for QuizV.
 1. Pur Realtime (éphémère)
 Aucune table Postgres. Tout passe par les channels Realtime + presence. Si l'hôte recharge la page, la partie est perdue.
 Setup minimal, parfait pour MVP.
+**→ Option retenue pour le MVP actuel** (cf. [`DEPLOY.md`](DEPLOY.md)).
 
 2. Tables minimales (rooms + games)
    Persiste : `rooms(code, host_id, created_at)`, `games(id, room_id, started_at, ended_at)`,
@@ -29,14 +30,16 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 ## Backlog
 
 - [ ] Aprés le podium, nouvelle page métrics avec un encart de métrics Global :
-    - nb total bonne réponse
-    - pourcentage bonne réponse
-    - temps moyen réponse
-    - bonne réponse le plus rapide (head shoot avec pseudo et position)
-    - total temps de réponse le plus long (escargot, avec pseudo et position)
-- [ ] Ajouter dans la page métrics, des métrics par personne : nb bonne réponse, pourcentage bonne réponse, temps moyen réponse, temps le plus rapide
+  - nb total bonne réponse
+  - pourcentage bonne réponse
+  - temps moyen réponse
+  - bonne réponse le plus rapide (head shoot avec pseudo et position)
+  - total temps de réponse le plus long (escargot, avec pseudo et position)
+- [ ] Ajouter dans la page métrics, des métrics par personne : nb bonne réponse,
+      pourcentage bonne réponse, temps moyen réponse, temps le plus rapide
 - [ ] génération résultat et métrics en fichier json téléchargeable
-- [ ] Revoir l'index avec une grille de card (même design que le reste, et card proche type QuizInfoPanel) des différents quizz, avec titre, description, tags, max-questions et target-difficulty.
+- [ ] Revoir l'index avec une grille de card (même design que le reste, et card proche type QuizInfoPanel)
+      des différents quizz, avec titre, description, tags, max-questions et target-difficulty.
 - [ ] l'affichage des choix sort en markdown brut et n'est pas formaté avec gras et autres...
 - [ ] Maximum de longueurs des choix / réponses à mettre dans la skills (éviter le débordement sur mobile surtout).
 - [ ] Dans l'écran des réponses, mets les lettres des bonnes réponses en vert
@@ -49,12 +52,12 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
 | # | Task | Description |
 |---|------|-------------|
-| 1 | Supabase schema | Write migrations for `quizzes`, `game_sessions`, `game_players`, `game_answers` |
-| 2 | `@quizv/transport-supabase` | Implement `IRealtimeTransport` using Supabase Realtime Broadcast |
+| 1 | Supabase schema | Only if persistence is needed: migrations for `quizzes`, `game_sessions`, `game_players`, `game_answers` |
+| ~~2~~ | ~~`@quizv/transport-supabase`~~ | ✅ Done: `IRealtimeTransport` on Supabase Realtime Broadcast + presence |
 | 3 | Host auth | Magic link login via Supabase Auth |
 | 4 | Quiz persistence | Save/load quizzes tied to host account |
 | 5 | `quizv upload` CLI | Upload a `.quizv.md` file to Supabase |
-| 6 | Vercel deployment | `vercel.json` for host + player apps, env var setup |
+| ~~6~~ | ~~Vercel deployment~~ | ✅ Done: `vercel.json` + env vars, see [`DEPLOY.md`](DEPLOY.md) |
 | 7 | Cloud E2E test | Full game flow via Supabase transport |
 
 ### Phase 4 — Slidev Addon

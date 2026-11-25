@@ -20,15 +20,17 @@ quizv/
 │   │       ├── decks.ts             # Built-in deck definitions
 │   │       ├── stores/
 │   │       │   └── game.ts          # Pinia store — HostPhase state machine
+│   │       ├── components/
+│   │       │   └── FullscreenButton.vue # Fullscreen toggle (every host view fits 100vh)
 │   │       ├── session/
 │   │       │   ├── supabase-session.ts # Supabase Realtime session handler
 │   │       │   └── join-code.ts     # Join code generation and validation
 │   │       └── views/
 │   │           ├── DeckSelectView.vue  # Deck selection screen
-│   │           ├── LobbyView.vue    # QR code + player list + Start button
-│   │           ├── QuestionView.vue # Timer ring + live answer count
-│   │           ├── RevealView.vue   # Correct answers + score delta + bar chart
-│   │           └── PodiumView.vue   # Final leaderboard
+│   │           ├── LobbyView.vue    # QR code + player constellation + Start button
+│   │           ├── QuestionView.vue # Countdown + live answer count
+│   │           ├── RevealView.vue   # Correct answers + score delta + vote particles
+│   │           └── PodiumView.vue   # Animated podium + leaderboard
 │   └── player/                      # Vue 3 SPA — player UI (port 3032)
 │       ├── index.html
 │       ├── package.json
@@ -42,9 +44,9 @@ quizv/
 │           └── views/
 │               ├── JoinView.vue     # Join code + pseudo/email form
 │               ├── LobbyView.vue    # Waiting room
-│               ├── QuestionView.vue # 2×2 answer grid + timer ring
-│               ├── FeedbackView.vue # Correct/wrong + points earned
-│               └── PodiumView.vue   # Final rank + score
+│               ├── QuestionView.vue # Answer grid + countdown + verdict/rank after reveal
+│               ├── FeedbackView.vue # Unused (not imported; in the backlog for removal)
+│               └── PodiumView.vue   # Final rank + score + animated podium
 ├── packages/
 │   ├── parser/                      # @quizv/parser
 │   │   ├── package.json
@@ -84,21 +86,40 @@ quizv/
 │   │       ├── cli.ts               # CLI entry — `quizv dev | check`
 │   │       ├── server.ts            # QuizvServer — Bun HTTP + WebSocket
 │   │       └── dev.ts               # devCommand — spawns Vite apps
-│   ├── theme-default/               # @quizv/theme-default
+│   ├── theme-default/               # @quizv/theme-default (new look: Inter + IBM Plex Mono)
 │   │   ├── package.json
 │   │   ├── index.ts
 │   │   └── styles/
 │   │       └── vars.css             # --qv-* CSS custom properties
+│   ├── theme-original/              # @quizv/theme-original (previous look: Syne), same variables
+│   │   ├── package.json
+│   │   ├── index.ts
+│   │   └── styles/
+│   │       └── vars.css
 │   └── ui/                          # @quizv/ui
 │       ├── package.json
 │       ├── tsconfig.json
+│       ├── styles/
+│       │   └── base.css             # .qv-label and .qv-sr-only utilities
+│       ├── tests/                   # theme parity, no hardcoded colors, fx layout/theme
 │       └── src/
 │           ├── index.ts             # Barrel export
-│           ├── TimerRing.vue        # Animated SVG countdown ring
+│           ├── FxCountdown.vue      # Particle countdown ring
+│           ├── FxLobby.vue          # Player constellation
+│           ├── FxReveal.vue         # Vote particles falling into answer columns
+│           ├── FxVerdict.vue        # Player verdict (check / cross particles)
+│           ├── FxPodium.vue         # Animated top-3 podium
+│           ├── fx/                  # Canvas engine shared by the Fx components
+│           │   ├── loop.ts          # rAF loop, reduced motion, visibility pause
+│           │   ├── draw.ts          # Drawing primitives (dots, glow, dust)
+│           │   ├── layout.ts        # Pure geometry (countdown, stacks, podium slots)
+│           │   ├── theme.ts         # Reads --qv-* / --qv-fx-* from CSS
+│           │   └── scenes/          # countdown, lobby, reveal, verdict, podium
 │           ├── AnswerButton.vue     # Answer choice button (multi-state)
-│           ├── AnswerBarChart.vue   # Live answer distribution chart
 │           ├── PlayerList.vue       # Lobby player chips
 │           ├── Podium.vue           # Ranked leaderboard list
+│           ├── DifficultyBar.vue    # Difficulty distribution bar
+│           ├── QuizInfoPanel.vue    # Quiz title, tags, stats
 │           └── QrCode.vue           # QR code canvas (wraps `qrcode`)
 └── examples/
     └── demo.quizv.md                # Sample quiz file
@@ -117,7 +138,9 @@ quizv/
 | `packages/core/src/events.ts` | `GameEvent` union + `GameEvents` builder |
 | `packages/core/src/game.ts` | `GameEngine` — authoritative game state machine |
 | `packages/server/src/server.ts` | Bun HTTP+WS server, handles all WS messages |
-| `packages/theme-default/styles/vars.css` | All `--qv-*` design tokens |
+| `packages/theme-default/styles/vars.css` | All `--qv-*` design tokens (same set in `theme-original`) |
+| `packages/ui/styles/base.css` | `.qv-label` and `.qv-sr-only` utilities |
+| `packages/ui/src/fx/` | Canvas engine behind the Fx components |
 
 ---
 
@@ -137,4 +160,4 @@ In production (Vercel), the build output is `dist/`, containing the compiled fro
 
 ---
 
-*Last updated: 2026-03-31*
+*Last updated: 2026-11-25*

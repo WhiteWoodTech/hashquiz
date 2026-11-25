@@ -5,40 +5,102 @@ Complete API reference for all components in `@quizv/ui`.
 Import from the package barrel:
 
 ```typescript
-import { TimerRing, AnswerButton, AnswerBarChart, PlayerList, Podium, QrCode } from '@quizv/ui'
+import {
+  FxCountdown, FxLobby, FxReveal, FxVerdict, FxPodium,
+  AnswerButton, PlayerList, Podium, QrCode, DifficultyBar, QuizInfoPanel,
+} from '@quizv/ui'
 ```
 
 ---
 
-## TimerRing
+## Fx components
 
-Animated SVG countdown ring. Color transitions purple → orange → red as time runs out.
+Canvas scenes driven by the theme tokens (`--qv-*`, `--qv-fx-*`). The shared engine lives in
+`packages/ui/src/fx/` (`loop.ts` render loop, `draw.ts` primitives, `layout.ts` pure geometry, `theme.ts`
+token reader, `scenes/` one file per scene). Common behavior:
 
-### Props
+- `prefers-reduced-motion: reduce` — no particle movement; the final state fades in, information is identical
+- The render loop pauses while the tab is hidden
+- No color or font is hardcoded: everything is read from CSS variables
+- The canvas is `aria-hidden`; the information is also available as DOM text (labels, `aria-label`, `.qv-sr-only`)
+- Animations never block buttons or events
+
+### FxCountdown
+
+Particle ring that empties as time runs out. Replaces `TimerRing`.
 
 | Prop | Type | Required | Default | Description |
 |------|------|----------|---------|-------------|
-| `total` | `number` | yes | — | Total seconds for this question |
+| `total` | `number` | yes | — | Total seconds for this question (a change rebuilds the ring) |
 | `remaining` | `number` | yes | — | Seconds remaining |
-| `size` | `number` | no | `120` | SVG width/height in pixels |
-
-### Color Thresholds
-
-| Fraction remaining | Color |
-|-------------------|-------|
-| > 50% | `var(--qv-accent)` — purple |
-| 25–50% | `var(--qv-warn)` — orange |
-| < 25% | `var(--qv-wrong)` — red |
-
-### Usage
+| `size` | `'compact' \| 'large'` | no | `'compact'` | Compact (player) or large (host) |
 
 ```vue
-<TimerRing :total="question.timer" :remaining="remaining" :size="140" />
+<FxCountdown :total="question.timer" :remaining="remaining" size="large" />
 ```
 
-### Accessibility
+Renders `role="timer"` with `aria-label="${remaining} seconds remaining"` and the whole seconds as text.
+Up to one dot per second is lit; the `danger` modifier applies in the last 4 seconds.
 
-Renders `aria-label="${remaining} seconds remaining"` on the `<svg>` element.
+### FxLobby
+
+Constellation of connected players: one dot per player, linked by lines; the most recent pseudos are labelled.
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `players` | `{ id: string; pseudo?: string }[]` | yes | — | One dot per entry (no pseudo: anonymous dot) |
+| `highlightId` | `string` | no | — | Dot drawn in `--qv-accent` (the current player) |
+| `labels` | `number` | no | `8` | Number of most recent pseudos labelled |
+
+```vue
+<FxLobby class="lobby__fx" :players="game.players" />
+```
+
+### FxReveal
+
+Answer reveal: one particle per vote falls into its answer column and stacks, then the correct columns turn
+`--qv-correct` while the others dim and percentages count up. Replaces `AnswerBarChart`.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `choices` | `{ id: string; text: string }[]` | yes | Question choices (one column each) |
+| `counts` | `Record<string, number>` | yes | Number of votes per choice id |
+| `correctIds` | `string[]` | yes | Ids of correct answers |
+
+Exposes `skip()` to jump to the final state. A change of `counts` or `correctIds` replays the sequence.
+Column stacks shrink to fit the canvas, so 100 votes in one column stay on screen.
+
+```vue
+<FxReveal ref="fx" :choices="question.choices" :counts="game.choiceCounts" :correct-ids="game.correctIds" />
+```
+
+### FxVerdict
+
+Verdict of the current player after the reveal: 24 particles converge onto a check in `--qv-correct`, or scatter
+faintly in `--qv-wrong` (wrong or no answer). The points text is rendered by the parent view.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `correct` | `boolean` | yes | Whether the player was right |
+| `delta` | `number` | yes | Points gained this round |
+| `answered` | `boolean` | yes | Whether the player answered at all |
+
+```vue
+<FxVerdict :correct="isCorrect" :delta="game.lastDelta" :answered="game.answered" />
+```
+
+### FxPodium
+
+Animated podium of the top 3: columns of particles proportional to the scores, with name and score.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `podium` | `PodiumEntry[]` | yes | Sorted ranking; only the first 3 are drawn |
+| `highlightId` | `string` | no | Player id highlighted in `--qv-accent`; if ranked below 3, their rank is shown |
+
+```vue
+<FxPodium :podium="game.podium" :highlight-id="game.playerId" />
+```
 
 ---
 
@@ -75,10 +137,10 @@ Answer choice button with multiple visual states. Supports multi-select: remains
 
 | `colorId` | Color |
 |-----------|-------|
-| `a` | Purple `#7c3aed` |
-| `b` | Cyan `#0891b2` |
-| `c` | Amber `#d97706` |
-| `d` | Green `#059669` |
+| `a` | `var(--qv-choice-a)` |
+| `b` | `var(--qv-choice-b)` |
+| `c` | `var(--qv-choice-c)` |
+| `d` | `var(--qv-choice-d)` |
 
 ### Usage
 
@@ -93,32 +155,6 @@ Answer choice button with multiple visual states. Supports multi-select: remains
   @select="toggleChoice"
 />
 ```
-
----
-
-## AnswerBarChart
-
-Horizontal bar chart showing live answer distribution. Used on the host's `RevealView`.
-
-### Props
-
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `choices` | `Array<{ id: string; text: string }>` | yes | Question choices |
-| `counts` | `Record<string, number>` | yes | Number of players who chose each ID |
-| `correctIds` | `string[]` | no | IDs of correct answers (for highlighting) |
-
-### Usage
-
-```vue
-<AnswerBarChart
-  :choices="question.choices"
-  :counts="game.choiceCounts"
-  :correctIds="game.correctIds"
-/>
-```
-
-Bars animate width on update (0.5s ease transition). Percentages are computed relative to total submissions.
 
 ---
 
@@ -189,8 +225,8 @@ Canvas-based QR code generator. Used on the host lobby to display the player joi
 <QrCode :value="game.playerUrl" :size="220" />
 ```
 
-Renders with white modules on dark background (`#111118`) to match the dark theme.
+Colors come from `--qv-qr-dark` (modules) and `--qv-qr-light` (background).
 
 ---
 
-*Last updated: 2026-03-31*
+*Last updated: 2026-11-25*

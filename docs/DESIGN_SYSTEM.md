@@ -7,39 +7,82 @@ CSS tokens, typography, spacing, and UI conventions for QuizV.
 ## Design Principles
 
 - **Dark-first** — all surfaces use a near-black palette
-- **Accent-driven** — purple (`#7c3aed`) as primary brand color
-- **Legible at distance** — large type, high contrast (host screen shown on projector)
+- **Color is a signal** — the interface is near-black and white; color only carries meaning
+  (correct, wrong, warning, answer slot, current player, main action)
+- **Legible at distance** — large type, high contrast (host screen shown on a projector)
 - **Mobile-friendly** — player UI designed for one-hand use on phones
-- **Token-only styling** — never hardcode colors; always use `var(--qv-*)`
+- **Token-only styling** — never hardcode colors or fonts; always use `var(--qv-*)`
+  (enforced by `packages/ui/tests/no-hardcoded-colors.test.ts`, canvas scenes included)
+- **Motion respects the user** — canvas scenes honor `prefers-reduced-motion` (final state faded in, no movement)
+  and pause when the tab is hidden
+
+---
+
+## Themes
+
+Two themes ship with the same set of variables. The theme is chosen by the `vars.css` import in
+`apps/host/src/main.ts` and `apps/player/src/main.ts`:
+
+```typescript
+import '@quizv/theme-default/styles/vars.css'   // or '@quizv/theme-original/styles/vars.css'
+import '@quizv/ui/styles/base.css'
+```
+
+| Package | Look |
+|---------|------|
+| `@quizv/theme-default` | New direction: Inter + IBM Plex Mono labels, near-black, white particles, small radii (6/4 px), wide label spacing |
+| `@quizv/theme-original` | Previous look: Syne, `#0a0a0f` surfaces, 12/8 px radii, tight label spacing, fewer particles |
+
+`packages/ui/tests/theme-parity.test.ts` fails if the two themes do not declare exactly the same variables.
+When adding a token, add it to both `vars.css` files.
 
 ---
 
 ## CSS Tokens
 
-All tokens are defined in `@quizv/theme-default/styles/vars.css` and available globally after import.
+Defined in `packages/theme-*/styles/vars.css` and available globally after import. Values below are those of
+`theme-default`, with the `theme-original` value when it differs.
 
 ### Colors
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--qv-bg` | `#0a0a0f` | Page background |
-| `--qv-surface` | `#111118` | Cards, panels |
-| `--qv-surface-2` | `#1a1a25` | Buttons, inputs, nested surfaces |
-| `--qv-border` | `#2a2a3a` | Dividers, borders |
-| `--qv-accent` | `#7c3aed` | Primary brand — purple |
+| `--qv-bg` | `#06060a` (`#0a0a0f`) | Page background |
+| `--qv-surface` | `#0c0c12` (`#111118`) | Cards, panels |
+| `--qv-surface-2` | `#14141c` (`#1a1a25`) | Buttons, inputs, nested surfaces |
+| `--qv-border` | `#22222e` (`#2a2a3a`) | Dividers, borders |
+| `--qv-accent` | `#7c3aed` | Main actions, focus, current player highlight |
 | `--qv-accent-2` | `#06b6d4` | Secondary accent — cyan |
 | `--qv-correct` | `#22c55e` | Correct answer state |
 | `--qv-wrong` | `#ef4444` | Wrong answer state |
-| `--qv-warn` | `#f97316` | Warning / mid-timer state |
-| `--qv-text` | `#ffffff` | Primary text |
-| `--qv-text-muted` | `#888899` | Secondary text, labels |
+| `--qv-warn` | `#f99e16` | Warning / mid-timer state |
+| `--qv-text` | `#f2f2f7` (`#ffffff`) | Primary text |
+| `--qv-text-muted` | `#8a8a9a` (`#888899`) | Secondary text, labels |
+
+### Answer slots
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--qv-choice-a` | `#7c3aed` | Answer A (buttons, chart columns) |
+| `--qv-choice-b` | `#0891b2` | Answer B |
+| `--qv-choice-c` | `#d97706` | Answer C |
+| `--qv-choice-d` | `#059669` | Answer D |
+
+### QR code
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--qv-qr-dark` | `#ffffff` | QR modules |
+| `--qv-qr-light` | `#111118` | QR background |
 
 ### Typography
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--qv-font-display` | `'Syne', system-ui, sans-serif` | Headings, buttons, UI labels |
+| `--qv-font-display` | `'Inter', system-ui, sans-serif` (`'Syne'`) | Headings, body text, buttons |
 | `--qv-font-mono` | `'IBM Plex Mono', monospace` | Codes, join code display |
+| `--qv-font-label` | `'IBM Plex Mono', monospace` (display font) | Short uppercase labels (`.qv-label`) |
+| `--qv-label-spacing` | `.4em` (`.05em`) | Letter spacing of `.qv-label` |
 
 Body text inherits `--qv-font-display`. All components use `font-family: inherit`.
 
@@ -47,8 +90,29 @@ Body text inherits `--qv-font-display`. All components use `font-family: inherit
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--qv-radius` | `12px` | Cards, buttons, primary elements |
-| `--qv-radius-sm` | `8px` | Badges, inner elements |
+| `--qv-radius` | `6px` (`12px`) | Cards, buttons, primary elements |
+| `--qv-radius-sm` | `4px` (`8px`) | Badges, inner elements |
+
+### Effects (`--qv-fx-*`)
+
+Read by the canvas scenes in `packages/ui/src/fx/` (`readFxTheme`); numbers are unitless.
+
+| Token | Default | Original | Usage |
+|-------|---------|----------|-------|
+| `--qv-fx-dot` | `#ffffff` | `#ffffff` | Particle color |
+| `--qv-fx-line-opacity` | `.2` | `.15` | Opacity of the lines linking particles |
+| `--qv-fx-glow` | `.35` | `.25` | Intensity of halos |
+| `--qv-fx-dust-density` | `1` | `.5` | Multiplier of the background dust count |
+| `--qv-fx-speed` | `1` | `1` | Global animation speed multiplier |
+
+---
+
+## Utilities (`packages/ui/styles/base.css`)
+
+| Class | Usage |
+|-------|-------|
+| `.qv-label` | Short uppercase title: `--qv-font-label`, `--qv-label-spacing`, weight 500. Only for short titles; long text stays in normal case with `--qv-font-display` |
+| `.qv-sr-only` | Visually hidden text kept for screen readers (used by the Fx components for their text summary) |
 
 ---
 
@@ -68,24 +132,25 @@ color: #888899;
 
 ---
 
-## Answer Color Variants
+## Color Is a Signal
 
-The four answer slots (A/B/C/D) each have a fixed accent color used for borders, badges, and chart bars:
+On the neutral near-black base, a color always means something:
 
-| Slot | Color | Hex |
-|------|-------|-----|
-| A | Purple | `#7c3aed` |
-| B | Cyan | `#0891b2` |
-| C | Amber | `#d97706` |
-| D | Green | `#059669` |
+| Color | Meaning |
+|-------|---------|
+| `--qv-correct` | Correct answer, positive verdict, points gained |
+| `--qv-wrong` | Wrong answer, negative verdict |
+| `--qv-warn` | Time running out, medium difficulty |
+| `--qv-choice-a` … `--qv-choice-d` | Identity of an answer slot |
+| `--qv-accent` | Main action, focus, the current player |
 
-These are defined inline per component as CSS custom property `--c` and are **not** design tokens.
+Particles stay white (`--qv-fx-dot`) until they carry a meaning, e.g. correct votes turn `--qv-correct` on reveal.
 
 ---
 
 ## BEM Naming
 
-All component styles use BEM with the `qv-` prefix:
+All component styles use BEM with the `qv-` prefix (Fx components use `fx-`):
 
 ```css
 .qv-btn { }              /* block */
@@ -94,35 +159,23 @@ All component styles use BEM with the `qv-` prefix:
 .qv-btn--a { }           /* color variant modifier */
 ```
 
-```css
-.qv-chart { }
-.qv-chart__row { }
-.qv-chart__bar { }
-```
-
 ---
 
-## Timer Ring Colors
+## Countdown Colors
 
-The `TimerRing` component changes color dynamically based on remaining fraction:
-
-| Fraction remaining | Color | Token |
-|-------------------|-------|-------|
-| > 50% | Purple | `var(--qv-accent)` |
-| 25–50% | Orange | `var(--qv-warn)` |
-| < 25% | Red | `var(--qv-wrong)` |
-
-Transitions use `stroke 0.4s ease` for smooth color change.
+`FxCountdown` shows one dot per second, unlit as time runs out (`countdownState` in
+`fx/layout.ts`). The last 4 seconds are flagged `danger` (`fx-countdown--danger`).
 
 ---
 
 ## Layout Conventions
 
-- **Host app** — designed for large screens (1080p+), landscape
-- **Player app** — designed for mobile (375px+), portrait, single column
-- Answer grid: 2×2 CSS Grid on mobile (`grid-template-columns: 1fr 1fr`)
-- No fixed breakpoints — relative units and `min()` / `max()` preferred
+- **Host app** — designed for large screens (1080p+), landscape. Every view fits `100vw × 100vh` with no page
+  scroll. A fullscreen button (`FullscreenButton.vue`) is shown in the top-right corner until fullscreen is entered.
+- **Player app** — designed for mobile (375px+), portrait, single column; animations never cover the answer buttons
+- Answer grid: 2×2 CSS Grid on the host, single column on mobile
+- No fixed breakpoints — relative units (`vmin`, `vw`, `vh`) and `min()` / `max()` preferred
 
 ---
 
-*Last updated: 2026-03-31*
+*Last updated: 2026-11-25*

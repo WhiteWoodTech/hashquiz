@@ -25,7 +25,6 @@ Setup minimal, parfait pour MVP.
 
 Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
-
 - Quizz asynchrone (date de fin, un a plusieurs joueurs)
 
 ---
@@ -43,8 +42,8 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
   - temps moyen réponse
   - bonne réponse le plus rapide (head shoot avec pseudo et position)
   - total temps de réponse le plus long (escargot, avec pseudo et position)
-- [ ] Ajouter dans la page métrics, des métrics par personne : nb bonne réponse,
-      pourcentage bonne réponse, temps moyen réponse, temps le plus rapide
+- [ ] Ajouter dans la page métrics, des métrics par personne : nb bonne réponse, pourcentage bonne réponse,
+      temps moyen réponse, temps le plus rapide
 - [ ] génération résultat et métrics en fichier json téléchargeable
 - [ ] Revoir l'index avec une grille de card (même design que le reste, et card proche type QuizInfoPanel)
       des différents quizz, avec titre, description, tags, max-questions et target-difficulty.
@@ -55,6 +54,14 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
       en gardant en vert les bonnes et enlève les de l'encart avec l'explication
 - [ ] Sur la base des corrections précédentes. Améliore le cli check : 4 réponses maximum,
       check là où la bonne réponse saute aux yeux (formatage asymétrique)
+- [ ] Supprimer `FeedbackView.vue` (non importé)
+- [ ] Rang : ordinal français ("1er" au lieu de "1e")
+- [ ] Verdict joueur faux après rechargement pendant la révélation (isCorrect calculé depuis la sélection locale
+      vide) — à corriger via le delta/serveur
+- [ ] Plein écran : fallback `webkitRequestFullscreen` (Safari desktop)
+- [ ] Classement (PlayerList) : défilement interne au-delà de ~50 joueurs ; pseudos récents parfois sous les
+      panneaux latéraux du lobby
+- [ ] Révélation : explication longue limitée à 40vh avec défilement sur projecteur
 
 ### Phase 3 — Cloud / Supabase
 
@@ -85,7 +92,6 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 | 13 | Question types | Add `type: multiple` explicit support + display hint |
 | 14 | Leaderboard between questions | Show top 5 snapshot between question and next question |
 | 15 | Timer sync | Broadcast `timer_tick` events for host/player sync |
-| 16 | Confetti | Confetti animation on player podium for top 3 |
 | 17 | Theming | Add `@quizv/theme-dark` and `@quizv/theme-minimal` variants |
 
 ---
@@ -117,6 +123,7 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 - [x] Fix: `TimerRing` `aria-label` binding (`:aria-label` dynamic binding)
 - [x] Fix: `AnswerButton` multi-select (selected state remains interactive)
 - [x] Fix: RevealView score delta zero shown as muted instead of green
+- [x] Fx animations (`FxCountdown`, `FxLobby`, `FxReveal`, `FxVerdict`, `FxPodium`), two themes, host fullscreen
 
 ### Phase 1 — Core Engine
 
@@ -129,4 +136,4 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
 ---
 
-*Last updated: 2026-03-31*
+*Last updated: 2026-11-25*

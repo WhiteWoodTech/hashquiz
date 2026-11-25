@@ -1,5 +1,6 @@
 <template>
   <FxBackdrop />
+  <BrandLogo />
   <div class="app">
     <Transition name="status">
       <p
@@ -19,7 +20,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { FxBackdrop } from '@quizv/ui'
+import { BrandLogo, FxBackdrop } from '@quizv/ui'
 import { useGameStore } from './stores/game'
 import JoinView     from './views/JoinView.vue'
 import LobbyView    from './views/LobbyView.vue'
@@ -38,7 +39,7 @@ const statusLabel = computed(() => {
 </script>
 
 <style>
-.app { position: relative; z-index: 1; min-height: 100vh; min-height: 100dvh; max-width: 480px; margin: 0 auto; padding: 1.25rem; }
+.app { position: relative; z-index: 1; min-height: 100vh; min-height: 100dvh; max-width: 480px; margin: 0 auto; padding: 2.5rem 1.25rem 1.25rem; }
 
 .status-banner {
   position: sticky; top: 0; z-index: 10;

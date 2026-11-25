@@ -1,6 +1,5 @@
 <template>
   <div class="join">
-    <h1 class="join__title">QuizV</h1>
     <p class="join__sub">Enter the game code to join</p>
 
     <div class="join__form">
@@ -55,8 +54,7 @@ function joinGame() {
 </script>
 
 <style scoped>
-.join { display: flex; flex-direction: column; align-items: center; padding-top: 3rem; }
-.join__title { font-size: 2.5rem; color: var(--qv-accent); margin: 0; }
+.join { display: flex; flex-direction: column; align-items: center; padding-top: 2rem; }
 .join__sub   { color: var(--qv-text-muted); margin: 0.5rem 0 2rem; }
 .join__form  { width: 100%; display: flex; flex-direction: column; gap: 0.75rem; }
 .join__error { color: var(--qv-wrong); font-size: 0.9rem; margin: 0; }

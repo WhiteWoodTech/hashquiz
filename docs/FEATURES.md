@@ -27,7 +27,7 @@ Feature list and roadmap for QuizV, organized by phase.
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| `@quizv/theme-default` | ✅ | CSS custom properties (`--qv-*`) |
+| `@quizv/theme-default` | ✅ | CSS custom properties (`--qv-*`), new look; `@quizv/theme-original` keeps the previous one |
 | `FxCountdown` component | ✅ | Particle countdown ring (replaces `TimerRing`) |
 | `AnswerButton` component | ✅ | Multi-state button with 4 color variants |
 | `FxReveal` component | ✅ | Vote particles falling into answer columns (replaces `AnswerBarChart`) |
@@ -49,7 +49,7 @@ Feature list and roadmap for QuizV, organized by phase.
 | Player app — Podium | ✅ | Final rank + score |
 | Multi-select answers | ✅ | Toggle choices until timer ends, auto-submit |
 | `quizv dev` spawns Vite | ✅ | Host (3031) + Player (3032) Vite servers |
-| `choiceCounts` in reveal | ✅ | Per-choice answer counts for host bar chart |
+| `choiceCounts` in reveal | ✅ | Per-choice answer counts for the host reveal animation (`FxReveal`) |
 | `playerUrl` in `host_connected` | ✅ | Pre-filled join URL for QR code |
 
 ---

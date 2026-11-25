@@ -15,7 +15,7 @@ Code style, naming, and git conventions for the QuizV project.
 
 | Element | Convention | Example |
 |---------|------------|---------|
-| Files | kebab-case | `game-engine.ts`, `TimerRing.vue` |
+| Files | kebab-case | `game-engine.ts`, `FxCountdown.vue` |
 | Classes | PascalCase | `GameEngine`, `QuizvServer` |
 | Vue components | PascalCase | `AnswerButton.vue`, `PlayerList.vue` |
 | Interfaces | PascalCase with `I` prefix for transport | `IRealtimeTransport` |
@@ -59,7 +59,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 // 2. Store imports
 import { useGameStore } from '../stores/game'
 // 3. Component imports
-import { TimerRing } from '@quizv/ui'
+import { FxCountdown } from '@quizv/ui'
 
 // 4. Props / emits
 const props = defineProps<{ total: number; remaining: number }>()
@@ -199,7 +199,7 @@ import { ref, computed } from 'vue'
 
 // 3. Workspace packages
 import type { GameEvent, PlayerState } from '@quizv/core'
-import { TimerRing } from '@quizv/ui'
+import { FxCountdown } from '@quizv/ui'
 
 // 4. Relative imports
 import { useGameStore } from '../stores/game'

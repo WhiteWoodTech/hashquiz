@@ -174,15 +174,14 @@ type HostPhase = 'connecting' | 'lobby' | 'question' | 'revealed' | 'finished'
 ## Player App Store (`apps/player/src/stores/game.ts`)
 
 ```typescript
-type PlayerPhase = 'join' | 'lobby' | 'question' | 'feedback' | 'podium'
+type PlayerPhase = 'join' | 'lobby' | 'question' | 'podium'
 ```
 
 | Phase | Trigger | View |
 |-------|---------|------|
 | `join` | Initial | `JoinView` |
 | `lobby` | `joined` message received | `LobbyView` |
-| `question` | `question_started` received | `QuestionView` |
-| `feedback` | `answer_revealed` received | `FeedbackView` |
+| `question` | `question_started` received | `QuestionView` (after `answer_revealed`, the verdict via `FxVerdict`, points and rank are shown inline) |
 | `podium` | `game_ended` received | `PodiumView` |
 
 **Multi-select answer flow:**

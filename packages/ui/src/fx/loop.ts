@@ -54,22 +54,25 @@ export function mountScene<S, P>(
   let last = 0
   let dpr = 0
   let destroyed = false
+  let drawFailed = false
 
   function resize(): boolean {
-    const rect = canvas.getBoundingClientRect()
+    // Layout size: unlike getBoundingClientRect it ignores CSS transforms (scale transitions).
+    const w = canvas.clientWidth
+    const h = canvas.clientHeight
     const d = window.devicePixelRatio || 1
-    if (rect.width === frame.w && rect.height === frame.h && d === dpr) return false
-    frame.w = rect.width
-    frame.h = rect.height
+    if (w === frame.w && h === frame.h && d === dpr) return false
+    frame.w = w
+    frame.h = h
     dpr = d
-    canvas.width = Math.round(rect.width * d)
-    canvas.height = Math.round(rect.height * d)
+    canvas.width = Math.round(w * d)
+    canvas.height = Math.round(h * d)
+    // Assigning canvas.width resets the transform.
+    ctx!.setTransform(d, 0, 0, d, 0, 0)
     return true
   }
 
   function init(): void {
-    // Assigning canvas.width resets the transform, so always reapply it.
-    ctx!.setTransform(dpr, 0, 0, dpr, 0, 0)
     frame.t = 0
     frame.dt = 0
     state = scene.init(frame, getProps())
@@ -81,7 +84,12 @@ export function mountScene<S, P>(
     last = now
     frame.t += frame.dt
     ctx!.clearRect(0, 0, frame.w, frame.h)
-    scene.draw(frame, state, getProps())
+    try {
+      scene.draw(frame, state, getProps())
+    } catch (e) {
+      if (!drawFailed) console.error('fx scene draw failed', e)
+      drawFailed = true
+    }
     schedule()
   }
 
@@ -110,7 +118,10 @@ export function mountScene<S, P>(
   }
 
   const observer = new ResizeObserver(() => {
-    if (resize()) init()
+    // Keep state and clock across a resize (scenes derive layout from f.w/f.h each frame);
+    // only seed the scene if it was initialised in a 0x0 box.
+    const wasEmpty = frame.w === 0 || frame.h === 0
+    if (resize() && wasEmpty) init()
   })
 
   resize()

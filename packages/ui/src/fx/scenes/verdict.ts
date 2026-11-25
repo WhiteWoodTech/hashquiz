@@ -19,6 +19,9 @@ interface Mote {
   vx: number
   vy: number
   rest: boolean
+  /** Wrong / no answer: where the dot lay when the current cycle started. */
+  sx: number
+  sy: number
 }
 
 interface VerdictScene {
@@ -41,11 +44,12 @@ const GAP = 0.3
 const OK_FORMED = DURATION + MAX_DELAY
 const OK_PERIOD = OK_FORMED + HOLD + FADE + GAP
 
-/** Wrong: converge onto the ✗, hold, crack, fall, settle, hold, fade, gap. */
-const KO_FORMED = 0.9 + MAX_DELAY
+/** Wrong: rise from the floor onto the ✗, hold, crack, fall, rest on the floor, rise again. */
+const KO_RISE = 1.0
+const KO_FORMED = KO_RISE + MAX_DELAY
 const KO_BREAK = KO_FORMED + 0.45
 const KO_SETTLED = KO_BREAK + 1.1
-const KO_PERIOD = KO_SETTLED + HOLD + FADE + GAP
+const KO_PERIOD = KO_SETTLED + 0.7
 
 const ease = (u: number): number => 1 - Math.pow(1 - clamp01(u), 3)
 const rand = (a: number, b: number): number => a + Math.random() * (b - a)
@@ -60,19 +64,35 @@ function newMotes(): Mote[] {
     vx: 0,
     vy: 0,
     rest: false,
+    sx: 0,
+    sy: 0,
   }))
 }
 
 /**
  * Correct: 24 dots converge onto a check mark in `theme.ok`, with a soft halo.
  * Wrong / no answer: dots form an ✗ in `theme.ko`, which cracks; its dots fall
- * onto an invisible floor, bounce a little and stay piled there.
- * Both loop (play, hold, fade, replay) while the verdict is shown.
+ * onto an invisible floor, bounce a little and stay piled there. The loop then
+ * restarts from that floor: the dots rise back up to reassemble the ✗ (no fade-in).
+ * The check loops (play, hold, fade, replay) while the verdict is shown.
  * Reduced motion: the final shape (check or ✗) fades in once, no loop.
  */
 export const verdictScene: Scene<VerdictScene, VerdictProps> = {
-  init() {
-    return { motes: newMotes(), cycle: 0, broken: false, piles: new Map() }
+  init(f, p) {
+    const motes = newMotes()
+    if (!p.correct) {
+      // The first play starts from the floor, like every later loop.
+      const r = 2.2
+      const half = Math.min(f.w, f.h * 1.5) * 0.5 * 0.7 * 1.4 - r
+      motes.forEach((m, i) => {
+        m.x = f.w / 2 + ((i + 0.5) / N - 0.5) * 2 * half * 0.9
+        m.y = f.h - r - 2 - (i % 2) * r * 1.8
+        m.sx = m.x
+        m.sy = m.y
+        m.rest = true
+      })
+    }
+    return { motes, cycle: 0, broken: false, piles: new Map() }
   },
 
   draw(f: Frame, s, p) {
@@ -80,7 +100,8 @@ export const verdictScene: Scene<VerdictScene, VerdictProps> = {
     const period = p.correct ? OK_PERIOD : KO_PERIOD
     const cycle = reduced ? 0 : Math.floor(f.t / period)
     if (cycle !== s.cycle) {
-      s.motes = newMotes()
+      if (p.correct) s.motes = newMotes()
+      else for (const m of s.motes) { m.sx = m.x; m.sy = m.y; m.rest = false }
       s.cycle = cycle
       s.broken = false
       s.piles.clear()
@@ -124,18 +145,22 @@ export const verdictScene: Scene<VerdictScene, VerdictProps> = {
     const cy = f.h * 0.4
     const floor = f.h - r - 2
     const target = crossPoints(N, cx, cy, crossSize)
-    const out = reduced ? 1 : 1 - clamp01((t - KO_SETTLED - HOLD) / FADE)
 
-    if (reduced || t < KO_BREAK) {
-      // Converge, then a brief tremor just before the crack.
-      const tremor = !reduced && t > KO_BREAK - 0.2 ? 0.8 : 0
+    if (reduced) {
+      for (let i = 0; i < N; i++) dot(f, target[i]!.x, target[i]!.y, r, fadeIn * 0.9, col)
+      return
+    }
+
+    if (t < KO_BREAK) {
+      // Rise from where the dots lie, reassemble the ✗, then a brief tremor just before the crack.
+      const tremor = t > KO_BREAK - 0.2 ? 0.8 : 0
+      const fresh = s.cycle === 0 ? clamp01(f.t / 0.4) : 1
       for (let i = 0; i < N; i++) {
         const m = s.motes[i]!
-        const u = reduced ? 1 : ease((t - m.delay) / 0.9)
-        const st = scatter(m, cy)
-        const x = st.x + (target[i]!.x - st.x) * u + rand(-tremor, tremor)
-        const y = st.y + (target[i]!.y - st.y) * u + rand(-tremor, tremor)
-        dot(f, x, y, r, reduced ? fadeIn * 0.9 : (0.25 + 0.65 * u) * out, col)
+        const u = ease((t - m.delay) / KO_RISE)
+        m.x = m.sx + (target[i]!.x - m.sx) * u
+        m.y = m.sy + (target[i]!.y - m.sy) * u
+        dot(f, m.x + rand(-tremor, tremor), m.y + rand(-tremor, tremor), r, (0.65 + 0.25 * u) * fresh, col)
       }
       return
     }
@@ -180,7 +205,7 @@ export const verdictScene: Scene<VerdictScene, VerdictProps> = {
           }
         }
       }
-      dot(f, m.x, m.y, r, (m.rest ? 0.65 : 0.85) * out, col)
+      dot(f, m.x, m.y, r, m.rest ? 0.65 : 0.85, col)
     }
   },
 }

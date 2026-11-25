@@ -1,5 +1,6 @@
 <template>
   <div class="app">
+    <FullscreenButton />
     <DeckSelectView v-if="game.phase === 'deck-select'" />
     <LobbyView    v-else-if="game.phase === 'lobby'"     />
     <QuestionView v-else-if="game.phase === 'question'" />
@@ -19,6 +20,7 @@ import LobbyView    from './views/LobbyView.vue'
 import QuestionView from './views/QuestionView.vue'
 import RevealView   from './views/RevealView.vue'
 import PodiumView   from './views/PodiumView.vue'
+import FullscreenButton from './components/FullscreenButton.vue'
 
 const game = useGameStore()
 onMounted(() => game.connect())
@@ -26,6 +28,6 @@ onBeforeUnmount(() => game.disposeSession?.())
 </script>
 
 <style>
-.app { min-height: 100vh; padding: 2rem; }
+.app { height: 100vh; overflow: hidden; padding: 0; }
 .connecting { display: flex; align-items: center; justify-content: center; height: 100vh; color: var(--qv-text-muted); }
 </style>

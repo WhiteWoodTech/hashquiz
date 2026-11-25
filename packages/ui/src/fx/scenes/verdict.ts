@@ -1,4 +1,4 @@
-import { dot, glow, line, clamp01 } from '../draw'
+import { dot, glow, clamp01 } from '../draw'
 import { checkPoints, crossPoints } from '../layout'
 import type { Frame, Scene } from '../loop'
 
@@ -66,7 +66,7 @@ function newMotes(): Mote[] {
 /**
  * Correct: 24 dots converge onto a check mark in `theme.ok`, with a soft halo.
  * Wrong / no answer: dots form an ✗ in `theme.ko`, which cracks; its dots fall
- * onto a thin floor line, bounce a little and stay piled there.
+ * onto an invisible floor, bounce a little and stay piled there.
  * Both loop (play, hold, fade, replay) while the verdict is shown.
  * Reduced motion: the final shape (check or ✗) fades in once, no loop.
  */
@@ -125,10 +125,6 @@ export const verdictScene: Scene<VerdictScene, VerdictProps> = {
     const floor = f.h - r - 2
     const target = crossPoints(N, cx, cy, crossSize)
     const out = reduced ? 1 : 1 - clamp01((t - KO_SETTLED - HOLD) / FADE)
-
-    // Floor line, a little wider than the cross.
-    const floorA = reduced ? fadeIn : clamp01(t / 0.6) * out
-    line(f, cx - crossSize * 1.4, floor + r + 0.5, cx + crossSize * 1.4, floor + r + 0.5, floorA, 0.6)
 
     if (reduced || t < KO_BREAK) {
       // Converge, then a brief tremor just before the crack.

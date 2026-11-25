@@ -82,9 +82,10 @@ await engine.revealAnswer()       // broadcasts answer_revealed + choiceCounts
 await engine.nextQuestion()       // active (next question)
 // ... last question:
 await engine.nextQuestion()       // active → finished (broadcasts game_ended)
+await engine.reset()              // finished → lobby, same room, scores 0 (broadcasts game_reset)
 ```
 
-**Game states:** `lobby → active → finished`
+**Game states:** `lobby → active → finished → (reset) lobby`
 
 **Scoring:**
 
@@ -134,6 +135,7 @@ Bun HTTP + WebSocket server. Serves the game over a single port (3030).
 | `host_start` | Host | `{}` |
 | `host_reveal` | Host | `{}` |
 | `host_next` | Host | `{}` |
+| `host_reset` | Host | `{}` — "Rejouer": only acts when the game is finished |
 
 ### Server → Client events (`GameEvent`)
 
@@ -146,10 +148,11 @@ Bun HTTP + WebSocket server. Serves the game over a single port (3030).
 | `answer_submitted` | All | `playerId`, `answerTimeMs` |
 | `answer_revealed` | All | `correct: string[]`, `scores: Score[]`, `choiceCounts: Record<string, number>`, `explanation?` |
 | `game_ended` | All | `podium: PodiumEntry[]` |
+| `game_reset` | All | — (back to lobby, same join code and players, scores 0) |
 
 ### Security
 
-- Host commands (`host_start`, `host_reveal`, `host_next`) are rejected if the sender's `role !== 'host'`
+- Host commands (`host_start`, `host_reveal`, `host_next`, `host_reset`) are rejected if the sender's `role !== 'host'`
 - Players are rejected at WS upgrade time if their `?code=` does not match the active join code
 - `GameEngine` guards against out-of-order commands with status checks (`lobby`, `active`, `finished`)
 
@@ -164,7 +167,7 @@ type HostPhase = 'connecting' | 'lobby' | 'question' | 'revealed' | 'finished'
 | Phase | Trigger | View |
 |-------|---------|------|
 | `connecting` | Initial, or WS close/error | "Connecting…" |
-| `lobby` | `host_connected` received | `LobbyView` |
+| `lobby` | `host_connected` or `game_reset` received | `LobbyView` |
 | `question` | `question_started` received | `QuestionView` |
 | `revealed` | `answer_revealed` received | `RevealView` |
 | `finished` | `game_ended` received | `PodiumView` |
@@ -180,7 +183,7 @@ type PlayerPhase = 'join' | 'lobby' | 'question' | 'podium'
 | Phase | Trigger | View |
 |-------|---------|------|
 | `join` | Initial | `JoinView` |
-| `lobby` | `joined` message received | `LobbyView` |
+| `lobby` | `joined` message or `game_reset` received | `LobbyView` |
 | `question` | `question_started` received | `QuestionView` (after `answer_revealed`, the verdict via `FxVerdict`, points and rank are shown inline) |
 | `podium` | `game_ended` received | `PodiumView` |
 

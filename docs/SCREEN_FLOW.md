@@ -9,7 +9,7 @@ Host and player application screen flows driven by WebSocket events.
 **Tech:** Vue 3 SPA at `http://localhost:3031`
 
 ```
-HostPhase: 'connecting' → 'lobby' → 'question' → 'revealed' → 'finished'
+HostPhase: 'connecting' → 'lobby' → 'question' → 'revealed' → 'finished' (→ 'lobby' via Rejouer)
 ```
 
 ### Screen Transitions
@@ -17,10 +17,10 @@ HostPhase: 'connecting' → 'lobby' → 'question' → 'revealed' → 'finished'
 | Phase | Trigger | View | Actions |
 |-------|---------|------|---------|
 | `connecting` | Initial load / WS close or error | "Connecting…" spinner | — |
-| `lobby` | `host_connected` received | `LobbyView` | QR code, player constellation (`FxLobby`), player list, Start button |
+| `lobby` | `host_connected` or `game_reset` received | `LobbyView` | QR code, player constellation (`FxLobby`), player list, Start button |
 | `question` | `question_started` received | `QuestionView` | Countdown (`FxCountdown`), answer count, Reveal |
 | `revealed` | `answer_revealed` received | `RevealView` | Vote particles (`FxReveal`), score deltas, Next button |
-| `finished` | `game_ended` received | `PodiumView` | Animated podium (`FxPodium`), full leaderboard |
+| `finished` | `game_ended` received | `PodiumView` | Animated podium (`FxPodium`), full leaderboard, **🔁 Rejouer** button (sends `host_reset`) |
 
 ### Fullscreen
 
@@ -63,7 +63,11 @@ hidden when the browser does not support the Fullscreen API.
          ▼
   ┌──────────────────┐
   │  PodiumView      │  Final scores, top 3 medals
-  └──────────────────┘
+  └──────┬───────────┘
+         │ [🔁 Rejouer] → sends host_reset
+         │ ◄── game_reset: same room/code, same players, scores 0
+         ▼
+     LobbyView (Start Game runs a fresh game)
 ```
 
 ---
@@ -73,7 +77,7 @@ hidden when the browser does not support the Fullscreen API.
 **Tech:** Vue 3 SPA at `http://localhost:3032` (mobile-first)
 
 ```
-PlayerPhase: 'join' → 'lobby' → 'question' → 'podium'
+PlayerPhase: 'join' → 'lobby' → 'question' → 'podium' (→ 'lobby' on game_reset)
 ```
 
 ### Screen Transitions
@@ -81,7 +85,7 @@ PlayerPhase: 'join' → 'lobby' → 'question' → 'podium'
 | Phase | Trigger | View | Actions |
 |-------|---------|------|---------|
 | `join` | Initial load | `JoinView` | Enter join code, pseudo, email |
-| `lobby` | `player_joined` (own join confirmed) | `LobbyView` | Waiting room with player count and constellation (`FxLobby`) |
+| `lobby` | `player_joined` (own join confirmed), or `game_reset` from the podium | `LobbyView` | Waiting room with player count and constellation (`FxLobby`) |
 | `question` | `question_started` received | `QuestionView` | Answer grid + countdown; once `answer_revealed` arrives, the verdict, points and rank appear in the same view |
 | `podium` | `game_ended` received | `PodiumView` | Final rank + score, animated podium (`FxPodium`) |
 
@@ -123,7 +127,11 @@ PlayerPhase: 'join' → 'lobby' → 'question' → 'podium'
          ▼
   ┌──────────────────┐
   │  PodiumView      │  Final rank + score
-  └──────────────────┘
+  └──────┬───────────┘
+         │ ◄── game_reset (host pressed Rejouer): back to LobbyView,
+         │     same identity, no code re-entry; session kept so a reload rejoins
+         ▼
+     LobbyView
 ```
 
 ### Rank

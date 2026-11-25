@@ -48,3 +48,44 @@ export function spiralUnit(count: number, w: number, h: number): number {
   const fitY = (0.45 * Math.max(h, 0)) / (r1 * SPIRAL_Y)
   return Math.min(base, fitX, fitY)
 }
+
+/** Seconds a vote takes to fall into its column. */
+export const FALL_DURATION = 1
+/** Seconds before the correct columns turn green (about 2.5 s of fall, then 1 s of suspense). */
+export const REVEAL_DELAY = 3.5
+/** Votes per row in a column's stack. */
+export const REVEAL_PER_ROW = 8
+
+const COLUMNS_SPAN = 0.6
+
+/** `n` column centers, evenly spread over the central 60% of `w`. */
+export function columnXs(n: number, w: number): number[] {
+  return Array.from({ length: Math.max(n, 0) }, (_, i) => w * ((1 - COLUMNS_SPAN) / 2 + (COLUMNS_SPAN * (i + 0.5)) / n))
+}
+
+/** Position of the `k`-th vote of a stack, growing upward from `baseY`. */
+export function stackSlot(
+  k: number,
+  perRow: number,
+  spacing: number,
+  cx: number,
+  baseY: number,
+): { x: number; y: number } {
+  return { x: cx + ((k % perRow) - (perRow - 1) / 2) * spacing, y: baseY - Math.floor(k / perRow) * spacing }
+}
+
+/** Height of a stack of `count` votes. */
+export function stackHeight(count: number, perRow: number, spacing: number): number {
+  return Math.ceil(Math.max(count, 0) / perRow) * spacing
+}
+
+/** Fall start times for `n` votes, spread over [0, 1.5] s. */
+export function fallStarts(n: number): number[] {
+  return Array.from({ length: Math.max(n, 0) }, (_, i) => (i * 1.5) / Math.max(n - 1, 1))
+}
+
+/** Rounded integer percentage of each count; all zeros when the total is 0. */
+export function percentages(counts: number[]): number[] {
+  const total = counts.reduce((a, b) => a + b, 0)
+  return counts.map((c) => (total > 0 ? Math.round((c / total) * 100) : 0))
+}

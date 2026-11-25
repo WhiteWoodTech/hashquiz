@@ -32,11 +32,14 @@
           </div>
         </div>
 
-        <AnswerBarChart
-          :choices="game.question.choices"
-          :counts="game.choiceCounts"
-          :correct-ids="game.correctIds"
-        />
+        <div class="rv-fx">
+          <FxReveal
+            ref="fx"
+            :choices="game.question.choices"
+            :counts="game.choiceCounts"
+            :correct-ids="game.correctIds"
+          />
+        </div>
       </div>
 
       <div class="rv-scores">
@@ -50,18 +53,25 @@
     </div>
 
     <div class="rv-controls">
-      <button class="qv-btn-action" @click="game.send('host_next')">⏭ Next Question</button>
+      <button class="qv-btn-action" @click="next">⏭ Next Question</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { marked } from 'marked'
 import { useGameStore } from '../stores/game'
-import { AnswerBarChart } from '@quizv/ui'
+import { FxReveal } from '@quizv/ui'
 
 const game = useGameStore()
+const fx = ref<InstanceType<typeof FxReveal> | null>(null)
+
+// Next stays active during the animation: jump to the final state, then advance.
+function next(): void {
+  fx.value?.skip()
+  game.send('host_next')
+}
 
 marked.setOptions({ breaks: true, gfm: true })
 
@@ -91,7 +101,7 @@ const renderedExplanation = computed(() =>
   min-height: 0;
 }
 .rv-left { display: flex; flex-direction: column; gap: 2.5vmin; min-height: 0; }
-.rv-left :deep(.qv-chart) { font-size: clamp(0.9rem, 2vmin, 1.4rem); }
+.rv-fx { flex: 1 1 0; min-height: 22vmin; }
 
 .rv-progress { display: flex; align-items: center; gap: 0.6rem; padding-right: 12rem; } /* clears the fullscreen button */
 .rv-progress__label { font-size: clamp(0.8rem, 1.6vmin, 1.1rem); color: var(--qv-text-muted); min-width: 2rem; }

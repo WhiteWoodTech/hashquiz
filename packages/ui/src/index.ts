@@ -1,5 +1,7 @@
 export { default as FxCountdown } from './FxCountdown.vue'
+export { default as BrandLogo } from './BrandLogo.vue'
 export { default as FxBackdrop } from './FxBackdrop.vue'
+export { default as FxHourglass } from './FxHourglass.vue'
 export { default as FxLobby } from './FxLobby.vue'
 export { default as FxPodium } from './FxPodium.vue'
 export { default as FxReveal } from './FxReveal.vue'

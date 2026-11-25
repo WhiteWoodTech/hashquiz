@@ -1,5 +1,5 @@
 <template>
-  <div class="qip">
+  <div :class="['qip', { 'qip--compact': compact }]">
     <div class="qip__badge">🧠 {{ quizInfo.title }}</div>
 
     <div class="qip__header">
@@ -45,6 +45,8 @@ import DifficultyBar from './DifficultyBar.vue'
 defineProps<{
   quizInfo: QuizInfo
   playerCount?: number
+  /** Smaller type and spacing (phones, deck grid). */
+  compact?: boolean
 }>()
 </script>
 
@@ -53,7 +55,29 @@ defineProps<{
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  padding: 1.25rem;
+  min-width: 0;
+  background: color-mix(in srgb, var(--qv-surface) 82%, transparent);
+  border: 1px solid var(--qv-border);
+  border-radius: var(--qv-radius);
+  backdrop-filter: blur(6px);
 }
+.qip--compact { gap: 0.75rem; padding: 1rem; }
+.qip--compact .qip__title { font-size: 1.5rem; overflow-wrap: anywhere; }
+.qip--compact .qip__description {
+  font-size: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.qip--compact .qip__badge { font-size: 0.75rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qip--compact .qip__metrics { gap: 0.5rem; }
+.qip--compact .qip__metric { min-width: 0; flex: 1 1 0; padding: 0.4rem 0.5rem; }
+.qip--compact .qip__metric strong { font-size: 1.4rem; }
+.qip--compact .qip__metric span { font-size: 0.75rem; }
+.qip--compact .qip__tag { font-size: 0.75rem; }
 
 .qip__badge {
   display: inline-block;

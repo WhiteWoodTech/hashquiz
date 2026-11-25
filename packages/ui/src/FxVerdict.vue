@@ -34,7 +34,7 @@ onBeforeUnmount(() => handle?.destroy())
 .fx-verdict {
   display: block;
   width: 100%;
-  height: 84px;
+  height: 96px;
   pointer-events: none;
 }
 </style>

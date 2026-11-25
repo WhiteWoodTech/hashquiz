@@ -61,9 +61,10 @@
 
     <!-- Inline feedback overlay (revealed by host) -->
     <Transition name="reveal">
-      <div v-if="revealed" :class="['qv-reveal', isCorrect ? 'qv-reveal--correct' : 'qv-reveal--wrong']">
+      <div v-if="revealed" role="status" :class="['qv-reveal', isCorrect ? 'qv-reveal--correct' : 'qv-reveal--wrong']">
+        <!-- FxVerdict draws the check / cross; screen readers get the verdict as text. -->
         <FxVerdict :correct="isCorrect" :delta="game.lastDelta" :answered="game.answered" />
-        <span class="qv-reveal__icon">{{ isCorrect ? '✓' : '✗' }}</span>
+        <span class="qv-sr-only">{{ isCorrect ? 'Correct' : 'Wrong' }}</span>
         <span class="qv-reveal__delta">{{ shownDelta > 0 ? '+' + shownDelta : '+0' }} pts</span>
         <span v-if="game.rank !== null" class="qv-reveal__rank qv-label">{{ ordinalFr(game.rank) }} / {{ game.playerTotal }}</span>
         <span v-if="game.answered" class="qv-reveal__info">Answered in {{ Math.round(game.answerTimeMs / 1000) }}s / {{ game.question.timer }}s</span>
@@ -257,9 +258,6 @@ function validateMultiple() {
 }
 .qv-reveal--correct { background: color-mix(in srgb, var(--qv-correct) 12%, transparent); }
 .qv-reveal--wrong   { background: color-mix(in srgb, var(--qv-wrong)   10%, transparent); }
-.qv-reveal__icon  { font-size: 2.5rem; line-height: 1; }
-.qv-reveal--correct .qv-reveal__icon { color: var(--qv-correct); }
-.qv-reveal--wrong   .qv-reveal__icon { color: var(--qv-wrong); }
 .qv-reveal__delta { font-size: 1.5rem; font-weight: 700; }
 .qv-reveal--correct .qv-reveal__delta { color: var(--qv-correct); }
 .qv-reveal--wrong   .qv-reveal__delta { color: var(--qv-text-muted); }

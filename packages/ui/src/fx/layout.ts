@@ -121,6 +121,23 @@ export function checkPoints(n: number, cx: number, cy: number, size: number): { 
   })
 }
 
+/**
+ * `n` points forming an ✗ centered on (cx, cy): the first ceil(n/2) along the
+ * top-left → bottom-right diagonal, the rest along top-right → bottom-left.
+ * Endpoints sit at ±size/2 on both axes.
+ */
+export function crossPoints(n: number, cx: number, cy: number, size: number): { x: number; y: number }[] {
+  const count = Math.max(n, 0)
+  const first = Math.ceil(count / 2)
+  const h = size / 2
+  const stroke = (m: number, x0: number, x1: number): { x: number; y: number }[] =>
+    Array.from({ length: m }, (_, k) => {
+      const u = m <= 1 ? 0 : k / (m - 1)
+      return { x: cx + x0 + (x1 - x0) * u, y: cy - h + 2 * h * u }
+    })
+  return [...stroke(first, -h, h), ...stroke(count - first, h, -h)]
+}
+
 /** Relative x of the podium columns for ranks 1, 2 and 3. */
 export const PODIUM_SLOTS = [0.5, 0.3, 0.7]
 

@@ -6,7 +6,7 @@ Import from the package barrel:
 
 ```typescript
 import {
-  FxCountdown, FxLobby, FxReveal, FxVerdict, FxPodium,
+  FxBackdrop, FxCountdown, FxLobby, FxReveal, FxVerdict, FxPodium,
   AnswerButton, PlayerList, Podium, QrCode, DifficultyBar, QuizInfoPanel,
 } from '@quizv/ui'
 ```
@@ -42,9 +42,16 @@ Particle ring that empties as time runs out. Replaces `TimerRing`.
 Renders `role="timer"` with `aria-label="${remaining} seconds remaining"` and the whole seconds as text.
 Up to one dot per second is lit; the `danger` modifier applies in the last 4 seconds.
 
+### FxBackdrop
+
+Full-viewport dust background, mounted once in each app's `App.vue` behind every screen (`position: fixed`, 100vw x
+100dvh, `pointer-events: none`). It is the only source of dust: the other Fx scenes no longer draw their own. It reseeds
+when the viewport size changes (fullscreen). No props.
+
 ### FxLobby
 
 Constellation of connected players: one dot per player, linked by lines; the most recent pseudos are labelled.
+The host lobby mounts two instances, one in each side area, with the players split between them.
 
 | Prop | Type | Required | Default | Description |
 |------|------|----------|---------|-------------|
@@ -77,8 +84,10 @@ Column stacks shrink to fit the canvas, so 100 votes in one column stay on scree
 ### FxVerdict
 
 Verdict of the current player after the reveal: 24 particles converge onto a check in `--qv-correct`; or, when wrong
-or unanswered, they form a cross in `--qv-wrong` that cracks, its dots falling onto a thin floor line where they pile
-up. Both animations loop (play, hold ~1.2 s, fade, replay) while shown; with reduced motion the final shape is static.
+or unanswered, they form a cross in `--qv-wrong` that cracks, its dots falling onto an invisible floor where they pile
+up. The check loops (play, hold ~1.2 s, fade, replay). The cross loop never fades: each iteration starts from the dots lying
+on the floor, which rise back up to reassemble the cross, then crack and fall again.
+With reduced motion the final shape is static.
 The canvas is `aria-hidden`: the parent view renders the points and a screen-reader verdict (`.qv-sr-only`).
 
 | Prop | Type | Required | Description |

@@ -1,19 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+
 :root {
-  --qv-bg:           #0a0a0f;
-  --qv-surface:      #111118;
-  --qv-surface-2:    #1a1a25;
-  --qv-border:       #2a2a3a;
+  --qv-bg:           #06060a;
+  --qv-surface:      #0c0c12;
+  --qv-surface-2:    #14141c;
+  --qv-border:       #22222e;
   --qv-accent:       #7c3aed;
   --qv-accent-2:     #06b6d4;
   --qv-correct:      #22c55e;
   --qv-wrong:        #ef4444;
   --qv-warn: #f99e16;
-  --qv-text:         #ffffff;
-  --qv-text-muted:   #888899;
-  --qv-font-display: 'Syne', system-ui, sans-serif;
+  --qv-text:         #f2f2f7;
+  --qv-text-muted:   #8a8a9a;
+  --qv-font-display: 'Inter', system-ui, sans-serif;
   --qv-font-mono:    'IBM Plex Mono', monospace;
-  --qv-radius:       12px;
-  --qv-radius-sm:    8px;
+  --qv-radius:       6px;
+  --qv-radius-sm:    4px;
+  --qv-font-label:   'IBM Plex Mono', monospace;
+  --qv-label-spacing: .4em;
+  --qv-choice-a:     #7c3aed;
+  --qv-choice-b:     #0891b2;
+  --qv-choice-c:     #d97706;
+  --qv-choice-d:     #059669;
+  --qv-qr-dark:      #ffffff;
+  --qv-qr-light:     #111118;
+  --qv-fx-dot:       #ffffff;
+  --qv-fx-line-opacity: .2;
+  --qv-fx-glow:      .35;
+  --qv-fx-dust-density: 1;
+  --qv-fx-speed:     1;
 }
 
 *, *::before, *::after { box-sizing: border-box; }

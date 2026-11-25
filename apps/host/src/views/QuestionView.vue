@@ -13,7 +13,7 @@
     </div>
 
     <header class="qv-header">
-      <TimerRing :total="game.question.timer" :remaining="remaining" :size="80" />
+      <FxCountdown :total="game.question.timer" :remaining="remaining" size="large" />
     </header>
 
     <div class="qv-q-meta">
@@ -56,7 +56,7 @@
 <script setup lang="ts">
 import { ref, onUnmounted, watch } from 'vue'
 import { useGameStore } from '../stores/game'
-import { TimerRing } from '@quizv/ui'
+import { FxCountdown } from '@quizv/ui'
 
 const game = useGameStore()
 const remaining = ref(game.question?.timer ?? 0)

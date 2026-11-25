@@ -14,7 +14,7 @@
 
     <!-- Timer ring -->
     <div class="qv-timer-wrap">
-      <TimerRing :total="game.question.timer" :remaining="remaining" :size="100" />
+      <FxCountdown :total="game.question.timer" :remaining="remaining" size="compact" />
     </div>
 
     <!-- Question meta: tags left, difficulty dot right -->
@@ -76,7 +76,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useGameStore } from '../stores/game'
-import { TimerRing, AnswerButton } from '@quizv/ui'
+import { FxCountdown, AnswerButton } from '@quizv/ui'
 
 const game = useGameStore()
 const remaining        = ref(game.question?.timer ?? 0)

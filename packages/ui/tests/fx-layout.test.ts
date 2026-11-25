@@ -1,5 +1,17 @@
 import { describe, expect, test } from 'bun:test'
-import { countdownState, spiralSlot, spiralUnit } from '../src/fx/layout'
+import {
+  FALL_DURATION,
+  REVEAL_DELAY,
+  REVEAL_PER_ROW,
+  columnXs,
+  countdownState,
+  fallStarts,
+  percentages,
+  spiralSlot,
+  spiralUnit,
+  stackHeight,
+  stackSlot,
+} from '../src/fx/layout'
 
 describe('countdownState', () => {
   test('full time: every dot lit, no danger', () => {
@@ -66,5 +78,34 @@ describe('spiralSlot / spiralUnit', () => {
   test('degenerate sizes do not produce NaN', () => {
     expect(Number.isFinite(spiralUnit(0, 0, 0))).toBe(true)
     expect(Number.isFinite(spiralUnit(1, 375, 200))).toBe(true)
+  })
+})
+
+describe('reveal layout', () => {
+  test('columnXs spreads n columns over 60% of the width', () => {
+    const xs = columnXs(4, 1000)
+    ;[275, 425, 575, 725].forEach((v, i) => expect(Math.abs(xs[i]! - v)).toBeLessThanOrEqual(1))
+    const two = columnXs(2, 1000)
+    expect(two[0]! + two[1]!).toBeCloseTo(1000, 5)
+  })
+  test('fallStarts spans 0..1.5 and is increasing', () => {
+    const s = fallStarts(32)
+    expect(s[31]).toBeCloseTo(1.5, 9)
+    for (let i = 1; i < s.length; i++) expect(s[i]!).toBeGreaterThan(s[i - 1]!)
+    expect(fallStarts(1)).toEqual([0])
+  })
+  test('percentages', () => {
+    expect(percentages([0, 0, 0, 0])).toEqual([0, 0, 0, 0])
+    expect(percentages([8, 5, 16, 3])).toEqual([25, 16, 50, 9])
+  })
+  test('stackSlot and stackHeight', () => {
+    expect(stackSlot(0, 8, 20, 100, 500)).toEqual({ x: 100 - 70, y: 500 })
+    expect(stackSlot(9, 8, 20, 100, 500)).toEqual({ x: 100 - 50, y: 480 })
+    expect(stackHeight(100, 8, 20)).toBe(260)
+    expect(stackHeight(100, 8, 20)).toBeLessThan(0.5 * 1080)
+    expect(stackHeight(0, 8, 20)).toBe(0)
+  })
+  test('constants', () => {
+    expect([FALL_DURATION, REVEAL_DELAY, REVEAL_PER_ROW]).toEqual([1, 3.5, 8])
   })
 })

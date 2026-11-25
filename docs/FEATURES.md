@@ -28,20 +28,24 @@ Feature list and roadmap for QuizV, organized by phase.
 | Feature | Status | Description |
 |---------|--------|-------------|
 | `@quizv/theme-default` | ✅ | CSS custom properties (`--qv-*`) |
-| `TimerRing` component | ✅ | Animated SVG ring, purple → orange → red |
+| `FxCountdown` component | ✅ | Particle countdown ring (replaces `TimerRing`) |
 | `AnswerButton` component | ✅ | Multi-state button with 4 color variants |
-| `AnswerBarChart` component | ✅ | Live answer distribution chart |
+| `FxReveal` component | ✅ | Vote particles falling into answer columns (replaces `AnswerBarChart`) |
 | `PlayerList` component | ✅ | Lobby player chips |
 | `Podium` component | ✅ | Ranked leaderboard with medals |
+| `FxLobby`, `FxVerdict`, `FxPodium` | ✅ | Player constellation, verdict particles, animated top-3 podium |
+| Two themes | ✅ | `theme-default` (new look) and `theme-original`, identical variables |
+| Reduced motion | ✅ | `prefers-reduced-motion`: final state faded in, same information |
+| Host fullscreen | ✅ | Every host view fits 100vh; fullscreen button |
 | `QrCode` component | ✅ | Canvas QR code (wraps `qrcode`) |
 | Host app — Lobby | ✅ | QR code, join code, live player list |
-| Host app — Question | ✅ | Timer ring, live answer count, Reveal button |
-| Host app — Reveal | ✅ | Correct answers, score deltas, bar chart |
+| Host app — Question | ✅ | Countdown, live answer count, Reveal button |
+| Host app — Reveal | ✅ | Correct answers, score deltas, vote particles |
 | Host app — Podium | ✅ | Final leaderboard |
 | Player app — Join | ✅ | Join code + pseudo/email form |
 | Player app — Lobby | ✅ | Waiting room with player count |
-| Player app — Question | ✅ | 2×2 answer grid + timer ring |
-| Player app — Feedback | ✅ | Correct/wrong + points earned + rank |
+| Player app — Question | ✅ | Answer grid + countdown |
+| Player app — Verdict | ✅ | Correct/wrong + points earned + rank (`3e / 12`), shown in the question view |
 | Player app — Podium | ✅ | Final rank + score |
 | Multi-select answers | ✅ | Toggle choices until timer ends, auto-submit |
 | `quizv dev` spawns Vite | ✅ | Host (3031) + Player (3032) Vite servers |
@@ -89,4 +93,4 @@ See [`DEPLOY.md`](DEPLOY.md) for setup.
 
 ---
 
-*Last updated: 2026-11-24*
+*Last updated: 2026-11-25*

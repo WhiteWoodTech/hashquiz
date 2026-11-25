@@ -65,7 +65,8 @@ bun run packages/server/src/cli.ts check <file>               # Validate quiz
 | `@quizv/transport-local` | `LocalTransport` — Bun WebSocket pub/sub |
 | `@quizv/transport-supabase` | Cloud transport stub (Phase 3) |
 | `@quizv/server` | Bun HTTP+WS server + `quizv` CLI |
-| `@quizv/theme-default` | CSS custom properties (`--qv-*`) |
+| `@quizv/theme-default` | CSS custom properties (`--qv-*`), new look |
+| `@quizv/theme-original` | Same variables, previous look (switch via the `main.ts` import) |
 | `@quizv/ui` | Shared Vue 3 components |
 
 | App | Port | Description |

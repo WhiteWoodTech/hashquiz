@@ -17,10 +17,17 @@ HostPhase: 'connecting' → 'lobby' → 'question' → 'revealed' → 'finished'
 | Phase | Trigger | View | Actions |
 |-------|---------|------|---------|
 | `connecting` | Initial load / WS close or error | "Connecting…" spinner | — |
-| `lobby` | `host_connected` received | `LobbyView` | QR code, player list, Start button |
-| `question` | `question_started` received | `QuestionView` | Timer ring, answer count, Next / Reveal |
-| `revealed` | `answer_revealed` received | `RevealView` | Bar chart, score deltas, Next button |
-| `finished` | `game_ended` received | `PodiumView` | Full leaderboard |
+| `lobby` | `host_connected` received | `LobbyView` | QR code, player constellation (`FxLobby`), player list, Start button |
+| `question` | `question_started` received | `QuestionView` | Countdown (`FxCountdown`), answer count, Reveal |
+| `revealed` | `answer_revealed` received | `RevealView` | Vote particles (`FxReveal`), score deltas, Next button |
+| `finished` | `game_ended` received | `PodiumView` | Animated podium (`FxPodium`), full leaderboard |
+
+### Fullscreen
+
+Every host view fits `100vw × 100vh` with no page scroll (landscape, 1080p and above). A **Fullscreen** button
+(`apps/host/src/components/FullscreenButton.vue`) sits in the top-right corner of every phase and calls
+`requestFullscreen()` on the document; it disappears while the page is fullscreen and comes back on exit. It is
+hidden when the browser does not support the Fullscreen API.
 
 ### Host Flow Diagram
 
@@ -41,7 +48,7 @@ HostPhase: 'connecting' → 'lobby' → 'question' → 'revealed' → 'finished'
          │ ◄── question_started
          ▼
   ┌──────────────────┐
-  │  QuestionView    │  Timer ring counts down
+  │  QuestionView    │  Countdown ring counts down
   │                  │  answer_submitted events show live count
   └──────┬───────────┘
          │ [Reveal] → sends host_reveal
@@ -49,7 +56,7 @@ HostPhase: 'connecting' → 'lobby' → 'question' → 'revealed' → 'finished'
          ▼
   ┌──────────────────┐
   │  RevealView      │  Correct answers highlighted
-  │                  │  Bar chart + score delta per player
+  │                  │  Vote particles + score delta per player
   └──────┬───────────┘
          │ [Next] → sends host_next
          │ ◄── question_started (loop) OR game_ended (last Q)
@@ -66,7 +73,7 @@ HostPhase: 'connecting' → 'lobby' → 'question' → 'revealed' → 'finished'
 **Tech:** Vue 3 SPA at `http://localhost:3032` (mobile-first)
 
 ```
-PlayerPhase: 'join' → 'lobby' → 'question' → 'feedback' → 'podium'
+PlayerPhase: 'join' → 'lobby' → 'question' → 'podium'
 ```
 
 ### Screen Transitions
@@ -74,10 +81,9 @@ PlayerPhase: 'join' → 'lobby' → 'question' → 'feedback' → 'podium'
 | Phase | Trigger | View | Actions |
 |-------|---------|------|---------|
 | `join` | Initial load | `JoinView` | Enter join code, pseudo, email |
-| `lobby` | `player_joined` (own join confirmed) | `LobbyView` | Waiting room with player count |
-| `question` | `question_started` received | `QuestionView` | 2×2 answer grid + timer ring |
-| `feedback` | `answer_revealed` received | `FeedbackView` | Correct/wrong + points + rank |
-| `podium` | `game_ended` received | `PodiumView` | Final rank + score |
+| `lobby` | `player_joined` (own join confirmed) | `LobbyView` | Waiting room with player count and constellation (`FxLobby`) |
+| `question` | `question_started` received | `QuestionView` | Answer grid + countdown; once `answer_revealed` arrives, the verdict, points and rank appear in the same view |
+| `podium` | `game_ended` received | `PodiumView` | Final rank + score, animated podium (`FxPodium`) |
 
 ### Player Flow Diagram
 
@@ -107,22 +113,24 @@ PlayerPhase: 'join' → 'lobby' → 'question' → 'feedback' → 'podium'
   │  │     │  │     │  Multi-select OK   │
   │  └─────┘  └─────┘                   │
   │                                      │
-  │  Timer ring: purple → orange → red   │
+  │  Countdown ring (FxCountdown)        │
   │  Timer = 0 → auto-submit + disable   │
   └──────┬───────────────────────────────┘
          │ timer expires → submitAnswer([...selected], lastPressMs)
-         │ ◄── answer_revealed
-         ▼
-  ┌──────────────────┐
-  │  FeedbackView    │  ✓ Correct / ✗ Wrong overlay
-  │                  │  Points earned + current rank
-  └──────┬───────────┘
+         │ ◄── answer_revealed: correct answers highlighted, verdict
+         │     (FxVerdict) + points + rank ("3e / 12") shown below
          │ ◄── question_started (loop) OR game_ended
          ▼
   ┌──────────────────┐
   │  PodiumView      │  Final rank + score
   └──────────────────┘
 ```
+
+### Rank
+
+After each reveal the store computes the player's rank with `rankOf(scores, playerId)` from `@quizv/core`
+(returns `{ rank, total }` or `null`) and exposes it as `rank` / `playerTotal`. The question view shows it as
+`3e / 12`.
 
 ---
 
@@ -138,4 +146,4 @@ PlayerPhase: 'join' → 'lobby' → 'question' → 'feedback' → 'podium'
 
 ---
 
-*Last updated: 2026-03-31*
+*Last updated: 2026-11-25*

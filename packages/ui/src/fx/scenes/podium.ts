@@ -1,4 +1,4 @@
-import { clamp01, dot, drawDust, glow, line, makeDust, spacedText, type Dust } from '../draw'
+import { clamp01, dot, glow, line, spacedText } from '../draw'
 import { PODIUM_SLOTS, podiumDots } from '../layout'
 import type { Frame, Scene } from '../loop'
 
@@ -43,7 +43,6 @@ interface Burst {
 }
 
 interface PodiumScene {
-  dust: Dust[]
   dots: SwarmDot[]
   counts: number[]
   me: SwarmDot | null
@@ -96,7 +95,6 @@ export const podiumScene: Scene<PodiumScene, PodiumScoreProps> = {
       for (let k = 0; k < n; k++) dots.push(swarmDot(f, rank, k, rand(1.1, 1.9)))
     })
     return {
-      dust: makeDust(50 * f.theme.dustDensity, f.w, f.h),
       dots,
       counts,
       me: p.outsideRank !== null ? swarmDot(f, -1, 0, 3) : null,
@@ -118,7 +116,6 @@ export const podiumScene: Scene<PodiumScene, PodiumScoreProps> = {
     const radius = Math.max(sp * 0.16, 1.8)
     const first = s.counts.length > 0
 
-    drawDust(f, s.dust)
 
     if (first && t > form(0) + BURST_DELAY) {
       glow(f, slotX(0), (topOf(0) + base) / 2, h * 0.35, (0.2 + 0.08 * Math.sin(t * 2)) * fade, theme.accent)

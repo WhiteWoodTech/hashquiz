@@ -1,4 +1,4 @@
-import { clamp01, dot, drawDust, glow, line, makeDust, type Dust } from '../draw'
+import { clamp01, dot, glow, line } from '../draw'
 import { spiralSlot, spiralUnit } from '../layout'
 import type { Frame, Scene } from '../loop'
 
@@ -32,7 +32,6 @@ interface LobbyDot {
 }
 
 interface LobbyScene {
-  dust: Dust[]
   dots: Map<string, LobbyDot>
   seq: number
 }
@@ -121,9 +120,7 @@ function addDot(f: Frame, s: LobbyScene, p: LobbyPlayer, fly: boolean): void {
  */
 export const lobbyScene: Scene<LobbyScene, LobbyProps> = {
   init(f, p) {
-    const area = clamp01((f.w * f.h) / (1280 * 720))
     const s: LobbyScene = {
-      dust: makeDust(70 * Math.max(area, 0.3) * f.theme.dustDensity, f.w, f.h),
       dots: new Map(),
       seq: 0,
     }
@@ -150,8 +147,6 @@ export const lobbyScene: Scene<LobbyScene, LobbyProps> = {
       if (!present.has(d.id) && d.leaving === null) d.leaving = t
       if (d.leaving !== null && t - d.leaving > LEAVE_S) s.dots.delete(d.id)
     }
-
-    drawDust(f, s.dust)
 
     const sc = scaleOf(f)
     const unit = unitFor(f, s.dots)

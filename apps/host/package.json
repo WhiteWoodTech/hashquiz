@@ -10,6 +10,7 @@
     "@quizv/core": "workspace:*",
     "@quizv/parser": "workspace:*",
     "@quizv/theme-default": "workspace:*",
+    "@quizv/theme-original": "workspace:*",
     "@quizv/transport-supabase": "workspace:*",
     "@quizv/ui": "workspace:*",
     "marked": "18.0.11",

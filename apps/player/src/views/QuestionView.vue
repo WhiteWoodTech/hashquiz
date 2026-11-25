@@ -65,7 +65,7 @@
         <FxVerdict :correct="isCorrect" :delta="game.lastDelta" :answered="game.answered" />
         <span class="qv-reveal__icon">{{ isCorrect ? '✓' : '✗' }}</span>
         <span class="qv-reveal__delta">{{ shownDelta > 0 ? '+' + shownDelta : '+0' }} pts</span>
-        <span v-if="game.rank !== null" class="qv-reveal__rank qv-label">{{ game.rank }}e / {{ game.playerTotal }}</span>
+        <span v-if="game.rank !== null" class="qv-reveal__rank qv-label">{{ ordinalFr(game.rank) }} / {{ game.playerTotal }}</span>
         <span v-if="game.answered" class="qv-reveal__info">Answered in {{ Math.round(game.answerTimeMs / 1000) }}s / {{ game.question.timer }}s</span>
         <span v-else class="qv-reveal__info">No answer submitted</span>
         <span v-if="game.totalScore > 0" class="qv-reveal__score">Score: <strong>{{ game.totalScore }}</strong> pts</span>
@@ -78,7 +78,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useGameStore } from '../stores/game'
-import { FxCountdown, FxVerdict, AnswerButton } from '@quizv/ui'
+import { FxCountdown, FxVerdict, AnswerButton, ordinalFr } from '@quizv/ui'
 
 const game = useGameStore()
 const remaining        = ref(game.question?.timer ?? 0)
@@ -92,7 +92,8 @@ let deadlineAt = 0   // Unix ms
 const oneShoot   = computed(() => game.question?.oneShoot ?? true)
 const isMultiple = computed(() => game.question?.type === 'multiple')
 const revealed   = computed(() => game.correctIds.length > 0)
-const isCorrect  = computed(() => game.correctIds.some(id => selected.value.has(id)))
+// Server verdict: points are only awarded for an exact match (calcPoints > 0 iff correct).
+const isCorrect  = computed(() => game.lastDelta > 0)
 
 // Points gained scroll from 0 to lastDelta in ~0.6s (shown directly with reduced motion).
 const shownDelta = ref(0)

@@ -31,8 +31,13 @@ vide : sans exécuter le JavaScript, un robot ne voit qu'un titre (« QuizV Play
 | Référencement LLM | 🔴 | Pas de `llms.txt`, pas de données structurées, aucune page citable |
 | Potentiel | 🟢 | ~195 questions rédigées en français avec explications : un vrai gisement de contenu |
 
-**Le point clé** : le meilleur levier n'est pas de « référencer l'application », mais d'ajouter une **couche publique
-statique** (accueil, pages de decks, documentation du format `.quizv.md`) et de laisser l'application en `noindex`.
+**Le point clé** : le meilleur levier n'est pas de « référencer l'application », mais d'ajouter du **contenu public
+lisible sans JavaScript**. L'architecture retenue (voir [5.2](#priorité-2--important-sous-un-à-deux-mois)) :
+
+- un **site statique séparé** porte l'acquisition : accueil, landing, documentation du format `.quizv.md`, FAQ ;
+- l'**application** garde ses propres pages publiques : l'index des quiz publics, une page par quiz et une page de
+  détails ; ces pages doivent être pré-rendues pour être indexables ;
+- les écrans de jeu (host, lobby, partie) restent en `noindex`.
 
 ## 2. Constat technique
 
@@ -117,19 +122,55 @@ Bases techniques sans lesquelles rien d'autre ne sert. Faible effort, fort impac
 
 Créer du contenu indexable et citable. C'est là que se joue l'essentiel du trafic.
 
+#### Architecture retenue
+
+Le contenu public se répartit sur deux projets, chacun avec un rôle clair :
+
+| Projet | Rôle | Pages | Indexation |
+| --- | --- | --- | --- |
+| **Site statique** (nouveau) | Acquisition : expliquer, convaincre, être cité | Accueil, landing, format `.quizv.md`, alternative à Kahoot, FAQ, `llms.txt` | Indexé, priorité SEO et GEO |
+| **Application** (existante) | Catalogue et jeu | Index des quiz publics, une page par quiz, page de détails | Pages catalogue indexées (pré-rendues) |
+| **Application** (existante) | Partie en cours | Host, lobby, question, podium, écran joueur | `noindex` |
+
+Points d'attention liés à cette séparation :
+
+- **Même domaine si possible** : servir le site statique à la racine (`example.com`) et l'application sous un chemin
+  ou un sous-domaine (`app.example.com`). Un même domaine concentre l'autorité ; un sous-domaine fonctionne aussi,
+  mais il faut alors le déclarer séparément dans Search Console et le lier abondamment depuis le site statique.
+- **Liens croisés** : chaque page du site statique pointe vers le catalogue de l'application, chaque page de quiz
+  renvoie vers l'accueil et la documentation. Sans liens, les deux projets se partagent mal leur popularité.
+- **Pas de doublon** : la description d'un quiz vit dans l'application (page quiz) ; le site statique la résume et
+  pointe vers elle, sans copier la page. Un `canonical` sur chaque page évite toute ambiguïté.
+- **Pages catalogue de l'application lisibles sans JS** : l'application est une SPA Vue, donc l'index, les pages quiz
+  et les pages de détails doivent être générées en HTML au build (voir [la mise en œuvre](#mise-en-œuvre-suggérée-du-pré-rendu)).
+
+#### Site statique
+
 | # | Action | Effort | Où |
 | --- | --- | --- | --- |
-| P2.1 | **Page d'accueil statique** (pré-rendue) : proposition de valeur en 1 phrase, 3 bénéfices, captures, CTA « Lancer une partie » → `/host`, « Rejoindre » → `/join` | M | Nouvelle app ou page pré-rendue |
-| P2.2 | Déplacer l'écran joueur de `/` vers `/join` (garder `/?code=` en redirection pour les QR codes déjà imprimés) | S | `vercel.json`, `apps/player` |
-| P2.3 | **Une page publique par deck** (`/quiz/docker-fundamentals`) générée au build depuis les `.quizv.md` : titre, description, tags, difficulté, nombre de questions, 3 à 5 questions d'exemple avec explication, bouton « Jouer ce quiz » | M | Script de build Vite/Bun |
-| P2.4 | Pages de tags en vraies URL (`/tag/docker`) au lieu de `#/tag/docker`, pour que chaque thématique soit indexable | M | `deck-browse.ts`, pré-rendu |
-| P2.5 | `sitemap.xml` généré au build (accueil, docs, decks, tags) avec `lastmod` issu de git | S | Script de build |
-| P2.6 | Données structurées JSON-LD : `SoftwareApplication` (accueil), `Quiz` + `Question`/`acceptedAnswer` (pages de decks), `BreadcrumbList` | M | Pages pré-rendues |
-| P2.7 | Page **« Format .quizv.md »** : spécification complète, exemple minimal copiable, erreurs courantes du `check` | M | `/docs/format` |
-| P2.8 | Page **« Alternative à Kahoot »** : tableau comparatif honnête (prix, compte requis, hors-ligne, open source, format) | S | `/alternative-kahoot` |
-| P2.9 | **FAQ** de 8 à 12 questions réelles (« Faut-il un compte ? », « Combien de joueurs ? », « Ça marche sans Internet ? ») avec balisage `FAQPage` | S | Accueil ou `/faq` |
-| P2.10 | `llms-full.txt` : la spécification du format + 1 deck complet en exemple, en Markdown brut | S | `public/llms-full.txt` |
-| P2.11 | Page 404 personnalisée (lien vers l'accueil et les decks) au lieu de la page texte Vercel | S | `vercel.json`, `404.html` |
+| P2.1 | **Accueil / landing** : proposition de valeur en 1 phrase, 3 bénéfices, captures, CTA « Lancer une partie » vers l'app et « Voir les quiz » vers le catalogue | M | Site statique |
+| P2.2 | Page **« Format .quizv.md »** : spécification complète, exemple minimal copiable, erreurs courantes du `check` | M | Site statique, `/docs/format` |
+| P2.3 | Page **« Alternative à Kahoot »** : tableau comparatif honnête (prix, compte requis, hors-ligne, open source, format) | S | Site statique |
+| P2.4 | **FAQ** de 8 à 12 questions réelles (« Faut-il un compte ? », « Combien de joueurs ? », « Ça marche sans Internet ? ») avec balisage `FAQPage` | S | Site statique |
+| P2.5 | `llms.txt` et `llms-full.txt` (spécification du format + 1 deck complet en Markdown brut) servis par le site statique, avec des liens vers le catalogue de l'app | S | Site statique |
+| P2.6 | JSON-LD `SoftwareApplication` et `Organization` (ou `Person`) sur l'accueil | S | Site statique |
+
+#### Pages publiques de l'application
+
+| # | Action | Effort | Où |
+| --- | --- | --- | --- |
+| P2.7 | **Index des quiz publics** (`/quiz`) : liste de tous les decks avec titre, description, tags, difficulté, nombre de questions ; filtres par tag en vraies URL (`/quiz/tag/docker`) au lieu de `#/tag/docker` | M | `apps/host` ou nouvelle app, pré-rendu |
+| P2.8 | **Une page par quiz** (`/quiz/docker-fundamentals`) : titre, description, tags, difficulté, auteur, 3 à 5 questions d'exemple, bouton « Jouer ce quiz » | M | Pré-rendu au build depuis `decks/` |
+| P2.9 | **Page de détails** du quiz (`/quiz/docker-fundamentals/details`) : liste complète des questions avec leurs explications (`> …`), c'est le contenu le plus citable par les LLM. À décider : afficher ou non les bonnes réponses (on peut les masquer derrière un `<details>` pour ne pas gâcher la partie) | M | Pré-rendu au build |
+| P2.10 | JSON-LD `Quiz` + `Question`/`acceptedAnswer` sur la page de détails, `ItemList` sur l'index, `BreadcrumbList` partout | M | Pages pré-rendues |
+| P2.11 | Déplacer l'écran joueur de `/` vers `/join` (garder `/?code=` en redirection pour les QR codes déjà imprimés), puisque la racine revient au site statique | S | `vercel.json`, `apps/player` |
+
+#### Commun aux deux
+
+| # | Action | Effort | Où |
+| --- | --- | --- | --- |
+| P2.12 | `sitemap.xml` par projet (site : pages éditoriales ; app : index, quiz, détails, tags) avec `lastmod` issu de git, déclarés tous deux dans `robots.txt` | S | Scripts de build |
+| P2.13 | Page 404 personnalisée (lien vers l'accueil et le catalogue) au lieu de la page texte Vercel | S | Les deux projets |
 
 ### Priorité 3 : amélioration continue, à planifier
 
@@ -180,7 +221,8 @@ Disallow: /join
 Sitemap: https://example.com/sitemap.xml
 ```
 
-Remplacer `example.com` par le domaine retenu en P1.8.
+Remplacer `example.com` par le domaine retenu en P1.8. Les pages catalogue de l'application (`/quiz/...`) restent
+autorisées ; seuls les écrans de jeu sont exclus. Si l'app est sur un sous-domaine, elle a son propre `robots.txt`.
 
 ### `<head>` de l'écran joueur (en attendant la landing)
 
@@ -264,10 +306,17 @@ Sur le host, ajouter en plus `<meta name="robots" content="noindex, nofollow">`.
 
 ### Mise en œuvre suggérée du pré-rendu
 
-Pas besoin de migrer vers Nuxt. Un script Bun lancé avant `build:web` peut lire `decks/**/*.quizv.md` avec
-`@quizv/parser` (déjà utilisé par le host) et écrire des fichiers HTML statiques dans `dist/quiz/<id>/index.html`,
-ainsi que `sitemap.xml` et `llms-full.txt`. Vercel les sert tels quels ; les réécritures de `vercel.json` sont à
-ajuster pour ne pas les masquer.
+**Pages publiques de l'application.** Pas besoin de migrer vers Nuxt. Un script Bun lancé avant `build:web` peut lire
+`decks/**/*.quizv.md` avec `@quizv/parser` (déjà utilisé par le host) et écrire des fichiers HTML statiques :
+`dist/quiz/index.html`, `dist/quiz/<id>/index.html`, `dist/quiz/<id>/details/index.html` et
+`dist/quiz/tag/<tag>/index.html`, ainsi que le `sitemap.xml` de l'app. Ces pages peuvent ensuite être « hydratées » par
+Vue pour l'interactivité (bouton « Jouer »), mais leur contenu doit être présent dans le HTML. Les réécritures de
+`vercel.json` sont à ajuster pour ne pas les masquer derrière le SPA. Alternative équivalente : `vite-ssg` sur une
+petite app Vue dédiée au catalogue.
+
+**Site statique.** N'importe quel générateur statique convient (Astro est un bon choix : HTML pur par défaut,
+Markdown natif, sitemap intégré). Il peut lire les mêmes `.quizv.md` du dépôt pour générer `llms-full.txt` et les
+résumés de quiz, afin que les deux projets restent synchronisés sans copie manuelle.
 
 ## 7. Indicateurs de suivi
 

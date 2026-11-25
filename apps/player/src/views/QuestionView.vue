@@ -12,9 +12,25 @@
       <span class="qv-progress__label">{{ game.quizMeta?.totalQuestions ?? '?' }}</span>
     </div>
 
-    <!-- Timer ring -->
-    <div class="qv-timer-wrap">
+    <!-- Timer ring, replaced by the result block once the answer is revealed -->
+    <div v-if="!revealed" class="qv-timer-wrap">
       <FxCountdown :total="game.question.timer" :remaining="remaining" size="compact" />
+    </div>
+    <div
+      v-else
+      role="status"
+      :class="['qv-result', isCorrect ? 'qv-result--correct' : 'qv-result--wrong']"
+    >
+      <!-- FxVerdict draws the check / cross; screen readers get the verdict as text. -->
+      <FxVerdict class="qv-result__fx" :correct="isCorrect" :delta="game.lastDelta" :answered="game.answered" />
+      <span class="qv-sr-only">{{ isCorrect ? 'Correct' : 'Wrong' }}</span>
+      <div class="qv-result__line">
+        <span class="qv-result__score">{{ game.totalScore }} <small>pts</small></span>
+        <span v-if="game.rank !== null" class="qv-result__rank qv-label">{{ ordinalFr(game.rank) }} / {{ game.playerTotal }}</span>
+      </div>
+      <span class="qv-result__delta">{{ shownDelta > 0 ? '+' + shownDelta : '+0' }} pts</span>
+      <span v-if="game.answered" class="qv-result__info">Answered in {{ Math.round(game.answerTimeMs / 1000) }}s / {{ game.question.timer }}s</span>
+      <span v-else class="qv-result__info">No answer submitted</span>
     </div>
 
     <!-- Question meta: tags left, difficulty dot right -->
@@ -58,21 +74,6 @@
     >
       Valider →
     </button>
-
-    <!-- Inline feedback overlay (revealed by host) -->
-    <Transition name="reveal">
-      <div v-if="revealed" role="status" :class="['qv-reveal', isCorrect ? 'qv-reveal--correct' : 'qv-reveal--wrong']">
-        <!-- FxVerdict draws the check / cross; screen readers get the verdict as text. -->
-        <FxVerdict :correct="isCorrect" :delta="game.lastDelta" :answered="game.answered" />
-        <span class="qv-sr-only">{{ isCorrect ? 'Correct' : 'Wrong' }}</span>
-        <span class="qv-reveal__delta">{{ shownDelta > 0 ? '+' + shownDelta : '+0' }} pts</span>
-        <span v-if="game.rank !== null" class="qv-reveal__rank qv-label">{{ ordinalFr(game.rank) }} / {{ game.playerTotal }}</span>
-        <span v-if="game.answered" class="qv-reveal__info">Answered in {{ Math.round(game.answerTimeMs / 1000) }}s / {{ game.question.timer }}s</span>
-        <span v-else class="qv-reveal__info">No answer submitted</span>
-        <span v-if="game.totalScore > 0" class="qv-reveal__score">Score: <strong>{{ game.totalScore }}</strong> pts</span>
-        <span class="qv-reveal__wait">Waiting for next question…</span>
-      </div>
-    </Transition>
   </div>
 </template>
 
@@ -250,29 +251,27 @@ function validateMultiple() {
   .qv-grid { grid-template-columns: 1fr; }
 }
 
-/* Inline feedback reveal */
-.qv-reveal {
-  display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
-  width: 100%; padding: 1rem; border-radius: var(--qv-radius);
-  text-align: center;
+/* Result block (replaces the countdown after reveal) */
+.qv-result {
+  display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
+  width: 100%; padding: 0.25rem 0.75rem 0.5rem; border-radius: var(--qv-radius);
+  text-align: center; animation: reveal-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.qv-reveal--correct { background: color-mix(in srgb, var(--qv-correct) 12%, transparent); }
-.qv-reveal--wrong   { background: color-mix(in srgb, var(--qv-wrong)   10%, transparent); }
-.qv-reveal__delta { font-size: 1.5rem; font-weight: 700; }
-.qv-reveal--correct .qv-reveal__delta { color: var(--qv-correct); }
-.qv-reveal--wrong   .qv-reveal__delta { color: var(--qv-text-muted); }
-.qv-reveal__rank  { font-size: 0.8rem; color: var(--qv-text); text-transform: none; letter-spacing: 0.08em; }
-.qv-reveal__wait  { font-size: 0.8rem; color: var(--qv-text-muted); margin-top: 0.25rem; }
-
-/* Reveal transition */
-.reveal-enter-active { animation: reveal-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.qv-result--correct { background: color-mix(in srgb, var(--qv-correct) 12%, transparent); }
+.qv-result--wrong   { background: color-mix(in srgb, var(--qv-wrong)   10%, transparent); }
+.qv-result .qv-result__fx { height: 72px; }
+.qv-result__line { display: flex; align-items: baseline; justify-content: center; gap: 0.75rem; }
+.qv-result__score { font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
+.qv-result__score small { font-size: 0.8rem; font-weight: 500; color: var(--qv-text-muted); }
+.qv-result__rank  { font-size: 0.85rem; color: var(--qv-text); text-transform: none; letter-spacing: 0.08em; }
+.qv-result__delta { font-size: 1.15rem; font-weight: 700; }
+.qv-result--correct .qv-result__delta { color: var(--qv-correct); }
+.qv-result--wrong   .qv-result__delta { color: var(--qv-text-muted); }
+.qv-result__info  { font-size: 0.8rem; color: var(--qv-text-muted); }
 @keyframes reveal-pop {
   from { opacity: 0; transform: scale(0.8); }
   to   { opacity: 1; transform: scale(1); }
 }
-
-.qv-reveal__info  { font-size: 0.82rem; color: var(--qv-text-muted); }
-.qv-reveal__score { font-size: 0.85rem; color: var(--qv-text-muted); }
 
 .qv-validate-btn {
   margin-top: 0.5rem;

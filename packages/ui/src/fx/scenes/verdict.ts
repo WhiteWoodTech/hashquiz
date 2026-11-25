@@ -32,7 +32,7 @@ interface VerdictScene {
   piles: Map<number, number>
 }
 
-const N = 24
+const N = 13
 /** Converge duration of a single dot. */
 const DURATION = 1.1
 const MAX_DELAY = 0.35
@@ -70,7 +70,7 @@ function newMotes(): Mote[] {
 }
 
 /**
- * Correct: 24 dots converge onto a check mark in `theme.ok`, with a soft halo.
+ * Correct: 13 dots converge onto a check mark in `theme.ok`, with a soft halo.
  * Wrong / no answer: dots form an ✗ in `theme.ko`, which cracks; its dots fall
  * onto an invisible floor, bounce a little and stay piled there.
  * Nodes carry a soft halo and are joined by thin constellation lines along each stroke;

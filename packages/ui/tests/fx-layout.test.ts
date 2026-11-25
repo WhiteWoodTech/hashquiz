@@ -3,6 +3,7 @@ import {
   FALL_DURATION,
   REVEAL_DELAY,
   REVEAL_PER_ROW,
+  checkPoints,
   columnXs,
   countdownState,
   fallStarts,
@@ -107,5 +108,16 @@ describe('reveal layout', () => {
   })
   test('constants', () => {
     expect([FALL_DURATION, REVEAL_DELAY, REVEAL_PER_ROW]).toEqual([1, 3.5, 8])
+  })
+})
+
+describe('checkPoints', () => {
+  test('spreads points along the check polyline', () => {
+    const pts = checkPoints(24, 0, 0, 100)
+    expect(pts).toHaveLength(24)
+    expect(pts[0]!.x).toBeCloseTo(-50, 5)
+    expect(pts[0]!.y).toBeCloseTo(0, 5)
+    expect(pts[23]!.x).toBeCloseTo(50, 5)
+    expect(pts[23]!.y).toBeCloseTo(-40, 5)
   })
 })

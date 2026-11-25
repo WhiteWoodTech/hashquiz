@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import type { QuestionPublic, Score, PodiumEntry, QuizInfo, StateSnapshot } from '@quizv/core'
 import type { GameEvent } from '@quizv/core'
 import { SupabaseTransport } from '@quizv/transport-supabase'
-import { GameEvents } from '@quizv/core'
+import { GameEvents, rankOf } from '@quizv/core'
 import type { IRealtimeTransport, PlayerState } from '@quizv/core'
 
 export type PlayerPhase = 'join' | 'lobby' | 'question' | 'podium'
@@ -75,6 +75,8 @@ export const useGameStore = defineStore('game', () => {
   const answerTimeMs = ref(0)
   const totalScore   = ref(0)
   const lastDelta    = ref(0)
+  const rank         = ref<number | null>(null)
+  const playerTotal  = ref(0)
   const correctIds   = ref<string[]>([])
   const explanation  = ref<string | undefined>(undefined)
   const podium       = ref<PodiumEntry[]>([])
@@ -294,6 +296,9 @@ export const useGameStore = defineStore('game', () => {
       explanation.value = snap.reveal.explanation
       const me = snap.reveal.scores.find(s => s.playerId === playerId.value)
       if (me) { lastDelta.value = me.delta; totalScore.value = me.score }
+      const r = rankOf(snap.reveal.scores, playerId.value)
+      rank.value = r?.rank ?? null
+      playerTotal.value = r?.total ?? 0
       answered.value = true   // round is over for everyone
       deadlineMs.value = null
       phase.value = 'question'    // QuestionView renders reveal feedback inline
@@ -350,6 +355,8 @@ export const useGameStore = defineStore('game', () => {
         questionIdx.value  = msg.idx
         answered.value     = false
         answerTimeMs.value = 0
+        rank.value         = null
+        playerTotal.value  = 0
         correctIds.value   = []
         explanation.value  = undefined
         deadlineMs.value   = msg.deadlineMs
@@ -362,6 +369,9 @@ export const useGameStore = defineStore('game', () => {
           lastDelta.value  = me.delta
           totalScore.value = me.score
         }
+        const r = rankOf(msg.scores, playerId.value)
+        rank.value = r?.rank ?? null
+        playerTotal.value = r?.total ?? 0
         correctIds.value = msg.correct
         explanation.value = msg.explanation
         answered.value = true
@@ -398,7 +408,7 @@ export const useGameStore = defineStore('game', () => {
 
   return {
     phase, playerId, playerCount, question, questionIdx,
-    answered, answerTimeMs, totalScore, lastDelta, correctIds, explanation, podium, connectError,
+    answered, answerTimeMs, totalScore, lastDelta, rank, playerTotal, correctIds, explanation, podium, connectError,
     quizMeta, deadlineMs, status, canStillAnswer,
     connect, submitAnswer, submitAnswerSupabase,
   }

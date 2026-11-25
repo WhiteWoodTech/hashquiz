@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test'
-import { calcPoints } from '../src/scoring'
+import { calcPoints, rankOf } from '../src/scoring'
 
 describe('calcPoints', () => {
   test('returns 0 for wrong answer', () => {
@@ -21,5 +21,21 @@ describe('calcPoints', () => {
 
   test('never returns less than 10 for correct answer', () => {
     expect(calcPoints(-5, true)).toBe(10)
+  })
+})
+
+describe('rankOf', () => {
+  const s = (playerId: string, score: number) => ({ playerId, pseudo: playerId, score, delta: 0 })
+  const scores = [s('a', 50), s('b', 80), s('c', 80)]
+
+  test('ranks by score desc, ties keep arrival order', () => {
+    expect(rankOf(scores, 'c')).toEqual({ rank: 2, total: 3 })
+    expect(rankOf(scores, 'b')).toEqual({ rank: 1, total: 3 })
+    expect(rankOf(scores, 'a')).toEqual({ rank: 3, total: 3 })
+  })
+
+  test('returns null for unknown player or empty list', () => {
+    expect(rankOf(scores, 'zzz')).toBeNull()
+    expect(rankOf([], 'a')).toBeNull()
   })
 })

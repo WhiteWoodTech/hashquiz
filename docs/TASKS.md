@@ -55,9 +55,6 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 - [ ] Sur la base des corrections précédentes. Améliore le cli check : 4 réponses maximum,
       check là où la bonne réponse saute aux yeux (formatage asymétrique)
 - [ ] Supprimer `FeedbackView.vue` (non importé)
-- [ ] Rang : ordinal français ("1er" au lieu de "1e")
-- [ ] Verdict joueur faux après rechargement pendant la révélation (isCorrect calculé depuis la sélection locale
-      vide) — à corriger via le delta/serveur
 - [ ] Plein écran : fallback `webkitRequestFullscreen` (Safari desktop)
 - [ ] Classement (PlayerList) : défilement interne au-delà de ~50 joueurs ; pseudos récents parfois sous les
       panneaux latéraux du lobby

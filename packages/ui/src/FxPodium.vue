@@ -12,7 +12,7 @@
       <span class="fx-podium__score">{{ e.score.toLocaleString() }} pts</span>
     </div>
     <p v-if="outsideRank !== null" class="fx-podium__outside" :class="{ 'fx-podium__outside--on': shown[3] }">
-      {{ outsideRank }}e / {{ podium.length }}
+      {{ ordinalFr(outsideRank) }} / {{ podium.length }}
     </p>
   </div>
 </template>
@@ -21,6 +21,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import type { PodiumEntry } from '@quizv/core'
 import { mountScene } from './fx/loop'
+import { ordinalFr } from './ordinal'
 import { PODIUM_SLOTS } from './fx/layout'
 import { podiumScene } from './fx/scenes/podium'
 

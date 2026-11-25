@@ -51,9 +51,10 @@ function toPublic(question: Question, idx: number, oneShoot: boolean): QuestionP
 
 /**
  * Core game state machine.
- * Lifecycle: lobby → active → finished
+ * Lifecycle: lobby → active → finished (→ lobby via reset())
  *
  * The host calls: start() → [per question: revealAnswer(), nextQuestion()] → (auto finish)
+ *   → optionally reset() to replay in the same room
  * Players call: submitAnswer()
  */
 export class GameEngine {
@@ -326,6 +327,26 @@ export class GameEngine {
       .map((p, i) => ({ rank: i + 1, playerId: p.id, pseudo: p.pseudo, score: p.score }))
     this.podium = podium
     await this.transport.broadcast(this.channel, GameEvents.gameEnded(podium))
+  }
+
+  /**
+   * Transition finished → lobby so the same room can play again ("Rejouer").
+   * Keeps the join code and every known player (score reset to 0, disconnect markers kept
+   * so grace-period cleanup still applies); clears all per-game state. No-op unless finished.
+   */
+  async reset(): Promise<void> {
+    if (this.state.status !== 'finished') return
+    this.state.status = 'lobby'
+    this.state.currentQuestionIdx = 0
+    this.state.totalQuestions = this.quiz.questions.length
+    delete this.state.currentQuestionDeadlineMs
+    for (const player of this.state.players.values()) player.score = 0
+    this.pendingAnswers.clear()
+    this.activeQuestions = []
+    this.revealedForIdx = -1
+    this.lastReveal = null
+    this.podium = null
+    await this.transport.broadcast(this.channel, GameEvents.gameReset())
   }
 
   /**

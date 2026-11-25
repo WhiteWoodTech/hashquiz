@@ -17,7 +17,7 @@ HostPhase: 'connecting' → 'lobby' → 'question' → 'revealed' → 'finished'
 | Phase | Trigger | View | Actions |
 |-------|---------|------|---------|
 | `connecting` | Initial load / WS close or error | "Connecting…" spinner | — |
-| `lobby` | `host_connected` or `game_reset` received | `LobbyView` | One centered column that scrolls: quiz card (first screen), then join link + join code + QR code, then player count + Start button. Player constellations (`FxLobby`) and name lists (`PlayerList`) sit in the left and right side areas, players split between the two sides |
+| `lobby` | `host_connected` or `game_reset` received | `LobbyView` | One centered column that scrolls over two screens: the quiz card, vertically centered (first screen), then join link + join code, QR code, player count and Start button. Grey QuizV logo fixed top left. Several constellations (`FxLobby`, 12 players max each) fill the left and right side areas, with the `PlayerList` name lists at the bottom of each side |
 | `question` | `question_started` received | `QuestionView` | Countdown (`FxCountdown`), answer count, Reveal |
 | `revealed` | `answer_revealed` received | `RevealView` | Vote particles (`FxReveal`), score deltas, Next button |
 | `finished` | `game_ended` received | `PodiumView` | Animated podium (`FxPodium`), full leaderboard, **🔁 Rejouer** button (sends `host_reset`) |

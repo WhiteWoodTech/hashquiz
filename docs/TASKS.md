@@ -45,8 +45,6 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 - [ ] Ajouter dans la page métrics, des métrics par personne : nb bonne réponse, pourcentage bonne réponse,
       temps moyen réponse, temps le plus rapide
 - [ ] génération résultat et métrics en fichier json téléchargeable
-- [ ] Revoir l'index avec une grille de card (même design que le reste, et card proche type QuizInfoPanel)
-      des différents quizz, avec titre, description, tags, max-questions et target-difficulty.
 - [ ] l'affichage des choix sort en markdown brut et n'est pas formaté avec gras et autres...
 - [ ] Maximum de longueurs des choix / réponses à mettre dans la skills (éviter le débordement sur mobile surtout).
 - [ ] Dans l'écran des réponses, mets les lettres des bonnes réponses en vert
@@ -95,6 +93,9 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
 ## Completed
 
+- [x] Revoir l'index avec une grille de card (même design que le reste, et card proche type QuizInfoPanel)
+      des différents quizz, avec titre, description, tags, max-questions et target-difficulty
+      (+ section de tags cliquables et page `#/tag/<tag>`).
 - [x] Agrandir le qr code
 - [x] version sur mobile agencer les questions les une en dessous des autres (laisser tels quels sur  desktop)
 - [x] vérifier le randomize les propositions a, b, c, d → si quizz fait plusieurs fois ca tourne

@@ -6,7 +6,7 @@ Import from the package barrel:
 
 ```typescript
 import {
-  FxBackdrop, FxCountdown, FxLobby, FxReveal, FxVerdict, FxPodium,
+  BrandLogo, FxBackdrop, FxCountdown, FxHourglass, FxLobby, FxReveal, FxVerdict, FxPodium,
   AnswerButton, PlayerList, Podium, QrCode, DifficultyBar, QuizInfoPanel,
 } from '@quizv/ui'
 ```
@@ -47,6 +47,18 @@ Up to one dot per second is lit; the `danger` modifier applies in the last 4 sec
 Full-viewport dust background, mounted once in each app's `App.vue` behind every screen (`position: fixed`, 100vw x
 100dvh, `pointer-events: none`). It is the only source of dust: the other Fx scenes no longer draw their own. It reseeds
 when the viewport size changes (fullscreen). No props.
+
+### FxHourglass
+
+Small canvas hourglass made of dots, used in the player waiting room: the grains fall from the top bulb through the
+neck into the bottom one, the glass flips, and it loops. With reduced motion it is a static hourglass. `aria-hidden`,
+no props. Geometry (`hourglassHalfWidth`, `hourglassSlots`) lives in `fx/layout.ts`.
+
+### BrandLogo
+
+The QuizV wordmark. By default fixed top left, grey and discreet (`--qv-text-muted`, opacity 0.7, like the host
+fullscreen button): mounted once in the player `App.vue` and in the host lobby. `centered` renders a large accent
+wordmark in the page flow (host deck pages).
 
 ### FxLobby
 
@@ -184,6 +196,7 @@ Displays a grid of player name chips. Used in the host lobby.
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `players` | `PlayerState[]` | yes | List of connected players |
+| `align` | `'start' \| 'end'` | no | `'end'` right-aligns the chips and the empty text (host right side area) |
 
 ### Usage
 

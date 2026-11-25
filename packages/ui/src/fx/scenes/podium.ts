@@ -23,7 +23,7 @@ interface SwarmDot {
   r: number
 }
 
-interface Burst {
+interface Spark {
   x: number
   y: number
   vx: number
@@ -31,13 +31,26 @@ interface Burst {
   a: number
 }
 
+/** One firework: an expanding ring and a gerbe of sparks from (x, y). */
+interface Burst {
+  x: number
+  y: number
+  at: number
+  /** Relative size (1 = the winner's burst). */
+  scale: number
+  color: string
+  sparks: Spark[]
+}
+
 interface PodiumScene {
   dust: Dust[]
   dots: SwarmDot[]
   counts: number[]
   me: SwarmDot | null
-  burst: Burst[] | null
-  burstAt: number
+  /** Live fireworks; the first one celebrates the winner, the next ones loop. */
+  bursts: Burst[]
+  fired: boolean
+  nextAt: number
   shown: boolean[]
 }
 
@@ -47,6 +60,11 @@ export const FORM_AT = [5, 3.3, 1.6]
 export const LABEL_DELAY = 0.9
 /** Seconds between the 1st column forming and the burst. */
 export const BURST_DELAY = 1.2
+/** Seconds between two looping fireworks (min, max). */
+export const FIREWORK_GAP: [number, number] = [0.8, 1.6]
+/** Upper bound on live sparks, to stay smooth on large games. */
+export const MAX_SPARKS = 250
+const RING_DURATION = 1.4
 /** Dots per row in a column. */
 const COLS = 5
 const BURST_N = 70
@@ -64,9 +82,11 @@ function swarmDot(f: Frame, rank: number, k: number, r: number): SwarmDot {
 
 /**
  * The swarm drifts, then gathers into up to three columns (3rd, 2nd, 1st), then a
- * ring and a burst of particles celebrate the winner. Names, scores and the
+ * ring and a burst of particles celebrate the winner, followed by smaller
+ * fireworks (mostly white, sometimes accent) looping above the podium, every
+ * 0.8–1.6 s, with at most `MAX_SPARKS` live sparks. Names, scores and the
  * outside-top-3 rank are HTML, revealed through `onShown`.
- * Reduced motion: columns are in place and fade in; no ring, no burst, no dust motion.
+ * Reduced motion: columns are in place and fade in; no ring, no fireworks, no dust motion.
  */
 export const podiumScene: Scene<PodiumScene, PodiumScoreProps> = {
   init(f, p) {
@@ -80,8 +100,9 @@ export const podiumScene: Scene<PodiumScene, PodiumScoreProps> = {
       dots,
       counts,
       me: p.outsideRank !== null ? swarmDot(f, -1, 0, 3) : null,
-      burst: null,
-      burstAt: 0,
+      bursts: [],
+      fired: false,
+      nextAt: 0,
       shown: [],
     }
   },
@@ -141,39 +162,55 @@ export const podiumScene: Scene<PodiumScene, PodiumScoreProps> = {
     }
 
     if (first && !reduced) {
-      if (!s.burst && t > form(0) + BURST_DELAY) {
-        const bx = slotX(0)
-        const by = topOf(0) - h * 0.02
-        s.burst = Array.from({ length: BURST_N }, () => {
+      const live = (): number => s.bursts.reduce((n, b) => n + b.sparks.length, 0)
+      const fire = (x: number, y: number, scale: number, color: string, n: number): void => {
+        const count = Math.min(Math.round(n), MAX_SPARKS - live())
+        if (count <= 0) return
+        const sparks = Array.from({ length: count }, () => {
           const a = rand(0, Math.PI * 2)
-          const v = rand(60, 200) * Math.max(h / 1080, 0.5) * 1.6
-          return { x: bx, y: by, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, a: 1 }
+          const v = rand(60, 200) * Math.max(h / 1080, 0.5) * 1.6 * scale
+          return { x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40 * scale, a: 1 }
         })
-        s.burstAt = t
+        s.bursts.push({ x, y, at: t, scale, color, sparks })
       }
-      if (s.burst) {
-        const u = (t - s.burstAt) / 1.4
+      if (!s.fired && t > form(0) + BURST_DELAY) {
+        fire(slotX(0), topOf(0) - h * 0.02, 1, theme.accent, BURST_N)
+        s.fired = true
+        s.nextAt = t + rand(...FIREWORK_GAP)
+      }
+      // Then, a new smaller firework every so often, somewhere above the podium.
+      if (s.fired && t >= s.nextAt) {
+        const top = Math.min(topOf(0), topOf(1), topOf(2)) - h * 0.08
+        const scale = rand(0.45, 0.85)
+        const color = Math.random() < 0.25 ? theme.accent : theme.dot
+        // Below the page title band, above the columns.
+        fire(rand(w * 0.15, w * 0.85), rand(h * 0.2, Math.max(h * 0.22, top)), scale, color, BURST_N * scale * 0.8)
+        s.nextAt = t + rand(...FIREWORK_GAP)
+      }
+      for (const b of s.bursts) {
+        const u = (t - b.at) / RING_DURATION
         if (u < 1) {
-          const cx = slotX(0)
-          const cy = topOf(0) - h * 0.02
-          const rr = ease(u) * h * 0.4
+          // Looping fireworks get a tighter ring than the winner's burst.
+          const rr = ease(u) * h * (b.scale < 1 ? 0.28 : 0.4) * b.scale
           const steps = 48
           for (let i = 0; i < steps; i++) {
             const a0 = (i / steps) * Math.PI * 2
             const a1 = ((i + 1) / steps) * Math.PI * 2
-            line(f, cx + Math.cos(a0) * rr, cy + Math.sin(a0) * rr, cx + Math.cos(a1) * rr, cy + Math.sin(a1) * rr, 2.5 * (1 - u), 1.5, theme.accent)
+            line(f, b.x + Math.cos(a0) * rr, b.y + Math.sin(a0) * rr, b.x + Math.cos(a1) * rr, b.y + Math.sin(a1) * rr, 2.5 * (1 - u), 1.5, b.color)
           }
         }
-        for (const b of s.burst) {
+        for (const p of b.sparks) {
           // Light gravity, drag, fade.
-          b.x += b.vx * dt
-          b.y += b.vy * dt
-          b.vx *= 0.97
-          b.vy = b.vy * 0.97 + 30 * dt
-          b.a -= dt * 0.4
-          if (b.a > 0) dot(f, b.x, b.y, radius * 0.9, b.a, theme.accent)
+          p.x += p.vx * dt
+          p.y += p.vy * dt
+          p.vx *= 0.97
+          p.vy = p.vy * 0.97 + 30 * dt
+          p.a -= dt * 0.4
+          if (p.a > 0) dot(f, p.x, p.y, radius * 0.9 * Math.max(b.scale, 0.7), p.a, b.color)
         }
+        b.sparks = b.sparks.filter((p) => p.a > 0)
       }
+      s.bursts = s.bursts.filter((b) => b.sparks.length > 0 || t - b.at < RING_DURATION)
     }
 
     // Rank figures above each column.

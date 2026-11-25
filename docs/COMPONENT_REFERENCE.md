@@ -93,7 +93,9 @@ The canvas is `aria-hidden`: the parent view renders the points and a screen-rea
 
 ### FxPodium
 
-Animated podium of the top 3: columns of particles proportional to the scores, with name and score.
+Animated podium of the top 3: columns of particles proportional to the scores, with name and score. Once the winner's
+column has formed, a ring and burst celebrate them, then smaller fireworks (mostly white, sometimes `--qv-accent`) keep
+popping above the podium every 0.8–1.6 s (at most 250 live sparks). No fireworks with reduced motion.
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|

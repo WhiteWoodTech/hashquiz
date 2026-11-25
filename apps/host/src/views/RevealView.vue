@@ -108,7 +108,7 @@ const renderedExplanation = computed(() =>
 .rv-progress__label { font-size: clamp(0.8rem, 1.6vmin, 1.1rem); color: var(--qv-text-muted); min-width: 2rem; }
 .rv-progress__label:last-child { text-align: right; }
 .rv-progress__track { flex: 1; height: 4px; background: var(--qv-border); border-radius: 2px; overflow: hidden; }
-.rv-progress__fill { height: 100%; background: var(--qv-accent); border-radius: 2px; }
+.rv-progress__fill { height: 100%; background: var(--qv-progress); border-radius: 2px; }
 
 .rv-question { font-size: clamp(1.3rem, 3.6vmin, 2.6rem); margin: 0; line-height: 1.25; }
 

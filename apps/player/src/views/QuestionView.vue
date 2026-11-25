@@ -226,7 +226,7 @@ function validateMultiple() {
 .qv-progress__label { font-size: 0.8rem; color: var(--qv-text-muted); min-width: 2rem; }
 .qv-progress__label:last-child { text-align: right; }
 .qv-progress__track { flex: 1; height: 4px; background: var(--qv-border); border-radius: 2px; overflow: hidden; }
-.qv-progress__fill { height: 100%; background: var(--qv-accent); border-radius: 2px; transition: width 0.3s; }
+.qv-progress__fill { height: 100%; background: var(--qv-progress); border-radius: 2px; transition: width 0.3s; }
 
 /* Question meta */
 .qv-q-meta { display: flex; align-items: center; justify-content: space-between; width: 100%; }

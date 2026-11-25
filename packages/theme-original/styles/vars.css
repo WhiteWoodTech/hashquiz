@@ -10,6 +10,7 @@
   --qv-warn: #f99e16;
   --qv-text:         #ffffff;
   --qv-text-muted:   #888899;
+  --qv-progress:     var(--qv-accent);
   --qv-font-display: 'Syne', system-ui, sans-serif;
   --qv-font-mono:    'IBM Plex Mono', monospace;
   --qv-radius:       12px;

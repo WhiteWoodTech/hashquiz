@@ -12,6 +12,7 @@
   --qv-warn: #f99e16;
   --qv-text:         #f2f2f7;
   --qv-text-muted:   #8a8a9a;
+  --qv-progress:     #6b6b7a;
   --qv-font-display: 'Inter', system-ui, sans-serif;
   --qv-font-mono:    'IBM Plex Mono', monospace;
   --qv-radius:       6px;

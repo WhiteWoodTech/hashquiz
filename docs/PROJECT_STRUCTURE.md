@@ -26,7 +26,7 @@ quizv/
 │   │       │   ├── supabase-session.ts # Supabase Realtime session handler
 │   │       │   └── join-code.ts     # Join code generation and validation
 │   │       └── views/
-│   │           ├── DeckSelectView.vue  # Deck selection screen
+│   │           ├── DeckSelectView.vue  # Quiz card grid, tag list and #/tag/<tag> page
 │   │           ├── LobbyView.vue    # QR code + player constellation + Start button
 │   │           ├── QuestionView.vue # Countdown + live answer count
 │   │           ├── RevealView.vue   # Correct answers + score delta + vote particles

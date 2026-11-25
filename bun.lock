@@ -102,6 +102,10 @@
       "name": "@quizv/theme-default",
       "version": "0.0.1",
     },
+    "packages/theme-original": {
+      "name": "@quizv/theme-original",
+      "version": "0.0.1",
+    },
     "packages/transport-local": {
       "name": "@quizv/transport-local",
       "version": "0.0.1",
@@ -364,6 +368,8 @@
     "@quizv/server": ["@quizv/server@workspace:packages/server"],
 
     "@quizv/theme-default": ["@quizv/theme-default@workspace:packages/theme-default"],
+
+    "@quizv/theme-original": ["@quizv/theme-original@workspace:packages/theme-original"],
 
     "@quizv/transport-local": ["@quizv/transport-local@workspace:packages/transport-local"],
 

@@ -190,6 +190,30 @@ export function groupPlayers(ids: string[], assigned: Map<string, number>): stri
   return groups.filter((g): g is string[] => !!g && g.length > 0)
 }
 
+/** Half-width of the hourglass at height `y` in [-1, 1] (0 = neck): a wide bulb on each side. */
+export function hourglassHalfWidth(y: number): number {
+  return 0.06 + 0.74 * Math.min(Math.abs(y), 1)
+}
+
+/**
+ * Resting spots of `n` grains piled in the bottom bulb (y in (0, 1]), lowest row first, each row
+ * centred and spaced `0.15` apart. The top bulb's spots are the point reflection (-x, -y) of these.
+ */
+export function hourglassSlots(n: number): { x: number; y: number }[] {
+  const gap = 0.15
+  const out: { x: number; y: number }[] = []
+  for (let row = 0; out.length < Math.max(n, 0) && row < 40; row++) {
+    const y = 0.92 - row * gap * 0.9
+    if (y <= 0.08) break
+    const room = hourglassHalfWidth(y) - 0.07
+    const count = Math.max(Math.floor((2 * room) / gap) + 1, 1)
+    for (let k = 0; k < count && out.length < n; k++) {
+      out.push({ x: (k - (count - 1) / 2) * gap, y })
+    }
+  }
+  return out
+}
+
 /** Relative x of the podium columns for ranks 1, 2 and 3. */
 export const PODIUM_SLOTS = [0.5, 0.3, 0.7]
 

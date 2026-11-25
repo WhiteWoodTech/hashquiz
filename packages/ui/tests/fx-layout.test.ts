@@ -16,6 +16,8 @@ import {
   verdictLinks,
   groupPlayers,
   groupSize,
+  hourglassHalfWidth,
+  hourglassSlots,
   stackHeight,
   stackSlot,
 } from '../src/fx/layout'
@@ -229,5 +231,30 @@ describe('groupPlayers', () => {
     expect(gOf(after, 'p29') >= 0).toBe(true)
     const sameGroup = (a: string, b: string) => (gOf(before, a) === gOf(before, b)) === (gOf(after, a) === gOf(after, b))
     expect(sameGroup('p10', 'p20')).toBe(true)
+  })
+})
+
+describe('hourglass geometry', () => {
+  test('narrow at the neck, wide at the ends, symmetric', () => {
+    expect(hourglassHalfWidth(0)).toBeLessThan(0.1)
+    expect(hourglassHalfWidth(1)).toBeGreaterThan(0.7)
+    expect(hourglassHalfWidth(-0.5)).toBe(hourglassHalfWidth(0.5))
+  })
+  test('slots: n distinct spots inside the bottom bulb', () => {
+    const s = hourglassSlots(18)
+    expect(s.length).toBe(18)
+    for (const p of s) {
+      expect(p.y).toBeGreaterThan(0)
+      expect(p.y).toBeLessThanOrEqual(1)
+      expect(Math.abs(p.x)).toBeLessThanOrEqual(hourglassHalfWidth(p.y))
+    }
+    expect(new Set(s.map((p) => `${p.x.toFixed(3)},${p.y.toFixed(3)}`)).size).toBe(18)
+  })
+  test('slots: filled from the bottom up', () => {
+    const s = hourglassSlots(18)
+    for (let i = 1; i < s.length; i++) expect(s[i]!.y).toBeLessThanOrEqual(s[i - 1]!.y + 1e-9)
+  })
+  test('no slots for n <= 0', () => {
+    expect(hourglassSlots(0)).toEqual([])
   })
 })

@@ -12,12 +12,10 @@
     "@quizv/ui": "workspace:*",
     "@quizv/theme-default": "workspace:*",
     "@quizv/theme-original": "workspace:*",
-    "canvas-confetti": "^1.9.3",
     "pinia": "^2.1.7",
     "vue": "^3.4.27"
   },
   "devDependencies": {
-    "@types/canvas-confetti": "^1.9.0",
     "@vitejs/plugin-vue": "^6.0.8",
     "typescript": "^5.4.5",
     "unocss": "^66.7.0",

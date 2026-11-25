@@ -1,4 +1,4 @@
-import { clamp01, dot, drawDust, glow, makeDust, type Dust } from '../draw'
+import { clamp01, dot, glow } from '../draw'
 import {
   FALL_DURATION,
   REVEAL_DELAY,
@@ -31,7 +31,6 @@ interface Vote {
 }
 
 interface RevealScene {
-  dust: Dust[]
   votes: Vote[]
   counts: number[]
   offset: number
@@ -76,7 +75,6 @@ export const revealScene: Scene<RevealScene, RevealProps> = {
     })
     p.onPhase?.(false)
     return {
-      dust: makeDust(26 * f.theme.dustDensity, f.w, f.h),
       votes,
       counts,
       offset: 0,
@@ -91,7 +89,6 @@ export const revealScene: Scene<RevealScene, RevealProps> = {
     // Reduced motion: the final state fades in instead of moving.
     const fade = f.reduced ? clamp01(f.t / 0.5) : 1
 
-    drawDust(f, s.dust)
 
     const n = s.counts.length
     if (n === 0) return

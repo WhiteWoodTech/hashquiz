@@ -1,4 +1,5 @@
 export { default as FxCountdown } from './FxCountdown.vue'
+export { default as FxBackdrop } from './FxBackdrop.vue'
 export { default as FxLobby } from './FxLobby.vue'
 export { default as FxPodium } from './FxPodium.vue'
 export { default as FxReveal } from './FxReveal.vue'

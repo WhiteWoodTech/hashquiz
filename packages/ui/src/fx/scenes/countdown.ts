@@ -1,4 +1,4 @@
-import { dot, drawDust, glow, makeDust, type Dust } from '../draw'
+import { dot, glow } from '../draw'
 import { countdownState } from '../layout'
 import type { Frame, Scene } from '../loop'
 
@@ -17,7 +17,6 @@ interface Spark {
 }
 
 interface CountdownScene {
-  dust: Dust[]
   sparks: Spark[]
 }
 
@@ -37,15 +36,13 @@ function newSparks(n: number): Spark[] {
 export const countdownScene: Scene<CountdownScene, CountdownProps> = {
   init(f, p) {
     const { dots } = countdownState(p.remaining, p.total)
-    return { dust: makeDust(22 * f.theme.dustDensity, f.w, f.h), sparks: newSparks(dots) }
+    return { sparks: newSparks(dots) }
   },
 
   draw(f: Frame, s, p) {
     const { ctx, theme, dt } = f
     const st = countdownState(p.remaining, p.total)
     if (s.sparks.length !== st.dots) s.sparks = newSparks(st.dots)
-
-    drawDust(f, s.dust)
 
     const cx = f.w / 2
     const cy = f.h / 2

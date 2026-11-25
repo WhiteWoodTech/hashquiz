@@ -23,6 +23,8 @@ type ServerMsg =
   | HostConnectedMsg
   | { type: 'host_ready'; joinCode: string; totalQuestions: number; playerUrl: string; quizMeta: QuizInfo }
 
+export type HostAction = 'host_start' | 'host_reveal' | 'host_next' | 'host_reset'
+
 export const useGameStore = defineStore('game', () => {
   const phase        = ref<HostPhase>('connecting')
   const joinCode     = ref('')
@@ -63,11 +65,12 @@ export const useGameStore = defineStore('game', () => {
     phase.value = 'lobby'
   }
 
-  function sendSupabase(action: 'host_start' | 'host_reveal' | 'host_next') {
+  function sendSupabase(action: HostAction) {
     if (!session) return
     if (action === 'host_start')  void session.start()
     if (action === 'host_reveal') void session.reveal()
     if (action === 'host_next')   void session.next()
+    if (action === 'host_reset')  void session.reset()
   }
 
   function connect() {
@@ -135,10 +138,23 @@ export const useGameStore = defineStore('game', () => {
         podium.value = msg.podium
         phase.value  = 'finished'
         break
+      case 'game_reset':
+        // "Rejouer": same room, same players, fresh game state
+        question.value     = null
+        questionIdx.value  = 0
+        answerCount.value  = 0
+        correctIds.value   = []
+        choiceCounts.value = {}
+        explanation.value  = undefined
+        scores.value       = []
+        podium.value       = []
+        players.value      = players.value.map(p => ({ ...p, score: 0 }))
+        phase.value        = 'lobby'
+        break
     }
   }
 
-  function send(type: 'host_start' | 'host_reveal' | 'host_next') {
+  function send(type: HostAction) {
     if (import.meta.env.VITE_TRANSPORT === 'supabase') {
       sendSupabase(type)
       return

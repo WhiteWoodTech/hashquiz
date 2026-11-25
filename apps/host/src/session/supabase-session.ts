@@ -148,6 +148,8 @@ export class SupabaseHostSession {
   async start(): Promise<void> { await this.engine.start() }
   async reveal(): Promise<void> { await this.engine.revealAnswer() }
   async next(): Promise<void> { await this.engine.nextQuestion() }
+  /** "Rejouer": back to the lobby of the same room (no-op unless the game is finished). */
+  async reset(): Promise<void> { await this.engine.reset() }
 
   dispose(): void {
     this.offBroadcast?.()

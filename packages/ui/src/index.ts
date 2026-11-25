@@ -1,6 +1,7 @@
 export { default as FxCountdown } from './FxCountdown.vue'
 export { default as FxLobby } from './FxLobby.vue'
 export { default as FxReveal } from './FxReveal.vue'
+export { default as FxVerdict } from './FxVerdict.vue'
 export { default as AnswerButton } from './AnswerButton.vue'
 export { default as PlayerList } from './PlayerList.vue'
 export { default as Podium } from './Podium.vue'

@@ -89,3 +89,34 @@ export function percentages(counts: number[]): number[] {
   const total = counts.reduce((a, b) => a + b, 0)
   return counts.map((c) => (total > 0 ? Math.round((c / total) * 100) : 0))
 }
+
+const CHECK_SHAPE: [number, number][] = [
+  [-0.5, 0],
+  [-0.15, 0.35],
+  [0.5, -0.4],
+]
+
+/** `n` points spread evenly along the check-mark polyline, scaled by `size` and centered on (cx, cy). */
+export function checkPoints(n: number, cx: number, cy: number, size: number): { x: number; y: number }[] {
+  const lens: number[] = []
+  let total = 0
+  for (let i = 0; i < CHECK_SHAPE.length - 1; i++) {
+    const [x0, y0] = CHECK_SHAPE[i]!
+    const [x1, y1] = CHECK_SHAPE[i + 1]!
+    const l = Math.hypot(x1 - x0, y1 - y0)
+    lens.push(l)
+    total += l
+  }
+  return Array.from({ length: Math.max(n, 0) }, (_, k) => {
+    let d = (n <= 1 ? 0 : k / (n - 1)) * total
+    let s = 0
+    while (s < lens.length - 1 && d > lens[s]!) {
+      d -= lens[s]!
+      s++
+    }
+    const u = lens[s]! > 0 ? d / lens[s]! : 0
+    const [x0, y0] = CHECK_SHAPE[s]!
+    const [x1, y1] = CHECK_SHAPE[s + 1]!
+    return { x: cx + (x0 + (x1 - x0) * u) * size, y: cy + (y0 + (y1 - y0) * u) * size }
+  })
+}

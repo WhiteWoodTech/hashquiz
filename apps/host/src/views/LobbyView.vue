@@ -1,6 +1,6 @@
 <template>
   <div class="lobby">
-    <span class="lobby__logo" aria-label="QuizV">QuizV</span>
+    <BrandLogo />
 
     <!-- Left side: constellations (12 players max each), names at the bottom. -->
     <aside class="lobby__side lobby__side--left">
@@ -15,7 +15,7 @@
     <!-- Single central column: scrolls through two screens. -->
     <div class="lobby__col">
       <section class="lobby__section lobby__section--card">
-        <QuizInfoPanel v-if="game.quizMeta" :quizInfo="game.quizMeta" :playerCount="game.players.length" class="quiz-info lobby__panel" />
+        <QuizInfoPanel v-if="game.quizMeta" :quizInfo="game.quizMeta" :playerCount="game.players.length" class="quiz-info" />
       </section>
 
       <section class="lobby__section lobby__section--join">
@@ -51,7 +51,7 @@
         <FxLobby v-for="g in rightGroups" :key="g.key" class="lobby__fx" :players="g.players" :labels="2" :spread="0.1" />
       </div>
       <div class="lobby__bare lobby__players">
-        <PlayerList :players="rightPlayers" aria-live="polite" />
+        <PlayerList :players="rightPlayers" align="end" aria-live="polite" />
       </div>
     </aside>
   </div>
@@ -61,7 +61,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useGameStore } from '../stores/game'
 import type { PlayerState } from '@quizv/core'
-import { FxLobby, QrCode, PlayerList, QuizInfoPanel, groupPlayers } from '@quizv/ui'
+import { BrandLogo, FxLobby, QrCode, PlayerList, QuizInfoPanel, groupPlayers } from '@quizv/ui'
 
 const game = useGameStore()
 const qrUrl = computed(() =>
@@ -151,31 +151,11 @@ onBeforeUnmount(() => { if (popTimer) clearTimeout(popTimer) })
 .lobby__section--join { gap: 2vmin; }
 .lobby__join, .lobby__start { display: flex; flex-direction: column; align-items: center; gap: 1.2vmin; }
 
-/* Logo: top left, grey and discreet like the fullscreen button. */
-.lobby__logo {
-  position: fixed;
-  top: 1.5vmin;
-  left: 1.5vmin;
-  z-index: 50;
-  font-size: clamp(0.9rem, 2vmin, 1.5rem);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--qv-text-muted);
-  opacity: 0.7;
-  pointer-events: none;
-}
-
-.lobby__panel {
-  background: color-mix(in srgb, var(--qv-surface) 82%, transparent);
-  border: 1px solid var(--qv-border);
-  border-radius: var(--qv-radius);
-  backdrop-filter: blur(6px);
-}
 /* Names, QR and join code sit directly on the backdrop: a halo of the page
    background keeps their text legible over dust and lines. */
 .lobby__bare { text-shadow: 0 0 1vmin var(--qv-bg), 0 0 2vmin var(--qv-bg); }
 
-.quiz-info {
+.lobby .quiz-info {
   padding: 3vmin;
   width: 100%;
   flex: 0 0 auto;

@@ -1,26 +1,60 @@
 <template>
-  <div class="deck-select">
-    <h1>Pick a quiz</h1>
-    <ul>
-      <li v-for="deck in decks" :key="deck.id">
-        <button class="qv-btn-primary" @click="pick(deck)">
-          {{ deck.name }}
-          <small>{{ deck.quiz.questions.length }} questions</small>
-        </button>
-      </li>
-      <li v-if="decks.length === 0">
-        No bundled decks found in <code>decks/</code>.
-      </li>
-    </ul>
+  <div class="decks">
+    <div class="decks__inner">
+      <BrandLogo centered class="decks__logo" />
+
+      <!-- Tag page -->
+      <template v-if="route.kind === 'tag'">
+        <a class="decks__back" href="#/">← All quizzes</a>
+        <h1 class="decks__title"><span class="decks__hash">#</span>{{ route.tag }}</h1>
+        <ul v-if="tagDecks.length" class="decks__grid">
+          <DeckCard v-for="deck in tagDecks" :key="deck.id" :deck="deck" @pick="pick" />
+        </ul>
+        <p v-else class="decks__empty">No quiz with the tag “{{ route.tag }}”.</p>
+      </template>
+
+      <!-- Full list -->
+      <template v-else>
+        <h1 class="decks__title">Pick a quiz</h1>
+        <ul v-if="decks.length" class="decks__grid">
+          <DeckCard v-for="deck in decks" :key="deck.id" :deck="deck" @pick="pick" />
+        </ul>
+        <p v-else class="decks__empty">No bundled decks found in <code>decks/</code>.</p>
+
+        <section v-if="tags.length" class="decks__tags" aria-labelledby="decks-tags">
+          <h2 id="decks-tags" class="decks__heading qv-label">Tags</h2>
+          <ul class="decks__taglist">
+            <li v-for="t in tags" :key="t.tag">
+              <a class="decks__tag" :href="tagHash(t.tag)">
+                {{ t.tag }} <span class="decks__tag-count">{{ t.count }}</span>
+              </a>
+            </li>
+          </ul>
+        </section>
+      </template>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { BrandLogo } from '@quizv/ui'
 import { useGameStore } from '../stores/game'
 import { bundledDecks, type BundledDeck } from '../decks'
+import { decksForTag, parseDeckHash, tagCounts, tagHash } from '../deck-browse'
+import DeckCard from '../components/DeckCard.vue'
 
 const game = useGameStore()
 const decks = bundledDecks
+const tags = tagCounts(decks)
+
+// Minimal hash routing (#/tag/<tag>): the browser back button and direct links keep working.
+const route = ref(parseDeckHash(location.hash))
+const sync = () => { route.value = parseDeckHash(location.hash) }
+onMounted(() => window.addEventListener('hashchange', sync))
+onBeforeUnmount(() => window.removeEventListener('hashchange', sync))
+
+const tagDecks = computed(() => (route.value.kind === 'tag' ? decksForTag(decks, route.value.tag) : []))
 
 function pick(deck: BundledDeck) {
   game.startWithDeck(deck)
@@ -28,32 +62,45 @@ function pick(deck: BundledDeck) {
 </script>
 
 <style scoped>
-/* Full-screen: title then a grid of decks that fits the viewport. */
-.deck-select {
-  height: 100%;
+/* The page scrolls on its own: the app shell is fixed height and the star backdrop stays put behind it. */
+.decks { height: 100%; overflow-y: auto; }
+.decks__inner {
+  max-width: 84rem;
+  margin: 0 auto;
+  padding: 4vmin 4vmin 6vmin;
   display: flex;
   flex-direction: column;
   gap: 3vmin;
-  padding: 5vmin 6vmin;
-  overflow: hidden;
 }
-h1 { margin: 0; font-size: clamp(1.8rem, 6vmin, 4rem); }
-ul {
+.decks__title { margin: 0; text-align: center; font-size: clamp(1.4rem, 3.4vmin, 2.4rem); font-weight: 600; }
+.decks__hash { color: var(--qv-accent); margin-right: 0.1em; }
+.decks__back {
+  align-self: flex-start;
+  color: var(--qv-text-muted);
+  text-decoration: none;
+  font-size: clamp(0.9rem, 1.8vmin, 1.2rem);
+}
+.decks__back:hover, .decks__back:focus-visible { color: var(--qv-text); text-decoration: underline; }
+.decks__grid {
   list-style: none; margin: 0; padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr));
-  align-content: start;
-  gap: 1.5vmin;
-  min-height: 0;
-  overflow: auto;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: 2vmin;
 }
-button {
-  width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: baseline;
-  padding: 2vmin 2.4vmin; font-size: clamp(1rem, 2.2vmin, 1.5rem); font-family: inherit;
-  color: var(--qv-text); background: var(--qv-surface-2);
-  border: 1px solid var(--qv-border); border-radius: var(--qv-radius); cursor: pointer;
+.decks__empty { text-align: center; color: var(--qv-text-muted); }
+.decks__heading { margin: 0 0 1.2vmin; color: var(--qv-text-muted); font-size: clamp(0.8rem, 1.6vmin, 1.1rem); }
+.decks__taglist { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 1vmin; }
+.decks__tag {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.35rem 0.8rem;
+  background: color-mix(in srgb, var(--qv-surface) 82%, transparent);
+  border: 1px solid var(--qv-border);
+  border-radius: var(--qv-radius-sm);
+  color: var(--qv-text);
+  text-decoration: none;
+  font-size: clamp(0.85rem, 1.8vmin, 1.2rem);
 }
-button:hover { background: var(--qv-surface); }
-button:focus-visible { outline: 2px solid var(--qv-accent); outline-offset: 2px; }
-small { color: var(--qv-text-muted); margin-left: 1rem; }
+.decks__tag:hover { border-color: var(--qv-accent); }
+.decks__tag:focus-visible { outline: 2px solid var(--qv-accent); outline-offset: 2px; }
+.decks__tag-count { color: var(--qv-text-muted); font-size: 0.85em; }
 </style>

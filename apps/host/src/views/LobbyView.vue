@@ -8,7 +8,7 @@
       <!-- Quiz info panel -->
       <QuizInfoPanel v-if="game.quizMeta" :quizInfo="game.quizMeta" :playerCount="game.players.length" class="quiz-info lobby__panel" />
 
-      <div class="lobby__panel lobby__players">
+      <div class="lobby__bare lobby__players">
         <PlayerList :players="game.players" aria-live="polite" />
       </div>
     </div>
@@ -28,12 +28,12 @@
     </div>
 
     <div class="lobby__col lobby__col--right">
-      <div class="lobby__qr lobby__panel">
+      <div class="lobby__qr lobby__bare">
         <QrCode :value="qrUrl" :size="800" />
         <p class="lobby__url">{{ qrUrl }}</p>
       </div>
 
-      <div class="lobby__code-box lobby__panel">
+      <div class="lobby__code-box lobby__bare">
         <p class="lobby__code-label qv-label">Join code</p>
         <p class="lobby__code">{{ game.joinCode }}</p>
       </div>
@@ -91,6 +91,9 @@ onBeforeUnmount(() => { if (popTimer) clearTimeout(popTimer) })
   border-radius: var(--qv-radius);
   backdrop-filter: blur(6px);
 }
+/* Player list, QR and join code sit directly on the constellation: a halo of the
+   page background keeps their text legible over the lines. */
+.lobby__bare { text-shadow: 0 0 1vmin var(--qv-bg), 0 0 2vmin var(--qv-bg); }
 
 .lobby__title { font-size: clamp(2rem, 6vmin, 4.5rem); line-height: 1; color: var(--qv-accent); margin: 0; }
 

@@ -111,14 +111,25 @@ export function makeDust(n: number, w: number, h: number): Dust[] {
   }))
 }
 
-/** Advances (unless reduced motion) and draws dust, wrapping around the frame edges. */
+/**
+ * Dust size multiplier for a `w`×`h` canvas: 1 on a phone-sized surface, growing
+ * to 2.2 on a 1080p projector so the specks survive being washed out.
+ */
+export const dustScale = (w: number, h: number): number => Math.min(Math.max(Math.min(w, h) / 480, 1), 2.2)
+
+/**
+ * Advances (unless reduced motion) and draws dust, wrapping around the frame edges.
+ * Size scales with the canvas (`dustScale`), opacity with `theme.dustAlpha`.
+ */
 export function drawDust(f: Frame, dust: Dust[]): void {
   const { w, h, dt } = f
+  const k = dustScale(w, h)
+  const alpha = f.theme.dustAlpha
   for (const p of dust) {
     if (!f.reduced && w > 0 && h > 0) {
       p.x = (((p.x + p.vx * dt) % w) + w) % w
       p.y = (((p.y + p.vy * dt) % h) + h) % h
     }
-    dot(f, p.x, p.y, p.r, p.a)
+    dot(f, p.x, p.y, p.r * k, p.a * alpha)
   }
 }

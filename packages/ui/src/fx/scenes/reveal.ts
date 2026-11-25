@@ -66,7 +66,10 @@ export const revealScene: Scene<RevealScene, RevealProps> = {
       ;[votes[i], votes[j]] = [votes[j]!, votes[i]!]
     }
     const starts = fallStarts(votes.length)
+    // Slots are assigned in landing order so stacks fill from the bottom up.
+    const next = new Array<number>(counts.length).fill(0)
     votes.forEach((v, i) => {
+      v.k = next[v.col]!++
       v.delay = 0.3 + starts[i]!
       v.sx = f.w / 2 + rand(-f.w * 0.3, f.w * 0.3)
       v.sy = -rand(4, 30)
@@ -93,15 +96,15 @@ export const revealScene: Scene<RevealScene, RevealProps> = {
     const n = s.counts.length
     if (n === 0) return
     const xs = columnXs(n, f.w)
-    const numPx = Math.min(Math.max(f.h * 0.07, 13), 30)
-    const base = f.h - 8
+    const numPx = Math.min(Math.max(f.h * 0.11, 18), 72)
+    const base = f.h - 18
     const maxCount = Math.max(...s.counts, 1)
-    const budget = Math.max(f.h - numPx * 2.4 - 16, 10)
+    const budget = Math.max(f.h - numPx * 1.6 - 26, 10)
     const colW = f.w * 0.6 / n
-    let sp = Math.min(f.h * 0.045, (colW / REVEAL_PER_ROW) * 0.9)
+    let sp = Math.min(f.h * 0.14, (colW / REVEAL_PER_ROW) * 0.92)
     if (stackHeight(maxCount, REVEAL_PER_ROW, sp) > budget) sp = budget / Math.ceil(maxCount / REVEAL_PER_ROW)
     sp = Math.max(sp, 2)
-    const r = Math.min(Math.max(sp * 0.2, 1.4), 6)
+    const r = Math.min(Math.max(sp * 0.3, 1.5), 16)
 
     const rv = ease((t - REVEAL_DELAY) / 0.7)
     if (!s.revealed && t >= REVEAL_DELAY) {
@@ -152,7 +155,7 @@ export const revealScene: Scene<RevealScene, RevealProps> = {
     xs.forEach((x, c) => {
       const top = base - stackHeight(s.counts[c]!, REVEAL_PER_ROW, sp) - numPx * 0.6
       if (rv > 0) {
-        ctx.globalAlpha = (isOk(c) ? 1 : lerp(1, 0.4, rv)) * clamp01(rv * 2) * fade
+        ctx.globalAlpha = (isOk(c) ? 1 : lerp(1, 0.65, rv)) * clamp01(rv * 2) * fade
         ctx.fillStyle = isOk(c) ? theme.ok : theme.muted
         ctx.fillText(`${Math.round(pcts[c]! * grow)}%`, x, top)
       } else if (landed[c]) {

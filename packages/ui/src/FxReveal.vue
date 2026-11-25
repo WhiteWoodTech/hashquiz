@@ -108,17 +108,17 @@ defineExpose({
   opacity: 1;
   transition: opacity 0.7s ease;
 }
-.fx-reveal__label--dim { opacity: 0.4; }
+.fx-reveal__label--dim { opacity: 0.75; }
 .fx-reveal__letter {
   font-family: var(--qv-font-display);
   font-weight: 600;
-  font-size: clamp(1.1rem, 3vmin, 2rem);
+  font-size: clamp(1.4rem, 4.2vmin, 3rem);
   line-height: 1;
 }
 .fx-reveal__text {
   font-family: var(--qv-font-display);
   color: var(--qv-text);
-  font-size: clamp(0.85rem, 2.1vmin, 1.4rem);
+  font-size: clamp(1rem, 2.8vmin, 2rem);
   line-height: 1.2;
   overflow-wrap: anywhere;
   display: -webkit-box;
@@ -129,7 +129,7 @@ defineExpose({
 }
 .fx-reveal__votes {
   color: var(--qv-text-muted);
-  font-size: clamp(0.75rem, 1.7vmin, 1.1rem);
+  font-size: clamp(0.85rem, 2.2vmin, 1.5rem);
   font-variant-numeric: tabular-nums;
 }
 .fx-reveal__label--ok .fx-reveal__text,

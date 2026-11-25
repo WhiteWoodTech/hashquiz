@@ -67,11 +67,11 @@ function joinGame() {
 }
 .qv-input:focus { outline: none; border-color: var(--qv-accent); }
 .qv-btn-primary {
-  padding: 0.9rem; background: var(--qv-accent); color: #fff;
+  padding: 0.9rem; background: var(--qv-accent); color: var(--qv-text);
   border: none; border-radius: var(--qv-radius); font-size: 1.1rem;
   cursor: pointer; font-family: inherit; font-weight: 600; margin-top: 0.25rem;
   transition: background 0.15s;
 }
-.qv-btn-primary:hover:not(:disabled) { background: #6d28d9; }
+.qv-btn-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--qv-accent) 80%, var(--qv-bg)); }
 .qv-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>

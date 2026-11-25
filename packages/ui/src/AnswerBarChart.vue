@@ -22,7 +22,7 @@ const props = defineProps<{
   correctIds?: string[]
 }>()
 
-const palette = ['#7c3aed', '#0891b2', '#d97706', '#059669']
+const palette = ['var(--qv-choice-a)', 'var(--qv-choice-b)', 'var(--qv-choice-c)', 'var(--qv-choice-d)']
 const total = computed(() =>
   Object.values(props.counts).reduce((s, n) => s + n, 0)
 )

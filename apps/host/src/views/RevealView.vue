@@ -2,7 +2,7 @@
   <div class="reveal-view" v-if="game.question">
     <!-- Progress bar -->
     <div class="rv-progress">
-      <span class="rv-progress__label">Q{{ game.questionIdx + 1 }}</span>
+      <span class="rv-progress__label qv-label">Q{{ game.questionIdx + 1 }}</span>
       <div class="rv-progress__track">
         <div
           class="rv-progress__fill"
@@ -17,7 +17,7 @@
     <!-- Correct answer + explanation together -->
     <div class="rv-answer-block">
       <div v-if="game.explanation" class="rv-explanation">
-        <span class="rv-correct__label">✓ {{ correctChoices.length > 1 ? 'Correct answers' : 'Correct answer' }}</span>
+        <span class="rv-correct__label qv-label">✓ {{ correctChoices.length > 1 ? 'Correct answers' : 'Correct answer' }}</span>
         <ul class="rv-correct__choices">
           <li
             v-for="choice in correctChoices"
@@ -25,7 +25,7 @@
             class="rv-correct__choice"
           >{{ choice.id.toUpperCase() }}. {{ choice.text }}</li>
         </ul>
-        <p class="rv-explanation__label">Explanation</p>
+        <p class="rv-explanation__label qv-label">Explanation</p>
         <div class="rv-explanation__body" v-html="renderedExplanation" />
       </div>
     </div>
@@ -122,10 +122,10 @@ const renderedExplanation = computed(() =>
 .rv-answer-block { margin-bottom: 1.25rem; }
 .rv-controls { margin-top: 1.5rem; display: flex; justify-content: center; }
 .qv-btn-action {
-  padding: 0.8rem 1.5rem; background: var(--qv-accent); color: #fff;
+  padding: 0.8rem 1.5rem; background: var(--qv-accent); color: var(--qv-text);
   border: none; border-radius: var(--qv-radius);
   cursor: pointer; font-size: 1rem; font-family: inherit; font-weight: 600;
   transition: background 0.15s;
 }
-.qv-btn-action:hover { background: #6d28d9; }
+.qv-btn-action:hover { background: color-mix(in srgb, var(--qv-accent) 80%, var(--qv-bg)); }
 </style>

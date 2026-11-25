@@ -2,7 +2,7 @@
   <div class="question-view" v-if="game.question">
     <!-- Progress bar -->
     <div class="qv-progress">
-      <span class="qv-progress__label">Q{{ game.questionIdx + 1 }}</span>
+      <span class="qv-progress__label qv-label">Q{{ game.questionIdx + 1 }}</span>
       <div class="qv-progress__track">
         <div
           class="qv-progress__fill"
@@ -107,10 +107,10 @@ onUnmounted(() => { if (interval) clearInterval(interval) })
 .qv-question-text { font-size: 2rem; margin: 0 0 1.5rem; line-height: 1.4; }
 .qv-choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; font-size: 1.25rem; }
 .qv-choice-card { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-radius: var(--qv-radius); background: var(--qv-surface-2); }
-.qv-choice-card--a { border-left: 4px solid #7c3aed; }
-.qv-choice-card--b { border-left: 4px solid #0891b2; }
-.qv-choice-card--c { border-left: 4px solid #d97706; }
-.qv-choice-card--d { border-left: 4px solid #059669; }
+.qv-choice-card--a { border-left: 4px solid var(--qv-choice-a); }
+.qv-choice-card--b { border-left: 4px solid var(--qv-choice-b); }
+.qv-choice-card--c { border-left: 4px solid var(--qv-choice-c); }
+.qv-choice-card--d { border-left: 4px solid var(--qv-choice-d); }
 .qv-choice-card__id { font-weight: 700; min-width: 1.5rem; }
 .qv-controls { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
 .qv-controls__answered { margin: 0; font-size: 0.9rem; color: var(--qv-text-muted); }

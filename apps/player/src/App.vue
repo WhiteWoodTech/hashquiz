@@ -45,16 +45,16 @@ const statusLabel = computed(() => {
   text-align: center;
   font-size: 0.85rem;
   font-weight: 500;
-  border-bottom: 1px solid var(--qv-border, #333);
+  border-bottom: 1px solid var(--qv-border);
 }
 .status-banner--connecting,
 .status-banner--reconnecting {
-  background: color-mix(in srgb, var(--qv-warn, #f59e0b) 18%, transparent);
-  color: var(--qv-warn, #f59e0b);
+  background: color-mix(in srgb, var(--qv-warn) 18%, transparent);
+  color: var(--qv-warn);
 }
 .status-banner--offline {
-  background: color-mix(in srgb, var(--qv-wrong, #ef4444) 18%, transparent);
-  color: var(--qv-wrong, #ef4444);
+  background: color-mix(in srgb, var(--qv-wrong) 18%, transparent);
+  color: var(--qv-wrong);
 }
 .status-enter-active, .status-leave-active { transition: opacity 0.2s, transform 0.2s; }
 .status-enter-from, .status-leave-to { opacity: 0; transform: translateY(-100%); }

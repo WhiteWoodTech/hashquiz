@@ -12,7 +12,7 @@
 
     <div class="lobby__info">
       <div class="lobby__code-box">
-        <p class="lobby__code-label">Join code</p>
+        <p class="lobby__code-label qv-label">Join code</p>
         <p class="lobby__code">{{ game.joinCode }}</p>
       </div>
       <PlayerList :players="game.players" />
@@ -55,12 +55,12 @@ const qrUrl = computed(() =>
 .lobby__code { margin: 0.25rem 0 0; font-size: 3rem; font-weight: 700; letter-spacing: 0.2em; color: var(--qv-accent); }
 .qv-btn-primary {
   margin-top: 1.5rem; width: 100%; padding: 0.9rem;
-  background: var(--qv-accent); color: #fff;
+  background: var(--qv-accent); color: var(--qv-text);
   border: none; border-radius: var(--qv-radius); font-size: 1.1rem;
   cursor: pointer; font-family: inherit; font-weight: 600;
   transition: background 0.15s;
 }
-.qv-btn-primary:hover:not(:disabled) { background: #6d28d9; }
+.qv-btn-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--qv-accent) 80%, var(--qv-bg)); }
 .qv-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .quiz-info {

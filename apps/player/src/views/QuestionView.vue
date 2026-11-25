@@ -2,7 +2,7 @@
   <div class="question-view" v-if="game.question">
     <!-- Progress bar: current question / total -->
     <div class="qv-progress">
-      <span class="qv-progress__label">Q{{ game.questionIdx + 1 }}</span>
+      <span class="qv-progress__label qv-label">Q{{ game.questionIdx + 1 }}</span>
       <div class="qv-progress__track">
         <div
           class="qv-progress__fill"
@@ -257,10 +257,10 @@ function validateMultiple() {
 .qv-validate-btn {
   margin-top: 0.5rem;
   padding: 0.75rem 2rem;
-  border: 2px solid var(--qv-accent, #7c3aed);
+  border: 2px solid var(--qv-accent);
   border-radius: var(--qv-radius);
   background: transparent;
-  color: var(--qv-accent, #7c3aed);
+  color: var(--qv-accent);
   font-size: 1rem;
   font-family: inherit;
   font-weight: 600;
@@ -268,8 +268,8 @@ function validateMultiple() {
   transition: background 0.15s, color 0.15s;
 }
 .qv-validate-btn:not(:disabled):hover {
-  background: var(--qv-accent, #7c3aed);
-  color: #fff;
+  background: var(--qv-accent);
+  color: var(--qv-text);
 }
 .qv-validate-btn:disabled {
   opacity: 0.4;

@@ -48,9 +48,10 @@ onBeforeUnmount(() => handle?.destroy())
   place-items: center;
   flex: none;
 }
+/* Capped so the host question view (progress, question, choices, controls) fits in 100vh. */
 .fx-countdown--large {
-  width: 48vmin;
-  height: 48vmin;
+  width: min(38vmin, 32vw);
+  height: min(38vmin, 32vw);
 }
 .fx-countdown--compact {
   width: 140px;
@@ -71,7 +72,7 @@ onBeforeUnmount(() => handle?.destroy())
   color: var(--qv-text);
   transition: color 0.3s ease;
 }
-.fx-countdown--large .fx-countdown__num { font-size: 15vmin; }
+.fx-countdown--large .fx-countdown__num { font-size: min(12vmin, 10vw); }
 .fx-countdown--compact .fx-countdown__num { font-size: 52px; }
 .fx-countdown--danger .fx-countdown__num { color: var(--qv-wrong); }
 </style>

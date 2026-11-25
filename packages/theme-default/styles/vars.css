@@ -28,6 +28,7 @@
   --qv-fx-line-opacity: .2;
   --qv-fx-glow:      .35;
   --qv-fx-dust-density: 1;
+  --qv-fx-dust-alpha: 1.8;
   --qv-fx-speed:     1;
 }
 

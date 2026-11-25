@@ -13,6 +13,8 @@ export interface FxTheme {
   lineOpacity: number
   glow: number
   dustDensity: number
+  /** Multiplier of the dust opacity. */
+  dustAlpha: number
   speed: number
   fontLabel: string
   fontDisplay: string
@@ -39,6 +41,7 @@ export function parseFxTheme(get: (name: string) => string): FxTheme {
     lineOpacity: num(str('--qv-fx-line-opacity'), 0.2),
     glow: num(str('--qv-fx-glow'), 0.3),
     dustDensity: num(str('--qv-fx-dust-density'), 1),
+    dustAlpha: num(str('--qv-fx-dust-alpha'), 1),
     speed: num(str('--qv-fx-speed'), 1),
     fontLabel: str('--qv-font-label'),
     fontDisplay: str('--qv-font-display'),

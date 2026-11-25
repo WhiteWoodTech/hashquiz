@@ -103,6 +103,7 @@ Read by the canvas scenes in `packages/ui/src/fx/` (`readFxTheme`); numbers are 
 | `--qv-fx-line-opacity` | `.2` | `.15` | Opacity of the lines linking particles |
 | `--qv-fx-glow` | `.35` | `.25` | Intensity of halos |
 | `--qv-fx-dust-density` | `1` | `.5` | Multiplier of the background dust count |
+| `--qv-fx-dust-alpha` | `1.8` | `1.5` | Multiplier of the background dust opacity (dust size also grows with the canvas, up to ×2.2 at 1080p) |
 | `--qv-fx-speed` | `1` | `1` | Global animation speed multiplier |
 
 ---

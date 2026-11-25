@@ -16,6 +16,7 @@ import {
   stackHeight,
   stackSlot,
 } from '../src/fx/layout'
+import { dustScale } from '../src/fx/draw'
 
 describe('countdownState', () => {
   test('full time: every dot lit, no danger', () => {
@@ -162,5 +163,14 @@ describe('podiumDots', () => {
   })
   test('slots', () => {
     expect(PODIUM_SLOTS).toEqual([0.5, 0.3, 0.7])
+  })
+})
+
+describe('dustScale', () => {
+  test('1 on a phone, grows on large canvases, capped at 2.2', () => {
+    expect(dustScale(390, 300)).toBe(1)
+    expect(dustScale(1920, 960)).toBe(2)
+    expect(dustScale(3840, 2160)).toBe(2.2)
+    expect(dustScale(0, 0)).toBe(1)
   })
 })

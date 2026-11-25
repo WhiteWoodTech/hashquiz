@@ -17,6 +17,7 @@ const full: Record<string, string> = {
   '--qv-fx-line-opacity': ' .2',
   '--qv-fx-glow': ' .35 ',
   '--qv-fx-dust-density': ' .5',
+  '--qv-fx-dust-alpha': ' 1.8 ',
   '--qv-fx-speed': ' 1.5 ',
   '--qv-font-label': " 'IBM Plex Mono', monospace ",
   '--qv-font-display': ' Inter, sans-serif ',
@@ -29,6 +30,7 @@ describe('parseFxTheme', () => {
     expect(t.lineOpacity).toBe(0.2)
     expect(t.glow).toBe(0.35)
     expect(t.dustDensity).toBe(0.5)
+    expect(t.dustAlpha).toBe(1.8)
     expect(t.speed).toBe(1.5)
   })
 
@@ -55,6 +57,7 @@ describe('parseFxTheme', () => {
     expect(t.lineOpacity).toBe(0.2)
     expect(t.glow).toBe(0.3)
     expect(t.dustDensity).toBe(1)
+    expect(t.dustAlpha).toBe(1)
     expect(t.speed).toBe(1)
   })
 

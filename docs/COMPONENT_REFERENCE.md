@@ -51,13 +51,16 @@ when the viewport size changes (fullscreen). No props.
 ### FxLobby
 
 Constellation of connected players: one dot per player, linked by lines; the most recent pseudos are labelled.
-The host lobby mounts two instances, one in each side area, with the players split between them.
+The host lobby mounts one instance per group of at most 12 players (random but stable sizes, `groupPlayers` in
+`layout.ts`), alternating between its left and right side areas. Optional `spread` (default `0.05`) widens the spiral
+for small groups.
 
 | Prop | Type | Required | Default | Description |
 |------|------|----------|---------|-------------|
 | `players` | `{ id: string; pseudo?: string }[]` | yes | — | One dot per entry (no pseudo: anonymous dot) |
 | `highlightId` | `string` | no | — | Dot drawn in `--qv-accent` (the current player) |
 | `labels` | `number` | no | `8` | Number of most recent pseudos labelled |
+| `spread` | `number` | no | `0.05` | Spiral spread, relative to the smaller canvas side |
 
 ```vue
 <FxLobby class="lobby__fx" :players="game.players" />
@@ -83,10 +86,11 @@ Column stacks shrink to fit the canvas, so 100 votes in one column stay on scree
 
 ### FxVerdict
 
-Verdict of the current player after the reveal: 24 particles converge onto a check in `--qv-correct`; or, when wrong
-or unanswered, they form a cross in `--qv-wrong` that cracks, its dots falling onto an invisible floor where they pile
-up. The check loops (play, hold ~1.2 s, fade, replay). The cross loop never fades: each iteration starts from the dots lying
-on the floor, which rise back up to reassemble the cross, then crack and fall again.
+Verdict of the current player after the reveal: 13 glowing nodes converge onto a check in `--qv-correct`, joined
+by thin constellation lines; or, when wrong or unanswered, they form a cross in `--qv-wrong` that cracks, its dots
+falling onto an invisible floor where they pile up. The check loops (play, hold ~1.2 s, fade, replay). The cross lines
+vanish when it shatters and return as the dots reassemble. The cross loop never fades: each iteration starts from the
+dots lying on the floor, which rise back up to reassemble the cross, then crack and fall again.
 With reduced motion the final shape is static.
 The canvas is `aria-hidden`: the parent view renders the points and a screen-reader verdict (`.qv-sr-only`).
 

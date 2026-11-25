@@ -27,6 +27,8 @@ export type GameEvent =
   | { type: 'answer_revealed';  correct: string[]; explanation: string | undefined; scores: Score[]; choiceCounts: Record<string, number> }
   | { type: 'next_question';    idx: number }
   | { type: 'game_ended';       podium: PodiumEntry[] }
+  /** Host chose "Rejouer": back to the lobby of the same room, scores reset to 0. */
+  | { type: 'game_reset' }
   | { type: 'state_request';    playerId: string }
   | { type: 'state_snapshot';   playerId: string; snapshot: StateSnapshot }
 
@@ -50,6 +52,7 @@ export const GameEvents = {
   ): GameEvent => ({ type: 'answer_revealed', correct, explanation, scores, choiceCounts }),
   nextQuestion: (idx: number): GameEvent => ({ type: 'next_question', idx }),
   gameEnded: (podium: PodiumEntry[]): GameEvent => ({ type: 'game_ended', podium }),
+  gameReset: (): GameEvent => ({ type: 'game_reset' }),
   stateRequest: (playerId: string): GameEvent => ({ type: 'state_request', playerId }),
   stateSnapshot: (playerId: string, snapshot: StateSnapshot): GameEvent =>
     ({ type: 'state_snapshot', playerId, snapshot }),

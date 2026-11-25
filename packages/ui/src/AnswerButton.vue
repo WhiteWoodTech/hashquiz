@@ -36,10 +36,10 @@ const emit = defineEmits<{ select: [id: string] }>()
   transition: border-color 0.15s, background 0.15s, opacity 0.15s;
   text-align: left;
 }
-.qv-btn--a { --c: #7c3aed; }
-.qv-btn--b { --c: #0891b2; }
-.qv-btn--c { --c: #d97706; }
-.qv-btn--d { --c: #059669; }
+.qv-btn--a { --c: var(--qv-choice-a); }
+.qv-btn--b { --c: var(--qv-choice-b); }
+.qv-btn--c { --c: var(--qv-choice-c); }
+.qv-btn--d { --c: var(--qv-choice-d); }
 
 @media (hover: hover) {
   .qv-btn:not(:disabled):hover    { border-color: var(--c); }
@@ -56,7 +56,7 @@ const emit = defineEmits<{ select: [id: string] }>()
   align-items: center;
   justify-content: center;
   background: var(--c);
-  color: #fff;
+  color: var(--qv-text);
   border-radius: 6px;
   font-weight: 700;
   font-size: 0.9rem;

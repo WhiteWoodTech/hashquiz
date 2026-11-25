@@ -138,6 +138,19 @@ export function crossPoints(n: number, cx: number, cy: number, size: number): { 
   return [...stroke(first, -h, h), ...stroke(count - first, h, -h)]
 }
 
+/**
+ * Index pairs joined by constellation lines for the verdict shapes: a check is one polyline
+ * through all `n` points; a cross is two polylines (first ceil(n/2) points, then the rest).
+ */
+export function verdictLinks(shape: 'check' | 'cross', n: number): [number, number][] {
+  const count = Math.max(n, 0)
+  const chain = (from: number, to: number): [number, number][] =>
+    Array.from({ length: Math.max(to - from - 1, 0) }, (_, k) => [from + k, from + k + 1] as [number, number])
+  if (shape === 'check') return chain(0, count)
+  const first = Math.ceil(count / 2)
+  return [...chain(0, first), ...chain(first, count)]
+}
+
 /** Relative x of the podium columns for ranks 1, 2 and 3. */
 export const PODIUM_SLOTS = [0.5, 0.3, 0.7]
 

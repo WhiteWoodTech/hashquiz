@@ -1,5 +1,5 @@
-import { dot, glow, clamp01 } from '../draw'
-import { checkPoints, crossPoints } from '../layout'
+import { dot, glow, line, clamp01 } from '../draw'
+import { checkPoints, crossPoints, verdictLinks } from '../layout'
 import type { Frame, Scene } from '../loop'
 
 export interface VerdictProps {
@@ -72,7 +72,9 @@ function newMotes(): Mote[] {
 /**
  * Correct: 24 dots converge onto a check mark in `theme.ok`, with a soft halo.
  * Wrong / no answer: dots form an ✗ in `theme.ko`, which cracks; its dots fall
- * onto an invisible floor, bounce a little and stay piled there. The loop then
+ * onto an invisible floor, bounce a little and stay piled there.
+ * Nodes carry a soft halo and are joined by thin constellation lines along each stroke;
+ * the cross lines vanish when it shatters and return as the dots reassemble. The loop then
  * restarts from that floor: the dots rise back up to reassemble the ✗ (no fade-in).
  * The check loops (play, hold, fade, replay) while the verdict is shown.
  * Reduced motion: the final shape (check or ✗) fades in once, no loop.
@@ -121,20 +123,35 @@ export const verdictScene: Scene<VerdictScene, VerdictProps> = {
       }
     }
 
+    // Constellation lines between neighbouring nodes; `alphas` holds each node's visibility.
+    const links = (shape: 'check' | 'cross', xs: number[], ys: number[], alphas: number[], k: number): void => {
+      for (const [i, j] of verdictLinks(shape, N)) {
+        line(f, xs[i]!, ys[i]!, xs[j]!, ys[j]!, Math.min(alphas[i]!, alphas[j]!) * k, 1, col)
+      }
+    }
+
     if (p.correct) {
       const cy = f.h / 2
       const target = checkPoints(N, cx, cy, size)
       const out = reduced ? 1 : 1 - clamp01((t - OK_FORMED - HOLD) / FADE)
       const g = reduced ? fadeIn : ease(t / DURATION)
       glow(f, cx, cy, size * (reduced ? 0.9 : 0.6 + 0.4 * g), 0.35 * g * out, col)
+      const xs: number[] = []
+      const ys: number[] = []
+      const as: number[] = []
       for (let i = 0; i < N; i++) {
         const m = s.motes[i]!
         const u = reduced ? 1 : ease((t - m.delay) / DURATION)
         const st = scatter(m, cy)
-        const x = st.x + (target[i]!.x - st.x) * u
-        const y = st.y + (target[i]!.y - st.y) * u
-        const a = reduced ? fadeIn : (0.25 + 0.75 * u) * out
-        dot(f, x, y, 2.4, a, col)
+        xs.push(st.x + (target[i]!.x - st.x) * u)
+        ys.push(st.y + (target[i]!.y - st.y) * u)
+        as.push(reduced ? fadeIn : (0.25 + 0.75 * u) * out)
+      }
+      // Lines first (they firm up as the shape forms), then glowing nodes on top.
+      links('check', xs, ys, as.map((a, i) => (reduced ? a : a * ease((t - s.motes[i]!.delay) / DURATION) ** 2)), 4)
+      for (let i = 0; i < N; i++) {
+        glow(f, xs[i]!, ys[i]!, 9, as[i]! * 0.8, col)
+        dot(f, xs[i]!, ys[i]!, 2.4, as[i]!, col)
       }
       return
     }
@@ -147,7 +164,13 @@ export const verdictScene: Scene<VerdictScene, VerdictProps> = {
     const target = crossPoints(N, cx, cy, crossSize)
 
     if (reduced) {
-      for (let i = 0; i < N; i++) dot(f, target[i]!.x, target[i]!.y, r, fadeIn * 0.9, col)
+      const xs = target.map((q) => q.x)
+      const ys = target.map((q) => q.y)
+      links('cross', xs, ys, xs.map(() => fadeIn * 0.9), 4)
+      for (let i = 0; i < N; i++) {
+        glow(f, xs[i]!, ys[i]!, 8, fadeIn * 0.7, col)
+        dot(f, xs[i]!, ys[i]!, r, fadeIn * 0.9, col)
+      }
       return
     }
 
@@ -155,12 +178,25 @@ export const verdictScene: Scene<VerdictScene, VerdictProps> = {
       // Rise from where the dots lie, reassemble the ✗, then a brief tremor just before the crack.
       const tremor = t > KO_BREAK - 0.2 ? 0.8 : 0
       const fresh = s.cycle === 0 ? clamp01(f.t / 0.4) : 1
+      const xs: number[] = []
+      const ys: number[] = []
+      const as: number[] = []
+      const us: number[] = []
       for (let i = 0; i < N; i++) {
         const m = s.motes[i]!
         const u = ease((t - m.delay) / KO_RISE)
         m.x = m.sx + (target[i]!.x - m.sx) * u
         m.y = m.sy + (target[i]!.y - m.sy) * u
-        dot(f, m.x + rand(-tremor, tremor), m.y + rand(-tremor, tremor), r, (0.65 + 0.25 * u) * fresh, col)
+        xs.push(m.x + rand(-tremor, tremor))
+        ys.push(m.y + rand(-tremor, tremor))
+        as.push((0.65 + 0.25 * u) * fresh)
+        us.push(u * u * fresh)
+      }
+      // Lines come back as the dots reassemble.
+      links('cross', xs, ys, us, 4)
+      for (let i = 0; i < N; i++) {
+        glow(f, xs[i]!, ys[i]!, 8, as[i]! * 0.7 * us[i]!, col)
+        dot(f, xs[i]!, ys[i]!, r, as[i]!, col)
       }
       return
     }

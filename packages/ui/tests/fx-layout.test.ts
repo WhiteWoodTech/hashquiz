@@ -13,6 +13,7 @@ import {
   podiumDots,
   spiralSlot,
   spiralUnit,
+  verdictLinks,
   stackHeight,
   stackSlot,
 } from '../src/fx/layout'
@@ -172,5 +173,24 @@ describe('dustScale', () => {
     expect(dustScale(1920, 960)).toBe(2)
     expect(dustScale(3840, 2160)).toBe(2.2)
     expect(dustScale(0, 0)).toBe(1)
+  })
+})
+
+describe('verdictLinks', () => {
+  test('check is one polyline through every point', () => {
+    const l = verdictLinks('check', 24)
+    expect(l.length).toBe(23)
+    expect(l[0]).toEqual([0, 1])
+    expect(l[22]).toEqual([22, 23])
+  })
+  test('cross is two separate strokes, never joined to each other', () => {
+    const l = verdictLinks('cross', 24)
+    expect(l.length).toBe(22)
+    expect(l.some(([a, b]) => a === 11 && b === 12)).toBe(false)
+    expect(l.some(([a, b]) => a === 12 && b === 13)).toBe(true)
+  })
+  test('degenerate counts give no links', () => {
+    expect(verdictLinks('check', 0)).toEqual([])
+    expect(verdictLinks('cross', 1)).toEqual([])
   })
 })

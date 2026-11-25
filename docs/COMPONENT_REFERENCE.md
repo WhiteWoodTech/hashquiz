@@ -76,8 +76,10 @@ Column stacks shrink to fit the canvas, so 100 votes in one column stay on scree
 
 ### FxVerdict
 
-Verdict of the current player after the reveal: 24 particles converge onto a check in `--qv-correct`, or scatter
-faintly in `--qv-wrong` (wrong or no answer). The points text is rendered by the parent view.
+Verdict of the current player after the reveal: 24 particles converge onto a check in `--qv-correct`; or, when wrong
+or unanswered, they form a cross in `--qv-wrong` that cracks, its dots falling onto a thin floor line where they pile
+up. Both animations loop (play, hold ~1.2 s, fade, replay) while shown; with reduced motion the final shape is static.
+The canvas is `aria-hidden`: the parent view renders the points and a screen-reader verdict (`.qv-sr-only`).
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|

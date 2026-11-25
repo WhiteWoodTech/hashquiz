@@ -5,6 +5,7 @@ import {
   REVEAL_DELAY,
   REVEAL_PER_ROW,
   checkPoints,
+  crossPoints,
   columnXs,
   countdownState,
   fallStarts,
@@ -121,6 +122,28 @@ describe('checkPoints', () => {
     expect(pts[0]!.y).toBeCloseTo(0, 5)
     expect(pts[23]!.x).toBeCloseTo(50, 5)
     expect(pts[23]!.y).toBeCloseTo(-40, 5)
+  })
+})
+
+describe('crossPoints', () => {
+  test('splits points across the two diagonals, endpoints at ±size/2', () => {
+    const pts = crossPoints(24, 10, 20, 100)
+    expect(pts).toHaveLength(24)
+    const a = pts.slice(0, 12)
+    const b = pts.slice(12)
+    // First stroke: top-left to bottom-right.
+    expect(a[0]!).toEqual({ x: -40, y: -30 })
+    expect(a[11]!).toEqual({ x: 60, y: 70 })
+    // Second stroke: top-right to bottom-left.
+    expect(b[0]!).toEqual({ x: 60, y: -30 })
+    expect(b[11]!).toEqual({ x: -40, y: 70 })
+    for (const p of a) expect(p.y - 20).toBeCloseTo(p.x - 10, 5)
+    for (const p of b) expect(p.y - 20).toBeCloseTo(-(p.x - 10), 5)
+  })
+  test('odd count gives the extra point to the first stroke; degenerate counts', () => {
+    expect(crossPoints(5, 0, 0, 10)).toHaveLength(5)
+    expect(crossPoints(0, 0, 0, 10)).toEqual([])
+    expect(crossPoints(1, 0, 0, 10)).toEqual([{ x: -5, y: -5 }])
   })
 })
 

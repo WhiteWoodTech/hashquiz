@@ -8,7 +8,7 @@ const names = (css: string) => new Set(css.match(/--qv-[a-z0-9-]+(?=\s*:)/g) ?? 
 
 const REQUIRED = [
   '--qv-bg', '--qv-surface', '--qv-surface-2', '--qv-border', '--qv-accent', '--qv-accent-2',
-  '--qv-correct', '--qv-wrong', '--qv-warn', '--qv-text', '--qv-text-muted', '--qv-font-display',
+  '--qv-correct', '--qv-wrong', '--qv-warn', '--qv-text', '--qv-text-muted', '--qv-progress', '--qv-font-display',
   '--qv-font-mono', '--qv-radius', '--qv-radius-sm',
   '--qv-font-label', '--qv-label-spacing', '--qv-choice-a', '--qv-choice-b', '--qv-choice-c',
   '--qv-choice-d', '--qv-qr-dark', '--qv-qr-light', '--qv-fx-dot', '--qv-fx-line-opacity',

@@ -101,7 +101,7 @@ onUnmounted(() => { if (interval) clearInterval(interval) })
 .qv-progress__label { font-size: clamp(0.8rem, 1.6vmin, 1.1rem); color: var(--qv-text-muted); min-width: 2rem; }
 .qv-progress__label:last-child { text-align: right; }
 .qv-progress__track { flex: 1; height: 4px; background: var(--qv-border); border-radius: 2px; overflow: hidden; }
-.qv-progress__fill { height: 100%; background: var(--qv-accent); border-radius: 2px; transition: width 0.3s; }
+.qv-progress__fill { height: 100%; background: var(--qv-progress); border-radius: 2px; transition: width 0.3s; }
 .qv-main {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);

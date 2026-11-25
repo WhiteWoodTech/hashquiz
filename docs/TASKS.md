@@ -24,11 +24,19 @@ Setup minimal, parfait pour MVP.
    Plus de travail, RLS plus complexe.
 
 Y a t'il un pb de divulgation des réponses au autres (WS) ?
-  
+
+
+- Quizz asynchrone (date de fin, un a plusieurs joueurs)
+
 ---
 
 ## Backlog
 
+- [ ] Série en cours (streak) : calculer dans `@quizv/core` le nombre de bonnes réponses consécutives par joueur,
+      l'envoyer dans `answer_revealed` et l'afficher sur l'écran verdict joueur
+- [ ] Dépassements au classement : envoyer le rang précédent et le nouveau rang de chaque joueur
+      (`answer_revealed` ou nouvel événement), puis ajouter un écran classement animé entre deux questions côté animateur
+      (qui passe devant qui) et l'écart avec le joueur devant côté répondant
 - [ ] Aprés le podium, nouvelle page métrics avec un encart de métrics Global :
   - nb total bonne réponse
   - pourcentage bonne réponse

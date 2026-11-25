@@ -16,6 +16,7 @@ Complete guide for AI assistants working on the QuizV repository.
 | [`SCREEN_FLOW.md`](./SCREEN_FLOW.md) | Host and player screen flows |
 | [`TASKS.md`](./TASKS.md) | Task backlog |
 | [`SEO_AUDIT.md`](./SEO_AUDIT.md) | SEO and LLM (GEO) audit with prioritised recommendations |
+| [`LICENSING.md`](./LICENSING.md) | Licensing tiers (MIT / fair-code / Enterprise) |
 
 ---
 
@@ -69,6 +70,7 @@ bun run packages/server/src/cli.ts check <file>               # Validate quiz
 | `@quizv/theme-default` | CSS custom properties (`--qv-*`), new look |
 | `@quizv/theme-original` | Same variables, previous look (switch via the `main.ts` import) |
 | `@quizv/ui` | Shared Vue 3 components |
+| `packages/ee` | Pro / Enterprise features — QuizV Enterprise License (placeholder) |
 
 | App | Port | Description |
 |-----|------|-------------|
@@ -142,6 +144,8 @@ Design tokens from `@quizv/theme-default/styles/vars.css` are available as `var(
 - Do not add Vue Router — navigation is phase-driven (`v-if` on store phase)
 - Do not import `@quizv/transport-supabase` in production paths — it is a stub
 - Do not call `ws.send()` without checking `readyState === WebSocket.OPEN`
+- Do not put paid features outside `packages/ee/` or `*.ee.*` files, and do not make MIT packages
+  (`@quizv/parser`, skills, MCP) depend on fair-code or Enterprise code — see [`LICENSING.md`](./LICENSING.md)
 
 ---
 

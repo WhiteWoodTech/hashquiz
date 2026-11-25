@@ -73,6 +73,12 @@ Conventional commits are also accepted: `<type>(scope): <description>`
 3. Fill out the PR template
 4. Wait for review
 
+## Contributor License Agreement
+
+QuizV is fair-code open-core (see [`docs/LICENSING.md`](docs/LICENSING.md)). Before your first pull request can be
+merged, you must agree to the [Contributor License Agreement](CLA.md) by commenting on the PR:
+`I have read the CLA and I agree to its terms.`
+
 ## Code Style
 
 - Follow the existing code style

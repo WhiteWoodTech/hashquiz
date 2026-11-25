@@ -1,6 +1,7 @@
 {
   "name": "@quizv/server",
   "version": "0.0.1",
+  "license": "SEE LICENSE IN ../../LICENSE.md",
   "type": "module",
   "bin": {
     "quizv": "./src/cli.ts"

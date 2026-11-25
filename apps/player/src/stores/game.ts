@@ -42,10 +42,6 @@ function saveSession(s: PersistedSession): void {
   try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(s)) } catch { /* ignore quota */ }
 }
 
-function clearSession(): void {
-  try { sessionStorage.removeItem(SESSION_KEY) } catch { /* ignore */ }
-}
-
 function loadDraft(): DraftAnswer | null {
   try {
     const raw = sessionStorage.getItem(SESSION_KEY + ':draft')
@@ -383,7 +379,25 @@ export const useGameStore = defineStore('game', () => {
       case 'game_ended':
         podium.value = msg.podium
         phase.value  = 'podium'
-        clearSession()
+        // Keep the persisted session: the host may "Rejouer" in the same room, and a player
+        // who reloads on the podium must auto-rejoin with the same playerId.
+        clearDraft()
+        break
+      case 'game_reset':
+        // Host chose "Rejouer": same room, same identity/connection, fresh game state.
+        question.value     = null
+        questionIdx.value  = 0
+        answered.value     = false
+        answerTimeMs.value = 0
+        totalScore.value   = 0
+        lastDelta.value    = 0
+        rank.value         = null
+        playerTotal.value  = 0
+        correctIds.value   = []
+        explanation.value  = undefined
+        podium.value       = []
+        deadlineMs.value   = null
+        phase.value        = 'lobby'
         clearDraft()
         break
     }

@@ -273,6 +273,10 @@ export class QuizvServer {
             if (role === 'host' && msg.type === 'host_next') {
               void self.engine.nextQuestion()
             }
+
+            if (role === 'host' && msg.type === 'host_reset') {
+              void self.engine.reset()
+            }
           } catch {
             // ignore malformed messages
           }
@@ -362,6 +366,7 @@ export class QuizvServer {
     <button id="btn-start" onclick="send('host_start')">▶ Start Game</button>
     <button id="btn-reveal" onclick="send('host_reveal')" disabled>🔍 Reveal Answer</button>
     <button id="btn-next" onclick="send('host_next')" disabled>⏭ Next Question</button>
+    <button id="btn-reset" onclick="send('host_reset')" disabled>🔁 Rejouer</button>
   </div>
   <div id="log"></div>
   <script>
@@ -382,6 +387,7 @@ export class QuizvServer {
       document.getElementById('btn-start').disabled = state !== 'lobby'
       document.getElementById('btn-reveal').disabled = state !== 'question'
       document.getElementById('btn-next').disabled = state !== 'revealed'
+      document.getElementById('btn-reset').disabled = state !== 'finished'
     }
 
     ws.onopen = () => {
@@ -429,6 +435,12 @@ export class QuizvServer {
         document.getElementById('game-state').textContent = 'finished'
         document.getElementById('question-box').style.display = 'none'
         setButtons('finished')
+      }
+      if (data.type === 'game_reset') {
+        clearInterval(hostTimerInterval)
+        document.getElementById('game-state').textContent = 'lobby'
+        document.getElementById('question-box').style.display = 'none'
+        setButtons('lobby')
       }
       log(data)
     }
@@ -587,6 +599,12 @@ export class QuizvServer {
             el.textContent = '#' + p.rank + ' ' + p.pseudo + ' \u2014 ' + p.score + ' pts'
             list.appendChild(el)
           })
+        }
+        if (data.type === 'game_reset') {
+          clearInterval(timerInterval)
+          totalScore = 0
+          document.getElementById('total-score').textContent = '0'
+          show('lobby')
         }
       }
     }

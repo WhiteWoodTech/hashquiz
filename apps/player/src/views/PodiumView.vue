@@ -5,15 +5,17 @@
       <p class="podium-view__name">{{ myEntry?.pseudo ?? '' }}</p>
       <p class="podium-view__score">{{ game.totalScore.toLocaleString() }} pts</p>
     </div>
+    <div class="podium-view__fx">
+      <FxPodium :podium="game.podium" :highlight-id="game.playerId" />
+    </div>
     <Podium :podium="game.podium" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import confetti from 'canvas-confetti'
+import { computed } from 'vue'
 import { useGameStore } from '../stores/game'
-import { Podium } from '@quizv/ui'
+import { FxPodium, Podium } from '@quizv/ui'
 
 const game = useGameStore()
 
@@ -24,12 +26,6 @@ const medal = computed(() => {
   const r = myEntry.value?.rank ?? 99
   return r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : `#${r}`
 })
-
-onMounted(() => {
-  if ((myEntry.value?.rank ?? 99) <= 3) {
-    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } })
-  }
-})
 </script>
 
 <style scoped>
@@ -38,4 +34,5 @@ onMounted(() => {
 .podium-view__medal { font-size: 3.5rem; margin: 0; line-height: 1; }
 .podium-view__name  { font-size: 1.3rem; font-weight: 700; margin: 0.5rem 0 0.25rem; }
 .podium-view__score { color: var(--qv-accent); font-size: 1.5rem; font-weight: 700; margin: 0; }
+.podium-view__fx { height: 22rem; }
 </style>

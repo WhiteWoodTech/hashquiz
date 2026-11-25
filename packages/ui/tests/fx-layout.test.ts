@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
   FALL_DURATION,
+  PODIUM_SLOTS,
   REVEAL_DELAY,
   REVEAL_PER_ROW,
   checkPoints,
@@ -8,6 +9,7 @@ import {
   countdownState,
   fallStarts,
   percentages,
+  podiumDots,
   spiralSlot,
   spiralUnit,
   stackHeight,
@@ -119,5 +121,23 @@ describe('checkPoints', () => {
     expect(pts[0]!.y).toBeCloseTo(0, 5)
     expect(pts[23]!.x).toBeCloseTo(50, 5)
     expect(pts[23]!.y).toBeCloseTo(-40, 5)
+  })
+})
+
+describe('podiumDots', () => {
+  test('scales dots by score relative to the winner', () => {
+    expect(podiumDots([9840, 8920, 8410])).toEqual([45, 41, 38])
+    expect(podiumDots([100])).toEqual([45])
+  })
+  test('falls back to the minimum when the winner has no points', () => {
+    expect(podiumDots([0, 0])).toEqual([6, 6])
+    expect(podiumDots([])).toEqual([])
+  })
+  test('bounded by minDots and never NaN', () => {
+    expect(podiumDots([1000, 1])).toEqual([45, 6])
+    expect(podiumDots([0, 5]).every((n) => Number.isFinite(n))).toBe(true)
+  })
+  test('slots', () => {
+    expect(PODIUM_SLOTS).toEqual([0.5, 0.3, 0.7])
   })
 })

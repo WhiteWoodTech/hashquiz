@@ -120,3 +120,12 @@ export function checkPoints(n: number, cx: number, cy: number, size: number): { 
     return { x: cx + (x0 + (x1 - x0) * u) * size, y: cy + (y0 + (y1 - y0) * u) * size }
   })
 }
+
+/** Relative x of the podium columns for ranks 1, 2 and 3. */
+export const PODIUM_SLOTS = [0.5, 0.3, 0.7]
+
+/** Dots per podium column (top 3 at most): proportional to the winner's score, at least `minDots`. */
+export function podiumDots(scores: number[], maxDots = 45, minDots = 6): number[] {
+  const top = scores[0] ?? 0
+  return scores.slice(0, 3).map((s) => (top > 0 ? Math.max(Math.round((maxDots * s) / top), minDots) : minDots))
+}

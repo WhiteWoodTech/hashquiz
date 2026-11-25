@@ -1,6 +1,7 @@
 {
   "name": "@quizv/theme-default",
   "version": "0.0.1",
+  "license": "SEE LICENSE IN ../../LICENSE.md",
   "type": "module",
   "exports": {
     ".": "./index.ts",

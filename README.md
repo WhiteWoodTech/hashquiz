@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/runtime-Bun-black" alt="Bun" />
   <img src="https://img.shields.io/badge/frontend-Vue%203-42b883" alt="Vue 3" />
   <img src="https://img.shields.io/badge/realtime-WebSocket-blue" alt="WebSocket" />
-  <img src="https://img.shields.io/badge/license-MIT-yellow" alt="MIT" />
+  <img src="https://img.shields.io/badge/license-fair--code-orange" alt="Fair-code" />
   <img src="https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg" alt="Gitmoji" />
 </p>
 <!-- markdownlint-restore -->
@@ -197,10 +197,19 @@ See [`docs/PROJECT_STRUCTURE.md`](docs/PROJECT_STRUCTURE.md) for the full file m
 | [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) | CSS tokens and design decisions |
 | [`docs/FEATURES.md`](docs/FEATURES.md) | Feature list and roadmap |
 | [`docs/TASKS.md`](docs/TASKS.md) | Task backlog |
+| [`docs/LICENSING.md`](docs/LICENSING.md) | Licensing model and FAQ |
 
 ## License
 
-MIT — see [LICENSE](LICENSE)
+QuizV is **fair-code open-core**:
+
+- **Format & tooling** (`@quizv/parser`, Claude skills, MCP) — MIT
+- **Product** (engine, server, apps) — QuizV Sustainable Use License: free to self-host, including for paid
+  trainings you deliver; reselling QuizV as a hosted service is not allowed
+- **Pro / Enterprise** (`packages/ee/`) — QuizV Enterprise License, license key required in production
+
+See [LICENSE.md](LICENSE.md) and the plain-language FAQ in [`docs/LICENSING.md`](docs/LICENSING.md).
+Versions up to v2.0.0 remain under MIT.
 
 ## Author
 

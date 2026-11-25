@@ -31,6 +31,14 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
 ## Backlog
 
+### Licensing (fair-code open-core)
+
+- [ ] Legal review of `LICENSE.md`, `LICENSE_EE.md` and `CLA.md`
+- [ ] Decide the licensor entity and transfer the IP to the company before fundraising
+- [ ] Implement offline license key verification in `packages/ee/` (signed file, public key)
+- [ ] Add extension points in core/server/apps for `@quizv/ee` features
+- [ ] Set up a CLA bot on pull requests
+
 - [ ] Série en cours (streak) : calculer dans `@quizv/core` le nombre de bonnes réponses consécutives par joueur,
       l'envoyer dans `answer_revealed` et l'afficher sur l'écran verdict joueur
 - [ ] Dépassements au classement : envoyer le rang précédent et le nouveau rang de chaque joueur

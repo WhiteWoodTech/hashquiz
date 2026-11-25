@@ -4,7 +4,7 @@
   "description": "Kahoot-alternative real-time multiplayer quiz platform",
   "type": "module",
   "author": "Maxime Lenne",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE.md",
   "private": true,
   "engines": {
     "node": ">=22.11.0"

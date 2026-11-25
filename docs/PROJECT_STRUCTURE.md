@@ -97,34 +97,43 @@ quizv/
 │   │   ├── index.ts
 │   │   └── styles/
 │   │       └── vars.css
-│   └── ui/                          # @quizv/ui
-│       ├── package.json
-│       ├── tsconfig.json
-│       ├── styles/
-│       │   └── base.css             # .qv-label and .qv-sr-only utilities
-│       ├── tests/                   # theme parity, no hardcoded colors, fx layout/theme
-│       └── src/
-│           ├── index.ts             # Barrel export
-│           ├── FxCountdown.vue      # Particle countdown ring
-│           ├── FxLobby.vue          # Player constellation
-│           ├── FxReveal.vue         # Vote particles falling into answer columns
-│           ├── FxVerdict.vue        # Player verdict (check / cross particles)
-│           ├── FxPodium.vue         # Animated top-3 podium
-│           ├── fx/                  # Canvas engine shared by the Fx components
-│           │   ├── loop.ts          # rAF loop, reduced motion, visibility pause
-│           │   ├── draw.ts          # Drawing primitives (dots, glow, dust)
-│           │   ├── layout.ts        # Pure geometry (countdown, stacks, podium slots)
-│           │   ├── theme.ts         # Reads --qv-* / --qv-fx-* from CSS
-│           │   └── scenes/          # countdown, lobby, reveal, verdict, podium
-│           ├── AnswerButton.vue     # Answer choice button (multi-state)
-│           ├── PlayerList.vue       # Lobby player chips
-│           ├── Podium.vue           # Ranked leaderboard list
-│           ├── DifficultyBar.vue    # Difficulty distribution bar
-│           ├── QuizInfoPanel.vue    # Quiz title, tags, stats
-│           └── QrCode.vue           # QR code canvas (wraps `qrcode`)
-└── examples/
-    └── demo.quizv.md                # Sample quiz file
+│   ├── ui/                          # @quizv/ui
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   ├── styles/
+│   │   │   └── base.css             # .qv-label and .qv-sr-only utilities
+│   │   ├── tests/                   # theme parity, no hardcoded colors, fx layout/theme
+│   │   └── src/
+│   │       ├── index.ts             # Barrel export
+│   │       ├── FxCountdown.vue      # Particle countdown ring
+│   │       ├── FxLobby.vue          # Player constellation
+│   │       ├── FxReveal.vue         # Vote particles falling into answer columns
+│   │       ├── FxVerdict.vue        # Player verdict (check / cross particles)
+│   │       ├── FxPodium.vue         # Animated top-3 podium
+│   │       ├── fx/                  # Canvas engine shared by the Fx components
+│   │       │   ├── loop.ts          # rAF loop, reduced motion, visibility pause
+│   │       │   ├── draw.ts          # Drawing primitives (dots, glow, dust)
+│   │       │   ├── layout.ts        # Pure geometry (countdown, stacks, podium slots)
+│   │       │   ├── theme.ts         # Reads --qv-* / --qv-fx-* from CSS
+│   │       │   └── scenes/          # countdown, lobby, reveal, verdict, podium
+│   │       ├── AnswerButton.vue     # Answer choice button (multi-state)
+│   │       ├── PlayerList.vue       # Lobby player chips
+│   │       ├── Podium.vue           # Ranked leaderboard list
+│   │       ├── DifficultyBar.vue    # Difficulty distribution bar
+│   │       ├── QuizInfoPanel.vue    # Quiz title, tags, stats
+│   │       └── QrCode.vue           # QR code canvas (wraps `qrcode`)
+│   └── ee/                          # Pro / Enterprise features (placeholder)
+│       ├── LICENSE                  # QuizV Enterprise License
+│       └── README.md                # Planned paid features and rules
+├── examples/
+│   └── demo.quizv.md                # Sample quiz file
+├── LICENSE.md                       # Licensing overview + QuizV Sustainable Use License
+├── LICENSE_EE.md                    # QuizV Enterprise License
+└── CLA.md                           # Contributor License Agreement
 ```
+
+Licensing per directory is described in [`LICENSING.md`](./LICENSING.md): `packages/parser` and
+`.claude/plugins/quizv` are MIT, `packages/ee` is Enterprise, everything else is fair-code.
 
 ---
 

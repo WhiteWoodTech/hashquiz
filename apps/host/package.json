@@ -1,6 +1,7 @@
 {
   "name": "@quizv/app-host",
   "version": "0.0.1",
+  "license": "SEE LICENSE IN ../../LICENSE.md",
   "type": "module",
   "scripts": {
     "dev": "vite",

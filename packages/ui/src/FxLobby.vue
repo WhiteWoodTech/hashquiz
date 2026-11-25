@@ -14,6 +14,7 @@ const props = withDefaults(
     players: { id: string; pseudo?: string }[]
     highlightId?: string
     labels?: number
+    spread?: number
   }>(),
   { labels: 8 },
 )
@@ -27,6 +28,7 @@ onMounted(() => {
     players: props.players,
     highlightId: props.highlightId,
     labels: props.labels,
+    spread: props.spread,
   }))
 })
 

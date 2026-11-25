@@ -12,6 +12,8 @@ export interface LobbyProps {
   highlightId?: string
   /** Number of most recent pseudos drawn next to their dot. */
   labels: number
+  /** Spiral spread relative to the smaller canvas side (default 0.05); larger for small groups. */
+  spread?: number
 }
 
 interface LobbyDot {
@@ -34,6 +36,7 @@ interface LobbyDot {
 interface LobbyScene {
   dots: Map<string, LobbyDot>
   seq: number
+  spread?: number
 }
 
 const LAND_DIST = 2
@@ -58,10 +61,10 @@ function freeSlot(dots: Map<string, LobbyDot>): number {
   return i
 }
 
-function unitFor(f: Frame, dots: Map<string, LobbyDot>): number {
+function unitFor(f: Frame, dots: Map<string, LobbyDot>, spread?: number): number {
   let max = 0
   for (const d of dots.values()) max = Math.max(max, d.slot + 1)
-  return spiralUnit(Math.max(max, 1), f.w, f.h)
+  return spiralUnit(Math.max(max, 1), f.w, f.h, spread)
 }
 
 function target(f: Frame, d: LobbyDot, unit: number): { x: number; y: number } {
@@ -84,7 +87,7 @@ function addDot(f: Frame, s: LobbyScene, p: LobbyPlayer, fly: boolean): void {
     label: 0,
   }
   s.dots.set(p.id, probe)
-  const unit = unitFor(f, s.dots)
+  const unit = unitFor(f, s.dots, s.spread)
   const tg = target(f, probe, unit)
 
   // Nearest neighbour among the other targets.
@@ -123,6 +126,7 @@ export const lobbyScene: Scene<LobbyScene, LobbyProps> = {
     const s: LobbyScene = {
       dots: new Map(),
       seq: 0,
+      spread: p.spread,
     }
     // Already present: settled. The highlighted player (self) still flies in.
     for (const pl of p.players) addDot(f, s, pl, pl.id === p.highlightId)
@@ -149,7 +153,8 @@ export const lobbyScene: Scene<LobbyScene, LobbyProps> = {
     }
 
     const sc = scaleOf(f)
-    const unit = unitFor(f, s.dots)
+    s.spread = p.spread
+    const unit = unitFor(f, s.dots, s.spread)
     const fontPx = Math.round(Math.min(Math.max(f.h * 0.024, 11), 28))
 
     // Most recent arrivals among the players still here.

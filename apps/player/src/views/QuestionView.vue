@@ -257,7 +257,7 @@ function validateMultiple() {
   width: 100%; padding: 0.25rem 0.75rem 0.5rem; border-radius: var(--qv-radius);
   text-align: center; animation: reveal-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.qv-result .qv-result__fx { height: 72px; }
+.qv-result .qv-result__fx { height: 88px; }
 .qv-result__line { display: flex; align-items: baseline; justify-content: center; gap: 0.75rem; }
 .qv-result__score { font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
 .qv-result__score small { font-size: 0.8rem; font-weight: 500; color: var(--qv-text-muted); }

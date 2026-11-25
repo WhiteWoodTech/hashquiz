@@ -38,11 +38,11 @@ export function spiralSlot(i: number, cx: number, cy: number, unit: number): { x
 }
 
 /**
- * Spiral unit for `count` dots on a `w`×`h` surface: `0.05 * min(w, h)`, shrunk
+ * Spiral unit for `count` dots on a `w`×`h` surface: `spread * min(w, h)` (spread defaults to 0.05), shrunk
  * so that slot `count - 1` (the outermost) stays within the central 90%.
  */
-export function spiralUnit(count: number, w: number, h: number): number {
-  const base = 0.05 * Math.max(Math.min(w, h), 0)
+export function spiralUnit(count: number, w: number, h: number, spread = 0.05): number {
+  const base = spread * Math.max(Math.min(w, h), 0)
   const r1 = spiralRadius(Math.max(count - 1, 0), 1)
   const fitX = (0.45 * Math.max(w, 0)) / (r1 * SPIRAL_X)
   const fitY = (0.45 * Math.max(h, 0)) / (r1 * SPIRAL_Y)
@@ -149,6 +149,45 @@ export function verdictLinks(shape: 'check' | 'cross', n: number): [number, numb
   if (shape === 'check') return chain(0, count)
   const first = Math.ceil(count / 2)
   return [...chain(0, first), ...chain(first, count)]
+}
+
+/** Largest constellation (players per group) in the lobby. */
+export const MAX_GROUP = 12
+const MIN_GROUP = 4
+
+/** Deterministic pseudo-random float in [0, 1) from an integer seed (mulberry32). */
+function seeded(seed: number): number {
+  let a = (seed + 0x6d2b79f5) | 0
+  a = Math.imul(a ^ (a >>> 15), a | 1)
+  a ^= a + Math.imul(a ^ (a >>> 7), a | 61)
+  return ((a ^ (a >>> 14)) >>> 0) / 4294967296
+}
+
+/** Capacity of lobby constellation `g`: a stable pseudo-random size in [4, 12]. */
+export function groupSize(g: number): number {
+  return MIN_GROUP + Math.floor(seeded(g * 7919 + 13) * (MAX_GROUP - MIN_GROUP + 1))
+}
+
+/**
+ * Splits players into constellations of at most `MAX_GROUP`. `assigned` (id -> group index) is the
+ * memory that keeps a player in its group: leavers are forgotten, newcomers fill the first group with
+ * room left, else open a new one. Returns the non-empty groups in index order, as lists of ids.
+ */
+export function groupPlayers(ids: string[], assigned: Map<string, number>): string[][] {
+  const present = new Set(ids)
+  for (const id of [...assigned.keys()]) if (!present.has(id)) assigned.delete(id)
+  const counts: number[] = []
+  for (const g of assigned.values()) counts[g] = (counts[g] ?? 0) + 1
+  for (const id of ids) {
+    if (assigned.has(id)) continue
+    let g = 0
+    while ((counts[g] ?? 0) >= groupSize(g)) g++
+    assigned.set(id, g)
+    counts[g] = (counts[g] ?? 0) + 1
+  }
+  const groups: string[][] = []
+  for (const id of ids) (groups[assigned.get(id)!] ??= []).push(id)
+  return groups.filter((g): g is string[] => !!g && g.length > 0)
 }
 
 /** Relative x of the podium columns for ranks 1, 2 and 3. */

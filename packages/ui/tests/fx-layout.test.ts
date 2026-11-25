@@ -14,6 +14,8 @@ import {
   spiralSlot,
   spiralUnit,
   verdictLinks,
+  groupPlayers,
+  groupSize,
   stackHeight,
   stackSlot,
 } from '../src/fx/layout'
@@ -192,5 +194,40 @@ describe('verdictLinks', () => {
   test('degenerate counts give no links', () => {
     expect(verdictLinks('check', 0)).toEqual([])
     expect(verdictLinks('cross', 1)).toEqual([])
+  })
+})
+
+describe('groupPlayers', () => {
+  const ids = (n: number) => Array.from({ length: n }, (_, i) => 'p' + i)
+  test('sizes are stable and between 4 and 12', () => {
+    for (let g = 0; g < 50; g++) {
+      expect(groupSize(g)).toBe(groupSize(g))
+      expect(groupSize(g)).toBeGreaterThanOrEqual(4)
+      expect(groupSize(g)).toBeLessThanOrEqual(12)
+    }
+  })
+  test('every player is placed once, no group above 12', () => {
+    const groups = groupPlayers(ids(100), new Map())
+    expect(groups.every((g) => g.length <= 12)).toBe(true)
+    expect(groups.flat().sort()).toEqual(ids(100).sort())
+  })
+  test('appending a player leaves the other groups untouched', () => {
+    const memory = new Map<string, number>()
+    const before = groupPlayers(ids(40), memory).map((g) => [...g])
+    const after = groupPlayers(ids(41), memory)
+    const flat = after.flat()
+    expect(flat.length).toBe(41)
+    const moved = before.filter((g) => !g.every((id) => after.some((a) => a.includes(id) && g.every((x) => a.includes(x)))))
+    expect(moved.length).toBe(0)
+  })
+  test('a leaver does not reshuffle the rest', () => {
+    const memory = new Map<string, number>()
+    const before = groupPlayers(ids(30), memory)
+    const gOf = (groups: string[][], id: string) => groups.findIndex((g) => g.includes(id))
+    const after = groupPlayers(ids(30).filter((i) => i !== 'p3'), memory)
+    expect(after.flat().length).toBe(29)
+    expect(gOf(after, 'p29') >= 0).toBe(true)
+    const sameGroup = (a: string, b: string) => (gOf(before, a) === gOf(before, b)) === (gOf(after, a) === gOf(after, b))
+    expect(sameGroup('p10', 'p20')).toBe(true)
   })
 })

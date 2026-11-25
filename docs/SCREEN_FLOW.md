@@ -17,7 +17,7 @@ HostPhase: 'connecting' → 'lobby' → 'question' → 'revealed' → 'finished'
 | Phase | Trigger | View | Actions |
 |-------|---------|------|---------|
 | `connecting` | Initial load / WS close or error | "Connecting…" spinner | — |
-| `lobby` | `host_connected` or `game_reset` received | `LobbyView` | QR code, player constellation (`FxLobby`), player list, Start button |
+| `lobby` | `host_connected` or `game_reset` received | `LobbyView` | One centered column that scrolls: quiz card (first screen), then join link + join code + QR code, then player count + Start button. Player constellations (`FxLobby`) and name lists (`PlayerList`) sit in the left and right side areas, players split between the two sides |
 | `question` | `question_started` received | `QuestionView` | Countdown (`FxCountdown`), answer count, Reveal |
 | `revealed` | `answer_revealed` received | `RevealView` | Vote particles (`FxReveal`), score deltas, Next button |
 | `finished` | `game_ended` received | `PodiumView` | Animated podium (`FxPodium`), full leaderboard, **🔁 Rejouer** button (sends `host_reset`) |
@@ -86,7 +86,7 @@ PlayerPhase: 'join' → 'lobby' → 'question' → 'podium' (→ 'lobby' on game
 |-------|---------|------|---------|
 | `join` | Initial load | `JoinView` | Enter join code, pseudo, email |
 | `lobby` | `player_joined` (own join confirmed), or `game_reset` from the podium | `LobbyView` | Waiting room with player count and constellation (`FxLobby`) |
-| `question` | `question_started` received | `QuestionView` | Answer grid + countdown; once `answer_revealed` arrives, the verdict, points and rank appear in the same view |
+| `question` | `question_started` received | `QuestionView` | Answer grid + countdown; once `answer_revealed` arrives, a result block replaces the countdown at the top (verdict constellation, total score, rank, points gained, speed); no tinted background, the shared `FxBackdrop` dust stays |
 | `podium` | `game_ended` received | `PodiumView` | Final rank + score, animated podium (`FxPodium`) |
 
 ### Player Flow Diagram

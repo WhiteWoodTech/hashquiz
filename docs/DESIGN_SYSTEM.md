@@ -102,6 +102,7 @@ Read by the canvas scenes in `packages/ui/src/fx/` (`readFxTheme`); numbers are 
 | `--qv-fx-dot` | `#ffffff` | `#ffffff` | Particle color |
 | `--qv-fx-line-opacity` | `.2` | `.15` | Opacity of the lines linking particles |
 | `--qv-fx-glow` | `.35` | `.25` | Intensity of halos |
+| `--qv-progress` | `#6b6b7a` | `var(--qv-accent)` | Fill of the question progress bars (grey and discreet in the default theme) |
 | `--qv-fx-dust-density` | `1` | `.5` | Multiplier of the background dust count |
 | `--qv-fx-dust-alpha` | `1.8` | `1.5` | Multiplier of the background dust opacity (dust size also grows with the canvas, up to ×2.2 at 1080p) |
 | `--qv-fx-speed` | `1` | `1` | Global animation speed multiplier |

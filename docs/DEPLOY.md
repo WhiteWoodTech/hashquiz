@@ -1,13 +1,25 @@
 # Deploy
 
-This project deploys on Vercel for hosting and Supabase for realtime messaging. No SQL
-tables — Supabase Realtime channels are the only Supabase feature used.
+This project deploys on Vercel for hosting and Supabase for realtime messaging and solo mode storage.
+Rooms only use Supabase Realtime channels. Solo mode stores finished runs, their answers and Markuiz
+leads in Postgres (`supabase/migrations/`) and can score runs in an Edge Function (`supabase/functions/`).
 
 ## 1. Create a Supabase project
 
 1. Go to <https://supabase.com> → New project.
-2. Skip schema setup — no tables are required.
-3. Settings → API → copy the **Project URL** and the **anon public** key.
+2. Settings → API → copy the **Project URL** and the **anon public** key.
+3. Apply the schema and deploy the Edge Function with the [Supabase CLI](https://supabase.com/docs/guides/cli):
+
+   ```bash
+   supabase login
+   supabase link --project-ref <project-ref>
+   supabase db push                                    # tables, RLS, RPCs (supabase/migrations/)
+   bun run build:edge && supabase functions deploy solo-submit
+   ```
+
+   `bun run build:edge` regenerates `supabase/functions/_shared/generated/` (solo decks + the
+   `verifySoloRun` bundle, gitignored). Redeploy the function whenever a `solo: true` deck changes, otherwise
+   edge-scored runs of that deck are rejected with `deck version mismatch`.
 
 ## 2. Create a Vercel project
 
@@ -25,6 +37,21 @@ Set these for Production and Preview:
 | `VITE_TRANSPORT` | `supabase` |
 | `VITE_SUPABASE_URL` | (from step 1) |
 | `VITE_SUPABASE_ANON_KEY` | (from step 1) |
+| `VITE_SOLO_SCORING` | `browser` (default) or `edge` |
+| `VITE_PLAYER_URL` | Optional public player URL; empty = same origin |
+
+### Solo scoring mode
+
+`browser` (default): the browser scores the run and writes it through the `submit_solo_run` RPC.
+`edge`: the browser posts the raw answers to the `solo-submit` Edge Function, which rescores them from its own
+copy of the deck. Switch **both** together:
+
+1. Set `VITE_SOLO_SCORING=edge` in Vercel and redeploy.
+2. In the SQL editor: `update solo_settings set scoring_mode = 'edge';` (the RPC then refuses browser-scored
+   runs).
+
+Switch back with `browser` in both places. `edge` stops forged scores, not cheating in general: correct answers
+are still in the client bundle and answer times are self-reported.
 
 ## 4. Deploy
 
@@ -43,8 +70,28 @@ Push to the configured branch. Vercel builds and serves:
 ## Local development
 
 `VITE_TRANSPORT=local` (the default in `.env.example`) keeps using
-`bun run packages/server/src/cli.ts dev examples/demo.quizv.md`. No Supabase is
-involved locally.
+`bun run packages/server/src/cli.ts dev examples/demo.quizv.md`. No Supabase is involved, and solo mode is not
+available.
+
+To work on solo mode, run a local Supabase (requires Docker):
+
+```bash
+bun run supabase:start                 # supabase start: Postgres, API, Realtime, Studio on 5432x ports
+supabase db reset                      # re-apply supabase/migrations/ on a clean database
+bun run build:edge                     # only for edge scoring
+supabase functions serve solo-submit   # only for edge scoring
+```
+
+Then run the apps with, in `apps/host/.env.local` and `apps/player/.env.local`:
+
+```bash
+VITE_TRANSPORT=supabase
+VITE_SUPABASE_URL=http://127.0.0.1:54321
+VITE_SUPABASE_ANON_KEY=<anon / publishable key from `supabase status`>
+VITE_SOLO_SCORING=browser              # or edge, with `update solo_settings set scoring_mode = 'edge'`
+```
+
+`supabase status` prints the local URLs and keys; Studio is at <http://127.0.0.1:54323>.
 
 ## Decks repositories (npm package)
 

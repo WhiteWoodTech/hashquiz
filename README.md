@@ -100,10 +100,28 @@ bun test                  # Run all tests
 bun run build             # Build every workspace package
 bun run build:web         # Build only the host + player SPAs
 bun run pack              # Stage the hashquiz npm package in pkg/
+bun run build:edge        # Generate the solo-submit Edge Function inputs
 bun run lint              # Lint markdown and YAML
 bun run lint:md:fix       # Auto-fix markdown
 bun run commit            # Interactive gitmoji commit
 ```
+
+### Solo mode with Supabase
+
+Solo runs, the leaderboard and Markuiz leads are stored in Supabase (`supabase/migrations/`). Locally (Docker
+required):
+
+```bash
+bun run supabase:start                 # local Supabase; `supabase status` prints the URL and anon key
+supabase db reset                      # apply the migrations
+bun run build:edge                     # edge scoring only: generate the Edge Function inputs
+supabase functions serve solo-submit   # edge scoring only
+```
+
+Run the apps with `VITE_TRANSPORT=supabase`, `VITE_SUPABASE_URL=http://127.0.0.1:54321` and the local anon key.
+`VITE_SOLO_SCORING` picks `browser` (default) or `edge` scoring; switching to `edge` also needs
+`update solo_settings set scoring_mode = 'edge'`. Production steps (`supabase db push`,
+`supabase functions deploy solo-submit`) are in [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ## Decks
 
@@ -179,6 +197,8 @@ quizv/
 ├── apps/
 │   ├── host/             # Vue 3 SPA — port 3031
 │   └── player/           # Vue 3 SPA — port 3032
+├── supabase/             # Supabase CLI project: migrations + solo-submit Edge Function
+├── scripts/build-edge.ts # Generates the Edge Function deck bundle
 └── examples/
     └── demo.quizv.md
 ```

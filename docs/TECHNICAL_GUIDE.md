@@ -243,6 +243,52 @@ Current coverage: **27 tests, 0 failures**
 
 ---
 
+## Solo Mode Storage (Supabase)
+
+Schema in `supabase/migrations/20261126090000_solo_live.sql`. RLS is enabled on every table, and table grants
+match the policies.
+
+| Table | Contents | anon |
+|-------|----------|------|
+| `solo_runs` | One finished run: `deck_id` (path after `/decks/`), `deck_version` (content hash, informational), `pseudo` (1–24 chars), `score`, `correct_count`, `question_count`, `total_time_ms`, `finished_at`, nullable `room_id` (future async rooms) | select |
+| `solo_answers` | One row per served question: `run_id`, `position`, `deck_index`, `choices` (original choice indices), `is_correct`, `answer_time_ms`, `points` | select |
+| `solo_settings` | Single row, `scoring_mode` = `browser` (default) or `edge` | select |
+| `leads` | Markuiz interest form: `email`, `consent` (must be true), `deck_id`, `created_at` | insert only (never readable; insert without `return=representation`) |
+
+Leaderboard index: `(deck_id, score desc, total_time_ms, finished_at)`. `solo_runs` is in the
+`supabase_realtime` publication so leaderboards receive new runs as inserts.
+
+**Functions** (all `set search_path = public`):
+
+- `submit_solo_run(p_run jsonb) → uuid` — `security definer`, executable by anon. Browser scoring mode: refuses
+  (SQLSTATE `42501`) unless `solo_settings.scoring_mode = 'browser'`, then calls `insert_solo_run`.
+- `insert_solo_run(p_run jsonb) → uuid` — `security definer`, **service_role only**. Inserts the run and its
+  answers in one transaction. `p_run` is `VerifiedRun` in snake_case: `deck_id`, `deck_version`, `pseudo`,
+  `score`, `correct_count`, `question_count`, `total_time_ms`, `answers[]` { `position`, `deck_index`,
+  `choices`, `is_correct`, `answer_time_ms`, `points` }.
+- `solo_rank(p_run_id uuid) → int` — 1 + runs of the same deck strictly before it in leaderboard order
+  (score desc, total time asc, finished at asc — same as `compareRuns`); `null` for an unknown id.
+
+anon can never insert into `solo_runs` / `solo_answers` directly.
+
+### Edge Function `solo-submit`
+
+`supabase/functions/solo-submit/index.ts` (Deno, `verify_jwt = false`: public). Used when
+`VITE_SOLO_SCORING=edge`.
+
+- `POST` a `SoloRunSubmission` JSON → `200 { runId, rank }`.
+- `422 { reason }`: `invalid json`, `unknown deck`, `deck version mismatch` (the function's deck copy differs
+  from the client's), or any `verifySoloRun` rejection reason.
+- `405` for other methods; `OPTIONS` → `204` with CORS headers (`Access-Control-Allow-Origin: *`).
+
+It loads the deck from `_shared/generated/decks.json`, rescores with `verifySoloRun`, and stores through
+`insert_solo_run` with `SUPABASE_SERVICE_ROLE_KEY` (ignores `solo_settings`). `bun run build:edge`
+(`scripts/build-edge.ts`) generates `_shared/generated/` (gitignored): `decks.json`
+(`{ [deckId]: { version, quiz } }`, `solo: true` decks only, ids from `buildDecks`) and `solo-verify.js`
+(`Bun.build` ESM bundle of `packages/core/src/solo-verify.ts`).
+
+---
+
 ## Release (`release.config.js`)
 
 semantic-release, configured as in `WhiteWoodTech/github-repository-template`.
@@ -266,6 +312,8 @@ stable versions (npm `latest`), a manual run on `develop` publishes
 `-beta.N` prereleases (npm `beta`). Channels, secrets and steps:
 [`DEPLOY.md`](DEPLOY.md#publishing-the-hashquiz-package).
 
+---
+
 ## Known Constraints
 
 | Constraint | Reason |
@@ -277,4 +325,4 @@ stable versions (npm `latest`), a manual run on `develop` publishes
 
 ---
 
-*Last updated: 2026-03-31*
+*Last updated: 2026-11-26*

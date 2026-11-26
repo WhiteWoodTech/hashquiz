@@ -67,3 +67,7 @@ index/public/deck-ports.json
 # Superpowers brainstorm mockups
 .superpowers/
 pkg/
+
+# Supabase (generated Edge Function inputs, CLI state)
+supabase/functions/_shared/generated/
+supabase/.temp/

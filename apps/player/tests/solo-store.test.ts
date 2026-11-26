@@ -19,6 +19,8 @@ const quiz = (solo: boolean): Quiz => ({
 const decks: Record<string, BundledDeck> = {
   'solo/deck': { id: 'solo/deck', name: 'Deck', version: 'v1', quiz: quiz(true) },
   'room/deck': { id: 'room/deck', name: 'Room', version: 'v1', quiz: quiz(false) },
+  // A 1 s budget no 10 s question fits: nothing is served.
+  'empty/deck': { id: 'empty/deck', name: 'Empty', version: 'v1', quiz: { ...quiz(true), meta: { ...quiz(true).meta, maxTimeSec: 1 } } },
 }
 
 const run = (id: string, pseudo: string, score: number): RankedRun =>
@@ -291,6 +293,114 @@ describe('solo store', () => {
     expect(solo.myRunId).toBeNull()
     expect(solo.submitState).toBe('idle')
     expect(live.tracked.at(-1)).toEqual({ pseudo: 'Alice', index: 0, total: 2, score: 0 })
+  })
+})
+
+/**
+ * Mimics realtime-js: one channel per topic on the client, so a deck's presence cannot be created again
+ * until the previous one has left, and leave() resolves later (when the server acknowledges).
+ */
+class SlowLive extends FakeLive {
+  static open = new Set<string>()
+  release: () => void = () => {}
+  constructor(private deckId: string, n: number) {
+    super()
+    if (SlowLive.open.has(deckId)) throw new Error('presence channel still open')
+    SlowLive.open.add(deckId)
+    this.key = `me${n}`
+  }
+  override async leave() {
+    this.log.push('leave')
+    await new Promise<void>(r => { this.release = r })
+    SlowLive.open.delete(this.deckId)
+  }
+}
+
+describe('solo store: reopening a deck', () => {
+  beforeEach(() => { setActivePinia(createPinia()); SlowLive.open.clear() })
+
+  function setupSlow() {
+    api = new FakeApi()
+    clock = 1_000
+    const made: SlowLive[] = []
+    setSoloDeps({
+      findDeck: id => decks[id],
+      backend: { api, live: id => { const l = new SlowLive(id, made.length); made.push(l); return l } },
+      now: () => clock,
+    })
+    return { solo: useSoloStore(), made }
+  }
+
+  test('open → abandon → open the same deck before the old channel has left: start still works', async () => {
+    const { solo, made } = setupSlow()
+    await solo.open('solo/deck')
+    expect(made.length).toBe(1)
+    solo.abandon()
+    // Same tick, like pageshow → syncRoute(true) or an A → B → A hash change.
+    const reopening = solo.open('solo/deck')
+    expect(solo.phase).toBe('intro')
+    await flush()
+    // The new channel waits for the old one to be gone instead of reusing it.
+    expect(made.length).toBe(1)
+    solo.start('Alice')
+    expect(solo.phase).toBe('question')
+    made[0]!.release()
+    await reopening
+    expect(made.length).toBe(2)
+    expect(made[1]!.log).toEqual(['watch', 'join'])
+    expect(made[1]!.tracked[0]).toMatchObject({ pseudo: 'Alice', index: 0 })
+    // onNewRun was re-subscribed for the reopened deck.
+    api.top = [run('r9', 'Eve', 10)]
+    api.newRunCb?.()
+    await flush()
+    expect(solo.top.map(r => r.id)).toEqual(['r9'])
+  })
+
+  test('A → B → A: the reopened deck gets a fresh channel once the first has left', async () => {
+    const { solo, made } = setupSlow()
+    decks['solo/other'] = { ...decks['solo/deck']!, id: 'solo/other' }
+    await solo.open('solo/deck')
+    solo.abandon()
+    void solo.open('solo/other')
+    solo.abandon()
+    const back = solo.open('solo/deck')
+    made[0]!.release()
+    await back
+    // The abandoned B open never created a channel; A got a fresh one after the first left.
+    expect(made.length).toBe(2)
+    expect(solo.phase).toBe('intro')
+    solo.start('Alice')
+    expect(solo.phase).toBe('question')
+    expect(made.at(-1)!.log).toContain('join')
+    delete decks['solo/other']
+  })
+
+  test('a presence channel that cannot be created shows unavailable instead of a dead Start', async () => {
+    api = new FakeApi()
+    setSoloDeps({
+      findDeck: id => decks[id],
+      backend: { api, live: () => { throw new Error('presence channel still open') } },
+      now: () => clock,
+    })
+    const solo = useSoloStore()
+    await solo.open('solo/deck')
+    expect(solo.phase).toBe('unavailable')
+  })
+})
+
+describe('solo store: no question served', () => {
+  beforeEach(() => { setActivePinia(createPinia()) })
+
+  test('an empty selection shows unavailable and submits nothing', async () => {
+    const solo = setup()
+    await solo.open('empty/deck')
+    expect(solo.phase).toBe('intro')
+    solo.start('Alice')
+    await flush()
+    expect(solo.phase).toBe('unavailable')
+    expect(solo.submitState).toBe('idle')
+    expect(api.submits).toEqual([])
+    expect(live.log).not.toContain('join')
   })
 })
 

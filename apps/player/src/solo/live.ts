@@ -17,8 +17,16 @@ export class SoloLive {
   private rows = new Map<string, Me>()
   private joinedInDiff = new Set<string>()
 
+  /**
+   * Throws when a channel for this deck is still open on the client: realtime-js would hand it back, and
+   * adding listeners to an already joined channel throws. Await the previous instance's leave() first.
+   */
   constructor(private client: SupabaseClient, deckId: string) {
-    this.channel = client.channel(`solo:${deckId}`, { config: { presence: { key: this.key } } })
+    const topic = `solo:${deckId}`
+    if (client.getChannels().some(c => c.topic === `realtime:${topic}`)) {
+      throw new Error(`presence channel ${topic} is still open`)
+    }
+    this.channel = client.channel(topic, { config: { presence: { key: this.key } } })
     this.channel
       .on('presence', { event: 'join' }, ({ key, newPresences }) => {
         const m = newPresences.at(-1) as unknown as Me | undefined
@@ -66,9 +74,17 @@ export class SoloLive {
     await this.channel.untrack()
   }
 
+  /**
+   * Leaves the channel; the server drops our presence with it, so no untrack() is needed (on a channel that
+   * never joined, untrack() would wait for its push timeout). Never rejects. Resolves once the client no
+   * longer holds the channel, so a new SoloLive on the same deck can be created.
+   */
   async leave(): Promise<void> {
-    await this.channel.untrack()
-    await this.client.removeChannel(this.channel)
+    try {
+      await this.client.removeChannel(this.channel)
+    } catch {
+      // Removal failed: the channel is unusable anyway.
+    }
   }
 
   onChange(cb: (players: LivePlayer[]) => void): () => void {

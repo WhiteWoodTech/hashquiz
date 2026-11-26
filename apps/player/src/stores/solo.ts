@@ -7,12 +7,16 @@ import type { LivePlayer, SoloLive } from '../solo/live'
 
 export type SoloPhase = 'intro' | 'question' | 'revealed' | 'end' | 'unavailable'
 export type SubmitState = 'idle' | 'saving' | 'saved' | 'error'
-export type SoloApiPort = Pick<SoloApi, 'submitRun' | 'fetchTop' | 'fetchCount' | 'fetchRun' | 'submitLead' | 'onNewRun'>
+export type SoloApiPort = Pick<SoloApi, 'submitRun' | 'fetchTop' | 'fetchCount' | 'fetchRun' | 'submitLead'> & {
+  /** The returned unsubscribe may resolve later: the store awaits it before subscribing the same deck again. */
+  onNewRun(deckId: string, cb: () => void): () => void | Promise<void>
+}
 export type SoloLivePort = Pick<SoloLive, 'key' | 'watch' | 'join' | 'update' | 'untrack' | 'leave' | 'onChange'>
 
 export interface SoloDeps {
   findDeck: (id: string) => BundledDeck | undefined
   /** null without Supabase credentials: solo is unavailable. */
+  /** `live` may throw (e.g. the deck channel is still open): the store then shows `unavailable`. */
   backend: { api: SoloApiPort; live: (deckId: string) => SoloLivePort } | null
   now?: () => number
 }
@@ -58,6 +62,9 @@ export const useSoloStore = defineStore('solo', () => {
   let offNewRun: (() => void) | null = null
   // Bumped on open/abandon so late async results from a previous deck or run are dropped.
   let gen = 0
+  // Resolves once the previous deck's channels are removed. realtime-js reuses a channel with the same topic,
+  // so reopening the same deck before its old channels are gone would get them back, already joined.
+  let leaving: Promise<unknown> = Promise.resolve()
 
   const liveOthers = computed(() => live.value.filter(p => p.key !== presence?.key))
 
@@ -98,8 +105,10 @@ export const useSoloStore = defineStore('solo', () => {
   function teardown(): void {
     gen++
     offPresence?.()
-    offNewRun?.()
-    if (presence) presence.leave().catch(ignore)
+    const pending = [leaving]
+    if (offNewRun) pending.push(Promise.resolve().then(offNewRun))
+    if (presence) pending.push(presence.leave())
+    leaving = Promise.all(pending.map(p => p.catch(ignore)))
     presence = offPresence = offNewRun = null
     live.value = []
     resetRun()
@@ -139,26 +148,48 @@ export const useSoloStore = defineStore('solo', () => {
     }
     deck.value = d
     phase.value = 'intro'
-    presence = backend.live(d.id)
+    const g = gen
+    await Promise.all([connect(d.id, g), refreshTop()])
+  }
+
+  /** Opens the deck's presence and new-run channels once the previous ones are gone. */
+  async function connect(deckId: string, g: number): Promise<void> {
+    await leaving
+    const backend = deps?.backend
+    if (g !== gen || !backend) return
+    try {
+      presence = backend.live(deckId)
+    } catch {
+      // Without a presence channel the run cannot be listed live: say so instead of a dead Start button.
+      if (phase.value === 'intro') { deck.value = null; phase.value = 'unavailable' }
+      return
+    }
     offPresence = presence.onChange(players => { live.value = players })
     presence.watch().catch(ignore)
-    offNewRun = backend.api.onNewRun(d.id, () => { void refreshTop() })
-    await refreshTop()
+    offNewRun = backend.api.onNewRun(deckId, () => { void refreshTop() })
+    // A run started while the old channels were closing joins presence now.
+    if (session.value && session.value.status !== 'finished') presence.join(me()).catch(ignore)
   }
 
   function start(name: string): void {
     const p = name.trim()
     const d = deck.value
-    if (!d || !presence || p.length < 1 || p.length > PSEUDO_MAX) return
-    if (phase.value === 'question' || phase.value === 'revealed') return
+    if (!d || p.length < 1 || p.length > PSEUDO_MAX) return
+    if (phase.value !== 'intro' && phase.value !== 'end') return
     resetRun()
     pseudo.value = p
     const s = new SoloSession({ quiz: d.quiz, deckId: d.id, deckVersion: d.version, pseudo: p, now })
     s.start()
+    if (s.total === 0) {
+      // Nothing served (e.g. a max-time budget no question fits): there is no run to play or store.
+      deck.value = null
+      phase.value = 'unavailable'
+      return
+    }
     session.value = s
     sync()
-    if (s.status === 'finished') { void finish(); return }
-    presence.join(me()).catch(ignore)
+    // Presence may still be connecting (see connect()): the run then joins once it is ready.
+    presence?.join(me()).catch(ignore)
   }
 
   const now = () => (deps?.now ?? Date.now)()

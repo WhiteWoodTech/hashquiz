@@ -141,16 +141,29 @@ export class SoloApi {
     }
   }
 
-  /** Calls `cb` on every new run of the deck. Returns an unsubscribe function. */
-  onNewRun(deckId: string, cb: () => void): () => void {
-    const channel = this.client
-      .channel(`solo-runs:${deckId}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'solo_runs', filter: `deck_id=eq.${deckId}` },
-        () => cb(),
-      )
-      .subscribe()
-    return () => { void this.client.removeChannel(channel) }
+  /**
+   * Calls `cb` on every new run of the deck. Returns an unsubscribe function whose promise resolves once the
+   * channel is removed (await it before subscribing again to the same deck). Never throws: if the channel
+   * cannot be set up, the leaderboard just does not refresh live.
+   */
+  onNewRun(deckId: string, cb: () => void): () => Promise<void> {
+    const topic = `solo-runs:${deckId}`
+    try {
+      // realtime-js returns an existing channel for the same topic, and `.on()` throws once it has joined.
+      if (this.client.getChannels().some(c => c.topic === `realtime:${topic}`)) throw new Error(`${topic} is still open`)
+      const channel = this.client
+        .channel(topic)
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'solo_runs', filter: `deck_id=eq.${deckId}` },
+          () => cb(),
+        )
+        .subscribe()
+      return async () => {
+        try { await this.client.removeChannel(channel) } catch { /* already gone */ }
+      }
+    } catch {
+      return async () => {}
+    }
   }
 }

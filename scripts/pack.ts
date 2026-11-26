@@ -40,7 +40,7 @@ cpSync(resolve(root, 'dist'), resolve(out, 'web'), { recursive: true })
 rmSync(resolve(out, 'web/host/decks.json'), { force: true })
 rmSync(resolve(out, 'web/quizv-config.js'), { force: true })
 
-cpSync(resolve(root, 'LICENSE'), resolve(out, 'LICENSE'))
+cpSync(resolve(root, 'LICENSE.md'), resolve(out, 'LICENSE.md'))
 cpSync(resolve(root, 'docs/PACKAGE.md'), resolve(out, 'README.md'))
 writeFileSync(resolve(out, 'package.json'), JSON.stringify({
   name: PACKAGE_NAME,
@@ -51,7 +51,7 @@ writeFileSync(resolve(out, 'package.json'), JSON.stringify({
   author: rootPkg.author,
   repository: { type: 'git', url: 'git+https://github.com/maxime-lenne/quizv.git' },
   bin: { [PACKAGE_NAME]: `./bin/${PACKAGE_NAME}.js` },
-  files: ['bin', 'web', 'README.md', 'LICENSE'],
+  files: ['bin', 'web', 'README.md', 'LICENSE.md'],
   engines: { bun: '>=1.1' },
   keywords: ['quiz', 'kahoot', 'markdown', 'slides', 'multiplayer'],
 }, null, 2) + '\n')

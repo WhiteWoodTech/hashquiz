@@ -2,32 +2,93 @@
   <FxBackdrop />
   <BrandLogo />
   <div class="app">
-    <Transition name="status">
-      <p
-        v-if="game.phase !== 'join' && game.status !== 'connected'"
-        class="status-banner"
-        :class="`status-banner--${game.status}`"
-      >
-        {{ statusLabel }}
-      </p>
-    </Transition>
-    <JoinView     v-if="game.phase === 'join'"      />
-    <LobbyView    v-else-if="game.phase === 'lobby'"     />
-    <QuestionView v-else-if="game.phase === 'question'"  />
-    <PodiumView   v-else-if="game.phase === 'podium'"    />
+    <template v-if="soloDeckId !== null">
+      <SoloQuestionView v-if="solo.phase === 'question' || solo.phase === 'revealed'" />
+      <SoloEndView      v-else-if="solo.phase === 'end'" />
+      <SoloIntroView    v-else-if="soloReady" :key="soloDeckId" />
+    </template>
+    <template v-else>
+      <Transition name="status">
+        <p
+          v-if="game.phase !== 'join' && game.status !== 'connected'"
+          class="status-banner"
+          :class="`status-banner--${game.status}`"
+        >
+          {{ statusLabel }}
+        </p>
+      </Transition>
+      <JoinView     v-if="game.phase === 'join'"      />
+      <LobbyView    v-else-if="game.phase === 'lobby'"     />
+      <QuestionView v-else-if="game.phase === 'question'"  />
+      <PodiumView   v-else-if="game.phase === 'podium'"    />
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue'
 import { BrandLogo, FxBackdrop } from '@quizv/ui'
 import { useGameStore } from './stores/game'
+import { useSoloStore, setSoloDeps } from './stores/solo'
+import { parseSoloHash } from './solo/route'
 import JoinView     from './views/JoinView.vue'
 import LobbyView    from './views/LobbyView.vue'
 import QuestionView from './views/QuestionView.vue'
 import PodiumView   from './views/PodiumView.vue'
 
+// Solo screens (and the deck bundle) load only on a `#/solo/<deckId>` route.
+const SoloIntroView    = defineAsyncComponent(() => import('./views/SoloIntroView.vue'))
+const SoloQuestionView = defineAsyncComponent(() => import('./views/SoloQuestionView.vue'))
+const SoloEndView      = defineAsyncComponent(() => import('./views/SoloEndView.vue'))
+
 const game = useGameStore()
+const solo = useSoloStore()
+const soloDeckId = ref<string | null>(null)
+const soloReady = ref(false)
+let depsLoaded = false
+
+async function syncRoute() {
+  const deckId = parseSoloHash(location.hash)?.deckId ?? null
+  if (deckId === soloDeckId.value) return
+  if (soloDeckId.value !== null) solo.abandon()
+  soloDeckId.value = deckId
+  soloReady.value = false
+  if (deckId === null) return
+  if (!depsLoaded) {
+    const { defaultSoloDeps } = await import('./solo/deps')
+    setSoloDeps(defaultSoloDeps())
+    depsLoaded = true
+  }
+  if (soloDeckId.value !== deckId) return
+  // open() sets the phase synchronously; the leaderboard fills in when it arrives.
+  const opening = solo.open(deckId)
+  soloReady.value = true
+  await opening
+}
+
+// Leaving the page mid-run abandons it; coming back from the back/forward cache reopens the deck.
+function onPageHide() {
+  if (soloDeckId.value === null) return
+  solo.abandon()
+  soloDeckId.value = null
+}
+function onPageShow(e: PageTransitionEvent) {
+  if (e.persisted) void syncRoute()
+}
+const onHashChange = () => { void syncRoute() }
+
+onMounted(() => {
+  void syncRoute()
+  window.addEventListener('hashchange', onHashChange)
+  window.addEventListener('pagehide', onPageHide)
+  window.addEventListener('pageshow', onPageShow)
+})
+onUnmounted(() => {
+  window.removeEventListener('hashchange', onHashChange)
+  window.removeEventListener('pagehide', onPageHide)
+  window.removeEventListener('pageshow', onPageShow)
+})
+
 const statusLabel = computed(() => {
   switch (game.status) {
     case 'connecting':   return 'Connexion…'

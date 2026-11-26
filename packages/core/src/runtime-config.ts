@@ -1,13 +1,13 @@
 /**
  * Runtime configuration of the host and player web apps.
  *
- * The apps are built once (and shipped prebuilt in the `markuiz` npm package), so
- * deployment settings cannot be baked in at build time. `markuiz build` writes a
+ * The apps are built once (and shipped prebuilt in the `hashquiz` npm package), so
+ * deployment settings cannot be baked in at build time. `hashquiz build` writes a
  * `/quizv-config.js` script that sets `window.__QUIZV_CONFIG__`; the apps read it
  * here and fall back to the Vite `VITE_*` env vars (monorepo dev and builds).
  */
 export interface QuizvRuntimeConfig {
-  /** `local` (Bun WS server from `markuiz dev`) or `supabase` (Supabase Realtime). */
+  /** `local` (Bun WS server from `hashquiz dev`) or `supabase` (Supabase Realtime). */
   transport: 'local' | 'supabase'
   supabaseUrl?: string
   supabaseAnonKey?: string
@@ -17,10 +17,10 @@ export interface QuizvRuntimeConfig {
 
 type Env = Record<string, string | undefined>
 
-/** Builds the config from environment variables (`MARKUIZ_*`, then `QUIZV_*`, then `VITE_*`). */
+/** Builds the config from environment variables (`HASHQUIZ_*`, then `QUIZV_*`, then `VITE_*`). */
 export function configFromEnv(env: Env): QuizvRuntimeConfig {
   const pick = (name: string) =>
-    env[`MARKUIZ_${name}`] || env[`QUIZV_${name}`] || env[`VITE_${name}`] || undefined
+    env[`HASHQUIZ_${name}`] || env[`QUIZV_${name}`] || env[`VITE_${name}`] || undefined
   const grace = pick('GRACE_MS') ?? env.VITE_QUIZV_GRACE_MS
   const n = grace !== undefined ? Number(grace) : NaN
   return {

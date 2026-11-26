@@ -8,8 +8,8 @@ describe('configFromEnv', () => {
   test('defaults to local transport', () => {
     expect(configFromEnv({})).toEqual({ transport: 'local', supabaseUrl: undefined, supabaseAnonKey: undefined, graceMs: undefined })
   })
-  test('MARKUIZ_* wins over QUIZV_* and VITE_*', () => {
-    const c = configFromEnv({ MARKUIZ_TRANSPORT: 'supabase', QUIZV_SUPABASE_URL: 'q', VITE_SUPABASE_URL: 'v', VITE_SUPABASE_ANON_KEY: 'k', VITE_QUIZV_GRACE_MS: '500' })
+  test('HASHQUIZ_* wins over QUIZV_* and VITE_*', () => {
+    const c = configFromEnv({ HASHQUIZ_TRANSPORT: 'supabase', QUIZV_SUPABASE_URL: 'q', VITE_SUPABASE_URL: 'v', VITE_SUPABASE_ANON_KEY: 'k', VITE_QUIZV_GRACE_MS: '500' })
     expect(c).toEqual({ transport: 'supabase', supabaseUrl: 'q', supabaseAnonKey: 'k', graceMs: 500 })
   })
 })

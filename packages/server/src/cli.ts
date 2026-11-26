@@ -9,14 +9,14 @@ const [,, command, arg, ...flags] = process.argv
 
 function printUsage(): void {
   console.log(`
-  markuiz <command> [options]   (quizv from the sources)
+  hashquiz <command> [options]   (quizv from the sources)
 
   Commands:
     dev <quiz.quizv.md>     Start local dev server with hot-reload
     check <quiz.quizv.md>   Validate quiz file format
     build [decks-dir]       Build the static site (host + player) for a decks
-                            folder (default: decks). Reads MARKUIZ_TRANSPORT,
-                            MARKUIZ_SUPABASE_URL, MARKUIZ_SUPABASE_ANON_KEY
+                            folder (default: decks). Reads HASHQUIZ_TRANSPORT,
+                            HASHQUIZ_SUPABASE_URL, HASHQUIZ_SUPABASE_ANON_KEY
                             (or their QUIZV_* / VITE_* names) from the environment.
 
   Options:

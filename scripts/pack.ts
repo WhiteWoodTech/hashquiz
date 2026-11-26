@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * Stages the publishable npm package in `pkg/`:
- *   pkg/bin/markuiz.js   CLI bundled with its workspace deps (runs on Bun)
+ *   pkg/bin/hashquiz.js   CLI bundled with its workspace deps (runs on Bun)
  *   pkg/web/           prebuilt host + player apps (from `bun run build:web`)
  *
  * Usage: bun run build:web && bun scripts/pack.ts [version]
@@ -10,7 +10,7 @@
 import { cpSync, existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
-export const PACKAGE_NAME = 'markuiz'
+export const PACKAGE_NAME = 'hashquiz'
 
 const root = resolve(import.meta.dirname, '..')
 const out = resolve(root, 'pkg')

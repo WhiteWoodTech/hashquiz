@@ -49,15 +49,15 @@ involved locally.
 ## Decks repositories (npm package)
 
 Decks live in their own repositories (`maxime-lenne/markuiz-decks`,
-`WhiteWoodTech/markuiz-decks`) that depend on the `markuiz` npm package and run
-`markuiz build decks --out dist` on Vercel. Steps 1 to 5 apply to them; the
-variables can use the `MARKUIZ_*` names (`MARKUIZ_TRANSPORT`, …). See
+`WhiteWoodTech/markuiz-decks`) that depend on the `hashquiz` npm package and run
+`hashquiz build decks --out dist` on Vercel. Steps 1 to 5 apply to them; the
+variables can use the `HASHQUIZ_*` names (`HASHQUIZ_TRANSPORT`, …). See
 [`PACKAGE.md`](PACKAGE.md).
 
 The host app reads the deck list from `host/decks.json` and the settings from
 `/quizv-config.js` at runtime, so the same prebuilt apps serve any decks folder.
 
-## Publishing the `markuiz` package
+## Publishing the `hashquiz` package
 
 1. Create an npm account and an access token able to publish (granular token,
    read and write, all packages).

@@ -13,7 +13,7 @@ export interface QuizvWebPluginOptions {
 /**
  * Serves (dev) and emits (build) the two runtime files the web apps load:
  * `/quizv-config.js` (deployment settings from the env) and `<base>decks.json`.
- * `markuiz build` writes the same files next to the prebuilt apps.
+ * `hashquiz build` writes the same files next to the prebuilt apps.
  */
 export function quizvWeb(options: QuizvWebPluginOptions): Plugin {
   const config = () => renderConfigScript(configFromEnv(process.env))

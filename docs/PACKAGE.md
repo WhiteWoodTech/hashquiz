@@ -1,7 +1,7 @@
-# markuiz
+# hashquiz
 
 Real-time multiplayer quiz (a Kahoot alternative) driven by Markdown decks.
-This package ships the `markuiz` CLI and the prebuilt host and player web apps,
+This package ships the `hashquiz` CLI and the prebuilt host and player web apps,
 so a repository only needs its decks.
 
 Requires [Bun](https://bun.sh) 1.1 or later.
@@ -9,7 +9,7 @@ Requires [Bun](https://bun.sh) 1.1 or later.
 ## Install
 
 ```bash
-bun add -d markuiz
+bun add -d hashquiz
 ```
 
 ## Decks repository layout
@@ -27,9 +27,9 @@ Format reference: [deck format](https://github.com/maxime-lenne/quizv/blob/devel
 ## Commands
 
 ```bash
-markuiz check decks/my-deck/index.quizv.md   # validate one deck
-markuiz dev decks/my-deck/index.quizv.md     # local game: host :3031/host/, players :3032
-markuiz build decks --out dist               # static site with every deck under decks/
+hashquiz check decks/my-deck/index.quizv.md   # validate one deck
+hashquiz dev decks/my-deck/index.quizv.md     # local game: host :3031/host/, players :3032
+hashquiz build decks --out dist               # static site with every deck under decks/
 ```
 
 `build` validates every `*.quizv.md` under the folder, copies the apps and
@@ -38,9 +38,9 @@ settings from the environment:
 
 | Variable | Value |
 | --- | --- |
-| `MARKUIZ_TRANSPORT` | `supabase` for a hosted game (default `local`) |
-| `MARKUIZ_SUPABASE_URL` | Supabase project URL |
-| `MARKUIZ_SUPABASE_ANON_KEY` | Supabase anon public key |
+| `HASHQUIZ_TRANSPORT` | `supabase` for a hosted game (default `local`) |
+| `HASHQUIZ_SUPABASE_URL` | Supabase project URL |
+| `HASHQUIZ_SUPABASE_ANON_KEY` | Supabase anon public key |
 
 The `QUIZV_*` and `VITE_*` names (`VITE_TRANSPORT`, …) are accepted too.
 
@@ -50,8 +50,8 @@ The `QUIZV_*` and `VITE_*` names (`VITE_TRANSPORT`, …) are accepted too.
 
 ```json
 {
-  "scripts": { "build": "markuiz build decks --out dist" },
-  "devDependencies": { "markuiz": "^2.0.0" }
+  "scripts": { "build": "hashquiz build decks --out dist" },
+  "devDependencies": { "hashquiz": "^2.0.0" }
 }
 ```
 

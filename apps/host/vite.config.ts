@@ -6,7 +6,7 @@ import { resolve } from 'node:path'
 import { quizvWeb } from '../../packages/server/src/vite-plugin'
 
 // Decks listed in the host. Defaults to the repo's `examples/`; QUIZV_DECKS_DIR
-// (relative to the repo root) points it elsewhere. `markuiz build` overrides it.
+// (relative to the repo root) points it elsewhere. `hashquiz build` overrides it.
 const repoRoot = resolve(__dirname, '../..')
 const decksDir = resolve(repoRoot, process.env.QUIZV_DECKS_DIR ?? 'examples')
 

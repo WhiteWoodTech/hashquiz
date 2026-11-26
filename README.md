@@ -99,7 +99,7 @@ Output: question count, theme, or a list of parsing errors with the offending qu
 bun test                  # Run all tests
 bun run build             # Build every workspace package
 bun run build:web         # Build only the host + player SPAs
-bun run pack              # Stage the markuiz npm package in pkg/
+bun run pack              # Stage the hashquiz npm package in pkg/
 bun run lint              # Lint markdown and YAML
 bun run lint:md:fix       # Auto-fix markdown
 bun run commit            # Interactive gitmoji commit
@@ -108,7 +108,7 @@ bun run commit            # Interactive gitmoji commit
 ## Decks
 
 Decks live in their own repositories and use the published
-[`markuiz`](docs/PACKAGE.md) npm package (CLI + prebuilt host and player apps):
+[`hashquiz`](docs/PACKAGE.md) npm package (CLI + prebuilt host and player apps):
 
 - [`maxime-lenne/markuiz-decks`](https://github.com/maxime-lenne/markuiz-decks): Docker,
   GenAI LLM introduction, MCP intro and overview
@@ -117,7 +117,7 @@ Decks live in their own repositories and use the published
 
 The host app of this repository lists the [`examples/`](examples/) decks (set `QUIZV_DECKS_DIR`,
 relative to the repo root, to list another folder). See [`docs/PACKAGE.md`](docs/PACKAGE.md) for
-`markuiz build` and the publishing steps in [`docs/DEPLOY.md`](docs/DEPLOY.md).
+`hashquiz build` and the publishing steps in [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 Example decks (smaller, for testing):
 

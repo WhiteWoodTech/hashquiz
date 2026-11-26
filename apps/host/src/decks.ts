@@ -13,7 +13,7 @@ interface DeckManifestEntry { id: string; content: string }
 
 /**
  * Decks available to the host. They are listed in `decks.json` next to the app,
- * written by `markuiz build` (or served by the Vite plugin in dev), so the same
+ * written by `hashquiz build` (or served by the Vite plugin in dev), so the same
  * prebuilt app works with any decks folder.
  */
 export async function loadDecks(url = `${import.meta.env.BASE_URL}decks.json`): Promise<BundledDeck[]> {

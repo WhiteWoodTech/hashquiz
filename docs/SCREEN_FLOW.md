@@ -85,7 +85,7 @@ PlayerPhase: 'join' → 'lobby' → 'question' → 'podium' (→ 'lobby' on game
 
 | Phase | Trigger | View | Actions |
 |-------|---------|------|---------|
-| `join` | Initial load | `JoinView` | Enter join code, pseudo, email |
+| `join` | Initial load | `JoinView` | Enter join code, pseudo, email. Below the form, when Supabase credentials are set, « Ou jouez en solo » lists the solo decks (`SoloCatalog`, lazy-loaded chunk); each card links to `#/solo/<deckId>` |
 | `lobby` | `player_joined` (own join confirmed), or `game_reset` from the podium | `LobbyView` | Grey QuizV logo top left, quiz card (same look as the host lobby, compact on phones), dot hourglass (`FxHourglass`) with "Waiting for the host…", and the room constellation (`FxLobby`) |
 | `question` | `question_started` received | `QuestionView` | Answer grid + countdown; once `answer_revealed` arrives, a result block replaces the countdown at the top (verdict constellation, total score, rank, points gained, speed); no tinted background, the shared `FxBackdrop` dust stays |
 | `podium` | `game_ended` received | `PodiumView` | Final rank + score, animated podium (`FxPodium`) |
@@ -145,7 +145,8 @@ After each reveal the store computes the player's rank with `rankOf(scores, play
 
 ## Player App — Solo
 
-**Tech:** same SPA, entered through the hash route `#/solo/<deckId>` (`deckId` URL-encoded, the host deck id).
+**Tech:** same SPA, entered through the hash route `#/solo/<deckId>` (`deckId` URL-encoded, the host deck id),
+from the solo list on the player home (`JoinView`) or the « Jouer en solo » link on host deck cards.
 Solo always runs on Supabase; no host, no join code. The hosted-room phases above are unchanged.
 
 ```

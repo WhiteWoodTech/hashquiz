@@ -45,3 +45,26 @@ Push to the configured branch. Vercel builds and serves:
 `VITE_TRANSPORT=local` (the default in `.env.example`) keeps using
 `bun run packages/server/src/cli.ts dev examples/demo.quizv.md`. No Supabase is
 involved locally.
+
+## Decks repositories (npm package)
+
+Decks live in their own repositories (`maxime-lenne/markuiz-decks`,
+`WhiteWoodTech/markuiz-decks`) that depend on the `markuiz` npm package and run
+`markuiz build decks --out dist` on Vercel. Steps 1 to 5 apply to them; the
+variables can use the `MARKUIZ_*` names (`MARKUIZ_TRANSPORT`, …). See
+[`PACKAGE.md`](PACKAGE.md).
+
+The host app reads the deck list from `host/decks.json` and the settings from
+`/quizv-config.js` at runtime, so the same prebuilt apps serve any decks folder.
+
+## Publishing the `markuiz` package
+
+1. Create an npm account and an access token able to publish (granular token,
+   read and write, all packages).
+2. Add it as the `NPM_TOKEN` secret of this repository (Settings → Secrets and
+   variables → Actions).
+3. Publish a GitHub release, or run the **Publish npm package** workflow by
+   hand with a version. It runs the tests, `bun run build:web`,
+   `bun scripts/pack.ts <version>` and `npm publish ./pkg`.
+
+Locally, `bun run pack` stages the package in `pkg/` (`npm pack ./pkg` to inspect it).

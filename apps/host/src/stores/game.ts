@@ -1,3 +1,4 @@
+import { config } from '../config'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { PlayerState, QuestionPublic, Score, PodiumEntry, QuizInfo } from '@quizv/core'
@@ -45,8 +46,8 @@ export const useGameStore = defineStore('game', () => {
   let session: SupabaseHostSession | null = null
 
   function startWithDeck(deck: BundledDeck) {
-    const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
+    const url = config.supabaseUrl
+    const anonKey = config.supabaseAnonKey
     if (!url || !anonKey) {
       console.error('Missing Supabase credentials')
       phase.value = 'deck-select'
@@ -74,7 +75,7 @@ export const useGameStore = defineStore('game', () => {
   }
 
   function connect() {
-    const mode = import.meta.env.VITE_TRANSPORT
+    const mode = config.transport
     if (mode === 'supabase') {
       phase.value = 'deck-select'
       return
@@ -155,7 +156,7 @@ export const useGameStore = defineStore('game', () => {
   }
 
   function send(type: HostAction) {
-    if (import.meta.env.VITE_TRANSPORT === 'supabase') {
+    if (config.transport === 'supabase') {
       sendSupabase(type)
       return
     }

@@ -13,6 +13,13 @@ export interface QuizvRuntimeConfig {
   supabaseAnonKey?: string
   /** Grace period before a vanished player is removed, in ms. */
   graceMs?: number
+  /**
+   * Solo run scoring: `browser` (`submit_solo_run` RPC, default) or `edge` (`solo-submit`
+   * Edge Function). Must match `solo_settings.scoring_mode` in the database.
+   */
+  soloScoring: 'browser' | 'edge'
+  /** Player app base URL for the host's "Jouer en solo" links (default: see the host `playerBaseUrl`). */
+  playerUrl?: string
 }
 
 type Env = Record<string, string | undefined>
@@ -28,6 +35,8 @@ export function configFromEnv(env: Env): QuizvRuntimeConfig {
     supabaseUrl: pick('SUPABASE_URL'),
     supabaseAnonKey: pick('SUPABASE_ANON_KEY'),
     graceMs: Number.isFinite(n) && n >= 0 ? n : undefined,
+    soloScoring: pick('SOLO_SCORING') === 'edge' ? 'edge' : 'browser',
+    playerUrl: pick('PLAYER_URL'),
   }
 }
 
@@ -49,5 +58,8 @@ export function readRuntimeConfig(buildEnv: Env = {}): QuizvRuntimeConfig {
     supabaseUrl: injected.supabaseUrl || fromBuild.supabaseUrl,
     supabaseAnonKey: injected.supabaseAnonKey || fromBuild.supabaseAnonKey,
     graceMs: injected.graceMs ?? fromBuild.graceMs,
+    // Like transport: the injected default (`browser`) never overrides an `edge` build env.
+    soloScoring: injected.soloScoring === 'edge' ? 'edge' : fromBuild.soloScoring,
+    playerUrl: injected.playerUrl || fromBuild.playerUrl,
   }
 }

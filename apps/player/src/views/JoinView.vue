@@ -27,10 +27,11 @@
 <script setup lang="ts">
 import { ref, onMounted, defineAsyncComponent } from 'vue'
 import { useGameStore } from '../stores/game'
+import { config } from '../config'
 
 // The solo list (and the deck bundle it needs) loads in its own chunk, only when solo can work.
 const SoloCatalog = defineAsyncComponent(() => import('../components/SoloCatalog.vue'))
-const soloEnabled = Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY)
+const soloEnabled = Boolean(config.supabaseUrl && config.supabaseAnonKey)
 
 const game = useGameStore()
 const code   = ref('')

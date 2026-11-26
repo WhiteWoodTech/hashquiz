@@ -45,7 +45,7 @@ export function devCommand(quizFile: string, port?: number): void {
 
 /** Minimal static server for the prebuilt apps, local transport config. */
 function serveStatic(root: string, port: number, home: string): void {
-  const config = renderConfigScript({ transport: 'local' })
+  const config = renderConfigScript({ transport: 'local', soloScoring: 'browser' })
   Bun.serve({
     port,
     hostname: '0.0.0.0',

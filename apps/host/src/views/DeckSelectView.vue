@@ -42,6 +42,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { BrandLogo } from '@quizv/ui'
 import { useGameStore } from '../stores/game'
+import { config } from '../config'
 import { loadDecks, type BundledDeck } from '../decks'
 import { decksForTag, parseDeckHash, playerBaseUrl, soloUrl, tagCounts, tagHash } from '../deck-browse'
 import DeckCard from '../components/DeckCard.vue'
@@ -71,8 +72,8 @@ onBeforeUnmount(() => window.removeEventListener('hashchange', sync))
 const tagDecks = computed(() => (route.value.kind === 'tag' ? decksForTag(decks.value, route.value.tag) : []))
 
 // The solo link needs the same Supabase credentials as a room; it opens the player app in this tab.
-const hasCreds = !!(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY)
-const playerBase = playerBaseUrl(import.meta.env, location)
+const hasCreds = !!(config.supabaseUrl && config.supabaseAnonKey)
+const playerBase = playerBaseUrl({ dev: import.meta.env.DEV, playerUrl: config.playerUrl }, location)
 const soloHref = (deck: BundledDeck) =>
   hasCreds && deck.quiz.meta.solo ? soloUrl(deck.id, playerBase) : undefined
 

@@ -156,7 +156,7 @@ SoloPhase: 'unavailable' | 'intro' → 'question' → 'revealed' → ('question'
 
 | Phase | Trigger | View | Actions |
 |-------|---------|------|---------|
-| `unavailable` | Unknown or non-solo deck id | `SoloIntroView` | Short "quiz not available" message |
+| `unavailable` | Unknown or non-solo deck id, or no Supabase credentials; also when no question is served (e.g. a `max-time` budget no question fits) or the presence channel cannot open | `SoloIntroView` | Short "quiz not available" message |
 | `intro` | Hash `#/solo/<deckId>` on a solo deck | `SoloIntroView` | Quiz card, pseudo field (no email), **Commencer**, leaderboard (`SoloLeaderboard`: live players "en cours" + past runs) |
 | `question` | Start, or **Suivant** | `SoloQuestionView` | Answer grid + countdown (the question `timer`); **Valider** makes the answer final when it is not a one-tap case |
 | `revealed` | Final answer or timeout | `SoloQuestionView` | Correction (verdict, correct answers, explanation, points, running score), live players on this quiz, **Suivant** (no auto-advance) |

@@ -8,8 +8,8 @@ Thank you for your interest in contributing to this project!
 2. Clone your fork:
 
    ```bash
-   git clone https://github.com/maxime-lenne/github-repository-template.git
-   cd github-repository-template
+   git clone https://github.com/<your-account>/hashquiz.git
+   cd hashquiz
    ```
 
 3. Install dependencies:

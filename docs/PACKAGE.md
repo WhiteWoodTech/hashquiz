@@ -22,7 +22,7 @@ package.json
 vercel.json
 ```
 
-Format reference: [deck format](https://github.com/maxime-lenne/quizv/blob/develop/docs/TECHNICAL_GUIDE.md).
+Format reference: [deck format](https://github.com/WhiteWoodTech/hashquiz/blob/develop/docs/TECHNICAL_GUIDE.md).
 
 ## Commands
 

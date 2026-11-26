@@ -49,7 +49,10 @@ writeFileSync(resolve(out, 'package.json'), JSON.stringify({
   type: 'module',
   license: rootPkg.license,
   author: rootPkg.author,
-  repository: { type: 'git', url: 'git+https://github.com/maxime-lenne/quizv.git' },
+  // Must match the publishing repository for the npm provenance attestation
+  repository: { type: 'git', url: 'git+https://github.com/WhiteWoodTech/hashquiz.git' },
+  homepage: 'https://github.com/WhiteWoodTech/hashquiz#readme',
+  bugs: { url: 'https://github.com/WhiteWoodTech/hashquiz/issues' },
   bin: { [PACKAGE_NAME]: `./bin/${PACKAGE_NAME}.js` },
   files: ['bin', 'web', 'README.md', 'LICENSE.md'],
   engines: { bun: '>=1.1' },

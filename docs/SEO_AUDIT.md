@@ -259,14 +259,14 @@ Sur le host, ajouter en plus `<meta name="robots" content="noindex, nofollow">`.
 > QuizV est une alternative open source à Kahoot : des quiz multijoueurs en temps réel, écrits en Markdown
 > (fichiers `.quizv.md`), que les joueurs rejoignent depuis leur téléphone avec un code, sans créer de compte.
 
-- Licence MIT, code source : https://github.com/maxime-lenne/quizv
+- Licence MIT, code source : https://github.com/WhiteWoodTech/hashquiz
 - Fonctionne en réseau local (WebSocket) ou en ligne (Vercel + Supabase Realtime)
 - Score selon la rapidité, questions à choix unique ou multiple, minuteur par question
 
 ## Documentation
 
 - [Format .quizv.md](https://example.com/docs/format): écrire un quiz en Markdown + frontmatter YAML
-- [Déployer](https://github.com/maxime-lenne/quizv/blob/develop/docs/DEPLOY.md): Vercel et Supabase
+- [Déployer](https://github.com/WhiteWoodTech/hashquiz/blob/develop/docs/DEPLOY.md): Vercel et Supabase
 
 ## Quiz disponibles
 

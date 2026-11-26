@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { decksForTag, parseDeckHash, soloUrl, tagCounts, tagHash, type BrowsableDeck } from '../src/deck-browse'
+import { decksForTag, parseDeckHash, playerBaseUrl, soloUrl, tagCounts, tagHash, type BrowsableDeck } from '../src/deck-browse'
 
 const deck = (id: string, tags: string[], extra: Partial<BrowsableDeck['quiz']['meta']> = {}, n = 4): BrowsableDeck => ({
   id,
@@ -49,5 +49,21 @@ describe('soloUrl', () => {
     const want = 'https://x.app/#/solo/docker%2Fquiz.quizv.md'
     expect(soloUrl('docker/quiz.quizv.md', 'https://x.app/')).toBe(want)
     expect(soloUrl('docker/quiz.quizv.md', 'https://x.app')).toBe(want)
+  })
+})
+
+describe('playerBaseUrl', () => {
+  const loc = { protocol: 'http:', hostname: '192.168.1.20', origin: 'http://192.168.1.20:3031' }
+  test('VITE_PLAYER_URL wins', () => {
+    expect(playerBaseUrl({ DEV: true, VITE_PLAYER_URL: 'https://p.app/' }, loc)).toBe('https://p.app/')
+  })
+  test('dev defaults to the player Vite server on :3032, same host', () => {
+    expect(playerBaseUrl({ DEV: true, VITE_PLAYER_URL: '' }, loc)).toBe('http://192.168.1.20:3032/')
+    expect(soloUrl('docker-fundamentals/index.quizv.md', playerBaseUrl({ DEV: true }, loc)))
+      .toBe('http://192.168.1.20:3032/#/solo/docker-fundamentals%2Findex.quizv.md')
+  })
+  test('production defaults to the same origin', () => {
+    expect(playerBaseUrl({ DEV: false }, { protocol: 'https:', hostname: 'q.app', origin: 'https://q.app' }))
+      .toBe('https://q.app/')
   })
 })

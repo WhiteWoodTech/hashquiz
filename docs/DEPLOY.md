@@ -59,12 +59,42 @@ The host app reads the deck list from `host/decks.json` and the settings from
 
 ## Publishing the `hashquiz` package
 
-1. Create an npm account and an access token able to publish (granular token,
-   read and write, all packages).
-2. Add it as the `NPM_TOKEN` secret of this repository (Settings → Secrets and
-   variables → Actions).
-3. Publish a GitHub release, or run the **Publish npm package** workflow by
-   hand with a version. It runs the tests, `bun run build:web`,
-   `bun scripts/pack.ts <version>` and `npm publish ./pkg`.
+Releases follow the process of
+[`WhiteWoodTech/github-repository-template`](https://github.com/WhiteWoodTech/github-repository-template):
+semantic-release (`release.config.js`) computes the version from the gitmoji or
+conventional commits, and `.github/workflows/release.yml` publishes.
 
-Locally, `bun run pack` stages the package in `pkg/` (`npm pack ./pkg` to inspect it).
+| Channel | Trigger | Version | npm dist-tag | Git |
+| --- | --- | --- | --- | --- |
+| Beta | Manual run of **Release** on `develop` | `vX.Y.Z-beta.N` | `beta` | tag + GitHub prerelease, no commit |
+| Stable | Push to `main` (merged `develop → main` PR) | `vX.Y.Z` | `latest` | `🔖 Release` commit (CHANGELOG.md + package.json), tag, GitHub release, `develop` rebased onto `main` |
+
+The first release is `1.0.0`, so the first beta is `1.0.0-beta.1`. Install a
+beta with `bun add -d hashquiz@beta`.
+
+The job runs the tests, `bun run pack` (stages `pkg/`: CLI bundle + prebuilt
+apps) and `bun run release`, which sets the version in `package.json` and
+`pkg/package.json` and publishes `pkg/` with a provenance attestation.
+
+### Secrets
+
+1. `NPM_TOKEN`: npm granular access token, read and write on all packages,
+   with "Bypass two-factor authentication" (the job fails without it).
+2. `RELEASE_TOKEN`, stable releases only: PAT of a repository admin
+   (fine-grained, Contents + Issues + Pull requests read and write), to push
+   the release commit to the protected `main` and rebase `develop`.
+
+Add both in Settings → Secrets and variables → Actions.
+
+### Publishing a beta
+
+Actions → **Release** → Run workflow → branch `develop`. Nothing is published
+when no commit since the last tag bumps the version (only 📝, 🔧, ✅, …).
+
+### Locally
+
+```bash
+bun run pack          # stage the package in pkg/ (npm pack ./pkg to inspect it)
+bun run release:dry   # preview the next version and notes (needs NPM_TOKEN and GITHUB_TOKEN)
+bun run sync:develop  # rebase develop onto main after a release, if the job reported a conflict
+```

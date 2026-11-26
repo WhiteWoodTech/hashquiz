@@ -15,6 +15,7 @@ Complete guide for AI assistants working on the QuizV repository.
 | [`FEATURES.md`](./FEATURES.md) | Feature list and roadmap |
 | [`SCREEN_FLOW.md`](./SCREEN_FLOW.md) | Host and player screen flows |
 | [`TASKS.md`](./TASKS.md) | Task backlog |
+| [`SEO_AUDIT.md`](./SEO_AUDIT.md) | SEO and LLM (GEO) audit with prioritised recommendations |
 
 ---
 

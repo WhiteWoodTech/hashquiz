@@ -84,9 +84,10 @@ Second game mode next to the hosted room: one player, own pace, shared per-quiz 
 | Total time | ✅ | Sum of answer times capped at each question timer; correction screen excluded |
 | Shared leaderboard | ✅ | Per deck across versions: score desc, total time asc, finished at asc; live players ("en cours") + past runs |
 | Run persistence | ✅ | `solo_runs` + `solo_answers`, written once at the end of the run; abandoned runs are not stored |
-| Scoring mode | ✅ | `VITE_SOLO_SCORING=browser` (default, `submit_solo_run` RPC) or `edge` (`solo-submit` Edge Function rescoring) |
+| Scoring mode | ✅ | Runtime config `soloScoring` (`HASHQUIZ_SOLO_SCORING` / `VITE_SOLO_SCORING`): `browser` (default, `submit_solo_run` RPC) or `edge` (`solo-submit` Edge Function rescoring) |
 | HashQuiz interest form | ✅ | Optional email + consent on the end screen, stored in insert-only `leads` |
-| Shared `@quizv/decks` | ✅ | Deck bundle and `deckInfo` used by both apps |
+| Runtime solo decks | ✅ | The player reads the same `decks.json` as the host (written by `hashquiz build`); `deckVersion` and `deckInfo` shared in `@quizv/core/decks` |
+| Home-page solo list | ✅ | « Ou jouez en solo » under the join form lists the solo decks |
 | Async room | ⬜ | End date, private code, shared persisted leaderboard (reuses the solo storage) |
 
 ---
@@ -109,7 +110,7 @@ Second game mode next to the hosted room: one player, own pace, shared per-quiz 
 | `crypto.randomUUID()` not used | Fails on HTTP over LAN (non-secure context) |
 | No Vue Router | Linear game flow — `v-if` on phase is sufficient |
 | Supabase mode is ephemeral for rooms | Rooms use no Postgres tables: a host page reload loses the game (only solo runs are stored) |
-| Solo needs Supabase | No local (Bun) solo backend; `quizv dev` stays room-only |
+| Solo needs Supabase | No local (Bun) solo backend; `hashquiz dev` with the local transport stays room-only |
 | `edge` scoring is not anti-cheat | Stops forged scores; answers stay in the client bundle and times are self-reported |
 | `playerUrl` hardcoded to port 3032 | Dedicated Vite player dev server |
 

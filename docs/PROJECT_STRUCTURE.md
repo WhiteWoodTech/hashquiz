@@ -41,17 +41,21 @@ quizv/
 │       └── src/
 │           ├── main.ts
 │           ├── App.vue
+│           ├── config.ts            # Runtime config (/quizv-config.js or VITE_* env)
 │           ├── stores/
 │           │   ├── game.ts          # Pinia store — PlayerPhase state machine
 │           │   └── solo.ts          # Pinia store — solo run (SoloPhase), leaderboard, live presence
 │           ├── solo/                # Solo live mode (loaded on #/solo/<deckId> only)
 │           │   ├── api.ts           # Supabase calls: submit run (RPC / Edge Function), leaderboard, leads
 │           │   ├── live.ts          # Realtime presence channel solo:<deckId>
-│           │   ├── route.ts         # parseSoloHash
-│           │   ├── deps.ts          # Wires Supabase client + VITE_SOLO_SCORING
+│           │   ├── route.ts         # parseSoloHash, soloHash
+│           │   ├── decks.ts         # Runtime deck list: /decks.json (cached), findDeck, loadSoloDecks
+│           │   ├── catalog.ts       # soloDecks filter
+│           │   ├── deps.ts          # Wires Supabase client + runtime soloScoring
 │           │   ├── format.ts        # Time formatting
 │           │   └── solo.css
 │           ├── components/
+│           │   ├── SoloCatalog.vue  # « Ou jouez en solo » list under the join form (lazy chunk)
 │           │   ├── SoloLeaderboard.vue # Live players + past runs
 │           │   └── LeadForm.vue     # HashQuiz interest form
 │           └── views/
@@ -86,15 +90,11 @@ quizv/
 │   │   │   ├── selection.ts         # serveQuestions: shared question selection + choice shuffling
 │   │   │   ├── solo.ts              # SoloSession: solo run state machine
 │   │   │   ├── solo-verify.ts       # verifySoloRun (edge rescoring), compareRuns (leaderboard order)
+│   │   │   ├── runtime-config.ts    # QuizvRuntimeConfig: transport, Supabase, soloScoring, playerUrl
+│   │   │   ├── decks.ts             # `@quizv/core/decks`: toDecks/fetchDecks (decks.json), deckVersion, deckInfo
 │   │   │   └── game.ts              # GameEngine state machine
 │   │   └── tests/
 │   │       └── game.test.ts         # 14 tests
-│   ├── decks/                       # @quizv/decks — shared deck bundle + content version
-│   │   ├── package.json
-│   │   └── src/
-│   │       ├── index.ts             # Deck bundle (import.meta.glob over decks/**)
-│   │       ├── build.ts             # buildDecks: deck id rule, content version
-│   │       └── info.ts              # deckInfo; pure entry `@quizv/decks/info`
 │   ├── transport-local/             # @quizv/transport-local
 │   │   ├── package.json
 │   │   ├── tsconfig.json
@@ -156,9 +156,10 @@ quizv/
 │   └── functions/
 │       └── solo-submit/index.ts     # Edge Function: rescoring (edge mode); _shared/generated is gitignored
 ├── scripts/
-│   └── build-edge.ts                # Generates the Edge Function deck bundle
+│   ├── build-edge.ts                # `build:edge <decksDir>`: Edge Function deck data (solo decks) + verifier
+│   └── pack.ts                      # Stages the hashquiz npm package in pkg/
 ├── examples/
-│   └── demo.quizv.md                # Sample quiz file
+│   └── demo.quizv.md                # Sample quiz file (`solo: true`)
 ├── LICENSE.md                       # Licensing overview + QuizV Sustainable Use License
 ├── LICENSE_EE.md                    # QuizV Enterprise License
 └── CLA.md                           # Contributor License Agreement
@@ -182,9 +183,11 @@ Licensing per directory is described in [`LICENSING.md`](./LICENSING.md): `packa
 | `supabase/migrations/20261126090000_solo_live.sql` | Solo schema, RLS and RPCs |
 | `packages/core/src/solo.ts` | `SoloSession` — solo run state machine |
 | `packages/server/src/server.ts` | Bun HTTP+WS server, handles all WS messages |
-| `packages/server/src/build.ts` | `hashquiz build`: static site = prebuilt apps + `host/decks.json` + `quizv-config.js` |
+| `packages/server/src/build.ts` | `hashquiz build`: static site = prebuilt apps + `host/decks.json` + `decks.json` (player) + `quizv-config.js` |
+| `packages/server/src/web-assets.ts` | `collectDecks`: the deck id rule (path relative to the decks folder), shared by both apps and `build:edge` |
 | `packages/server/src/vite-plugin.ts` | Serves/emits `decks.json` and `quizv-config.js` for the Vite apps |
-| `packages/core/src/runtime-config.ts` | Runtime settings read by both apps (transport, Supabase) |
+| `packages/core/src/runtime-config.ts` | Runtime settings read by both apps (transport, Supabase, solo scoring, player URL) |
+| `packages/core/src/decks.ts` | Deck manifest parsing, `deckVersion` (content hash), `deckInfo` (card data) |
 | `scripts/pack.ts` | Stages the `hashquiz` npm package in `pkg/` (see `docs/PACKAGE.md`) |
 | `packages/theme-default/styles/vars.css` | All `--qv-*` design tokens (same set in `theme-original`) |
 | `packages/ui/styles/base.css` | `.qv-label` and `.qv-sr-only` utilities |

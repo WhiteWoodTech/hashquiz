@@ -234,16 +234,17 @@ bun test --watch            # Watch mode
 bun test packages/core      # Single package
 ```
 
-Current coverage: **222 tests across 27 files, 0 failures**
+Current coverage: **258 tests across 31 files, 0 failures**
 
 | Package | Tests | Coverage |
 |---------|-------|----------|
 | `@quizv/parser` | 30 | Parse paths, edge cases, validation, `solo` flag |
-| `@quizv/core` | 74 | GameEngine transitions, scoring, choiceCounts, question selection, `SoloSession`, `verifySoloRun`, `compareRuns` |
-| `@quizv/decks` | 8 | Deck bundle, content version, `deckInfo` |
+| `@quizv/core` | 91 | GameEngine transitions, scoring, choiceCounts, question selection, `SoloSession`, `verifySoloRun`, `compareRuns`, runtime config, deck manifest (`toDecks`, `deckVersion`, `deckInfo`) |
 | `@quizv/ui` | 45 | Theme parity, Fx layout |
-| `apps/player` | 39 | Solo API, route, store |
-| `apps/host` | 8 | Deck browsing, solo link |
+| `@quizv/server` | 14 | `collectDecks`, `hashquiz build`, server |
+| `@quizv/transport-supabase` | 7 | Supabase transport |
+| `apps/player` | 59 | Solo API, route, store, runtime deck list |
+| `apps/host` | 12 | Deck browsing, manifest parsing, solo link |
 
 ---
 
@@ -254,7 +255,7 @@ Schema in `supabase/migrations/20261126090000_solo_live.sql`, hardened by
 
 | Table | Contents | anon |
 |-------|----------|------|
-| `solo_runs` | One finished run: `deck_id` (path after `/decks/`), `deck_version` (content hash, informational), `pseudo` (1–24 chars), `score`, `correct_count`, `question_count`, `total_time_ms`, `finished_at`, nullable `room_id` (future async rooms) | select |
+| `solo_runs` | One finished run: `deck_id` (manifest id: path relative to the decks folder, from `collectDecks`), `deck_version` (content hash, informational), `pseudo` (1–24 chars), `score`, `correct_count`, `question_count`, `total_time_ms`, `finished_at`, nullable `room_id` (future async rooms) | select |
 | `solo_answers` | One row per served question: `run_id`, `position`, `deck_index`, `choices` (original choice indices), `is_correct`, `answer_time_ms`, `points` | select |
 | `solo_settings` | Single row, `scoring_mode` = `browser` (default) or `edge` | select |
 | `leads` | HashQuiz interest form: `email` (≤ 254 chars), `consent` (must be true), `deck_id` (≤ 200 chars), `created_at` | insert only (never readable; insert without `return=representation`) |
@@ -293,8 +294,8 @@ topic) or replaces the socket without erroring them. Letting phoenix rejoin woul
 
 ### Edge Function `solo-submit`
 
-`supabase/functions/solo-submit/index.ts` (Deno, `verify_jwt = false`: public). Used when
-`VITE_SOLO_SCORING=edge`.
+`supabase/functions/solo-submit/index.ts` (Deno, `verify_jwt = false`: public). Used when the runtime config
+has `soloScoring: 'edge'` (`HASHQUIZ_SOLO_SCORING` / `VITE_SOLO_SCORING=edge`).
 
 - `POST` a `SoloRunSubmission` JSON → `200 { runId, rank }`.
 - `422 { reason }`: `invalid json`, `unknown deck`, `deck version mismatch` (the function's deck copy differs
@@ -302,10 +303,10 @@ topic) or replaces the socket without erroring them. Letting phoenix rejoin woul
 - `405` for other methods; `OPTIONS` → `204` with CORS headers (`Access-Control-Allow-Origin: *`).
 
 It loads the deck from `_shared/generated/decks.json`, rescores with `verifySoloRun`, and stores through
-`insert_solo_run` with `SUPABASE_SERVICE_ROLE_KEY` (ignores `solo_settings`). `bun run build:edge`
-(`scripts/build-edge.ts`) generates `_shared/generated/` (gitignored): `decks.json`
-(`{ [deckId]: { version, quiz } }`, `solo: true` decks only, ids from `buildDecks`) and `solo-verify.js`
-(`Bun.build` ESM bundle of `packages/core/src/solo-verify.ts`).
+`insert_solo_run` with `SUPABASE_SERVICE_ROLE_KEY` (ignores `solo_settings`). `bun run build:edge <decksDir>`
+(`scripts/build-edge.ts`, same decks folder as `hashquiz build`) generates `_shared/generated/` (gitignored):
+`decks.json` (`{ [deckId]: { version, quiz } }`, `solo: true` decks only, ids from `collectDecks`, versions
+from `deckVersion`) and `solo-verify.js` (`Bun.build` ESM bundle of `packages/core/src/solo-verify.ts`).
 
 **Known limit: question selection is not replayed.** The function checks that every question exists in its
 deck, that none repeats, that each answer time is within `[0, timer]` and that the `max-time` budget holds,

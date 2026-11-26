@@ -34,7 +34,8 @@ class FakeChannel {
   listeners: Array<{ kind: string; filter: { event?: string }; cb: (payload?: unknown) => void }> = []
   tracked: unknown[] = []
   state: Record<string, unknown[]> = {}
-  constructor(public name: string, public opts?: unknown) {}
+  readonly topic: string
+  constructor(public name: string, public opts?: unknown) { this.topic = `realtime:${name}` }
   on(kind: string, filter: { event?: string }, cb: (payload?: unknown) => void) { this.listeners.push({ kind, filter, cb }); return this }
   subscribe(cb?: (s: string) => void) { cb?.('SUBSCRIBED'); return this }
   async track(s: unknown) { this.tracked.push(s) }
@@ -57,8 +58,15 @@ class FakeClient {
   functions = { invoke: async (fn: string, opts: unknown) => { this.invokeCalls.push({ fn, opts }); return this.invokeResult } }
   async rpc(fn: string, args: unknown) { this.rpcCalls.push({ fn, args }); return this.rpcResults[fn] ?? { data: null, error: null } }
   from(table: string) { const q = new FakeQuery(this.tableResult); this.queries.push({ table, q }); return q }
-  channel(name: string, opts?: unknown) { const c = new FakeChannel(name, opts); this.channels.push(c); return c }
-  async removeChannel(c: unknown) { this.removed.push(c) }
+  /** Channels the client still holds, like realtime-js: same topic → same channel. */
+  open: FakeChannel[] = []
+  getChannels() { return this.open }
+  channel(name: string, opts?: unknown) {
+    const existing = this.open.find(c => c.name === name)
+    if (existing) return existing
+    const c = new FakeChannel(name, opts); this.channels.push(c); this.open.push(c); return c
+  }
+  async removeChannel(c: FakeChannel) { this.removed.push(c); this.open = this.open.filter(o => o !== c) }
 }
 const make = () => { const c = new FakeClient(); return { c, as: () => c as unknown as SupabaseClient } }
 
@@ -162,7 +170,7 @@ describe('SoloApi reads and leads', () => {
     expect(await new SoloApi(as(), 'browser').submitLead('a@b.co', 'd')).toEqual({ ok: false, error: 'denied' })
   })
 
-  test('onNewRun listens to INSERT on solo_runs and unsubscribes', () => {
+  test('onNewRun listens to INSERT on solo_runs and unsubscribes', async () => {
     const { c, as } = make()
     let n = 0
     const off = new SoloApi(as(), 'browser').onNewRun('d', () => n++)
@@ -170,8 +178,23 @@ describe('SoloApi reads and leads', () => {
     expect(l.filter).toMatchObject({ event: 'INSERT', table: 'solo_runs' })
     l.cb()
     expect(n).toBe(1)
-    off()
+    await off()
     expect(c.removed).toEqual([c.channels[0]])
+    expect(c.getChannels()).toEqual([])
+  })
+
+  test('onNewRun never throws while the same deck channel is still open', async () => {
+    const { c, as } = make()
+    const api = new SoloApi(as(), 'browser')
+    const off1 = api.onNewRun('d', () => {})
+    const off2 = api.onNewRun('d', () => {})
+    expect(c.channels.length).toBe(1)
+    expect(c.channels[0].listeners.length).toBe(1)
+    await off2()
+    expect(c.removed).toEqual([])
+    await off1()
+    api.onNewRun('d', () => {})
+    expect(c.channels.length).toBe(2)
   })
 })
 
@@ -246,5 +269,26 @@ describe('SoloLive', () => {
     expect(n).toBe(0)
     await live.leave()
     expect(c.removed).toEqual([c.channels[0]])
+    expect(c.getChannels()).toEqual([])
+  })
+
+  test('leave does not untrack (the server drops presence on leave) and never rejects', async () => {
+    const { c, as } = make()
+    const live = new SoloLive(as(), 'd')
+    let untracked = 0
+    c.channels[0].untrack = async () => { untracked++ }
+    c.removeChannel = async () => { throw new Error('socket closed') }
+    await live.leave()
+    expect(untracked).toBe(0)
+  })
+
+  test('the constructor throws while the deck channel is still open, and works after leave', async () => {
+    const { c, as } = make()
+    const first = new SoloLive(as(), 'd')
+    expect(() => new SoloLive(as(), 'd')).toThrow('still open')
+    await first.leave()
+    const second = new SoloLive(as(), 'd')
+    expect(c.channels.length).toBe(2)
+    expect(second.key).not.toBe(first.key)
   })
 })

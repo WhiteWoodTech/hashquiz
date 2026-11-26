@@ -36,7 +36,7 @@ import LobbyView    from './views/LobbyView.vue'
 import QuestionView from './views/QuestionView.vue'
 import PodiumView   from './views/PodiumView.vue'
 
-// Solo screens (and the deck bundle) load only on a `#/solo/<deckId>` route.
+// Solo screens (and the deck list, decks.json) load only on a `#/solo/<deckId>` route.
 const SoloIntroView    = defineAsyncComponent(() => import('./views/SoloIntroView.vue'))
 const SoloQuestionView = defineAsyncComponent(() => import('./views/SoloQuestionView.vue'))
 const SoloEndView      = defineAsyncComponent(() => import('./views/SoloEndView.vue'))
@@ -61,7 +61,7 @@ async function syncRoute(reopen = false) {
     depsLoaded = true
   }
   if (soloDeckId.value !== deckId) return
-  // open() sets the phase synchronously; the leaderboard fills in when it arrives.
+  // open() sets the phase (`loading`) synchronously; the deck, then the leaderboard, fill in when they arrive.
   const opening = solo.open(deckId)
   soloReady.value = true
   await opening

@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
-import { findDeck } from '@quizv/decks'
 import type { SoloDeps } from '../stores/solo'
 import { config } from '../config'
 import { SoloApi } from './api'
+import { findDeck } from './decks'
 import { SoloLive } from './live'
 
 /** Real solo dependencies from the runtime config. Without Supabase credentials the backend is null. */

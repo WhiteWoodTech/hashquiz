@@ -16,13 +16,22 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, shallowRef } from 'vue'
 import { QuizInfoPanel } from '@quizv/ui'
-import { bundledDecks } from '@quizv/decks'
-import { deckInfo } from '@quizv/decks/info'
-import { soloDecks } from '../solo/catalog'
+import type { QuizInfo } from '@quizv/core'
+import { deckInfo } from '@quizv/core/decks'
+import { loadSoloDecks } from '../solo/decks'
 import { soloHash } from '../solo/route'
 
-const decks = soloDecks(bundledDecks).map(d => ({ id: d.id, info: deckInfo(d) }))
+// Filled once decks.json is loaded; the section stays hidden while loading, on error or without solo decks.
+const decks = shallowRef<{ id: string; info: QuizInfo }[]>([])
+onMounted(async () => {
+  try {
+    decks.value = (await loadSoloDecks()).map(d => ({ id: d.id, info: deckInfo(d) }))
+  } catch (e) {
+    console.error('Solo quizzes unavailable:', e)
+  }
+})
 </script>
 
 <style scoped>

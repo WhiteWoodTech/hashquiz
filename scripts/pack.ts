@@ -38,6 +38,7 @@ if (!result.success) {
 cpSync(resolve(root, 'dist'), resolve(out, 'web'), { recursive: true })
 // Deck list and settings belong to each site: `build` writes them.
 rmSync(resolve(out, 'web/host/decks.json'), { force: true })
+rmSync(resolve(out, 'web/decks.json'), { force: true })
 rmSync(resolve(out, 'web/quizv-config.js'), { force: true })
 
 cpSync(resolve(root, 'LICENSE.md'), resolve(out, 'LICENSE.md'))

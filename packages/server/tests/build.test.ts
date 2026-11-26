@@ -38,6 +38,8 @@ describe('buildSite', () => {
     expect(buildSite({ decksDir: dir, outDir: out, env: { HASHQUIZ_TRANSPORT: 'supabase' } })).toBe(1)
     expect(existsSync(join(out, 'index.html'))).toBe(true)
     expect(JSON.parse(readFileSync(join(out, 'host/decks.json'), 'utf-8'))[0].id).toBe('demo/index.quizv.md')
+    // The player reads the same manifest at the site root (solo decks).
+    expect(readFileSync(join(out, 'decks.json'), 'utf-8')).toBe(readFileSync(join(out, 'host/decks.json'), 'utf-8'))
     expect(readFileSync(join(out, 'quizv-config.js'), 'utf-8')).toContain('"transport":"supabase"')
   })
 })

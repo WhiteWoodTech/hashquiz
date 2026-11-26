@@ -2,7 +2,8 @@ import type { Quiz, Question } from '@quizv/parser'
 import type { IRealtimeTransport } from './transport'
 import { GameEvents, type StateSnapshot } from './events'
 import { calcPoints } from './scoring'
-import type { GameState, PlayerState, Score, PodiumEntry, QuestionPublic, QuizInfo } from './types'
+import { serveQuestions, toPublic } from './selection'
+import type { GameState, PlayerState, Score, PodiumEntry, QuizInfo } from './types'
 
 interface PendingAnswer {
   playerId: string
@@ -15,38 +16,6 @@ interface RevealPayload {
   explanation: string | undefined
   scores: Score[]
   choiceCounts: Record<string, number>
-}
-
-/** Position-keyed IDs reassigned to choices after shuffling. Questions are capped at 4 choices. */
-const POSITIONAL_IDS = ['a', 'b', 'c', 'd'] as const
-
-/**
- * Shuffle a question's choices and reassign positional IDs (a/b/c/d) so the badge letter
- * displayed by the UI keeps matching the visual position while the correct answer's letter
- * varies between games. Pure: returns a new Question, leaves the input untouched.
- */
-function shuffleChoices(question: Question): Question {
-  const arr = [...question.choices]
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[arr[i], arr[j]] = [arr[j]!, arr[i]!]
-  }
-  const renamed = arr.map((c, i) => ({ ...c, id: POSITIONAL_IDS[i] ?? c.id }))
-  return { ...question, choices: renamed }
-}
-
-/** Maps a Question to QuestionPublic (strips isCorrect from choices) */
-function toPublic(question: Question, idx: number, oneShoot: boolean): QuestionPublic {
-  return {
-    idx,
-    type: question.type,
-    timer: question.timer,
-    difficulty: question.difficulty,
-    text: question.text,
-    choices: question.choices.map(({ id, text }) => ({ id, text })),
-    oneShoot,
-    tags: question.tags,
-  }
 }
 
 /**
@@ -116,116 +85,13 @@ export class GameEngine {
     void this.transport.broadcast(this.channel, GameEvents.playerLeft(playerId))
   }
 
-  private shuffle<T>(arr: T[]): T[] {
-    const a = [...arr]
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[a[i], a[j]] = [a[j]!, a[i]!]
-    }
-    return a
-  }
-
-  private selectQuestions(): Question[] {
-    const { maxQuestions, maxTimeSec, targetDifficulty } = this.quiz.meta
-    const all = this.quiz.questions
-
-    if (!maxQuestions && !maxTimeSec && !targetDifficulty) return all
-
-    const DIFF_RANK: Record<'easy' | 'medium' | 'hard', number> = { easy: 0, medium: 1, hard: 2 }
-
-    // ── Difficulty-aware path ───────────────────────────────────────────────
-    if (targetDifficulty) {
-      const targetRank = DIFF_RANK[targetDifficulty]
-
-      // Step 1: Hard guardrail — 1 hard question per tag (deduplicated by object ref)
-      const guardrailSet = new Set<Question>()
-      const uniqueTags = [...new Set(all.flatMap(q => q.tags))]
-      for (const tag of uniqueTags) {
-        const hardForTag = this.shuffle(
-          all.filter(q => q.difficulty === 'hard' && q.tags.includes(tag)),
-        )
-        for (const q of hardForTag) {
-          if (!guardrailSet.has(q)) { guardrailSet.add(q); break }
-        }
-      }
-      const guardrail = [...guardrailSet]
-
-      // Step 2: Pools from the remaining questions (not in guardrail)
-      const pool       = all.filter(q => !guardrailSet.has(q))
-      const targetPool = this.shuffle(pool.filter(q => q.difficulty === targetDifficulty))
-      const belowPool  = this.shuffle(pool.filter(q => DIFF_RANK[q.difficulty] < targetRank))
-      const abovePool  = this.shuffle(pool.filter(q => DIFF_RANK[q.difficulty] > targetRank))
-
-      // Step 3: Determine total N (count limit)
-      const totalN = maxQuestions !== undefined
-        ? Math.min(maxQuestions, all.length)
-        : all.length  // for max-time or unbounded: start with all, trim later
-
-      // Step 4: Fill slots with 60/40 split
-      const slots        = Math.max(0, totalN - guardrail.length)
-      const targetCount  = Math.round(slots * 0.6)
-      const belowCount   = slots - targetCount
-      const targetSample = targetPool.slice(0, targetCount)
-      const belowSample  = belowPool.slice(0, belowCount)
-
-      // Step 5: Fallback — fill shortfall from remaining target/below (never above)
-      const usedSet   = new Set<Question>([...guardrail, ...targetSample, ...belowSample])
-      const shortfall = slots - targetSample.length - belowSample.length
-      const fallback  = this.shuffle(
-        [...targetPool, ...belowPool].filter(q => !usedSet.has(q)),
-      )
-      const extra = fallback.slice(0, Math.max(0, shortfall))
-
-      let selected = [...guardrail, ...targetSample, ...belowSample, ...extra]
-
-      // Step 6: Apply time budget if set (sort easy-first so short warmups get priority)
-      if (maxTimeSec !== undefined) {
-        selected.sort((a, b) => DIFF_RANK[a.difficulty] - DIFF_RANK[b.difficulty])
-        let total = 0
-        selected = selected.filter(q => {
-          if (total + q.timer <= maxTimeSec) { total += q.timer; return true }
-          return false
-        })
-      }
-
-      // Step 7: Final sort — difficulty ascending (easy → medium → hard)
-      selected.sort((a, b) => DIFF_RANK[a.difficulty] - DIFF_RANK[b.difficulty])
-      return selected
-    }
-
-    // ── Original path: no targetDifficulty ─────────────────────────────────
-    const indices = all.map((_, i) => i)
-    for (let i = indices.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[indices[i], indices[j]] = [indices[j]!, indices[i]!]
-    }
-
-    let selectedIndices: number[]
-    if (maxQuestions !== undefined) {
-      selectedIndices = indices.slice(0, maxQuestions)
-    } else {
-      selectedIndices = []
-      let total = 0
-      for (const idx of indices) {
-        const timer = all[idx]!.timer
-        if (total + timer <= maxTimeSec!) {
-          selectedIndices.push(idx)
-          total += timer
-        }
-      }
-    }
-
-    selectedIndices.sort((a, b) => a - b)
-    return selectedIndices.map(i => all[i]!)
-  }
-
   /** Transition lobby → active, broadcast game_started + first question_started event */
   async start(): Promise<void> {
     if (this.state.status !== 'lobby') return
     this.state.status = 'active'
     // Shuffle each question's choices once at start so the correct answer's letter varies
     // between games but stays frozen for the whole session (cohérent across host/player/rejoin).
-    this.activeQuestions = this.selectQuestions().map(q => shuffleChoices(q))
+    this.activeQuestions = serveQuestions(this.quiz)
     this.state.totalQuestions = this.activeQuestions.length
     await this.transport.broadcast(this.channel, GameEvents.gameStarted())
     await this._broadcastCurrentQuestion()

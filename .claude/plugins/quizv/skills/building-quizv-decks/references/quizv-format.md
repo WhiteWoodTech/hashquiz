@@ -41,6 +41,7 @@ tags: [topic]
 | author | `author` | string | No | — | Author name |
 | tags | `tags` | string[] | Yes | `[]` | Array of tags |
 | oneShoot | `one-shoot` | boolean | No | `true` | Prevent immediate retake |
+| solo | `solo` | boolean | No | `false` | Allow solo play with a shared leaderboard |
 | maxQuestions | `max-questions` | number | No | — | Max questions to display (positive) |
 | maxTimeSec | `max-time` | number/string | No | — | Time limit: bare number or `'Xm'` = minutes, `'Xs'` = seconds |
 | targetDifficulty | `target-difficulty` | string | No | — | `'easy'`, `'medium'`, or `'hard'` |

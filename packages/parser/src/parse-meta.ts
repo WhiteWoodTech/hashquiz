@@ -46,6 +46,7 @@ export function parseMeta(rawBlock: string): QuizMeta {
     author: typeof data['author'] === 'string' ? data['author'] : undefined,
     tags: Array.isArray(data['tags']) ? (data['tags'] as string[]) : [],
     oneShoot: data['one-shoot'] !== false,
+    solo: data['solo'] === true,
     maxQuestions:
       typeof data['max-questions'] === 'number' && data['max-questions'] > 0
         ? data['max-questions']

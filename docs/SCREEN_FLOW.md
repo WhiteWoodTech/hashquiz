@@ -143,6 +143,66 @@ After each reveal the store computes the player's rank with `rankOf(scores, play
 
 ---
 
+## Player App — Solo
+
+**Tech:** same SPA, entered through the hash route `#/solo/<deckId>` (`deckId` URL-encoded, the host deck id).
+Solo always runs on Supabase; no host, no join code. The hosted-room phases above are unchanged.
+
+```
+SoloPhase: 'unavailable' | 'intro' → 'question' → 'revealed' → ('question' …) → 'end' (→ 'question' via Rejouer)
+```
+
+### Screen Transitions
+
+| Phase | Trigger | View | Actions |
+|-------|---------|------|---------|
+| `unavailable` | Unknown or non-solo deck id | `SoloIntroView` | Short "quiz not available" message |
+| `intro` | Hash `#/solo/<deckId>` on a solo deck | `SoloIntroView` | Quiz card, pseudo field (no email), **Commencer**, leaderboard (`SoloLeaderboard`: live players "en cours" + past runs) |
+| `question` | Start, or **Suivant** | `SoloQuestionView` | Answer grid + countdown (the question `timer`); **Valider** makes the answer final when it is not a one-tap case |
+| `revealed` | Final answer or timeout | `SoloQuestionView` | Correction (verdict, correct answers, explanation, points, running score), live players on this quiz, **Suivant** (no auto-advance) |
+| `end` | Last correction passed | `SoloEndView` | Score, total time, rank, full leaderboard with own row highlighted, **Rejouer** (new run, new row), Markuiz interest form (`LeadForm`) |
+
+### Solo Flow Diagram
+
+```
+[Open #/solo/<deckId>]
+        │
+        ▼
+  ┌──────────────┐
+  │ SoloIntro    │  Pseudo + [Commencer], leaderboard (live + past)
+  └──────┬───────┘
+         │ presence on solo:<deckId>
+         ▼
+  ┌──────────────┐
+  │ question     │  Countdown from the question timer
+  └──────┬───────┘
+         │ answer or timeout
+         ▼
+  ┌──────────────┐
+  │ revealed     │  Correction + points + live players; [Suivant]
+  └──────┬───────┘
+         │ [Suivant] → next question (loop) OR end
+         ▼
+  ┌──────────────┐
+  │ SoloEnd      │  Run saved (RPC or Edge Function), score, time, rank,
+  │              │  leaderboard, [Rejouer], Markuiz form
+  └──────────────┘
+```
+
+### Answer finality
+
+- `single` + `one-shoot: true`: the tap is final.
+- `multiple` + `one-shoot: true`: **Valider** is final.
+- `one-shoot: false` (any type): choices stay editable until **Valider**; on timeout the last selection counts.
+
+### Total time and persistence
+
+Total time = sum of the answer times, each capped at the question timer (a timeout counts as the full timer);
+correction time is excluded and is the leaderboard tie-break. Leaving mid-run abandons it: nothing is stored.
+A run is written once, at the end. Pseudo only, no email on runs.
+
+---
+
 ## Multi-Select Answer Logic
 
 1. Player taps answer buttons to toggle selection (any number of choices)
@@ -155,4 +215,4 @@ After each reveal the store computes the player's rank with `rankOf(scores, play
 
 ---
 
-*Last updated: 2026-11-25*
+*Last updated: 2026-11-26*

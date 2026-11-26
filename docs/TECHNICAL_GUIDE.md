@@ -234,12 +234,16 @@ bun test --watch            # Watch mode
 bun test packages/core      # Single package
 ```
 
-Current coverage: **27 tests, 0 failures**
+Current coverage: **222 tests across 27 files, 0 failures**
 
 | Package | Tests | Coverage |
 |---------|-------|----------|
-| `@quizv/parser` | 13 | Parse paths, edge cases, validation |
-| `@quizv/core` | 14 | GameEngine transitions, scoring, choiceCounts |
+| `@quizv/parser` | 30 | Parse paths, edge cases, validation, `solo` flag |
+| `@quizv/core` | 74 | GameEngine transitions, scoring, choiceCounts, question selection, `SoloSession`, `verifySoloRun`, `compareRuns` |
+| `@quizv/decks` | 8 | Deck bundle, content version, `deckInfo` |
+| `@quizv/ui` | 45 | Theme parity, Fx layout |
+| `apps/player` | 39 | Solo API, route, store |
+| `apps/host` | 8 | Deck browsing, solo link |
 
 ---
 
@@ -270,6 +274,10 @@ Leaderboard index: `(deck_id, score desc, total_time_ms, finished_at)`. `solo_ru
   (score desc, total time asc, finished at asc — same as `compareRuns`); `null` for an unknown id.
 
 anon can never insert into `solo_runs` / `solo_answers` directly.
+
+**Presence.** Live solo players use a public Realtime presence channel per deck, `solo:<deckId>`. Each player
+tracks pseudo, current question / total and score, and untracks on finish or abandon. Finished runs reach the
+leaderboards through inserts on `solo_runs`.
 
 ### Edge Function `solo-submit`
 

@@ -19,7 +19,7 @@ Feature list and roadmap for QuizV, organized by phase.
 | Scoring formula | ✅ | 500–1000 pts based on answer speed |
 | `quizv dev` CLI | ✅ | Starts WS server from a `.quizv.md` file |
 | `quizv check` CLI | ✅ | Validates a quiz file and reports errors |
-| Unit tests | ✅ | 88 tests across 9 files (parser, core, transports, apps), 0 failures |
+| Unit tests | ✅ | 222 tests across 27 files (parser, core, decks, transports, UI, apps), 0 failures |
 
 ---
 
@@ -71,6 +71,26 @@ See [`DEPLOY.md`](DEPLOY.md) for setup.
 
 ---
 
+## Solo live mode (complete)
+
+Second game mode next to the hosted room: one player, own pace, shared per-quiz leaderboard. Needs Supabase
+(Postgres tables + Realtime), see [`DEPLOY.md`](DEPLOY.md) and [`TECHNICAL_GUIDE.md`](TECHNICAL_GUIDE.md).
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| `solo: true` frontmatter | ✅ | Flags a deck as playable solo (`QuizMeta.solo`, default `false`) |
+| Play solo link | ✅ | Solo deck cards in the host catalog link to the player app at `#/solo/<deckId>` |
+| Solo run | ✅ | Per-question timer, correction right after the answer, **Suivant** when ready, `Valider` for editable answers |
+| Total time | ✅ | Sum of answer times capped at each question timer; correction screen excluded |
+| Shared leaderboard | ✅ | Per deck across versions: score desc, total time asc, finished at asc; live players ("en cours") + past runs |
+| Run persistence | ✅ | `solo_runs` + `solo_answers`, written once at the end of the run; abandoned runs are not stored |
+| Scoring mode | ✅ | `VITE_SOLO_SCORING=browser` (default, `submit_solo_run` RPC) or `edge` (`solo-submit` Edge Function rescoring) |
+| Markuiz interest form | ✅ | Optional email + consent on the end screen, stored in insert-only `leads` |
+| Shared `@quizv/decks` | ✅ | Deck bundle and `deckInfo` used by both apps |
+| Async room | ⬜ | End date, private code, shared persisted leaderboard (reuses the solo storage) |
+
+---
+
 ## Phase 4 — Slidev Addon (planned)
 
 | Feature | Status | Description |
@@ -88,9 +108,11 @@ See [`DEPLOY.md`](DEPLOY.md) for setup.
 |-----------|--------|
 | `crypto.randomUUID()` not used | Fails on HTTP over LAN (non-secure context) |
 | No Vue Router | Linear game flow — `v-if` on phase is sufficient |
-| Supabase mode is ephemeral | No Postgres tables: a host page reload loses the game |
+| Supabase mode is ephemeral for rooms | Rooms use no Postgres tables: a host page reload loses the game (only solo runs are stored) |
+| Solo needs Supabase | No local (Bun) solo backend; `quizv dev` stays room-only |
+| `edge` scoring is not anti-cheat | Stops forged scores; answers stay in the client bundle and times are self-reported |
 | `playerUrl` hardcoded to port 3032 | Dedicated Vite player dev server |
 
 ---
 
-*Last updated: 2026-11-25*
+*Last updated: 2026-11-26*

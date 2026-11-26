@@ -22,6 +22,7 @@ quizv/
 │   │       ├── stores/
 │   │       │   └── game.ts          # Pinia store — HostPhase state machine
 │   │       ├── components/
+│   │       │   ├── DeckCard.vue     # Catalog card, "Jouer en solo" link on solo decks
 │   │       │   └── FullscreenButton.vue # Fullscreen toggle (every host view fits 100vh)
 │   │       ├── session/
 │   │       │   ├── supabase-session.ts # Supabase Realtime session handler
@@ -41,11 +42,25 @@ quizv/
 │           ├── main.ts
 │           ├── App.vue
 │           ├── stores/
-│           │   └── game.ts          # Pinia store — PlayerPhase state machine
+│           │   ├── game.ts          # Pinia store — PlayerPhase state machine
+│           │   └── solo.ts          # Pinia store — solo run (SoloPhase), leaderboard, live presence
+│           ├── solo/                # Solo live mode (loaded on #/solo/<deckId> only)
+│           │   ├── api.ts           # Supabase calls: submit run (RPC / Edge Function), leaderboard, leads
+│           │   ├── live.ts          # Realtime presence channel solo:<deckId>
+│           │   ├── route.ts         # parseSoloHash
+│           │   ├── deps.ts          # Wires Supabase client + VITE_SOLO_SCORING
+│           │   ├── format.ts        # Time formatting
+│           │   └── solo.css
+│           ├── components/
+│           │   ├── SoloLeaderboard.vue # Live players + past runs
+│           │   └── LeadForm.vue     # Markuiz interest form
 │           └── views/
 │               ├── JoinView.vue     # Join code + pseudo/email form
 │               ├── LobbyView.vue    # Waiting room
 │               ├── QuestionView.vue # Answer grid + countdown + verdict/rank after reveal
+│               ├── SoloIntroView.vue    # Quiz card + pseudo + leaderboard
+│               ├── SoloQuestionView.vue # Question and correction (solo)
+│               ├── SoloEndView.vue      # Score, rank, leaderboard, Markuiz form
 │               ├── FeedbackView.vue # Unused (not imported; in the backlog for removal)
 │               └── PodiumView.vue   # Final rank + score + animated podium
 ├── packages/
@@ -68,9 +83,18 @@ quizv/
 │   │   │   ├── events.ts            # GameEvent discriminated union + GameEvents builder
 │   │   │   ├── transport.ts         # IRealtimeTransport interface
 │   │   │   ├── scoring.ts           # calcPoints(timeRemaining, isCorrect)
+│   │   │   ├── selection.ts         # serveQuestions: shared question selection + choice shuffling
+│   │   │   ├── solo.ts              # SoloSession: solo run state machine
+│   │   │   ├── solo-verify.ts       # verifySoloRun (edge rescoring), compareRuns (leaderboard order)
 │   │   │   └── game.ts              # GameEngine state machine
 │   │   └── tests/
 │   │       └── game.test.ts         # 14 tests
+│   ├── decks/                       # @quizv/decks — shared deck bundle + content version
+│   │   ├── package.json
+│   │   └── src/
+│   │       ├── index.ts             # Deck bundle (import.meta.glob over decks/**)
+│   │       ├── build.ts             # buildDecks: deck id rule, content version
+│   │       └── info.ts              # deckInfo; pure entry `@quizv/decks/info`
 │   ├── transport-local/             # @quizv/transport-local
 │   │   ├── package.json
 │   │   ├── tsconfig.json
@@ -125,6 +149,14 @@ quizv/
 │   └── ee/                          # Pro / Enterprise features (placeholder)
 │       ├── LICENSE                  # QuizV Enterprise License
 │       └── README.md                # Planned paid features and rules
+├── supabase/                        # Supabase CLI project (solo live mode)
+│   ├── config.toml
+│   ├── migrations/
+│   │   └── 20261126090000_solo_live.sql # solo_runs, solo_answers, solo_settings, leads, RPCs
+│   └── functions/
+│       └── solo-submit/index.ts     # Edge Function: rescoring (edge mode); _shared/generated is gitignored
+├── scripts/
+│   └── build-edge.ts                # Generates the Edge Function deck bundle
 ├── examples/
 │   └── demo.quizv.md                # Sample quiz file
 ├── LICENSE.md                       # Licensing overview + QuizV Sustainable Use License
@@ -147,6 +179,8 @@ Licensing per directory is described in [`LICENSING.md`](./LICENSING.md): `packa
 | `packages/core/src/types.ts` | Shared types: `PlayerState`, `Score`, `PodiumEntry` |
 | `packages/core/src/events.ts` | `GameEvent` union + `GameEvents` builder |
 | `packages/core/src/game.ts` | `GameEngine` — authoritative game state machine |
+| `supabase/migrations/20261126090000_solo_live.sql` | Solo schema, RLS and RPCs |
+| `packages/core/src/solo.ts` | `SoloSession` — solo run state machine |
 | `packages/server/src/server.ts` | Bun HTTP+WS server, handles all WS messages |
 | `packages/server/src/build.ts` | `hashquiz build`: static site = prebuilt apps + `host/decks.json` + `quizv-config.js` |
 | `packages/server/src/vite-plugin.ts` | Serves/emits `decks.json` and `quizv-config.js` for the Vite apps |
@@ -174,4 +208,4 @@ In production (Vercel), the build output is `dist/`, containing the compiled fro
 
 ---
 
-*Last updated: 2026-11-25*
+*Last updated: 2026-11-26*

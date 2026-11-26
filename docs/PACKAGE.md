@@ -33,16 +33,22 @@ hashquiz build decks --out dist               # static site with every deck unde
 ```
 
 `build` validates every `*.quizv.md` under the folder, copies the apps and
-writes `host/decks.json` and `quizv-config.js`. It reads the deployment
-settings from the environment:
+writes `host/decks.json` (host deck list), the same `decks.json` at the root
+(player solo decks) and `quizv-config.js`. It reads the deployment settings
+from the environment:
 
 | Variable | Value |
 | --- | --- |
 | `HASHQUIZ_TRANSPORT` | `supabase` for a hosted game (default `local`) |
 | `HASHQUIZ_SUPABASE_URL` | Supabase project URL |
 | `HASHQUIZ_SUPABASE_ANON_KEY` | Supabase anon public key |
+| `HASHQUIZ_SOLO_SCORING` | Solo run scoring: `browser` (default) or `edge` |
+| `HASHQUIZ_PLAYER_URL` | Optional player URL for the host's solo links (default: same origin) |
 
 The `QUIZV_*` and `VITE_*` names (`VITE_TRANSPORT`, …) are accepted too.
+
+Decks with `solo: true` in their frontmatter can also be played alone from
+the player app (Supabase required, see the hashquiz `docs/DEPLOY.md`).
 
 ## Deploy on Vercel
 

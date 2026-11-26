@@ -85,7 +85,7 @@ PlayerPhase: 'join' → 'lobby' → 'question' → 'podium' (→ 'lobby' on game
 
 | Phase | Trigger | View | Actions |
 |-------|---------|------|---------|
-| `join` | Initial load | `JoinView` | Enter join code, pseudo, email. Below the form, when Supabase credentials are set, « Ou jouez en solo » lists the solo decks (`SoloCatalog`, lazy-loaded chunk); each card links to `#/solo/<deckId>` |
+| `join` | Initial load | `JoinView` | Enter join code, pseudo, email. Below the form, when Supabase credentials are set, « Ou jouez en solo » lists the solo decks of the runtime `decks.json` (`SoloCatalog`, lazy-loaded chunk; hidden while loading, on error or without solo decks); each card links to `#/solo/<deckId>` |
 | `lobby` | `player_joined` (own join confirmed), or `game_reset` from the podium | `LobbyView` | Grey QuizV logo top left, quiz card (same look as the host lobby, compact on phones), dot hourglass (`FxHourglass`) with "Waiting for the host…", and the room constellation (`FxLobby`) |
 | `question` | `question_started` received | `QuestionView` | Answer grid + countdown; once `answer_revealed` arrives, a result block replaces the countdown at the top (verdict constellation, total score, rank, points gained, speed); no tinted background, the shared `FxBackdrop` dust stays |
 | `podium` | `game_ended` received | `PodiumView` | Final rank + score, animated podium (`FxPodium`) |
@@ -145,19 +145,21 @@ After each reveal the store computes the player's rank with `rankOf(scores, play
 
 ## Player App — Solo
 
-**Tech:** same SPA, entered through the hash route `#/solo/<deckId>` (`deckId` URL-encoded, the host deck id),
+**Tech:** same SPA, entered through the hash route `#/solo/<deckId>` (`deckId` URL-encoded, the manifest id shared
+with the host: path relative to the decks folder),
 from the solo list on the player home (`JoinView`) or the « Jouer en solo » link on host deck cards.
 Solo always runs on Supabase; no host, no join code. The hosted-room phases above are unchanged.
 
 ```
-SoloPhase: 'unavailable' | 'intro' → 'question' → 'revealed' → ('question' …) → 'end' (→ 'question' via Rejouer)
+SoloPhase: 'loading' → 'unavailable' | 'intro' → 'question' → 'revealed' → ('question' …) → 'end' (→ 'question' via Rejouer)
 ```
 
 ### Screen Transitions
 
 | Phase | Trigger | View | Actions |
 |-------|---------|------|---------|
-| `unavailable` | Unknown or non-solo deck id, or no Supabase credentials; also when no question is served (e.g. a `max-time` budget no question fits) or the presence channel cannot open | `SoloIntroView` | Short "quiz not available" message |
+| `loading` | Hash `#/solo/<deckId>`, while the deck list (`/decks.json`) loads | `SoloIntroView` | « Chargement du quiz… » |
+| `unavailable` | Unknown or non-solo deck id, deck list load error, or no Supabase credentials; also when no question is served (e.g. a `max-time` budget no question fits) or the presence channel cannot open | `SoloIntroView` | Short "quiz not available" message |
 | `intro` | Hash `#/solo/<deckId>` on a solo deck | `SoloIntroView` | Quiz card, pseudo field (no email), **Commencer**, leaderboard (`SoloLeaderboard`: live players "en cours" + past runs) |
 | `question` | Start, or **Suivant** | `SoloQuestionView` | Answer grid + countdown (the question `timer`); **Valider** makes the answer final when it is not a one-tap case |
 | `revealed` | Final answer or timeout | `SoloQuestionView` | Correction (verdict, correct answers, explanation, points, running score), live players on this quiz, **Suivant** (no auto-advance) |

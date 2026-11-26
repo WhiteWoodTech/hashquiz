@@ -14,12 +14,16 @@ leads in Postgres (`supabase/migrations/`) and can score runs in an Edge Functio
    supabase login
    supabase link --project-ref <project-ref>
    supabase db push                                    # tables, RLS, RPCs (supabase/migrations/)
-   bun run build:edge && supabase functions deploy solo-submit
+   bun run build:edge <decksDir> && supabase functions deploy solo-submit
    ```
 
-   `bun run build:edge` regenerates `supabase/functions/_shared/generated/` (solo decks + the
-   `verifySoloRun` bundle, gitignored). Redeploy the function whenever a `solo: true` deck changes, otherwise
-   edge-scored runs of that deck are rejected with `deck version mismatch`.
+   Run these from this repository. `bun run build:edge <decksDir>` regenerates
+   `supabase/functions/_shared/generated/` (solo decks + the `verifySoloRun` bundle, gitignored). Pass it
+   **the same decks folder as `hashquiz build`** (e.g. a checkout of a decks repository,
+   `bun run build:edge ../markuiz-decks/decks`): deck ids (paths relative to that folder) and versions
+   (content hash) must match the `decks.json` the apps load. Redeploy the function whenever a `solo: true`
+   deck changes, otherwise edge-scored runs of that deck are rejected with `deck version mismatch` or
+   `unknown deck`.
 
 ## 2. Create a Vercel project
 
@@ -38,7 +42,11 @@ Set these for Production and Preview:
 | `VITE_SUPABASE_URL` | (from step 1) |
 | `VITE_SUPABASE_ANON_KEY` | (from step 1) |
 | `VITE_SOLO_SCORING` | `browser` (default) or `edge` |
-| `VITE_PLAYER_URL` | Host only, optional player URL for solo links; empty = same origin |
+| `VITE_PLAYER_URL` | Optional player URL for the host's solo links; empty = same origin |
+
+Each name can also be written `HASHQUIZ_*` or `QUIZV_*` (`HASHQUIZ_SOLO_SCORING`, …; `HASHQUIZ_*` wins).
+`hashquiz build` writes them into `/quizv-config.js`, read by both apps at runtime
+(`packages/core/src/runtime-config.ts`).
 
 ### Solo scoring mode
 
@@ -46,7 +54,7 @@ Set these for Production and Preview:
 `edge`: the browser posts the raw answers to the `solo-submit` Edge Function, which rescores them from its own
 copy of the deck. Switch **both** together:
 
-1. Set `VITE_SOLO_SCORING=edge` in Vercel and redeploy.
+1. Set `VITE_SOLO_SCORING=edge` (or `HASHQUIZ_SOLO_SCORING=edge`) in Vercel and redeploy.
 2. In the SQL editor: `update solo_settings set scoring_mode = 'edge';` (the RPC then refuses browser-scored
    runs).
 
@@ -68,6 +76,8 @@ Push to the configured branch. Vercel builds and serves:
 2. Open `/?code=XYZ` in two other tabs (or scan the QR), join with two pseudos.
 3. Click *Start* in the host tab. Verify the question appears in player tabs, answers
    register, and the podium shows at the end.
+4. Solo (needs a `solo: true` deck): the player home lists it under the join form, and its host card
+   shows **Jouer en solo**. Play a run to the end and check it appears in the leaderboard.
 
 ## Local development
 
@@ -75,12 +85,14 @@ Push to the configured branch. Vercel builds and serves:
 `bun run packages/server/src/cli.ts dev examples/demo.quizv.md`. No Supabase is involved, and solo mode is not
 available.
 
-To work on solo mode, run a local Supabase (requires Docker):
+Both Vite apps list the decks of `examples/` (or `QUIZV_DECKS_DIR`, relative to the repo root), served as
+`/host/decks.json` and `/decks.json`. `examples/demo.quizv.md` is a `solo: true` deck. To work on solo mode,
+run a local Supabase (requires Docker):
 
 ```bash
 bun run supabase:start                 # supabase start: Postgres, API, Realtime, Studio on 5432x ports
 supabase db reset                      # re-apply supabase/migrations/ on a clean database
-bun run build:edge                     # only for edge scoring
+bun run build:edge examples            # only for edge scoring (same folder as the apps list)
 supabase functions serve solo-submit   # only for edge scoring
 ```
 
@@ -104,8 +116,10 @@ Decks live in their own repositories (`maxime-lenne/markuiz-decks`,
 variables can use the `HASHQUIZ_*` names (`HASHQUIZ_TRANSPORT`, …). See
 [`PACKAGE.md`](PACKAGE.md).
 
-The host app reads the deck list from `host/decks.json` and the settings from
-`/quizv-config.js` at runtime, so the same prebuilt apps serve any decks folder.
+The host app reads the deck list from `host/decks.json`, the player its solo decks from the same
+manifest at `/decks.json`, and both the settings from `/quizv-config.js` at runtime, so the same
+prebuilt apps serve any decks folder. For edge scoring, run `bun run build:edge` (step 1) with a
+checkout of the decks repository's folder, then redeploy the function.
 
 ## Publishing the `hashquiz` package
 

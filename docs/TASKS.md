@@ -25,7 +25,8 @@ Setup minimal, parfait pour MVP.
 
 Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
-- Quizz asynchrone (date de fin, un a plusieurs joueurs)
+- Salon asynchrone (date de fin, code privé, classement partagé) : réutilisera le stockage du solo live
+  (`room_id` nullable sur `solo_runs`)
 
 ---
 
@@ -101,6 +102,10 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
 ## Completed
 
+- [x] Solo live : quiz jouable seul depuis le catalogue (`solo: true`), correction après chaque réponse,
+      temps total, classement partagé par quiz (joueurs en cours + runs terminés), stockage Supabase
+      (`solo_runs`, `solo_answers`), scoring navigateur ou Edge Function (`VITE_SOLO_SCORING`),
+      formulaire d'intérêt Markuiz (`leads`), bundle `@quizv/decks` partagé
 - [x] Revoir l'index avec une grille de card (même design que le reste, et card proche type QuizInfoPanel)
       des différents quizz, avec titre, description, tags, max-questions et target-difficulty
       (+ section de tags cliquables et page `#/tag/<tag>`).
@@ -142,4 +147,4 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
 ---
 
-*Last updated: 2026-11-25*
+*Last updated: 2026-11-26*

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@quizv/core": "workspace:*",
+    "@quizv/decks": "workspace:*",
     "@quizv/transport-supabase": "workspace:*",
     "@quizv/ui": "workspace:*",
     "@quizv/theme-default": "workspace:*",

@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   publish:
-    name: Publish markuiz
+    name: Publish hashquiz
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

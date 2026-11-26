@@ -26,7 +26,7 @@ export function devCommand(quizFile: string, port?: number): void {
   } else {
     const web = findWebDist()
     if (!web) {
-      console.error('Prebuilt web apps not found: reinstall the markuiz package.')
+      console.error('Prebuilt web apps not found: reinstall the hashquiz package.')
       process.exit(1)
     }
     serveStatic(web, 3031, '/host/')

@@ -139,10 +139,10 @@ quizv/
 | `packages/core/src/events.ts` | `GameEvent` union + `GameEvents` builder |
 | `packages/core/src/game.ts` | `GameEngine` — authoritative game state machine |
 | `packages/server/src/server.ts` | Bun HTTP+WS server, handles all WS messages |
-| `packages/server/src/build.ts` | `markuiz build`: static site = prebuilt apps + `host/decks.json` + `quizv-config.js` |
+| `packages/server/src/build.ts` | `hashquiz build`: static site = prebuilt apps + `host/decks.json` + `quizv-config.js` |
 | `packages/server/src/vite-plugin.ts` | Serves/emits `decks.json` and `quizv-config.js` for the Vite apps |
 | `packages/core/src/runtime-config.ts` | Runtime settings read by both apps (transport, Supabase) |
-| `scripts/pack.ts` | Stages the `markuiz` npm package in `pkg/` (see `docs/PACKAGE.md`) |
+| `scripts/pack.ts` | Stages the `hashquiz` npm package in `pkg/` (see `docs/PACKAGE.md`) |
 | `packages/theme-default/styles/vars.css` | All `--qv-*` design tokens (same set in `theme-original`) |
 | `packages/ui/styles/base.css` | `.qv-label` and `.qv-sr-only` utilities |
 | `packages/ui/src/fx/` | Canvas engine behind the Fx components |

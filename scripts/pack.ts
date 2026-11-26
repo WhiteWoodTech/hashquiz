@@ -53,6 +53,9 @@ writeFileSync(resolve(out, 'package.json'), JSON.stringify({
   repository: { type: 'git', url: 'git+https://github.com/WhiteWoodTech/hashquiz.git' },
   homepage: 'https://github.com/WhiteWoodTech/hashquiz#readme',
   bugs: { url: 'https://github.com/WhiteWoodTech/hashquiz/issues' },
+  // Public scoped-or-not package with provenance: npm refuses provenance on a
+  // new package unless access is explicitly public.
+  publishConfig: { access: 'public', provenance: true },
   bin: { [PACKAGE_NAME]: `./bin/${PACKAGE_NAME}.js` },
   files: ['bin', 'web', 'README.md', 'LICENSE.md'],
   engines: { bun: '>=1.1' },

@@ -2,7 +2,7 @@ import { describe, test, expect } from 'bun:test'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Quiz, SoloRunSubmission } from '@quizv/core'
 import { SoloApi } from '../src/solo/api'
-import { SoloLive } from '../src/solo/live'
+import { SoloLive, realtimeSettled } from '../src/solo/live'
 
 const quiz: Quiz = {
   meta: { title: 'T', theme: 'default', tags: [], oneShoot: true, solo: true },
@@ -37,8 +37,10 @@ class FakeChannel {
   readonly topic: string
   constructor(public name: string, public opts?: unknown) { this.topic = `realtime:${name}` }
   on(kind: string, filter: { event?: string }, cb: (payload?: unknown) => void) { this.listeners.push({ kind, filter, cb }); return this }
-  subscribe(cb?: (s: string) => void) { cb?.('SUBSCRIBED'); return this }
-  async track(s: unknown) { this.tracked.push(s) }
+  statusCb: ((s: string) => void) | undefined
+  trackStatus = 'ok'
+  subscribe(cb?: (s: string) => void) { this.statusCb = cb; cb?.('SUBSCRIBED'); return this }
+  async track(s: unknown) { this.tracked.push(s); return this.trackStatus }
   async untrack() {}
   presenceState() { return this.state }
   fire(event: string, payload?: unknown) {
@@ -55,6 +57,7 @@ class FakeClient {
   tableResult: Result = { data: [] }
   channels: FakeChannel[] = []
   removed: unknown[] = []
+  realtime = { connectionState: () => 'open' }
   functions = { invoke: async (fn: string, opts: unknown) => { this.invokeCalls.push({ fn, opts }); return this.invokeResult } }
   async rpc(fn: string, args: unknown) { this.rpcCalls.push({ fn, args }); return this.rpcResults[fn] ?? { data: null, error: null } }
   from(table: string) { const q = new FakeQuery(this.tableResult); this.queries.push({ table, q }); return q }
@@ -290,5 +293,101 @@ describe('SoloLive', () => {
     const second = new SoloLive(as(), 'd')
     expect(c.channels.length).toBe(2)
     expect(second.key).not.toBe(first.key)
+  })
+})
+
+describe('realtimeSettled', () => {
+  const client = (states: string[]) => {
+    let i = 0
+    return { realtime: { connectionState: () => states[Math.min(i++, states.length - 1)] } } as unknown as SupabaseClient
+  }
+
+  test('resolves at once on an idle or open socket', async () => {
+    const t0 = Date.now()
+    await realtimeSettled(client(['closed']), 1_000, 5)
+    await realtimeSettled(client(['open']), 1_000, 5)
+    expect(Date.now() - t0).toBeLessThan(20)
+  })
+
+  test('waits while the socket is closing or reconnecting', async () => {
+    const c = client(['closing', 'connecting', 'connecting', 'open'])
+    await realtimeSettled(c, 1_000, 5)
+    expect(c.realtime.connectionState()).toBe('open')
+  })
+
+  test('gives up after maxMs', async () => {
+    const t0 = Date.now()
+    await realtimeSettled(client(['connecting']), 30, 5)
+    expect(Date.now() - t0).toBeLessThan(200)
+  })
+})
+
+describe('channel rebuild after a server-side drop', () => {
+  const me = { pseudo: 'Al', index: 1, total: 5, score: 100 }
+  const settle = () => new Promise(r => setTimeout(r, 0))
+
+  test('CHANNEL_ERROR replaces the presence channel and re-tracks the latest state', async () => {
+    const { c, as } = make()
+    const live = new SoloLive(as(), 'd')
+    await live.join(me)
+    const old = c.channels[0]!
+    old.statusCb?.('CHANNEL_ERROR')
+    await settle()
+    expect(c.removed).toEqual([old])
+    expect(c.channels.length).toBe(2)
+    const fresh = c.channels[1]!
+    expect(fresh.name).toBe('solo:d')
+    expect((fresh.opts as { config: { presence: { key: string } } }).config.presence.key).toBe(live.key)
+    expect(fresh.tracked).toEqual([me])
+    // Events from the dropped channel are ignored; the fresh one feeds the rows.
+    let seen: unknown[] = []
+    live.onChange(p => { seen = p })
+    old.fire('join', { key: 'x', newPresences: [me] }); old.fire('sync')
+    expect(seen).toEqual([])
+    fresh.fire('join', { key: 'y', newPresences: [me] }); fresh.fire('sync')
+    expect(seen).toEqual([{ key: 'y', ...me }])
+  })
+
+  test('a refused track() rebuilds once; errors within REBUILD_MIN_MS are ignored', async () => {
+    const { c, as } = make()
+    const live = new SoloLive(as(), 'd')
+    await live.join(me)
+    c.channels[0]!.trackStatus = 'error'
+    await live.update({ ...me, index: 2 })
+    expect(c.channels.length).toBe(2)
+    expect(c.channels[1]!.tracked).toEqual([{ ...me, index: 2 }])
+    c.channels[1]!.trackStatus = 'error'
+    await live.update({ ...me, index: 3 })
+    expect(c.channels.length).toBe(2)
+  })
+
+  test('no rebuild after leave, and an untracked player is not re-tracked', async () => {
+    const { c, as } = make()
+    const live = new SoloLive(as(), 'd')
+    await live.join(me)
+    await live.untrack()
+    c.channels[0]!.statusCb?.('CHANNEL_ERROR')
+    await settle()
+    expect(c.channels.length).toBe(2)
+    expect(c.channels[1]!.tracked).toEqual([])
+    await live.leave()
+    c.channels[1]!.statusCb?.('CHANNEL_ERROR')
+    await settle()
+    expect(c.channels.length).toBe(2)
+  })
+
+  test('onNewRun replaces an errored channel and refetches once', async () => {
+    const { c, as } = make()
+    let n = 0
+    const off = new SoloApi(as(), 'browser').onNewRun('d', () => n++)
+    c.channels[0]!.statusCb?.('CHANNEL_ERROR')
+    await settle()
+    expect(c.removed).toEqual([c.channels[0]])
+    expect(c.channels.length).toBe(2)
+    expect(n).toBe(1)
+    c.channels[1]!.listeners[0]!.cb()
+    expect(n).toBe(2)
+    await off()
+    expect(c.getChannels()).toEqual([])
   })
 })

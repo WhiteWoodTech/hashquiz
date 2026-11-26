@@ -1,4 +1,5 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
+import type { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js'
+import { REBUILD_MIN_MS, realtimeSettled } from './live'
 import { verifySoloRun, type Quiz, type RankedRun, type SoloRunSubmission } from '@quizv/core'
 
 export type ScoringMode = 'browser' | 'edge'
@@ -151,15 +152,33 @@ export class SoloApi {
     try {
       // realtime-js returns an existing channel for the same topic, and `.on()` throws once it has joined.
       if (this.client.getChannels().some(c => c.topic === `realtime:${topic}`)) throw new Error(`${topic} is still open`)
-      const channel = this.client
-        .channel(topic)
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'solo_runs', filter: `deck_id=eq.${deckId}` },
-          () => cb(),
-        )
-        .subscribe()
+      let channel: RealtimeChannel
+      let stopped = false
+      let lastRebuild = Number.NEGATIVE_INFINITY
+      const open = () => {
+        const ch = this.client
+          .channel(topic)
+          .on(
+            'postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'solo_runs', filter: `deck_id=eq.${deckId}` },
+            () => cb(),
+          )
+        channel = ch
+        ch.subscribe((status: string) => {
+          // Same duplicate-rejoin trap as SoloLive.rebuild: replace an errored channel with a fresh one.
+          if (status !== 'CHANNEL_ERROR' || ch !== channel || stopped) return
+          if (Date.now() - lastRebuild < REBUILD_MIN_MS) return
+          lastRebuild = Date.now()
+          void (async () => {
+            try { await this.client.removeChannel(ch) } catch { /* unusable anyway */ }
+            await realtimeSettled(this.client)
+            if (!stopped && ch === channel) { open(); cb() }
+          })()
+        })
+      }
+      open()
       return async () => {
+        stopped = true
         try { await this.client.removeChannel(channel) } catch { /* already gone */ }
       }
     } catch {

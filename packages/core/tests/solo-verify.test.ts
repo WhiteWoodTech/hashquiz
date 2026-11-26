@@ -55,41 +55,67 @@ describe('verifySoloRun', () => {
   })
 
   test('rejects an empty pseudo and trims a valid one', () => {
-    expect(reason(makeQuiz(), sub(good, '   '))).not.toBeNull()
-    expect(reason(makeQuiz(), sub(good, 'x'.repeat(25)))).not.toBeNull()
+    expect(reason(makeQuiz(), sub(good, '   '))).toBe('pseudo must be 1-24 characters')
+    expect(reason(makeQuiz(), sub(good, 'x'.repeat(25)))).toBe('pseudo must be 1-24 characters')
     const r = verifySoloRun(makeQuiz(), sub(good, '  Bob '))
     expect(r.ok && r.run.pseudo).toBe('Bob')
   })
 
   test('rejects empty answers, unknown index and duplicates', () => {
-    expect(reason(makeQuiz(), sub([]))).not.toBeNull()
-    expect(reason(makeQuiz(), sub([good[0]!, { deckIndex: 5, choices: [], answerTimeMs: 0 }]))).not.toBeNull()
-    expect(reason(makeQuiz(), sub([good[0]!, good[0]!]))).not.toBeNull()
+    expect(reason(makeQuiz(), sub([]))).toBe('no answers')
+    expect(reason(makeQuiz(), sub([good[0]!, { deckIndex: 5, choices: [], answerTimeMs: 0 }]))).toBe('unknown question')
+    expect(reason(makeQuiz(), sub([good[0]!, good[0]!]))).toBe('duplicate question')
   })
 
   test('rejects time above timer, negative or fractional time', () => {
-    expect(reason(makeQuiz(), sub([{ ...good[0]!, answerTimeMs: 20001 }, good[1]!]))).not.toBeNull()
-    expect(reason(makeQuiz(), sub([{ ...good[0]!, answerTimeMs: -1 }, good[1]!]))).not.toBeNull()
-    expect(reason(makeQuiz(), sub([{ ...good[0]!, answerTimeMs: 1.5 }, good[1]!]))).not.toBeNull()
+    expect(reason(makeQuiz(), sub([{ ...good[0]!, answerTimeMs: 20001 }, good[1]!]))).toBe('invalid answer time')
+    expect(reason(makeQuiz(), sub([{ ...good[0]!, answerTimeMs: -1 }, good[1]!]))).toBe('invalid answer time')
+    expect(reason(makeQuiz(), sub([{ ...good[0]!, answerTimeMs: 1.5 }, good[1]!]))).toBe('invalid answer time')
   })
 
   test('rejects bad or duplicate choice indices', () => {
-    expect(reason(makeQuiz(), sub([{ ...good[0]!, choices: [4] }, good[1]!]))).not.toBeNull()
-    expect(reason(makeQuiz(), sub([{ ...good[0]!, choices: [-1] }, good[1]!]))).not.toBeNull()
-    expect(reason(makeQuiz(), sub([{ ...good[0]!, choices: [1, 1] }, good[1]!]))).not.toBeNull()
+    expect(reason(makeQuiz(), sub([{ ...good[0]!, choices: [4] }, good[1]!]))).toBe('invalid choice')
+    expect(reason(makeQuiz(), sub([{ ...good[0]!, choices: [-1] }, good[1]!]))).toBe('invalid choice')
+    expect(reason(makeQuiz(), sub([{ ...good[0]!, choices: [1, 1] }, good[1]!]))).toBe('invalid choice')
   })
 
   test('rejects a wrong answer count', () => {
-    expect(reason(makeQuiz(), sub([good[0]!]))).not.toBeNull()
-    expect(reason(makeQuiz({ maxQuestions: 1 }), sub(good))).not.toBeNull()
+    expect(reason(makeQuiz(), sub([good[0]!]))).toBe('wrong answer count')
+    expect(reason(makeQuiz({ maxQuestions: 1 }), sub(good))).toBe('too many answers')
     expect(reason(makeQuiz({ maxQuestions: 1 }), sub([good[0]!]))).toBeNull()
     expect(reason(makeQuiz({ maxQuestions: 5 }), sub(good))).toBeNull()
   })
 
   test('rejects a run over max time', () => {
-    expect(reason(makeQuiz({ maxTimeSec: 20 }), sub(good))).not.toBeNull()
+    expect(reason(makeQuiz({ maxTimeSec: 20 }), sub(good))).toBe('over max time')
     expect(reason(makeQuiz({ maxTimeSec: 30 }), sub(good))).toBeNull()
     expect(reason(makeQuiz({ maxTimeSec: 30 }), sub([good[0]!]))).toBeNull()
+  })
+
+  test('malformed submissions are rejected without throwing', () => {
+    const q = makeQuiz()
+    const bad = (o: unknown) => verifySoloRun(q, o as SoloRunSubmission)
+    const base = { deckId: 'd', deckVersion: 'v1', pseudo: 'A', answers: good }
+    for (const o of [
+      null, 5, { ...base, pseudo: 5 }, { ...base, answers: [null] }, { ...base, answers: undefined },
+      { ...base, answers: null }, { ...base, answers: [{ deckIndex: 0, choices: {}, answerTimeMs: 0 }] },
+      { ...base, deckId: 1 }, { ...base, deckId: '' }, { ...base, deckVersion: {} },
+    ]) {
+      const r = bad(o)
+      expect(r.ok).toBe(false)
+    }
+  })
+
+  test('a fractional timer that times out round-trips', () => {
+    let t = 0
+    const quiz = makeQuiz({}, [single(0.5555)])
+    const session = new SoloSession({ quiz, deckId: 'd', deckVersion: 'v1', pseudo: 'Alice', now: () => t })
+    session.start()
+    session.timeout()
+    session.next()
+    const r = verifySoloRun(quiz, session.toSubmission())
+    expect(r.ok && r.run.totalTimeMs).toBe(556)
+    expect(r.ok && r.run.totalTimeMs).toBe(session.totalTimeMs)
   })
 
   test('timeout answers are valid and incorrect; multiple needs the exact set', () => {

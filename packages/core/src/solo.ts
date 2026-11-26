@@ -103,8 +103,8 @@ export class SoloSession {
   answer(choiceIds: string[]): void {
     if (this._status !== 'question') return
     const q = this.served[this._index]!
-    const timerMs = q.timer * 1000
-    const elapsed = Math.min(timerMs, Math.max(0, this.now() - this.shownAt))
+    const timerMs = Math.round(q.timer * 1000)
+    const elapsed = Math.round(Math.min(timerMs, Math.max(0, this.now() - this.shownAt)))
     const correctIds = q.choices.filter(c => c.isCorrect).map(c => c.id)
     // Same exact-match rule as GameEngine.revealAnswer
     const isCorrect =
@@ -121,7 +121,7 @@ export class SoloSession {
     if (this._status !== 'question') return
     const q = this.served[this._index]!
     const correctIds = q.choices.filter(c => c.isCorrect).map(c => c.id)
-    this.reveal(q, { isCorrect: false, answered: false, elapsed: q.timer * 1000, correctIds, choices: [] })
+    this.reveal(q, { isCorrect: false, answered: false, elapsed: Math.round(q.timer * 1000), correctIds, choices: [] })
   }
 
   next(): void {

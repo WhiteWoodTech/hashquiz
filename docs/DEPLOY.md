@@ -69,8 +69,9 @@ conventional commits, and `.github/workflows/release.yml` publishes.
 | Beta | Manual run of **Release** on `develop` | `vX.Y.Z-beta.N` | `beta` | tag + GitHub prerelease, no commit |
 | Stable | Push to `main` (merged `develop → main` PR) | `vX.Y.Z` | `latest` | `🔖 Release` commit (CHANGELOG.md + package.json), tag, GitHub release, `develop` rebased onto `main` |
 
-The first release is `1.0.0`, so the first beta is `1.0.0-beta.1`. Install a
-beta with `bun add -d hashquiz@beta`.
+The first release is `1.0.0`. The first published beta is `1.0.0-beta.2`
+(the `v1.0.0-beta.1` tag exists but its npm publish failed). Install a beta
+with `bun add -d hashquiz@beta`.
 
 The job runs the tests, `bun run pack` (stages `pkg/`: CLI bundle + prebuilt
 apps) and `bun run release`, which sets the version in `package.json` and

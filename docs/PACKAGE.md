@@ -51,7 +51,7 @@ The `QUIZV_*` and `VITE_*` names (`VITE_TRANSPORT`, …) are accepted too.
 ```json
 {
   "scripts": { "build": "hashquiz build decks --out dist" },
-  "devDependencies": { "hashquiz": "^1.0.0-beta.1" }
+  "devDependencies": { "hashquiz": "^1.0.0-beta.2" }
 }
 ```
 

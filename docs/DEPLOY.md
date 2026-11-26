@@ -38,7 +38,7 @@ Set these for Production and Preview:
 | `VITE_SUPABASE_URL` | (from step 1) |
 | `VITE_SUPABASE_ANON_KEY` | (from step 1) |
 | `VITE_SOLO_SCORING` | `browser` (default) or `edge` |
-| `VITE_PLAYER_URL` | Optional public player URL; empty = same origin |
+| `VITE_PLAYER_URL` | Host only, optional player URL for solo links; empty = same origin |
 
 ### Solo scoring mode
 
@@ -89,6 +89,7 @@ VITE_TRANSPORT=supabase
 VITE_SUPABASE_URL=http://127.0.0.1:54321
 VITE_SUPABASE_ANON_KEY=<anon / publishable key from `supabase status`>
 VITE_SOLO_SCORING=browser              # or edge, with `update solo_settings set scoring_mode = 'edge'`
+VITE_PLAYER_URL=                       # host only; empty = http://<host>:3032/ (player Vite server) in dev
 ```
 
 `supabase status` prints the local URLs and keys; Studio is at <http://127.0.0.1:54323>.

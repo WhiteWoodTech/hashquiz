@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { deckInfo, decksForTag, parseDeckHash, tagCounts, tagHash, type BrowsableDeck } from '../src/deck-browse'
+import { decksForTag, parseDeckHash, tagCounts, tagHash, type BrowsableDeck } from '../src/deck-browse'
 
 const deck = (id: string, tags: string[], extra: Partial<BrowsableDeck['quiz']['meta']> = {}, n = 4): BrowsableDeck => ({
   id,
@@ -30,18 +30,6 @@ describe('decksForTag', () => {
   })
   test('unknown tag gives an empty list', () => {
     expect(decksForTag(decks, 'nope')).toEqual([])
-  })
-})
-
-describe('deckInfo', () => {
-  test('maps metadata and difficulty split', () => {
-    const info = deckInfo(deck('a', ['x'], { description: 'd', targetDifficulty: 'hard' }))
-    expect(info).toMatchObject({ title: 'A', description: 'd', tags: ['x'], totalQuestions: 4, targetDifficulty: 'hard' })
-    expect(info.difficultyDistribution).toEqual({ easy: 50, medium: 0, hard: 50 })
-  })
-  test('max-questions caps the count', () => {
-    expect(deckInfo(deck('a', [], { maxQuestions: 3 })).totalQuestions).toBe(3)
-    expect(deckInfo(deck('a', [], { maxQuestions: 99 })).totalQuestions).toBe(4)
   })
 })
 

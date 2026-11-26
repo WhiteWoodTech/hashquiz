@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import type { LivePlayer } from '../solo/live'
 import type { BoardRow } from '../stores/solo'
-import { formatDuration } from '../solo/deck-info'
+import { formatDuration } from '../solo/format'
 
 defineProps<{ live: LivePlayer[]; rows: BoardRow[] }>()
 </script>

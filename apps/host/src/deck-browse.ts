@@ -1,20 +1,7 @@
-import type { QuizInfo } from '@quizv/core'
+import type { BrowsableDeck } from '@quizv/decks/info'
 
-/** The part of a bundled deck the browsing pages need (keeps this module free of `import.meta.glob`). */
-export interface BrowsableDeck {
-  id: string
-  name: string
-  quiz: {
-    meta: {
-      title: string
-      description?: string
-      tags: string[]
-      maxQuestions?: number
-      targetDifficulty?: 'easy' | 'medium' | 'hard'
-    }
-    questions: { difficulty: 'easy' | 'medium' | 'hard' }[]
-  }
-}
+// deckInfo lives in @quizv/decks so the player solo intro uses the same card data.
+export { deckInfo, type BrowsableDeck } from '@quizv/decks/info'
 
 export interface TagCount {
   tag: string
@@ -33,22 +20,6 @@ export function tagCounts(decks: BrowsableDeck[]): TagCount[] {
 /** Decks carrying `tag` (exact match), in their original order. */
 export function decksForTag<D extends BrowsableDeck>(decks: D[], tag: string): D[] {
   return decks.filter((d) => d.quiz.meta.tags.includes(tag))
-}
-
-/** Card data for a deck, in the shape of the lobby info panel. */
-export function deckInfo(deck: BrowsableDeck): QuizInfo {
-  const { meta, questions } = deck.quiz
-  const total = questions.length
-  const pct = (d: 'easy' | 'medium' | 'hard') =>
-    Math.round((questions.filter((q) => q.difficulty === d).length / (total || 1)) * 100)
-  return {
-    title: meta.title || deck.name,
-    ...(meta.description !== undefined && { description: meta.description }),
-    tags: meta.tags,
-    totalQuestions: meta.maxQuestions !== undefined ? Math.min(meta.maxQuestions, total) : total,
-    ...(meta.targetDifficulty !== undefined && { targetDifficulty: meta.targetDifficulty }),
-    difficultyDistribution: { easy: pct('easy'), medium: pct('medium'), hard: pct('hard') },
-  }
 }
 
 export type DeckRoute = { kind: 'list' } | { kind: 'tag'; tag: string }

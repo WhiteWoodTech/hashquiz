@@ -4,6 +4,7 @@ import type { BundledDeck } from './build'
 
 export { buildDecks, deckVersion } from './build'
 export type { BundledDeck } from './build'
+export { deckInfo, type BrowsableDeck } from './info'
 
 // Vite-only: resolved at build time relative to this file.
 const rawDecks = import.meta.glob('../../../decks/**/*.quizv.md', {

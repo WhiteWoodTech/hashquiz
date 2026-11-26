@@ -97,9 +97,16 @@ function tick() {
   remaining.value = Math.max(0, Math.round((dl - Date.now()) / 100) / 10)
   if (remaining.value > 0) return
   stopTimer()
-  // Timeout takes the current selection if any (answer time is then capped at the full timer).
-  if (selected.value.size > 0) solo.answer([...selected.value])
-  else solo.timeout()
+  // Timeout takes the current selection if any (answer time is then the full timer).
+  solo.timeout([...selected.value])
+}
+
+/** A tap at or after the deadline is late: run the timeout now instead of waiting for the next tick. */
+function late(): boolean {
+  const dl = solo.deadlineMs
+  if (dl === null || Date.now() < dl) return false
+  tick()
+  return true
 }
 
 // New question: clear the selection and restart the countdown.
@@ -130,7 +137,7 @@ function btnState(id: string): 'idle' | 'selected' | 'correct' | 'wrong' | 'disa
 }
 
 function handleSelect(id: string) {
-  if (solo.phase !== 'question') return
+  if (solo.phase !== 'question' || late()) return
   if (!needsValidate.value) {
     selected.value = new Set([id])
     solo.answer([id])
@@ -144,7 +151,7 @@ function handleSelect(id: string) {
 }
 
 function validate() {
-  if (solo.phase !== 'question' || selected.value.size === 0) return
+  if (solo.phase !== 'question' || late() || selected.value.size === 0) return
   solo.answer([...selected.value])
 }
 </script>

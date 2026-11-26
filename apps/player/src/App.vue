@@ -47,9 +47,10 @@ const soloDeckId = ref<string | null>(null)
 const soloReady = ref(false)
 let depsLoaded = false
 
-async function syncRoute() {
+/** Follows the hash; `reopen` restarts the current solo deck even when the hash is unchanged. */
+async function syncRoute(reopen = false) {
   const deckId = parseSoloHash(location.hash)?.deckId ?? null
-  if (deckId === soloDeckId.value) return
+  if (deckId === soloDeckId.value && !reopen) return
   if (soloDeckId.value !== null) solo.abandon()
   soloDeckId.value = deckId
   soloReady.value = false
@@ -66,14 +67,15 @@ async function syncRoute() {
   await opening
 }
 
-// Leaving the page mid-run abandons it; coming back from the back/forward cache reopens the deck.
+// Leaving the page mid-run abandons it but keeps the solo route (blank until reopened, never the room
+// JoinView); coming back from the back/forward cache reopens the deck on its intro screen.
 function onPageHide() {
   if (soloDeckId.value === null) return
   solo.abandon()
-  soloDeckId.value = null
+  soloReady.value = false
 }
 function onPageShow(e: PageTransitionEvent) {
-  if (e.persisted) void syncRoute()
+  if (e.persisted) void syncRoute(true)
 }
 const onHashChange = () => { void syncRoute() }
 

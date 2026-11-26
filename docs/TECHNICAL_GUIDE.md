@@ -285,6 +285,12 @@ Reopening a deck (back/forward cache, `A → B → A` hash changes) waits for th
 and adding listeners to an already joined channel throws. **Commencer** works meanwhile; the run joins presence
 once the new channel is open.
 
+A channel that errors (`CHANNEL_ERROR`) or whose `track()` is refused (`unmatched topic`) is removed and
+replaced by a fresh one (at most every 2 s), which re-tracks the player. Phoenix disconnects on `pagehide` and
+reconnects on `pageshow`; when the old connection's close lands after the new one opened, phoenix errors and
+rejoins channels that had already joined (a duplicate join, which the Realtime server answers by dropping the
+topic) or replaces the socket without erroring them. Letting phoenix rejoin would leave the player unlisted.
+
 ### Edge Function `solo-submit`
 
 `supabase/functions/solo-submit/index.ts` (Deno, `verify_jwt = false`: public). Used when

@@ -66,12 +66,8 @@ bun run dev examples/demo.quizv.md
 # Equivalent direct CLI call
 bun run packages/server/src/cli.ts dev examples/demo.quizv.md
 
-# Launch one of the built-in decks (see deck index below)
-bun run dev decks/docker-fundamentals/index.quizv.md
-bun run dev decks/cloud-gcp-fundamentals/index.quizv.md
-
 # Override the WS / HTTP port (host and player apps stay on 3031 / 3032)
-bun run dev decks/mcp-deep-dive/index.quizv.md --port 4040
+bun run dev examples/quiz-ia-dev.quizv.md --port 4040
 ```
 
 This starts three servers simultaneously:
@@ -93,7 +89,6 @@ Quickly check syntax and structure without starting the game:
 
 ```bash
 bun run packages/server/src/cli.ts check examples/demo.quizv.md
-bun run packages/server/src/cli.ts check decks/genai-llm-introduction/index.quizv.md
 ```
 
 Output: question count, theme, or a list of parsing errors with the offending question index.
@@ -101,29 +96,28 @@ Output: question count, theme, or a list of parsing errors with the offending qu
 ### Build & test
 
 ```bash
-bun test                  # Run all tests (88)
+bun test                  # Run all tests
 bun run build             # Build every workspace package
 bun run build:web         # Build only the host + player SPAs
+bun run pack              # Stage the markuiz npm package in pkg/
 bun run lint              # Lint markdown and YAML
 bun run lint:md:fix       # Auto-fix markdown
 bun run commit            # Interactive gitmoji commit
 ```
 
-## Deck Index
+## Decks
 
-Ready-to-play decks live in [`decks/`](decks/). Each folder contains an `index.quizv.md`, an `assets/` directory,
-and the raw `sources/` used to plan the quiz.
+Decks live in their own repositories and use the published
+[`markuiz`](docs/PACKAGE.md) npm package (CLI + prebuilt host and player apps):
 
-| Deck | Title | Topics | Launch |
-|------|-------|--------|--------|
-| [`decks/agentic-coding`](decks/agentic-coding/) | Agentic Coding | agentic-coding, context-engineering, subagents, MCP, SDD, CLI, gen-ai | `bun run dev decks/agentic-coding/index.quizv.md` |
-| [`decks/cloud-fundamentals`](decks/cloud-fundamentals/) | Cloud Platforms Overview | cloud, devops, infrastructure, XaaS | `bun run dev decks/cloud-fundamentals/index.quizv.md` |
-| [`decks/cloud-gcp-fundamentals`](decks/cloud-gcp-fundamentals/) | GCP Fundamentals | cloud, gcp, devops | `bun run dev decks/cloud-gcp-fundamentals/index.quizv.md` |
-| [`decks/docker-fundamentals`](decks/docker-fundamentals/) | Docker | docker-fundamentals, image, container | `bun run dev decks/docker-fundamentals/index.quizv.md` |
-| [`decks/genai-llm-introduction`](decks/genai-llm-introduction/) | Fondamentaux de l'IA Générative | ia, llm, prompt, rag, agents, mcp, gen-ai | `bun run dev decks/genai-llm-introduction/index.quizv.md` |
-| [`decks/mcp-deep-dive`](decks/mcp-deep-dive/) | MCP — deep dive | mcp, ai, protocol, genai, server | `bun run dev decks/mcp-deep-dive/index.quizv.md` |
-| [`decks/mcp-intro-and-overview`](decks/mcp-intro-and-overview/) | MCP intro and overview | mcp, ai, llm, integration | `bun run dev decks/mcp-intro-and-overview/index.quizv.md` |
-| [`decks/observability`](decks/observability/) | Observability | observabilité, métriques, logs, traces, monitoring, alerting, apm, prometheus, grafana | `bun run dev decks/observability/index.quizv.md` |
+- [`maxime-lenne/markuiz-decks`](https://github.com/maxime-lenne/markuiz-decks): Docker,
+  GenAI LLM introduction, MCP intro and overview
+- [`WhiteWoodTech/markuiz-decks`](https://github.com/WhiteWoodTech/markuiz-decks): agentic coding,
+  cloud, GCP, MCP deep dive, observability
+
+The host app of this repository lists the [`examples/`](examples/) decks (set `QUIZV_DECKS_DIR`,
+relative to the repo root, to list another folder). See [`docs/PACKAGE.md`](docs/PACKAGE.md) for
+`markuiz build` and the publishing steps in [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 Example decks (smaller, for testing):
 

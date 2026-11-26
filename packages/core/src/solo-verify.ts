@@ -20,11 +20,23 @@ const fail = (reason: string): VerifyResult => ({ ok: false, reason })
 
 /** Recomputes a solo run from raw answers. Submitted scores are never trusted (the submission carries none). */
 export function verifySoloRun(quiz: Quiz, sub: SoloRunSubmission): VerifyResult {
-  const pseudo = sub.pseudo.trim()
+  const raw: unknown = sub
+  if (typeof raw !== 'object' || raw === null) return fail('invalid submission')
+  const { deckId, deckVersion, pseudo: rawPseudo, answers: rawAnswers } = raw as Record<string, unknown>
+  if (typeof deckId !== 'string' || deckId.length < 1 || deckId.length > 200) return fail('invalid deckId')
+  if (typeof deckVersion !== 'string' || deckVersion.length < 1 || deckVersion.length > 64) return fail('invalid deckVersion')
+  if (typeof rawPseudo !== 'string') return fail('pseudo must be 1-24 characters')
+  if (!Array.isArray(rawAnswers)) return fail('invalid answers')
+  for (const a of rawAnswers) {
+    if (typeof a !== 'object' || a === null || !Array.isArray((a as { choices?: unknown }).choices)) {
+      return fail('invalid answer')
+    }
+  }
+  const pseudo = rawPseudo.trim()
   if (pseudo.length < 1 || pseudo.length > 24) return fail('pseudo must be 1-24 characters')
 
   const questions = quiz.questions
-  const answers = sub.answers
+  const answers = rawAnswers as SoloAnswer[]
   if (answers.length < 1) return fail('no answers')
 
   const seen = new Set<number>()
@@ -38,7 +50,7 @@ export function verifySoloRun(quiz: Quiz, sub: SoloRunSubmission): VerifyResult 
 
   for (const a of answers) {
     const q = questions[a.deckIndex]!
-    if (!Number.isInteger(a.answerTimeMs) || a.answerTimeMs < 0 || a.answerTimeMs > q.timer * 1000) {
+    if (!Number.isInteger(a.answerTimeMs) || a.answerTimeMs < 0 || a.answerTimeMs > Math.round(q.timer * 1000)) {
       return fail('invalid answer time')
     }
     const picked = new Set<number>()
@@ -79,8 +91,8 @@ export function verifySoloRun(quiz: Quiz, sub: SoloRunSubmission): VerifyResult 
   return {
     ok: true,
     run: {
-      deckId: sub.deckId,
-      deckVersion: sub.deckVersion,
+      deckId,
+      deckVersion,
       pseudo,
       score,
       correctCount,

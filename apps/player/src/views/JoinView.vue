@@ -19,12 +19,18 @@
         Join Game
       </button>
     </div>
+
+    <SoloCatalog v-if="soloEnabled" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, defineAsyncComponent } from 'vue'
 import { useGameStore } from '../stores/game'
+
+// The solo list (and the deck bundle it needs) loads in its own chunk, only when solo can work.
+const SoloCatalog = defineAsyncComponent(() => import('../components/SoloCatalog.vue'))
+const soloEnabled = Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY)
 
 const game = useGameStore()
 const code   = ref('')

@@ -28,7 +28,7 @@
 import { computed, ref } from 'vue'
 import { QuizInfoPanel } from '@quizv/ui'
 import { useSoloStore, PSEUDO_MAX } from '../stores/solo'
-import { deckInfo } from '../solo/deck-info'
+import { deckInfo } from '@quizv/decks/info'
 import SoloLeaderboard from '../components/SoloLeaderboard.vue'
 import '../solo/solo.css'
 

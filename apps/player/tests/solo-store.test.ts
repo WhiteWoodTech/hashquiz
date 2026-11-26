@@ -4,7 +4,7 @@ import type { Quiz, RankedRun, SoloRunSubmission } from '@quizv/core'
 import type { BundledDeck } from '@quizv/decks'
 import type { LivePlayer } from '../src/solo/live'
 import type { Outcome } from '../src/solo/api'
-import { formatDuration } from '../src/solo/deck-info'
+import { formatDuration } from '../src/solo/format'
 import { useSoloStore, setSoloDeps, type SoloApiPort, type SoloLivePort } from '../src/stores/solo'
 
 const question = (text: string) => ({
@@ -161,6 +161,26 @@ describe('solo store', () => {
     expect(solo.phase).toBe('revealed')
     expect(solo.lastResult?.answered).toBe(false)
     expect(solo.score).toBe(0)
+  })
+
+  test('answer after deadline is treated as timeout', async () => {
+    const solo = setup()
+    await solo.open('solo/deck')
+    solo.start('Alice')
+    clock += 10_000 // timer is 10 s: the deadline is reached
+    solo.answer([solo.question!.choices[0]!.id])
+    expect(solo.phase).toBe('revealed')
+    expect(solo.lastResult).toMatchObject({ answered: false, points: 0, answerTimeMs: 10_000 })
+    expect(solo.score).toBe(0)
+  })
+
+  test('timeout takes the current selection at the full timer', async () => {
+    const solo = setup()
+    await solo.open('solo/deck')
+    solo.start('Alice')
+    clock += 10_300
+    solo.timeout([solo.question!.choices[0]!.id])
+    expect(solo.lastResult).toMatchObject({ answered: true, isCorrect: true, answerTimeMs: 10_000 })
   })
 
   test('next after last question submits once and fetches rank', async () => {

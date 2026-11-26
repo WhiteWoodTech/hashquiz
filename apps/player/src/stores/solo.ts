@@ -153,8 +153,7 @@ export const useSoloStore = defineStore('solo', () => {
     if (phase.value === 'question' || phase.value === 'revealed') return
     resetRun()
     pseudo.value = p
-    const now = deps?.now
-    const s = new SoloSession({ quiz: d.quiz, deckId: d.id, deckVersion: d.version, pseudo: p, ...(now && { now }) })
+    const s = new SoloSession({ quiz: d.quiz, deckId: d.id, deckVersion: d.version, pseudo: p, now })
     s.start()
     session.value = s
     sync()
@@ -162,16 +161,23 @@ export const useSoloStore = defineStore('solo', () => {
     presence.join(me()).catch(ignore)
   }
 
+  const now = () => (deps?.now ?? Date.now)()
+  const pastDeadline = () => deadlineMs.value !== null && now() >= deadlineMs.value
+
+  /** A deliberate answer. At or after the deadline it is a late tap: the question times out unanswered. */
   function answer(choiceIds: string[]): void {
     if (phase.value !== 'question') return
+    if (pastDeadline()) { timeout(); return }
     session.value?.answer(choiceIds)
     sync()
     presence?.update(me()).catch(ignore)
   }
 
-  function timeout(): void {
+  /** The timer ran out: a pending selection (made before the deadline) counts, with the full timer as its time. */
+  function timeout(selection: string[] = []): void {
     if (phase.value !== 'question') return
-    session.value?.timeout()
+    if (selection.length > 0) session.value?.answer(selection)
+    else session.value?.timeout()
     sync()
     presence?.update(me()).catch(ignore)
   }

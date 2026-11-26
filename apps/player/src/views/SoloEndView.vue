@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import { useSoloStore } from '../stores/solo'
-import { formatDuration } from '../solo/deck-info'
+import { formatDuration } from '../solo/format'
 import SoloLeaderboard from '../components/SoloLeaderboard.vue'
 import LeadForm from '../components/LeadForm.vue'
 import '../solo/solo.css'

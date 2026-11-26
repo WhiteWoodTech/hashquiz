@@ -1,8 +1,8 @@
 <template>
   <section class="lead" aria-labelledby="lead-title">
-    <p v-if="state === 'done'" class="lead__thanks" role="status">Merci, on vous tient au courant de Markuiz !</p>
+    <p v-if="state === 'done'" class="lead__thanks" role="status">Merci, on vous tient au courant de HashQuiz !</p>
     <form v-else class="lead__form" novalidate @submit.prevent="send">
-      <h3 id="lead-title" class="lead__title">Markuiz arrive bientôt</h3>
+      <h3 id="lead-title" class="lead__title">HashQuiz arrive bientôt</h3>
       <label class="solo-label" for="lead-email">Email</label>
       <input
         id="lead-email"
@@ -16,7 +16,7 @@
       />
       <label class="lead__consent">
         <input v-model="consent" type="checkbox" required />
-        <span>J'accepte d'être recontacté·e au sujet de Markuiz</span>
+        <span>J'accepte d'être recontacté·e au sujet de HashQuiz</span>
       </label>
       <button class="solo-btn solo-btn--ghost" type="submit" :disabled="!canSend">Tenir au courant</button>
       <p v-if="state === 'error'" class="lead__error" role="status">Oups, réessayez.</p>

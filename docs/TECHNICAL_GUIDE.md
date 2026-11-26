@@ -257,7 +257,7 @@ Schema in `supabase/migrations/20261126090000_solo_live.sql`, hardened by
 | `solo_runs` | One finished run: `deck_id` (path after `/decks/`), `deck_version` (content hash, informational), `pseudo` (1–24 chars), `score`, `correct_count`, `question_count`, `total_time_ms`, `finished_at`, nullable `room_id` (future async rooms) | select |
 | `solo_answers` | One row per served question: `run_id`, `position`, `deck_index`, `choices` (original choice indices), `is_correct`, `answer_time_ms`, `points` | select |
 | `solo_settings` | Single row, `scoring_mode` = `browser` (default) or `edge` | select |
-| `leads` | Markuiz interest form: `email` (≤ 254 chars), `consent` (must be true), `deck_id` (≤ 200 chars), `created_at` | insert only (never readable; insert without `return=representation`) |
+| `leads` | HashQuiz interest form: `email` (≤ 254 chars), `consent` (must be true), `deck_id` (≤ 200 chars), `created_at` | insert only (never readable; insert without `return=representation`) |
 
 Leaderboard index: `(deck_id, score desc, total_time_ms, finished_at)`. `solo_runs` is in the
 `supabase_realtime` publication so leaderboards receive new runs as inserts.

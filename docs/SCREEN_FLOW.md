@@ -161,7 +161,7 @@ SoloPhase: 'unavailable' | 'intro' → 'question' → 'revealed' → ('question'
 | `intro` | Hash `#/solo/<deckId>` on a solo deck | `SoloIntroView` | Quiz card, pseudo field (no email), **Commencer**, leaderboard (`SoloLeaderboard`: live players "en cours" + past runs) |
 | `question` | Start, or **Suivant** | `SoloQuestionView` | Answer grid + countdown (the question `timer`); **Valider** makes the answer final when it is not a one-tap case |
 | `revealed` | Final answer or timeout | `SoloQuestionView` | Correction (verdict, correct answers, explanation, points, running score), live players on this quiz, **Suivant** (no auto-advance) |
-| `end` | Last correction passed | `SoloEndView` | Score, total time, rank, full leaderboard with own row highlighted, **Rejouer** (new run, new row), Markuiz interest form (`LeadForm`) |
+| `end` | Last correction passed | `SoloEndView` | Score, total time, rank, full leaderboard with own row highlighted, **Rejouer** (new run, new row), HashQuiz interest form (`LeadForm`) |
 
 ### Solo Flow Diagram
 
@@ -186,7 +186,7 @@ SoloPhase: 'unavailable' | 'intro' → 'question' → 'revealed' → ('question'
          ▼
   ┌──────────────┐
   │ SoloEnd      │  Run saved (RPC or Edge Function), score, time, rank,
-  │              │  leaderboard, [Rejouer], Markuiz form
+  │              │  leaderboard, [Rejouer], HashQuiz form
   └──────────────┘
 ```
 

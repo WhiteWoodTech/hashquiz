@@ -53,14 +53,14 @@ quizv/
 │           │   └── solo.css
 │           ├── components/
 │           │   ├── SoloLeaderboard.vue # Live players + past runs
-│           │   └── LeadForm.vue     # Markuiz interest form
+│           │   └── LeadForm.vue     # HashQuiz interest form
 │           └── views/
 │               ├── JoinView.vue     # Join code + pseudo/email form
 │               ├── LobbyView.vue    # Waiting room
 │               ├── QuestionView.vue # Answer grid + countdown + verdict/rank after reveal
 │               ├── SoloIntroView.vue    # Quiz card + pseudo + leaderboard
 │               ├── SoloQuestionView.vue # Question and correction (solo)
-│               ├── SoloEndView.vue      # Score, rank, leaderboard, Markuiz form
+│               ├── SoloEndView.vue      # Score, rank, leaderboard, HashQuiz form
 │               ├── FeedbackView.vue # Unused (not imported; in the backlog for removal)
 │               └── PodiumView.vue   # Final rank + score + animated podium
 ├── packages/

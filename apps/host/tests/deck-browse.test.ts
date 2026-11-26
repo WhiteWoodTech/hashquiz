@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { decksForTag, parseDeckHash, tagCounts, tagHash, type BrowsableDeck } from '../src/deck-browse'
+import { decksForTag, parseDeckHash, soloUrl, tagCounts, tagHash, type BrowsableDeck } from '../src/deck-browse'
 
 const deck = (id: string, tags: string[], extra: Partial<BrowsableDeck['quiz']['meta']> = {}, n = 4): BrowsableDeck => ({
   id,
@@ -41,5 +41,13 @@ describe('hash route', () => {
     expect(parseDeckHash('')).toEqual({ kind: 'list' })
     expect(parseDeckHash('#/other')).toEqual({ kind: 'list' })
     expect(parseDeckHash('#/tag/%E0%A4%A')).toEqual({ kind: 'list' })
+  })
+})
+
+describe('soloUrl', () => {
+  test('joins base and hash with exactly one slash', () => {
+    const want = 'https://x.app/#/solo/docker%2Fquiz.quizv.md'
+    expect(soloUrl('docker/quiz.quizv.md', 'https://x.app/')).toBe(want)
+    expect(soloUrl('docker/quiz.quizv.md', 'https://x.app')).toBe(want)
   })
 })

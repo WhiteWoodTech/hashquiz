@@ -4,6 +4,7 @@ description: A demonstration quiz about web technologies
 theme: default
 author: QuizV
 tags: [demo, web]
+solo: true
 ---
 
 ---

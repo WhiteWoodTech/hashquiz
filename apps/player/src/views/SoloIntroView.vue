@@ -1,6 +1,7 @@
 <template>
   <div class="solo-intro">
-    <p v-if="solo.phase === 'unavailable' || !solo.deck" class="solo-intro__unavailable" role="status">
+    <p v-if="solo.phase === 'loading'" class="solo-intro__unavailable" role="status">Chargement du quiz…</p>
+    <p v-else-if="solo.phase === 'unavailable' || !solo.deck" class="solo-intro__unavailable" role="status">
       Ce quiz n'est pas disponible en solo.
     </p>
     <template v-else>
@@ -28,7 +29,7 @@
 import { computed, ref } from 'vue'
 import { QuizInfoPanel } from '@quizv/ui'
 import { useSoloStore, PSEUDO_MAX } from '../stores/solo'
-import { deckInfo } from '@quizv/decks/info'
+import { deckInfo } from '@quizv/core/decks'
 import SoloLeaderboard from '../components/SoloLeaderboard.vue'
 import '../solo/solo.css'
 

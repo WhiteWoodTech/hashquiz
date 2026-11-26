@@ -12,7 +12,8 @@ export interface BuildOptions {
 }
 
 /**
- * Static site for a decks folder: the prebuilt apps, `host/decks.json` and
+ * Static site for a decks folder: the prebuilt apps, `host/decks.json` (host
+ * list), the same `decks.json` at the root (player solo decks) and
  * `quizv-config.js` (transport + Supabase settings from the env). Deployable
  * as-is (e.g. Vercel, see docs/DEPLOY.md). Returns the number of decks.
  */
@@ -44,7 +45,9 @@ export function buildSite({ decksDir, outDir, env = process.env }: BuildOptions)
   rmSync(out, { recursive: true, force: true })
   mkdirSync(out, { recursive: true })
   cpSync(web, out, { recursive: true })
-  writeFileSync(resolve(out, 'host/decks.json'), JSON.stringify(decks))
+  const manifest = JSON.stringify(decks)
+  writeFileSync(resolve(out, 'host/decks.json'), manifest)
+  writeFileSync(resolve(out, 'decks.json'), manifest)
   writeFileSync(resolve(out, 'quizv-config.js'), renderConfigScript(configFromEnv(env)))
   return decks.length
 }

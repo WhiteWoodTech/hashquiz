@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
 import { computed, ref, shallowRef } from 'vue'
 import { SoloSession, type QuestionPublic, type RankedRun, type SoloResult } from '@quizv/core'
-import type { BundledDeck } from '@quizv/decks'
+import type { LoadedDeck } from '@quizv/core/decks'
 import type { Outcome, SoloApi } from '../solo/api'
 import type { LivePlayer, SoloLive } from '../solo/live'
 
-export type SoloPhase = 'intro' | 'question' | 'revealed' | 'end' | 'unavailable'
+export type SoloPhase = 'loading' | 'intro' | 'question' | 'revealed' | 'end' | 'unavailable'
 export type SubmitState = 'idle' | 'saving' | 'saved' | 'error'
 export type SoloApiPort = Pick<SoloApi, 'submitRun' | 'fetchTop' | 'fetchCount' | 'fetchRun' | 'submitLead'> & {
   /** The returned unsubscribe may resolve later: the store awaits it before subscribing the same deck again. */
@@ -14,7 +14,8 @@ export type SoloApiPort = Pick<SoloApi, 'submitRun' | 'fetchTop' | 'fetchCount' 
 export type SoloLivePort = Pick<SoloLive, 'key' | 'watch' | 'join' | 'update' | 'untrack' | 'leave' | 'onChange'>
 
 export interface SoloDeps {
-  findDeck: (id: string) => BundledDeck | undefined
+  /** Deck lookup in the runtime manifest; a rejection (manifest load error) shows `unavailable`. */
+  findDeck: (id: string) => Promise<LoadedDeck | undefined>
   /** null without Supabase credentials: solo is unavailable. */
   /** `live` may throw (e.g. the deck channel is still open): the store then shows `unavailable`. */
   backend: { api: SoloApiPort; live: (deckId: string) => SoloLivePort } | null
@@ -35,7 +36,7 @@ const ignore = () => {}
 
 export const useSoloStore = defineStore('solo', () => {
   const phase = ref<SoloPhase>('unavailable')
-  const deck = shallowRef<BundledDeck | null>(null)
+  const deck = shallowRef<LoadedDeck | null>(null)
   // SoloSession is a plain state machine: the fields views need are mirrored into refs by sync().
   const session = shallowRef<SoloSession | null>(null)
   const pseudo = ref('')
@@ -139,16 +140,22 @@ export const useSoloStore = defineStore('solo', () => {
     teardown()
     top.value = []
     runCount.value = null
-    const d = deps?.findDeck(deckId)
+    deck.value = null
     const backend = deps?.backend
-    if (!d || !d.quiz.meta.solo || !backend) {
-      deck.value = null
-      phase.value = 'unavailable'
-      return
+    if (!deps || !backend) { phase.value = 'unavailable'; return }
+    phase.value = 'loading'
+    const g = gen
+    let d: LoadedDeck | undefined
+    try {
+      d = await deps.findDeck(deckId)
+    } catch {
+      d = undefined
     }
+    // Abandoned or reopened while the deck list was loading.
+    if (g !== gen) return
+    if (!d || !d.quiz.meta.solo) { phase.value = 'unavailable'; return }
     deck.value = d
     phase.value = 'intro'
-    const g = gen
     await Promise.all([connect(d.id, g), refreshTop()])
   }
 

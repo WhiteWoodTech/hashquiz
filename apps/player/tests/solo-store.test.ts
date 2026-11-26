@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach } from 'bun:test'
 import { createPinia, setActivePinia } from 'pinia'
 import type { Quiz, RankedRun, SoloRunSubmission } from '@quizv/core'
-import type { BundledDeck } from '@quizv/decks'
+import type { LoadedDeck } from '@quizv/core/decks'
 import type { LivePlayer } from '../src/solo/live'
 import type { Outcome } from '../src/solo/api'
 import { formatDuration } from '../src/solo/format'
@@ -16,7 +16,7 @@ const quiz = (solo: boolean): Quiz => ({
   meta: { title: 'Deck', theme: 'default', tags: [], oneShoot: true, solo },
   questions: [question('Q1'), question('Q2')],
 })
-const decks: Record<string, BundledDeck> = {
+const decks: Record<string, LoadedDeck> = {
   'solo/deck': { id: 'solo/deck', name: 'Deck', version: 'v1', quiz: quiz(true) },
   'room/deck': { id: 'room/deck', name: 'Room', version: 'v1', quiz: quiz(false) },
   // A 1 s budget no 10 s question fits: nothing is served.
@@ -68,7 +68,7 @@ function setup(backend = true) {
   live = new FakeLive()
   clock = 1_000
   setSoloDeps({
-    findDeck: id => decks[id],
+    findDeck: async id => decks[id],
     backend: backend ? { api, live: () => live } : null,
     now: () => clock,
   })
@@ -94,6 +94,34 @@ describe('solo store', () => {
     expect(solo.phase).toBe('unavailable')
     await solo.open('room/deck')
     expect(solo.phase).toBe('unavailable')
+  })
+
+  test('the deck list loads asynchronously: loading, then intro', async () => {
+    const solo = setup()
+    const opening = solo.open('solo/deck')
+    expect(solo.phase).toBe('loading')
+    expect(solo.deck).toBeNull()
+    await opening
+    expect(solo.phase).toBe('intro')
+  })
+
+  test('a deck list load error sets unavailable', async () => {
+    setup()
+    setSoloDeps({ findDeck: async () => { throw new Error('404') }, backend: { api, live: () => live }, now: () => clock })
+    const solo = useSoloStore()
+    await solo.open('solo/deck')
+    expect(solo.phase).toBe('unavailable')
+    expect(live.log).toEqual([])
+  })
+
+  test('abandoning while the deck list loads opens nothing', async () => {
+    const solo = setup()
+    const opening = solo.open('solo/deck')
+    solo.abandon()
+    await opening
+    expect(solo.phase).toBe('unavailable')
+    expect(solo.deck).toBeNull()
+    expect(live.log).toEqual([])
   })
 
   test('missing Supabase credentials set unavailable', async () => {
@@ -324,7 +352,7 @@ describe('solo store: reopening a deck', () => {
     clock = 1_000
     const made: SlowLive[] = []
     setSoloDeps({
-      findDeck: id => decks[id],
+      findDeck: async id => decks[id],
       backend: { api, live: id => { const l = new SlowLive(id, made.length); made.push(l); return l } },
       now: () => clock,
     })
@@ -338,8 +366,9 @@ describe('solo store: reopening a deck', () => {
     solo.abandon()
     // Same tick, like pageshow → syncRoute(true) or an A → B → A hash change.
     const reopening = solo.open('solo/deck')
-    expect(solo.phase).toBe('intro')
+    expect(solo.phase).toBe('loading')
     await flush()
+    expect(solo.phase).toBe('intro')
     // The new channel waits for the old one to be gone instead of reusing it.
     expect(made.length).toBe(1)
     solo.start('Alice')
@@ -378,7 +407,7 @@ describe('solo store: reopening a deck', () => {
   test('a presence channel that cannot be created shows unavailable instead of a dead Start', async () => {
     api = new FakeApi()
     setSoloDeps({
-      findDeck: id => decks[id],
+      findDeck: async id => decks[id],
       backend: { api, live: () => { throw new Error('presence channel still open') } },
       now: () => clock,
     })

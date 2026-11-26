@@ -1,17 +1,16 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
+// Relative type import: this module is also loaded by the Vite configs (see vite-plugin.ts).
+import type { DeckManifestEntry } from '../../core/src/decks'
 
-/** One deck as served to the host app in `decks.json`. */
-export interface DeckManifestEntry {
-  /** Path relative to the decks folder, e.g. `docker-fundamentals/index.quizv.md`. */
-  id: string
-  /** Raw `.quizv.md` content, parsed by the host in the browser. */
-  content: string
-}
+export type { DeckManifestEntry }
 
 const SKIP = new Set(['node_modules', 'dist', '.git'])
 
-/** Every `*.quizv.md` under `dir` (recursive), sorted by id. */
+/**
+ * Every `*.quizv.md` under `dir` (recursive), sorted by id. The single deck id rule
+ * (path relative to the decks folder), shared by both apps and the solo Edge Function.
+ */
 export function collectDecks(dir: string): DeckManifestEntry[] {
   const out: DeckManifestEntry[] = []
   const walk = (d: string) => {

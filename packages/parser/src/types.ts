@@ -5,6 +5,7 @@ export interface QuizMeta {
   author?: string
   tags: string[]
   oneShoot: boolean       // one-shoot frontmatter, default true
+  solo: boolean           // solo frontmatter, default false
   maxQuestions?: number   // max-questions frontmatter
   maxTimeSec?: number     // max-time frontmatter, stored in seconds
   targetDifficulty?: 'easy' | 'medium' | 'hard'

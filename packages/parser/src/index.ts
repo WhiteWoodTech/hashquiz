@@ -13,7 +13,7 @@ export function parseQuizFile(content: string): Quiz {
   const blocks = splitBlocks(content)
 
   if (blocks.length === 0) {
-    return { meta: { title: '', theme: 'default', tags: [] }, questions: [] }
+    return { meta: { title: '', theme: 'default', tags: [], solo: false }, questions: [] }
   }
 
   const [metaBlock, ...questionBlocks] = blocks as [string, ...string[]]

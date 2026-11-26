@@ -216,6 +216,65 @@ difficulty: easy
     expect(quiz.meta.oneShoot).toBe(false)
   })
 
+  test('solo defaults to false when absent', () => {
+    const content = `---
+title: T
+theme: default
+tags: []
+---
+---
+type: single
+timer: 20
+difficulty: easy
+---
+# Q?
+- [x] A
+- [ ] B
+`
+    const quiz = parseQuizFile(content)
+    expect(quiz.meta.solo).toBe(false)
+  })
+
+  test('solo: true is parsed', () => {
+    const content = `---
+title: T
+theme: default
+tags: []
+solo: true
+---
+---
+type: single
+timer: 20
+difficulty: easy
+---
+# Q?
+- [x] A
+- [ ] B
+`
+    const quiz = parseQuizFile(content)
+    expect(quiz.meta.solo).toBe(true)
+  })
+
+  test('non-boolean solo is false', () => {
+    const content = `---
+title: T
+theme: default
+tags: []
+solo: "yes"
+---
+---
+type: single
+timer: 20
+difficulty: easy
+---
+# Q?
+- [x] A
+- [ ] B
+`
+    const quiz = parseQuizFile(content)
+    expect(quiz.meta.solo).toBe(false)
+  })
+
   test('max-questions is parsed as number', () => {
     const content = `---
 title: T

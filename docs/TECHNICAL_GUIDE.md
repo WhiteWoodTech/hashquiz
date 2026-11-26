@@ -249,15 +249,15 @@ Current coverage: **222 tests across 27 files, 0 failures**
 
 ## Solo Mode Storage (Supabase)
 
-Schema in `supabase/migrations/20261126090000_solo_live.sql`. RLS is enabled on every table, and table grants
-match the policies.
+Schema in `supabase/migrations/20261126090000_solo_live.sql`, hardened by
+`20261126120000_solo_hardening.sql`. RLS is enabled on every table, and table grants match the policies.
 
 | Table | Contents | anon |
 |-------|----------|------|
 | `solo_runs` | One finished run: `deck_id` (path after `/decks/`), `deck_version` (content hash, informational), `pseudo` (1–24 chars), `score`, `correct_count`, `question_count`, `total_time_ms`, `finished_at`, nullable `room_id` (future async rooms) | select |
 | `solo_answers` | One row per served question: `run_id`, `position`, `deck_index`, `choices` (original choice indices), `is_correct`, `answer_time_ms`, `points` | select |
 | `solo_settings` | Single row, `scoring_mode` = `browser` (default) or `edge` | select |
-| `leads` | Markuiz interest form: `email`, `consent` (must be true), `deck_id`, `created_at` | insert only (never readable; insert without `return=representation`) |
+| `leads` | Markuiz interest form: `email` (≤ 254 chars), `consent` (must be true), `deck_id` (≤ 200 chars), `created_at` | insert only (never readable; insert without `return=representation`) |
 
 Leaderboard index: `(deck_id, score desc, total_time_ms, finished_at)`. `solo_runs` is in the
 `supabase_realtime` publication so leaderboards receive new runs as inserts.
@@ -265,9 +265,11 @@ Leaderboard index: `(deck_id, score desc, total_time_ms, finished_at)`. `solo_ru
 **Functions** (all `set search_path = public`):
 
 - `submit_solo_run(p_run jsonb) → uuid` — `security definer`, executable by anon. Browser scoring mode: refuses
-  (SQLSTATE `42501`) unless `solo_settings.scoring_mode = 'browser'`, then calls `insert_solo_run`.
+  (SQLSTATE `42501`) unless `solo_settings.scoring_mode = 'browser'` (fails closed: no row or a null mode
+  refuses too), then calls `insert_solo_run`.
 - `insert_solo_run(p_run jsonb) → uuid` — `security definer`, **service_role only**. Inserts the run and its
-  answers in one transaction. `p_run` is `VerifiedRun` in snake_case: `deck_id`, `deck_version`, `pseudo`,
+  answers in one transaction. Rejects (SQLSTATE `22023`) a run whose `answers` is not an array of 1–200 items
+  or whose length differs from `question_count`. `p_run` is `VerifiedRun` in snake_case: `deck_id`, `deck_version`, `pseudo`,
   `score`, `correct_count`, `question_count`, `total_time_ms`, `answers[]` { `position`, `deck_index`,
   `choices`, `is_correct`, `answer_time_ms`, `points` }.
 - `solo_rank(p_run_id uuid) → int` — 1 + runs of the same deck strictly before it in leaderboard order
@@ -278,6 +280,10 @@ anon can never insert into `solo_runs` / `solo_answers` directly.
 **Presence.** Live solo players use a public Realtime presence channel per deck, `solo:<deckId>`. Each player
 tracks pseudo, current question / total and score, and untracks on finish or abandon. Finished runs reach the
 leaderboards through inserts on `solo_runs`.
+Reopening a deck (back/forward cache, `A → B → A` hash changes) waits for the previous `solo:<deckId>` and
+`solo-runs:<deckId>` channels to be removed first: realtime-js returns an existing channel for the same topic,
+and adding listeners to an already joined channel throws. **Commencer** works meanwhile; the run joins presence
+once the new channel is open.
 
 ### Edge Function `solo-submit`
 
@@ -294,6 +300,13 @@ It loads the deck from `_shared/generated/decks.json`, rescores with `verifySolo
 (`scripts/build-edge.ts`) generates `_shared/generated/` (gitignored): `decks.json`
 (`{ [deckId]: { version, quiz } }`, `solo: true` decks only, ids from `buildDecks`) and `solo-verify.js`
 (`Bun.build` ESM bundle of `packages/core/src/solo-verify.ts`).
+
+**Known limit: question selection is not replayed.** The function checks that every question exists in its
+deck, that none repeats, that each answer time is within `[0, timer]` and that the `max-time` budget holds,
+but it does not replay the random selection (`target-difficulty` split, one hard question per tag). With
+`max-time` or `target-difficulty`, only the question count cap is checked, so a crafted run can choose its
+own (e.g. easiest) questions. `edge` stops forged scores, not choosing questions or other cheating: correct
+answers are in the client bundle and answer times are self-reported.
 
 ---
 

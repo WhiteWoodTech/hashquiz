@@ -51,7 +51,9 @@ copy of the deck. Switch **both** together:
    runs).
 
 Switch back with `browser` in both places. `edge` stops forged scores, not cheating in general: correct answers
-are still in the client bundle and answer times are self-reported.
+are still in the client bundle and answer times are self-reported. The function does not replay random
+question selection either: with `max-time` or `target-difficulty`, a crafted run can pick its own questions
+(see `TECHNICAL_GUIDE.md`, Edge Function).
 
 ## 4. Deploy
 

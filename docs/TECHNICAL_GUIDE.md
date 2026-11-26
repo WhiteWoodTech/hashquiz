@@ -243,6 +243,29 @@ Current coverage: **27 tests, 0 failures**
 
 ---
 
+## Release (`release.config.js`)
+
+semantic-release, configured as in `WhiteWoodTech/github-repository-template`.
+The leading gitmoji (unicode or `:shortcode:`) or, without emoji, the
+conventional type of each commit header decides the bump:
+
+| Gitmoji | Conventional | Version Bump | Release notes section |
+|---------|--------------|--------------|-----------------------|
+| 💥 | `type!:` | Major | 💥 Breaking Changes |
+| ✨ 🎉 | `feat` | Minor | ✨ Features |
+| 🐛 🚑️ 🩹 | `fix` | Patch | 🐛 Bug Fixes |
+| 🔒️ | | Patch | 🔒 Security |
+| ⚡️ | `perf` | Patch | ⚡ Performance |
+| ♻️ | `refactor` | Patch | ♻️ Refactoring |
+| 🚀 | | Patch | 🚀 Deployment |
+| ⬆️ ⬇️ | | Patch | ⬆️ Dependencies |
+| Others (📝 🔧 ✅ ...) | `docs`, `chore`, `ci`... | None | Not listed |
+
+A `BREAKING CHANGE:` footer always triggers a major release. `main` publishes
+stable versions (npm `latest`), a manual run on `develop` publishes
+`-beta.N` prereleases (npm `beta`). Channels, secrets and steps:
+[`DEPLOY.md`](DEPLOY.md#publishing-the-hashquiz-package).
+
 ## Known Constraints
 
 | Constraint | Reason |

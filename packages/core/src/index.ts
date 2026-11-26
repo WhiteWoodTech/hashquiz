@@ -8,3 +8,4 @@ export { configFromEnv, renderConfigScript, readRuntimeConfig } from './runtime-
 export type { QuizvRuntimeConfig } from './runtime-config'
 export { serveQuestions, selectQuestions, shuffleChoices, toPublic, type ServedQuestion } from './selection'
 export { SoloSession, type SoloStatus, type SoloAnswer, type SoloResult, type SoloRunSubmission } from './solo'
+export { verifySoloRun, compareRuns, type VerifiedRun, type VerifyResult, type RankedRun } from './solo-verify'

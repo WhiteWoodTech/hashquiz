@@ -22,6 +22,9 @@ const toRanked = (r: RunRow): RankedRun => ({
   finishedAt: r.finished_at,
 })
 
+/** Same check as the `leads.email` constraint in the database. */
+export const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
+
 const message = (e: unknown): string => (e instanceof Error ? e.message : String(e))
 const fail = (error: string): { ok: false; error: string } => ({ ok: false, error })
 
@@ -111,10 +114,24 @@ export class SoloApi {
     }
   }
 
+  /** Number of stored runs for the deck (the N in "#rank sur N"). */
+  async fetchCount(deckId: string): Promise<Outcome<number>> {
+    try {
+      const { count, error } = await this.client
+        .from('solo_runs')
+        .select('id', { count: 'exact', head: true })
+        .eq('deck_id', deckId)
+      if (error) return fail(error.message)
+      return { ok: true, value: count ?? 0 }
+    } catch (e) {
+      return fail(message(e))
+    }
+  }
+
   /** Insert only: anon cannot read `leads`, so the row is never selected back. */
   async submitLead(email: string, deckId: string): Promise<Outcome<void>> {
     const trimmed = email.trim()
-    if (!/^[^\s@]+@[^\s@]+$/.test(trimmed)) return fail('invalid email')
+    if (!EMAIL_RE.test(trimmed)) return fail('invalid email')
     try {
       const { error } = await this.client.from('leads').insert({ email: trimmed, consent: true, deck_id: deckId })
       if (error) return fail(error.message)

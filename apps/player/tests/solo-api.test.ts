@@ -19,7 +19,7 @@ const sub: SoloRunSubmission = {
   answers: [{ deckIndex: 0, choices: [1], answerTimeMs: 3000 }],
 }
 
-type Result = { data?: unknown; error?: { message: string } | null }
+type Result = { data?: unknown; count?: number | null; error?: { message: string } | null }
 
 class FakeQuery {
   calls: Array<[string, unknown[]]> = []
@@ -31,15 +31,18 @@ class FakeQuery {
 }
 
 class FakeChannel {
-  listeners: Array<{ kind: string; filter: object; cb: () => void }> = []
+  listeners: Array<{ kind: string; filter: { event?: string }; cb: (payload?: unknown) => void }> = []
   tracked: unknown[] = []
   state: Record<string, unknown[]> = {}
   constructor(public name: string, public opts?: unknown) {}
-  on(kind: string, filter: object, cb: () => void) { this.listeners.push({ kind, filter, cb }); return this }
+  on(kind: string, filter: { event?: string }, cb: (payload?: unknown) => void) { this.listeners.push({ kind, filter, cb }); return this }
   subscribe(cb?: (s: string) => void) { cb?.('SUBSCRIBED'); return this }
   async track(s: unknown) { this.tracked.push(s) }
   async untrack() {}
   presenceState() { return this.state }
+  fire(event: string, payload?: unknown) {
+    for (const l of this.listeners) if (l.kind === 'presence' && l.filter.event === event) l.cb(payload)
+  }
 }
 
 class FakeClient {
@@ -139,9 +142,21 @@ describe('SoloApi reads and leads', () => {
     expect(c.queries[0].q.calls).toEqual([['insert', [{ email: 'a@b.co', consent: true, deck_id: 'd' }]]])
   })
 
+  test('fetchCount counts the deck runs with a head-only exact count', async () => {
+    const { c, as } = make()
+    c.tableResult = { data: null, count: 7 }
+    expect(await new SoloApi(as(), 'browser').fetchCount('d')).toEqual({ ok: true, value: 7 })
+    expect(c.queries[0].table).toBe('solo_runs')
+    expect(c.queries[0].q.calls).toEqual([['select', ['id', { count: 'exact', head: true }]], ['eq', ['deck_id', 'd']]])
+    c.tableResult = { count: null, error: { message: 'boom' } }
+    expect(await new SoloApi(as(), 'browser').fetchCount('d')).toEqual({ ok: false, error: 'boom' })
+  })
+
   test('submitLead rejects malformed emails and surfaces errors', async () => {
     const { c, as } = make()
-    expect((await new SoloApi(as(), 'browser').submitLead('nope', 'd')).ok).toBe(false)
+    for (const bad of ['nope', 'a@b', 'a b@c.d', 'a@b c.d', '@b.co']) {
+      expect((await new SoloApi(as(), 'browser').submitLead(bad, 'd')).ok).toBe(false)
+    }
     expect(c.queries).toEqual([])
     c.tableResult = { error: { message: 'denied' } }
     expect(await new SoloApi(as(), 'browser').submitLead('a@b.co', 'd')).toEqual({ ok: false, error: 'denied' })
@@ -163,24 +178,62 @@ describe('SoloApi reads and leads', () => {
 describe('SoloLive', () => {
   const me = { pseudo: 'Al', index: 1, total: 5, score: 100 }
 
-  test('joins solo:<deckId>, tracks, and flattens presence state', async () => {
+  test('joins solo:<deckId>, tracks, and lists one row per presence key', async () => {
     const { c, as } = make()
     const live = new SoloLive(as(), 'folder/deck')
     const ch = c.channels[0]
     expect(ch.name).toBe('solo:folder/deck')
     const key = (ch.opts as { config: { presence: { key: string } } }).config.presence.key
     expect(key.length).toBeGreaterThan(3)
+    expect(live.key).toBe(key)
     let seen: unknown[] = []
     live.onChange(p => { seen = p })
     await live.join(me)
     await live.update({ ...me, index: 2 })
     expect(ch.tracked).toEqual([me, { ...me, index: 2 }])
-    ch.state = { [key]: [{ ...me, presence_ref: 'x' }], other: [{ pseudo: 'Bo', index: 0, total: 5, score: 0 }] }
-    ch.listeners[0].cb()
-    expect(seen).toEqual([
-      { key, ...me },
-      { key: 'other', pseudo: 'Bo', index: 0, total: 5, score: 0 },
-    ])
+    const bo = { pseudo: 'Bo', index: 0, total: 5, score: 0 }
+    ch.fire('join', { key, newPresences: [{ ...me, presence_ref: 'x' }] })
+    ch.fire('join', { key: 'other', newPresences: [bo] })
+    ch.fire('sync')
+    expect(seen).toEqual([{ key, ...me }, { key: 'other', ...bo }])
+  })
+
+  test('an update (join + leave of the same key in one diff) replaces the row; a pure leave removes it', async () => {
+    // realtime-js 2.106 never prunes presenceState() metas, so rows are rebuilt from join/leave events.
+    const { c, as } = make()
+    const live = new SoloLive(as(), 'd')
+    const ch = c.channels[0]
+    let seen: unknown[] = []
+    live.onChange(p => { seen = p })
+    const bo = { pseudo: 'Bo', index: 0, total: 5, score: 0 }
+    ch.fire('join', { key: 'bo', newPresences: [bo] })
+    ch.fire('sync')
+    ch.fire('join', { key: 'bo', newPresences: [{ ...bo, index: 1, score: 50 }] })
+    ch.fire('leave', { key: 'bo', leftPresences: [bo] })
+    ch.fire('sync')
+    expect(seen).toEqual([{ key: 'bo', ...bo, index: 1, score: 50 }])
+    ch.fire('leave', { key: 'bo', leftPresences: [{ ...bo, index: 1, score: 50 }] })
+    ch.fire('sync')
+    expect(seen).toEqual([])
+  })
+
+  test('watch subscribes once without tracking; untrack keeps the channel', async () => {
+    const { c, as } = make()
+    const live = new SoloLive(as(), 'd')
+    const ch = c.channels[0]
+    let subs = 0
+    const sub = ch.subscribe.bind(ch)
+    ch.subscribe = (cb?: (s: string) => void) => { subs++; return sub(cb) }
+    let untracked = 0
+    ch.untrack = async () => { untracked++ }
+    await live.watch()
+    expect(ch.tracked).toEqual([])
+    await live.join(me)
+    expect(subs).toBe(1)
+    expect(ch.tracked).toEqual([me])
+    await live.untrack()
+    expect(untracked).toBe(1)
+    expect(c.removed).toEqual([])
   })
 
   test('leave removes the channel and onChange unsubscribes', async () => {
@@ -189,7 +242,7 @@ describe('SoloLive', () => {
     let n = 0
     const off = live.onChange(() => n++)
     off()
-    c.channels[0].listeners[0].cb()
+    c.channels[0].fire('sync')
     expect(n).toBe(0)
     await live.leave()
     expect(c.removed).toEqual([c.channels[0]])

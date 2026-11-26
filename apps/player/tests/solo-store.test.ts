@@ -1,0 +1,283 @@
+import { describe, test, expect, beforeEach } from 'bun:test'
+import { createPinia, setActivePinia } from 'pinia'
+import type { Quiz, RankedRun, SoloRunSubmission } from '@quizv/core'
+import type { BundledDeck } from '@quizv/decks'
+import type { LivePlayer } from '../src/solo/live'
+import type { Outcome } from '../src/solo/api'
+import { formatDuration } from '../src/solo/deck-info'
+import { useSoloStore, setSoloDeps, type SoloApiPort, type SoloLivePort } from '../src/stores/solo'
+
+const question = (text: string) => ({
+  type: 'single' as const, timer: 10, difficulty: 'easy' as const, tags: [], text,
+  // One correct choice: every answer is right, whatever the shuffled ids.
+  choices: [{ id: 'a', text: 'yes', isCorrect: true }],
+})
+const quiz = (solo: boolean): Quiz => ({
+  meta: { title: 'Deck', theme: 'default', tags: [], oneShoot: true, solo },
+  questions: [question('Q1'), question('Q2')],
+})
+const decks: Record<string, BundledDeck> = {
+  'solo/deck': { id: 'solo/deck', name: 'Deck', version: 'v1', quiz: quiz(true) },
+  'room/deck': { id: 'room/deck', name: 'Room', version: 'v1', quiz: quiz(false) },
+}
+
+const run = (id: string, pseudo: string, score: number): RankedRun =>
+  ({ id, pseudo, score, totalTimeMs: 4000, finishedAt: '2026-11-26T10:00:00Z' })
+
+class FakeApi implements SoloApiPort {
+  submits: SoloRunSubmission[] = []
+  submitResult: Outcome<{ runId: string; rank: number | null }> = { ok: true, value: { runId: 'mine', rank: 2 } }
+  top: RankedRun[] = []
+  count = 0
+  runs: Record<string, RankedRun> = {}
+  newRunCb: (() => void) | null = null
+  unsubscribed = 0
+  async submitRun(sub: SoloRunSubmission) { this.submits.push(sub); return this.submitResult }
+  async fetchTop() { return { ok: true as const, value: this.top } }
+  async fetchCount() { return { ok: true as const, value: this.count } }
+  async fetchRun(id: string): Promise<Outcome<RankedRun>> {
+    const r = this.runs[id]
+    return r ? { ok: true, value: r } : { ok: false, error: 'run not found' }
+  }
+  async submitLead() { return { ok: true as const, value: undefined } }
+  onNewRun(_deckId: string, cb: () => void) { this.newRunCb = cb; return () => { this.unsubscribed++ } }
+}
+
+class FakeLive implements SoloLivePort {
+  key = 'me'
+  log: string[] = []
+  tracked: unknown[] = []
+  cb: ((p: LivePlayer[]) => void) | null = null
+  async watch() { this.log.push('watch') }
+  async join(me: unknown) { this.log.push('join'); this.tracked.push(me) }
+  async update(me: unknown) { this.log.push('update'); this.tracked.push(me) }
+  async untrack() { this.log.push('untrack') }
+  async leave() { this.log.push('leave') }
+  onChange(cb: (p: LivePlayer[]) => void) { this.cb = cb; return () => { this.cb = null } }
+}
+
+let api: FakeApi
+let live: FakeLive
+let clock: number
+const flush = () => new Promise(r => setTimeout(r, 0))
+
+function setup(backend = true) {
+  api = new FakeApi()
+  live = new FakeLive()
+  clock = 1_000
+  setSoloDeps({
+    findDeck: id => decks[id],
+    backend: backend ? { api, live: () => live } : null,
+    now: () => clock,
+  })
+  return useSoloStore()
+}
+
+async function playToEnd(solo: ReturnType<typeof useSoloStore>) {
+  solo.start('Alice')
+  for (let i = 0; i < 2; i++) {
+    clock += 2_000
+    solo.answer([solo.question!.choices[0]!.id])
+    solo.next()
+  }
+  await flush()
+}
+
+describe('solo store', () => {
+  beforeEach(() => { setActivePinia(createPinia()) })
+
+  test('unknown deck sets unavailable', async () => {
+    const solo = setup()
+    await solo.open('nope')
+    expect(solo.phase).toBe('unavailable')
+    await solo.open('room/deck')
+    expect(solo.phase).toBe('unavailable')
+  })
+
+  test('missing Supabase credentials set unavailable', async () => {
+    const solo = setup(false)
+    await solo.open('solo/deck')
+    expect(solo.phase).toBe('unavailable')
+  })
+
+  test('open shows the intro with live rows and the top', async () => {
+    const solo = setup()
+    api.top = [run('r1', 'Bob', 900)]
+    await solo.open('solo/deck')
+    expect(solo.phase).toBe('intro')
+    expect(solo.deck?.id).toBe('solo/deck')
+    expect(solo.top).toEqual([run('r1', 'Bob', 900)])
+    expect(live.log).toEqual(['watch'])
+    live.cb?.([{ key: 'x', pseudo: 'Zoe', index: 0, total: 2, score: 0 }])
+    expect(solo.live.map(p => p.pseudo)).toEqual(['Zoe'])
+  })
+
+  test('start joins presence and shows first question', async () => {
+    const solo = setup()
+    await solo.open('solo/deck')
+    solo.start('  Alice  ')
+    expect(solo.phase).toBe('question')
+    expect(solo.pseudo).toBe('Alice')
+    expect(solo.index).toBe(0)
+    expect(solo.total).toBe(2)
+    expect(solo.question?.text).toBe('Q1')
+    expect(solo.deadlineMs).toBe(1_000 + 10_000)
+    expect(live.log).toContain('join')
+    expect(live.tracked[0]).toEqual({ pseudo: 'Alice', index: 0, total: 2, score: 0 })
+  })
+
+  test('start rejects empty or too long pseudos', async () => {
+    const solo = setup()
+    await solo.open('solo/deck')
+    solo.start('   ')
+    expect(solo.phase).toBe('intro')
+    solo.start('x'.repeat(25))
+    expect(solo.phase).toBe('intro')
+  })
+
+  test('answer reveals the result and updates presence; live excludes me', async () => {
+    const solo = setup()
+    await solo.open('solo/deck')
+    solo.start('Alice')
+    clock += 2_000
+    solo.answer([solo.question!.choices[0]!.id])
+    expect(solo.phase).toBe('revealed')
+    expect(solo.lastResult?.isCorrect).toBe(true)
+    expect(solo.score).toBeGreaterThan(0)
+    expect(solo.question?.text).toBe('Q1')
+    expect(live.log).toContain('update')
+    live.cb?.([
+      { key: 'me', pseudo: 'Alice', index: 0, total: 2, score: solo.score },
+      { key: 'x', pseudo: 'Zoe', index: 1, total: 2, score: 0 },
+    ])
+    expect(solo.liveOthers.map(p => p.pseudo)).toEqual(['Zoe'])
+  })
+
+  test('timeout reveals a missed question with zero points', async () => {
+    const solo = setup()
+    await solo.open('solo/deck')
+    solo.start('Alice')
+    solo.timeout()
+    expect(solo.phase).toBe('revealed')
+    expect(solo.lastResult?.answered).toBe(false)
+    expect(solo.score).toBe(0)
+  })
+
+  test('next after last question submits once and fetches rank', async () => {
+    const solo = setup()
+    await solo.open('solo/deck')
+    api.count = 5
+    await playToEnd(solo)
+    expect(solo.phase).toBe('end')
+    expect(api.submits.length).toBe(1)
+    expect(api.submits[0]).toMatchObject({ deckId: 'solo/deck', deckVersion: 'v1', pseudo: 'Alice' })
+    expect(api.submits[0]!.answers.length).toBe(2)
+    expect(solo.submitState).toBe('saved')
+    expect(solo.myRunId).toBe('mine')
+    expect(solo.myRank).toBe(2)
+    expect(solo.runCount).toBe(5)
+    expect(solo.totalTimeMs).toBe(4_000)
+    expect(live.log).toContain('untrack')
+    solo.next()
+    solo.retrySubmit()
+    await flush()
+    expect(api.submits.length).toBe(1)
+  })
+
+  test('submit failure keeps local result', async () => {
+    const solo = setup()
+    await solo.open('solo/deck')
+    api.submitResult = { ok: false, error: 'rls denied' }
+    await playToEnd(solo)
+    expect(solo.phase).toBe('end')
+    expect(solo.submitState).toBe('error')
+    expect(solo.score).toBeGreaterThan(0)
+    expect(solo.myRunId).toBeNull()
+    api.submitResult = { ok: true, value: { runId: 'mine', rank: 1 } }
+    solo.retrySubmit()
+    await flush()
+    expect(solo.submitState).toBe('saved')
+    expect(solo.myRank).toBe(1)
+    expect(api.submits.length).toBe(2)
+  })
+
+  test('abandon clears run without submitting', async () => {
+    const solo = setup()
+    await solo.open('solo/deck')
+    solo.start('Alice')
+    solo.answer([solo.question!.choices[0]!.id])
+    solo.abandon()
+    await flush()
+    expect(api.submits).toEqual([])
+    expect(live.log).toContain('leave')
+    expect(api.unsubscribed).toBe(1)
+    expect(solo.session).toBeNull()
+    expect(solo.question).toBeNull()
+    solo.start('Alice')
+    expect(solo.session).toBeNull()
+  })
+
+  test('highlights by runId', async () => {
+    const solo = setup()
+    api.top = [run('other', 'Alice', 950), run('mine', 'Alice', 900)]
+    await solo.open('solo/deck')
+    await playToEnd(solo)
+    expect(solo.board.filter(r => r.mine).map(r => r.id)).toEqual(['mine'])
+    expect(solo.board.map(r => r.rank)).toEqual([1, 2])
+  })
+
+  test('own row outside the top is appended with its rank', async () => {
+    const solo = setup()
+    api.top = [run('r1', 'Bob', 950)]
+    api.runs.mine = run('mine', 'Alice', 100)
+    api.submitResult = { ok: true, value: { runId: 'mine', rank: 42 } }
+    await solo.open('solo/deck')
+    await playToEnd(solo)
+    expect(solo.board.map(r => [r.id, r.rank, r.mine])).toEqual([['r1', 1, false], ['mine', 42, true]])
+  })
+
+  test('a refetched top keeps my rank in step with my row', async () => {
+    const solo = setup()
+    api.top = [run('mine', 'Alice', 900)]
+    await solo.open('solo/deck')
+    await playToEnd(solo)
+    expect(solo.myRank).toBe(1)
+    api.top = [run('fast', 'Zed', 990), run('mine', 'Alice', 900)]
+    api.newRunCb?.()
+    await flush()
+    expect(solo.myRank).toBe(2)
+  })
+
+  test('new runs refetch the top', async () => {
+    const solo = setup()
+    await solo.open('solo/deck')
+    api.top = [run('r9', 'Eve', 10)]
+    api.newRunCb?.()
+    await flush()
+    expect(solo.top.map(r => r.id)).toEqual(['r9'])
+  })
+
+  test('playAgain starts a fresh session with the same pseudo', async () => {
+    const solo = setup()
+    await solo.open('solo/deck')
+    await playToEnd(solo)
+    const first = solo.session
+    solo.playAgain()
+    expect(solo.phase).toBe('question')
+    expect(solo.session).not.toBe(first)
+    expect(solo.pseudo).toBe('Alice')
+    expect(solo.index).toBe(0)
+    expect(solo.score).toBe(0)
+    expect(solo.myRunId).toBeNull()
+    expect(solo.submitState).toBe('idle')
+    expect(live.tracked.at(-1)).toEqual({ pseudo: 'Alice', index: 0, total: 2, score: 0 })
+  })
+})
+
+describe('formatDuration', () => {
+  test('formats milliseconds as m:ss', () => {
+    expect(formatDuration(0)).toBe('0:00')
+    expect(formatDuration(4_400)).toBe('0:04')
+    expect(formatDuration(125_000)).toBe('2:05')
+  })
+})

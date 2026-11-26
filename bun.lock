@@ -56,6 +56,7 @@
         "@quizv/theme-original": "workspace:*",
         "@quizv/transport-supabase": "workspace:*",
         "@quizv/ui": "workspace:*",
+        "@supabase/supabase-js": "^2.45.4",
         "pinia": "^4.0.3",
         "vue": "^3.4.27",
       },
@@ -64,6 +65,7 @@
         "typescript": "^5.4.5",
         "unocss": "^66.7.0",
         "vite": "^8.2.2",
+        "vite-plugin-node-polyfills": "0.28.0",
       },
     },
     "packages/core": {

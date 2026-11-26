@@ -8,7 +8,7 @@
         <a class="decks__back" href="#/">← All quizzes</a>
         <h1 class="decks__title"><span class="decks__hash">#</span>{{ route.tag }}</h1>
         <ul v-if="tagDecks.length" class="decks__grid">
-          <DeckCard v-for="deck in tagDecks" :key="deck.id" :deck="deck" @pick="pick" />
+          <DeckCard v-for="deck in tagDecks" :key="deck.id" :deck="deck" :solo-href="soloHref(deck)" @pick="pick" />
         </ul>
         <p v-else class="decks__empty">No quiz with the tag “{{ route.tag }}”.</p>
       </template>
@@ -19,7 +19,7 @@
         <p v-if="loading" class="decks__empty">Loading quizzes…</p>
         <p v-else-if="loadError" class="decks__empty">Could not load the quiz list: {{ loadError }}</p>
         <ul v-else-if="decks.length" class="decks__grid">
-          <DeckCard v-for="deck in decks" :key="deck.id" :deck="deck" @pick="pick" />
+          <DeckCard v-for="deck in decks" :key="deck.id" :deck="deck" :solo-href="soloHref(deck)" @pick="pick" />
         </ul>
         <p v-else class="decks__empty">No decks found. Add <code>.quizv.md</code> files to your decks folder.</p>
 
@@ -43,7 +43,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { BrandLogo } from '@quizv/ui'
 import { useGameStore } from '../stores/game'
 import { loadDecks, type BundledDeck } from '../decks'
-import { decksForTag, parseDeckHash, tagCounts, tagHash } from '../deck-browse'
+import { decksForTag, parseDeckHash, soloUrl, tagCounts, tagHash } from '../deck-browse'
 import DeckCard from '../components/DeckCard.vue'
 
 const game = useGameStore()
@@ -69,6 +69,12 @@ onMounted(() => window.addEventListener('hashchange', sync))
 onBeforeUnmount(() => window.removeEventListener('hashchange', sync))
 
 const tagDecks = computed(() => (route.value.kind === 'tag' ? decksForTag(decks.value, route.value.tag) : []))
+
+// The solo link needs the same Supabase credentials as a room; it opens the player app in this tab.
+const hasCreds = !!(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY)
+const playerBase = import.meta.env.VITE_PLAYER_URL || location.origin + '/'
+const soloHref = (deck: BundledDeck) =>
+  hasCreds && deck.quiz.meta.solo ? soloUrl(deck.id, playerBase) : undefined
 
 function pick(deck: BundledDeck) {
   game.startWithDeck(deck)

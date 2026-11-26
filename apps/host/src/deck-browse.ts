@@ -36,3 +36,7 @@ export function parseDeckHash(hash: string): DeckRoute {
 }
 
 export const tagHash = (tag: string): string => `#/tag/${encodeURIComponent(tag)}`
+
+/** Player-app link to the solo run of a deck: `<base>/#/solo/<deckId>` (same format as the player `soloHash`). */
+export const soloUrl = (deckId: string, playerBase: string): string =>
+  `${playerBase.replace(/\/+$/, '')}/#/solo/${encodeURIComponent(deckId)}`

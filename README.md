@@ -108,7 +108,7 @@ bun run commit            # Interactive gitmoji commit
 
 ### Solo mode with Supabase
 
-Solo runs, the leaderboard and Markuiz leads are stored in Supabase (`supabase/migrations/`). Locally (Docker
+Solo runs, the leaderboard and HashQuiz leads are stored in Supabase (`supabase/migrations/`). Locally (Docker
 required):
 
 ```bash

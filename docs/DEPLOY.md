@@ -1,7 +1,7 @@
 # Deploy
 
 This project deploys on Vercel for hosting and Supabase for realtime messaging and solo mode storage.
-Rooms only use Supabase Realtime channels. Solo mode stores finished runs, their answers and Markuiz
+Rooms only use Supabase Realtime channels. Solo mode stores finished runs, their answers and HashQuiz
 leads in Postgres (`supabase/migrations/`) and can score runs in an Edge Function (`supabase/functions/`).
 
 ## 1. Create a Supabase project

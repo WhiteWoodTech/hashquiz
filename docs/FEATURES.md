@@ -85,7 +85,7 @@ Second game mode next to the hosted room: one player, own pace, shared per-quiz 
 | Shared leaderboard | ✅ | Per deck across versions: score desc, total time asc, finished at asc; live players ("en cours") + past runs |
 | Run persistence | ✅ | `solo_runs` + `solo_answers`, written once at the end of the run; abandoned runs are not stored |
 | Scoring mode | ✅ | `VITE_SOLO_SCORING=browser` (default, `submit_solo_run` RPC) or `edge` (`solo-submit` Edge Function rescoring) |
-| Markuiz interest form | ✅ | Optional email + consent on the end screen, stored in insert-only `leads` |
+| HashQuiz interest form | ✅ | Optional email + consent on the end screen, stored in insert-only `leads` |
 | Shared `@quizv/decks` | ✅ | Deck bundle and `deckInfo` used by both apps |
 | Async room | ⬜ | End date, private code, shared persisted leaderboard (reuses the solo storage) |
 

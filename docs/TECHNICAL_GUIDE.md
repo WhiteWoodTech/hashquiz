@@ -197,6 +197,10 @@ type PlayerPhase = 'join' | 'lobby' | 'question' | 'podium'
 
 ## Dev Stack Startup (`packages/server/src/dev.ts`)
 
+From the quizv sources the apps run under Vite as below. From the installed
+`markuiz` npm package (no `apps/` folder) `dev` serves the prebuilt apps from
+the package's `web/` folder on the same ports instead.
+
 ```typescript
 export function devCommand(quizFile: string, port?: number): void {
   const server = new QuizvServer({ quizFile, port })

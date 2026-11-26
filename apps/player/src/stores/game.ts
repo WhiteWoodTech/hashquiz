@@ -1,3 +1,4 @@
+import { config } from '../config'
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { QuestionPublic, Score, PodiumEntry, QuizInfo, StateSnapshot } from '@quizv/core'
@@ -150,8 +151,8 @@ export const useGameStore = defineStore('game', () => {
   }
 
   async function connectSupabase(code: string, pseudo: string, email: string) {
-    const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
+    const url = config.supabaseUrl
+    const anonKey = config.supabaseAnonKey
     if (!url || !anonKey) {
       connectError.value = 'Missing Supabase credentials'
       return
@@ -257,7 +258,7 @@ export const useGameStore = defineStore('game', () => {
       if (!email)  emailCached  = persisted.email
     }
 
-    if (import.meta.env.VITE_TRANSPORT === 'supabase') {
+    if (config.transport === 'supabase') {
       void connectSupabase(code, pseudoCached, emailCached)
       return
     }

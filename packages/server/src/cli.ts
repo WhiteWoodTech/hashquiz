@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 import { devCommand } from './dev'
+import { buildSite } from './build'
 import { parseQuizFile, validateQuiz } from '@quizv/parser'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -8,14 +9,19 @@ const [,, command, arg, ...flags] = process.argv
 
 function printUsage(): void {
   console.log(`
-  quizv <command> [options]
+  markuiz <command> [options]   (quizv from the sources)
 
   Commands:
     dev <quiz.quizv.md>     Start local dev server with hot-reload
     check <quiz.quizv.md>   Validate quiz file format
+    build [decks-dir]       Build the static site (host + player) for a decks
+                            folder (default: decks). Reads MARKUIZ_TRANSPORT,
+                            MARKUIZ_SUPABASE_URL, MARKUIZ_SUPABASE_ANON_KEY
+                            (or their QUIZV_* / VITE_* names) from the environment.
 
   Options:
     --port <number>         Port to listen on (default: 3030)
+    --out <dir>             Output folder for build (default: dist)
 `)
 }
 
@@ -24,8 +30,13 @@ if (!command || command === '--help' || command === '-h') {
   process.exit(0)
 }
 
-const portFlag = flags.indexOf('--port')
-const port = portFlag !== -1 ? parseInt(flags[portFlag + 1] ?? '3030') : 3030
+const args = [arg, ...flags].filter((a): a is string => a !== undefined)
+function flag(name: string): string | undefined {
+  const i = args.indexOf(name)
+  return i !== -1 ? args[i + 1] : undefined
+}
+const port = parseInt(flag('--port') ?? '3030')
+const positional = args.find((a, i) => !a.startsWith('--') && !(i > 0 && args[i - 1]!.startsWith('--')))
 
 if (command === 'dev') {
   if (!arg) {
@@ -33,6 +44,16 @@ if (command === 'dev') {
     process.exit(1)
   }
   devCommand(arg, port)
+} else if (command === 'build') {
+  const decksDir = positional ?? 'decks'
+  const outDir = flag('--out') ?? 'dist'
+  try {
+    const count = buildSite({ decksDir, outDir })
+    console.log(`✓ Built ${count} deck(s) from ${decksDir} into ${outDir}`)
+  } catch (e) {
+    console.error(`✗ ${e instanceof Error ? e.message : String(e)}`)
+    process.exit(1)
+  }
 } else if (command === 'check') {
   if (!arg) {
     console.error('Error: provide a .quizv.md file path\n  quizv check quiz.quizv.md')

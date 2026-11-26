@@ -16,10 +16,12 @@
       <!-- Full list -->
       <template v-else>
         <h1 class="decks__title">Pick a quiz</h1>
-        <ul v-if="decks.length" class="decks__grid">
+        <p v-if="loading" class="decks__empty">Loading quizzes…</p>
+        <p v-else-if="loadError" class="decks__empty">Could not load the quiz list: {{ loadError }}</p>
+        <ul v-else-if="decks.length" class="decks__grid">
           <DeckCard v-for="deck in decks" :key="deck.id" :deck="deck" @pick="pick" />
         </ul>
-        <p v-else class="decks__empty">No bundled decks found in <code>decks/</code>.</p>
+        <p v-else class="decks__empty">No decks found. Add <code>.quizv.md</code> files to your decks folder.</p>
 
         <section v-if="tags.length" class="decks__tags" aria-labelledby="decks-tags">
           <h2 id="decks-tags" class="decks__heading qv-label">Tags</h2>
@@ -40,13 +42,25 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { BrandLogo } from '@quizv/ui'
 import { useGameStore } from '../stores/game'
-import { bundledDecks, type BundledDeck } from '../decks'
+import { loadDecks, type BundledDeck } from '../decks'
 import { decksForTag, parseDeckHash, tagCounts, tagHash } from '../deck-browse'
 import DeckCard from '../components/DeckCard.vue'
 
 const game = useGameStore()
-const decks = bundledDecks
-const tags = tagCounts(decks)
+const decks = ref<BundledDeck[]>([])
+const loading = ref(true)
+const loadError = ref('')
+const tags = computed(() => tagCounts(decks.value))
+
+onMounted(async () => {
+  try {
+    decks.value = await loadDecks()
+  } catch (e) {
+    loadError.value = e instanceof Error ? e.message : String(e)
+  } finally {
+    loading.value = false
+  }
+})
 
 // Minimal hash routing (#/tag/<tag>): the browser back button and direct links keep working.
 const route = ref(parseDeckHash(location.hash))
@@ -54,7 +68,7 @@ const sync = () => { route.value = parseDeckHash(location.hash) }
 onMounted(() => window.addEventListener('hashchange', sync))
 onBeforeUnmount(() => window.removeEventListener('hashchange', sync))
 
-const tagDecks = computed(() => (route.value.kind === 'tag' ? decksForTag(decks, route.value.tag) : []))
+const tagDecks = computed(() => (route.value.kind === 'tag' ? decksForTag(decks.value, route.value.tag) : []))
 
 function pick(deck: BundledDeck) {
   game.startWithDeck(deck)

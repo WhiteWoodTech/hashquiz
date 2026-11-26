@@ -1,4 +1,4 @@
-import { GameEngine } from '@quizv/core'
+import { GameEngine, readRuntimeConfig } from '@quizv/core'
 import type { GameEvent, IRealtimeTransport, PlayerState, QuizInfo } from '@quizv/core'
 import { GameEvents } from '@quizv/core'
 import type { Quiz } from '@quizv/parser'
@@ -20,12 +20,9 @@ export interface HostSessionOptions {
 
 function resolveGraceMs(opt?: number): number {
   if (typeof opt === 'number' && Number.isFinite(opt) && opt >= 0) return opt
-  // Vite exposes env vars via import.meta.env, but allow a runtime fallback for tests.
-  const fromEnv = (import.meta.env?.VITE_QUIZV_GRACE_MS as string | undefined)
-  if (fromEnv) {
-    const n = Number(fromEnv)
-    if (Number.isFinite(n) && n >= 0) return n
-  }
+  // Runtime config (/quizv-config.js) or VITE_QUIZV_GRACE_MS. import.meta.env is undefined under bun test.
+  const fromConfig = readRuntimeConfig((import.meta.env ?? {}) as unknown as Record<string, string | undefined>).graceMs
+  if (fromConfig !== undefined) return fromConfig
   return 60_000
 }
 

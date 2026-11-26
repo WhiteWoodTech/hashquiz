@@ -163,7 +163,7 @@ export class SoloSession {
       isCorrect: r.isCorrect,
       points,
       correctIds: r.correctIds,
-      explanation: q.explanation,
+      ...(q.explanation !== undefined ? { explanation: q.explanation } : {}),
       answered: r.answered,
       answerTimeMs: r.elapsed,
     }

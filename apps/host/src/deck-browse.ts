@@ -45,14 +45,15 @@ export const soloUrl = (deckId: string, playerBase: string): string =>
 export const PLAYER_DEV_PORT = 3032
 
 /**
- * Base URL of the player app: `VITE_PLAYER_URL` when set; otherwise the player Vite server on :3032 in dev
- * (the host runs on :3031), and the same origin in production (player at `/`, host at `/host`).
+ * Base URL of the player app: the runtime `playerUrl` (`HASHQUIZ_PLAYER_URL`, `VITE_PLAYER_URL`, …) when set;
+ * otherwise the player Vite server on :3032 in dev (the host runs on :3031), and the same origin in
+ * production (player at `/`, host at `/host`).
  */
 export function playerBaseUrl(
-  env: { DEV: boolean; VITE_PLAYER_URL?: string | undefined },
+  opts: { dev: boolean; playerUrl?: string | undefined },
   loc: { protocol: string; hostname: string; origin: string },
 ): string {
-  if (env.VITE_PLAYER_URL) return env.VITE_PLAYER_URL
-  if (env.DEV) return `${loc.protocol}//${loc.hostname}:${PLAYER_DEV_PORT}/`
+  if (opts.playerUrl) return opts.playerUrl
+  if (opts.dev) return `${loc.protocol}//${loc.hostname}:${PLAYER_DEV_PORT}/`
   return `${loc.origin}/`
 }

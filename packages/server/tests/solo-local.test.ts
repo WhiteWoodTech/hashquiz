@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test } from 'bun:test'
+import { afterEach, describe, expect, spyOn, test } from 'bun:test'
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
@@ -37,26 +37,29 @@ function open(url: string): Promise<{ ws: WebSocket; messages: Msg[] }> {
   })
 }
 
-function start(withDecks = true): number {
+let lastDir = ''
+
+function start(withDecks = true, dbPath?: (dir: string) => string): number {
   const port = 45_000 + Math.floor(Math.random() * 10_000)
   const dir = mkdtempSync(join(tmpdir(), 'solo-local-'))
   cleanups.push(() => rmSync(dir, { recursive: true, force: true }))
   writeFileSync(join(dir, DECK), DEMO)
+  lastDir = dir
   const server = new QuizvServer({
     quizFile: QUIZ,
     port,
     graceMs: 0,
-    ...(withDecks ? { decksDir: dir, soloDbPath: join(dir, 'db', 'solo.db') } : {}),
+    ...(withDecks ? { decksDir: dir, soloDbPath: dbPath ? dbPath(dir) : join(dir, 'db', 'solo.db') } : {}),
   })
   server.start()
   cleanups.push(() => server.stop())
   return port
 }
 
-function play(): SoloRunSubmission {
+function play(source = DEMO): SoloRunSubmission {
   let t = 0
   const s = new SoloSession({
-    quiz: parseQuizFile(DEMO), deckId: DECK, deckVersion: deckVersion(DEMO), pseudo: 'Alice', now: () => t,
+    quiz: parseQuizFile(source), deckId: DECK, deckVersion: deckVersion(source), pseudo: 'Alice', now: () => t,
   })
   s.start()
   while (s.status !== 'finished') {
@@ -114,6 +117,35 @@ describe('QuizvServer — local solo', () => {
     const port = start()
     const res = await fetch(`http://localhost:${port}/ws?role=player&id=p1`, { headers: { upgrade: 'websocket' } })
     expect(res.status).toBe(403)
+  })
+
+  test('deck edits are picked up again one second after the previous reload', async () => {
+    const port = start()
+    const submit = (source: string) => fetch(`http://localhost:${port}/solo/runs`, {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(play(source)),
+    })
+    expect((await submit(DEMO)).status).toBe(200)
+    const v2 = DEMO.replace('What does HTML stand for', 'What does HTML stand for?')
+    expect(v2).not.toBe(DEMO)
+    writeFileSync(join(lastDir, DECK), v2)
+    expect((await submit(v2)).status).toBe(200)
+    const v3 = v2.replace('What does HTML stand for?', 'What does HTML stand for??')
+    writeFileSync(join(lastDir, DECK), v3)
+    await new Promise(r => setTimeout(r, 1_100))
+    expect((await submit(v3)).status).toBe(200)
+  })
+
+  test('a solo store that cannot open disables solo with a warning; rooms still run', async () => {
+    const warn = spyOn(console, 'warn').mockImplementation(() => {})
+    cleanups.push(() => warn.mockRestore())
+    // The DB's parent "folder" is a regular file: mkdir and open fail.
+    const port = start(true, dir => { writeFileSync(join(dir, 'blocker'), ''); return join(dir, 'blocker', 'solo.db') })
+    expect(warn).toHaveBeenCalled()
+    expect(String(warn.mock.calls[0]?.[0])).toContain('solo')
+    const solo = await fetch(`http://localhost:${port}/solo/count?deck=${DECK}`)
+    expect(solo.headers.get('content-type')).toContain('text/html')
+    const room = await fetch(`http://localhost:${port}/ws?role=player&id=p1`, { headers: { upgrade: 'websocket' } })
+    expect(room.status).toBe(403)
   })
 
   test('without decksDir /solo/ routes are absent', async () => {

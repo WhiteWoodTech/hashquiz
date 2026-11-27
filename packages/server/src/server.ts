@@ -196,10 +196,21 @@ export class QuizvServer {
     if (options.decksDir) this.solo = this._createSolo(options.decksDir, options.soloDbPath)
   }
 
-  /** Local solo service: decks read from disk (no TTL, a version mismatch reloads), runs in SQLite. */
-  private _createSolo(decksDir: string, dbPath?: string): SoloService {
-    const decks = new SoloDeckSource(async () => parseManifest(collectDecks(decksDir)), { ttlMs: Infinity })
-    const store = SoloStore.open(dbPath ?? resolve(DEFAULT_SOLO_DB))
+  /**
+   * Local solo service: decks read from disk (no TTL, a version mismatch reloads at most once a
+   * second: a disk read is cheap), runs in SQLite. Null, with a warning, when the store cannot open
+   * (read-only folder, locked or corrupt DB): rooms still run, solo is off.
+   */
+  private _createSolo(decksDir: string, dbPath?: string): SoloService | null {
+    const path = dbPath ?? resolve(DEFAULT_SOLO_DB)
+    let store: SoloStore
+    try {
+      store = SoloStore.open(path)
+    } catch (err) {
+      console.warn(`Local solo disabled: cannot open the solo leaderboard ${path} (${(err as Error).message})`)
+      return null
+    }
+    const decks = new SoloDeckSource(async () => parseManifest(collectDecks(decksDir)), { ttlMs: Infinity, minRefetchMs: 1_000 })
     const publish = (topic: string, msg: SoloServerMsg) => { this.server?.publish(topic, JSON.stringify(msg)) }
     return { http: createSoloHttpHandler({ decks, store, publish }), hub: new SoloPresenceHub(publish), store }
   }

@@ -91,13 +91,7 @@ export function createSoloHttpHandler(o: SoloServiceOptions): (req: Request) => 
     if (!found.ok) return reason(found.reason === 'decks unavailable' ? 503 : 422, found.reason)
     const verified = verifySoloRun(found.deck.quiz, sub)
     if (!verified.ok) return reason(422, verified.reason)
-    let runId: string
-    try {
-      runId = o.store.insertRun(verified.run, new Date().toISOString())
-    } catch (e) {
-      console.error('Failed to store solo run:', e)
-      return reason(500, 'store failed')
-    }
+    const runId = o.store.insertRun(verified.run, new Date().toISOString())
     o.publish(soloTopic(deckId), { type: 'solo_new_run', deckId })
     return json(200, { runId, rank: o.store.rank(runId) })
   }
@@ -111,11 +105,8 @@ export function createSoloHttpHandler(o: SoloServiceOptions): (req: Request) => 
     if (deckId !== undefined && deckId !== null && (typeof deckId !== 'string' || deckId.length > 200)) {
       return reason(422, 'invalid deckId')
     }
-    try {
-      o.store.insertLead(email, typeof deckId === 'string' ? deckId : null)
-    } catch {
-      return reason(422, 'invalid lead')
-    }
+    // Inputs are validated above: a throw here is a real store failure, answered by the router's catch.
+    o.store.insertLead(email, typeof deckId === 'string' ? deckId : null)
     return empty(204)
   }
 
@@ -123,6 +114,16 @@ export function createSoloHttpHandler(o: SoloServiceOptions): (req: Request) => 
     const url = new URL(req.url)
     if (!url.pathname.startsWith('/solo/')) return null
     if (req.method === 'OPTIONS') return empty(204)
+    try {
+      return await dispatch(req, url)
+    } catch (e) {
+      // Answered here, with CORS headers: the dev server's generic 500 would reach the browser as a CORS error.
+      console.error('Solo store failed:', e)
+      return reason(500, 'store failed')
+    }
+  }
+
+  async function dispatch(req: Request, url: URL): Promise<Response> {
     const parts = url.pathname.slice('/solo/'.length).split('/')
     const route = parts[0]
     let id: string | undefined

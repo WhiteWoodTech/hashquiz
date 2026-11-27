@@ -47,14 +47,17 @@ from the environment:
 | `HASHQUIZ_SOLO_SCORING` | Solo run scoring: `browser` (default) or `edge` |
 | `HASHQUIZ_PLAYER_URL` | Optional player URL for the host's solo links (default: same origin) |
 
-The `QUIZV_*` and `VITE_*` names (`VITE_TRANSPORT`, …) are accepted too.
+The `QUIZV_*` and `VITE_*` names (`VITE_TRANSPORT`, …) are accepted too. The prebuilt apps carry no
+settings of their own: whatever `quizv-config.js` says (including `local` and `browser`) is what they use.
 
 Decks with `solo: true` in their frontmatter can also be played alone from
 the player app. `hashquiz dev` serves solo on its own (port 3030): runs are stored in `.hashquiz/solo.db` of
 the working directory (add `.hashquiz/` to `.gitignore`) and rescored by the server. The leaderboard exists only
 on the machine running the server and the players must reach its port 3030, so it does not work for an https
-static deploy. With `--decks <dir>` and a file, the solo decks come from that folder. For a hosted site use
-the Supabase backend (see the hashquiz `docs/DEPLOY.md`).
+static deploy (on an `https:` page the apps hide local solo). If `.hashquiz/solo.db` cannot be opened, the
+server warns and runs rooms without solo. When a deck changes during a run, the score is not stored and the end
+screen offers « Rejouer » with the new version. With `--decks <dir>` and a file, the solo decks come from that
+folder. For a hosted site use the Supabase backend (see the hashquiz `docs/DEPLOY.md`).
 
 ## Deploy the solo backend on Supabase
 

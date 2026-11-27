@@ -117,6 +117,11 @@ to know about:
   decks repository.
 - Nothing deploys online. Players must reach port 3030 of that machine (the player app calls
   `http://<page hostname>:3030`), so it is unsuitable for https static deploys: use the Supabase backend there.
+  On an `https:` page the apps hide local solo instead of retrying a blocked `ws://` socket.
+- Live presence rows are not authenticated (any client can show any pseudo), like Supabase presence; stored
+  runs are always rescored by the server.
+- If `.hashquiz/solo.db` cannot be opened (read-only folder, locked or corrupt file), `hashquiz dev` warns and
+  runs rooms without solo.
 
 ### Local Supabase
 
@@ -189,6 +194,12 @@ The job runs the tests, `bun run pack` (stages `pkg/`: CLI bundle + prebuilt
 apps) and `bun run release`, which sets the version in `package.json` and
 `pkg/package.json` and publishes `pkg/` with a provenance attestation.
 
+`bun run pack` runs `build:web` itself (which starts by deleting `dist/`, so no stale assets ship) with a clean
+env: no `VITE_*`, `QUIZV_*` or `HASHQUIZ_*` variables, and `QUIZV_PACK=1` makes both Vite configs skip `.env*`
+files. The published apps take their settings from `/quizv-config.js` only. It then fails if `pkg/web` contains
+the local Supabase port `54321`, a JWT (`eyJ…`) or a Supabase URL / anon key set in `apps/*/.env*` or the
+environment (`scripts/pack-guard.ts`).
+
 ### Secrets
 
 1. `NPM_TOKEN`: npm granular access token, read and write on all packages,
@@ -207,7 +218,7 @@ when no commit since the last tag bumps the version (only 📝, 🔧, ✅, …).
 ### Locally
 
 ```bash
-bun run pack          # stage the package in pkg/ (npm pack ./pkg to inspect it)
+bun run pack          # clean-env build:web, then stage pkg/ (npm pack ./pkg to inspect it)
 bun run release:dry   # preview the next version and notes (needs NPM_TOKEN and GITHUB_TOKEN)
 bun run sync:develop  # rebase develop onto main after a release, if the job reported a conflict
 ```

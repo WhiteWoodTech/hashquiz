@@ -165,7 +165,9 @@ quizv/
 │       ├── LICENSE                  # QuizV Enterprise License
 │       └── README.md                # Planned paid features and rules
 ├── scripts/
-│   └── pack.ts                      # Stages the hashquiz npm package in pkg/ (CLI, web apps, supabase project)
+│   ├── pack.ts                      # Stages the hashquiz npm package in pkg/ (CLI, web apps, supabase project)
+│   ├── pack-guard.ts                # Clean build env for pack; fails if pkg/web holds Supabase settings
+│   └── tests/                       # pack-guard tests
 ├── examples/
 │   └── demo.quizv.md                # Sample quiz file (`solo: true`)
 ├── LICENSE.md                       # Licensing overview + QuizV Sustainable Use License
@@ -197,6 +199,7 @@ Licensing per directory is described in [`LICENSING.md`](./LICENSING.md): `packa
 | `packages/core/src/runtime-config.ts` | Runtime settings read by both apps (transport, Supabase, solo scoring, player URL) |
 | `packages/core/src/decks.ts` | Deck manifest parsing, `deckVersion` (content hash), `deckInfo` (card data) |
 | `scripts/pack.ts` | Stages the `hashquiz` npm package in `pkg/` (see `docs/PACKAGE.md`) |
+| `scripts/pack-guard.ts` | Clean env for the pack build; refuses a `pkg/web` with a baked Supabase URL / key |
 | `packages/theme-default/styles/vars.css` | All `--qv-*` design tokens (same set in `theme-original`) |
 | `packages/ui/styles/base.css` | `.qv-label` and `.qv-sr-only` utilities |
 | `packages/ui/src/fx/` | Canvas engine behind the Fx components |

@@ -141,7 +141,10 @@ For edge scoring, copy `packages/backend-supabase/supabase/functions/.env.exampl
 Run the apps with `VITE_TRANSPORT=supabase`, `VITE_SUPABASE_URL=http://127.0.0.1:54321` and the local anon key
 (e.g. in an untracked `apps/player/.env.local` and `apps/host/.env.local`). `examples/demo.quizv.md` is a
 `solo: true` deck: the player home lists it under the join form and its host card links to `#/solo/<deckId>`.
-`VITE_SOLO_SCORING` (or `HASHQUIZ_SOLO_SCORING` for `hashquiz build`) picks `browser` (default) or `edge`
+The dev servers serve `/quizv-config.js` from these files too, so the apps follow them at runtime; a shell
+`VITE_TRANSPORT=local` still wins. `bun run pack` ignores them: it builds the apps with a clean env (no
+`VITE_*` / `QUIZV_*` / `HASHQUIZ_*`, `.env*` files skipped) and refuses to stage `pkg/` if a Supabase URL or key
+is baked in. `VITE_SOLO_SCORING` (or `HASHQUIZ_SOLO_SCORING` for `hashquiz build`) picks `browser` (default) or `edge`
 scoring; switching to `edge` also needs `update solo_settings set scoring_mode = 'edge'`. Production steps
 (`hashquiz supabase deploy` or the manual `supabase` commands) are in [`docs/DEPLOY.md`](docs/DEPLOY.md).
 

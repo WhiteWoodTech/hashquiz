@@ -6,12 +6,17 @@
  *   pkg/supabase/      Supabase project for `hashquiz supabase deploy` (migrations,
  *                      solo-submit Edge Function, freshly bundled _shared/solo-core.js)
  *
- * Usage: bun run build:web && bun scripts/pack.ts [version]
+ * The apps are built here with a clean env (no `VITE_*` / `QUIZV_*` / `HASHQUIZ_*`, `.env*`
+ * files ignored via `QUIZV_PACK=1`), so a developer's Supabase settings never ship: the
+ * deployment settings come from `/quizv-config.js` at run time. `pkg/web` is then checked.
+ *
+ * Usage: bun scripts/pack.ts [version]   (`bun run pack`)
  * Then:  npm publish ./pkg --access public
  */
 import { cpSync, existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { copySupabaseProject } from '../packages/backend-supabase/src/cli'
+import { bakedEnvValues, cleanBuildEnv, findBakedSecrets } from './pack-guard'
 
 export const PACKAGE_NAME = 'hashquiz'
 
@@ -20,8 +25,11 @@ const out = resolve(root, 'pkg')
 const rootPkg = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf-8'))
 const version = (process.argv[2] ?? rootPkg.version).replace(/^v/, '')
 
-if (!existsSync(resolve(root, 'dist/host/index.html'))) {
-  console.error('dist/ is missing: run `bun run build:web` first')
+const build = Bun.spawnSync(['bun', 'run', 'build:web'], {
+  cwd: root, env: cleanBuildEnv(process.env), stdout: 'inherit', stderr: 'inherit',
+})
+if (build.exitCode !== 0 || !existsSync(resolve(root, 'dist/host/index.html'))) {
+  console.error('`bun run build:web` failed')
   process.exit(1)
 }
 
@@ -43,6 +51,15 @@ cpSync(resolve(root, 'dist'), resolve(out, 'web'), { recursive: true })
 rmSync(resolve(out, 'web/host/decks.json'), { force: true })
 rmSync(resolve(out, 'web/decks.json'), { force: true })
 rmSync(resolve(out, 'web/quizv-config.js'), { force: true })
+
+const envFiles = ['apps/host', 'apps/player'].flatMap(app =>
+  ['.env', '.env.local', '.env.production', '.env.production.local'].map(f => resolve(root, app, f)))
+const leaks = findBakedSecrets(resolve(out, 'web'), bakedEnvValues(envFiles, process.env))
+if (leaks.length) {
+  console.error('pkg/web contains deployment settings (Supabase URL / key), refusing to stage it:')
+  for (const l of leaks) console.error(`  ${l}`)
+  process.exit(1)
+}
 
 // config.toml, migrations/, functions/ without .env*, plus a fresh solo-core.js bundle.
 await copySupabaseProject(resolve(root, 'packages/backend-supabase/supabase'), resolve(out, 'supabase'), 'build')

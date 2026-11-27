@@ -183,7 +183,7 @@ hashquiz/
 │           ├── App.vue
 │           ├── stores/
 │           └── views/
-└── examples/
+└── tests/fixtures/
 ```
 
 ### Import Order

@@ -7,7 +7,7 @@ import { deckVersion } from '@hashquiz/core/decks'
 import { parseQuizFile } from '@hashquiz/parser'
 import { HashQuizServer } from '../src/server'
 
-const QUIZ = resolve(import.meta.dir, '../../../examples/demo.hashquiz.md')
+const QUIZ = resolve(import.meta.dir, '../../../tests/fixtures/demo.hashquiz.md')
 const DEMO = readFileSync(QUIZ, 'utf-8')
 const DECK = 'demo.hashquiz.md'
 

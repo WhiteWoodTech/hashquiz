@@ -7,7 +7,7 @@ import { compareRuns, verifySoloRun, type RankedRun, type VerifiedRun } from '@h
 import { parseQuizFile } from '../../parser/src/index'
 import { SoloStore } from '../src/solo/store'
 
-const quiz = parseQuizFile(readFileSync(resolve(import.meta.dir, '../../../examples/demo.hashquiz.md'), 'utf-8'))
+const quiz = parseQuizFile(readFileSync(resolve(import.meta.dir, '../../../tests/fixtures/demo.hashquiz.md'), 'utf-8'))
 
 /** Answers every question with the correct choices, taking `ms` per answer (wrong when `wrong`). */
 function build(deckId: string, pseudo: string, ms: number, wrong = false): VerifiedRun {

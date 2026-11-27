@@ -52,6 +52,7 @@
         "@quizv/core": "workspace:*",
         "@quizv/theme-default": "workspace:*",
         "@quizv/theme-original": "workspace:*",
+        "@quizv/backend-local": "workspace:*",
         "@quizv/backend-supabase": "workspace:*",
         "@quizv/ui": "workspace:*",
         "marked": "18.0.11",

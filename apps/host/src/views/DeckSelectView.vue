@@ -40,6 +40,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { soloAvailable } from '@quizv/core'
 import { BrandLogo } from '@quizv/ui'
 import { useGameStore } from '../stores/game'
 import { config } from '../config'
@@ -71,11 +72,11 @@ onBeforeUnmount(() => window.removeEventListener('hashchange', sync))
 
 const tagDecks = computed(() => (route.value.kind === 'tag' ? decksForTag(decks.value, route.value.tag) : []))
 
-// The solo link needs the same Supabase credentials as a room; it opens the player app in this tab.
-const hasCreds = !!(config.supabaseUrl && config.supabaseAnonKey)
+// The solo link needs a solo backend (the local dev server, or Supabase credentials); it opens the player app in this tab.
+const soloEnabled = soloAvailable(config)
 const playerBase = playerBaseUrl({ dev: import.meta.env.DEV, playerUrl: config.playerUrl }, location)
 const soloHref = (deck: BundledDeck) =>
-  hasCreds && deck.quiz.meta.solo ? soloUrl(deck.id, playerBase) : undefined
+  soloEnabled && deck.quiz.meta.solo ? soloUrl(deck.id, playerBase) : undefined
 
 function pick(deck: BundledDeck) {
   game.startWithDeck(deck)

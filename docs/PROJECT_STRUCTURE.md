@@ -45,13 +45,11 @@ quizv/
 │           ├── stores/
 │           │   ├── game.ts          # Pinia store — PlayerPhase state machine
 │           │   └── solo.ts          # Pinia store — solo run (SoloPhase), leaderboard, live presence
-│           ├── solo/                # Solo live mode (loaded on #/solo/<deckId> only)
-│           │   ├── api.ts           # Supabase calls: submit run (RPC / Edge Function), leaderboard, leads
-│           │   ├── live.ts          # Realtime presence channel solo:<deckId>
+│           ├── solo/                # Solo live mode (loaded on #/solo/<deckId> only); backends live in @quizv/backend-*
 │           │   ├── route.ts         # parseSoloHash, soloHash
 │           │   ├── decks.ts         # Runtime deck list: /decks.json (cached), findDeck, loadSoloDecks
 │           │   ├── catalog.ts       # soloDecks filter
-│           │   ├── deps.ts          # Wires Supabase client + runtime soloScoring
+│           │   ├── deps.ts          # Picks the SoloBackend from the runtime transport (local or Supabase)
 │           │   ├── format.ts        # Time formatting
 │           │   └── solo.css
 │           ├── components/
@@ -86,6 +84,8 @@ quizv/
 │   │   │   ├── types.ts             # PlayerState, Score, PodiumEntry, QuestionPublic
 │   │   │   ├── events.ts            # GameEvent discriminated union + GameEvents builder
 │   │   │   ├── transport.ts         # IRealtimeTransport interface
+│   │   │   ├── solo-backend.ts      # SoloBackend ports (SoloApiPort, SoloLivePort, Outcome, EMAIL_RE)
+│   │   │   ├── solo-decks.ts        # `@quizv/core/solo-decks`: parseManifest, SoloDeckSource
 │   │   │   ├── scoring.ts           # calcPoints(timeRemaining, isCorrect)
 │   │   │   ├── selection.ts         # serveQuestions: shared question selection + choice shuffling
 │   │   │   ├── solo.ts              # SoloSession: solo run state machine
@@ -99,14 +99,20 @@ quizv/
 │   │   ├── package.json
 │   │   ├── tsconfig.json
 │   │   └── src/
-│   │       └── index.ts             # LocalTransport — Bun WS pub/sub
+│   │       ├── index.ts             # LocalTransport — Bun WS pub/sub
+│   │       └── solo/                # Local solo backend
+│   │           ├── protocol.ts      # WS messages + solo:<deckId> topic (browser-safe)
+│   │           ├── client.ts        # createLocalSoloBackend (browser: fetch + WebSocket) — `./solo-client`
+│   │           ├── store.ts         # SoloStore on bun:sqlite (.hashquiz/solo.db)
+│   │           ├── server.ts        # createSoloHttpHandler, SoloPresenceHub (Bun)
+│   │           └── server-entry.ts  # `./solo-server` barrel
 │   ├── backend-supabase/            # @quizv/backend-supabase
 │   │   ├── package.json
 │   │   ├── src/
 │   │   │   ├── index.ts             # SupabaseTransport
-│   │   │   ├── solo/                # SoloApi, SoloLive, toSoloRunRow
+│   │   │   ├── solo/                # SoloApi, SoloLive, toSoloRunRow, createSupabaseSoloBackend
 │   │   │   ├── edge/solo-core.ts    # Edge Function bundle entry (deck source, verifier, row mapping)
-│   │   │   └── cli/edge-bundle.ts   # `build:edge`: bundles solo-core.ts into functions/_shared/solo-core.js
+│   │   │   └── cli/                 # edge-bundle.ts (`build:edge` → functions/_shared/solo-core.js), deploy.ts (`hashquiz supabase deploy`)
 │   │   └── supabase/                # Supabase CLI project (`--workdir packages/backend-supabase`)
 │   │       ├── config.toml
 │   │       ├── migrations/          # solo_runs, solo_answers, solo_settings, leads, RPCs
@@ -117,7 +123,7 @@ quizv/
 │   │   ├── package.json
 │   │   ├── tsconfig.json
 │   │   └── src/
-│   │       ├── cli.ts               # CLI entry — `quizv dev | check`
+│   │       ├── cli.ts               # CLI entry — `quizv dev | check | build | supabase deploy`
 │   │       ├── server.ts            # QuizvServer — Bun HTTP + WebSocket
 │   │       └── dev.ts               # devCommand — spawns Vite apps
 │   ├── theme-default/               # @quizv/theme-default (new look: Inter + IBM Plex Mono)
@@ -159,7 +165,7 @@ quizv/
 │       ├── LICENSE                  # QuizV Enterprise License
 │       └── README.md                # Planned paid features and rules
 ├── scripts/
-│   └── pack.ts                      # Stages the hashquiz npm package in pkg/
+│   └── pack.ts                      # Stages the hashquiz npm package in pkg/ (CLI, web apps, supabase project)
 ├── examples/
 │   └── demo.quizv.md                # Sample quiz file (`solo: true`)
 ├── LICENSE.md                       # Licensing overview + QuizV Sustainable Use License
@@ -201,7 +207,7 @@ Licensing per directory is described in [`LICENSING.md`](./LICENSING.md): `packa
 
 | Port | Process |
 |------|---------|
-| 3030 | Bun WS/HTTP server (game logic) |
+| 3030 | Bun WS/HTTP server (game logic, local solo API) |
 | 3031 | Vite — `apps/host` |
 | 3032 | Vite — `apps/player` (binds `0.0.0.0` for LAN) |
 
@@ -213,4 +219,4 @@ In production (Vercel), the build output is `dist/`, containing the compiled fro
 
 ---
 
-*Last updated: 2026-11-26*
+*Last updated: 2026-11-27*

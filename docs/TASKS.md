@@ -102,6 +102,10 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
 ## Completed
 
+- [x] Backend plugins : `@quizv/backend-local` / `@quizv/backend-supabase` derrière les ports de `@quizv/core`
+      (`SoloBackend`), solo local sur `hashquiz dev` (SQLite `.hashquiz/solo.db`, rescoring serveur, présence WS),
+      Edge Function qui lit `decks.json` depuis `HASHQUIZ_SITE_URL`, commande `hashquiz supabase deploy`, projet
+      Supabase livré dans le paquet npm
 - [x] Solo live : quiz jouable seul depuis le catalogue (`solo: true`), correction après chaque réponse,
       temps total, classement partagé par quiz (joueurs en cours + runs terminés), stockage Supabase
       (`solo_runs`, `solo_answers`), scoring navigateur ou Edge Function (`soloScoring` de la config runtime),
@@ -147,4 +151,4 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
 ---
 
-*Last updated: 2026-11-26*
+*Last updated: 2026-11-27*

@@ -19,7 +19,7 @@ Feature list and roadmap for QuizV, organized by phase.
 | Scoring formula | ✅ | 500–1000 pts based on answer speed |
 | `quizv dev` CLI | ✅ | Starts WS server from a `.quizv.md` file |
 | `quizv check` CLI | ✅ | Validates a quiz file and reports errors |
-| Unit tests | ✅ | 222 tests across 27 files (parser, core, decks, transports, UI, apps), 0 failures |
+| Unit tests | ✅ | 360 tests across 40 files (parser, core, decks, backends, UI, apps), 0 failures |
 
 ---
 
@@ -73,8 +73,9 @@ See [`DEPLOY.md`](DEPLOY.md) for setup.
 
 ## Solo live mode (complete)
 
-Second game mode next to the hosted room: one player, own pace, shared per-quiz leaderboard. Needs Supabase
-(Postgres tables + Realtime), see [`DEPLOY.md`](DEPLOY.md) and [`TECHNICAL_GUIDE.md`](TECHNICAL_GUIDE.md).
+Second game mode next to the hosted room: one player, own pace, shared per-quiz leaderboard. Runs on either backend
+plugin: Supabase (Postgres tables + Realtime) or the local `hashquiz dev` server (SQLite), see
+[`DEPLOY.md`](DEPLOY.md) and [`TECHNICAL_GUIDE.md`](TECHNICAL_GUIDE.md).
 
 | Feature | Status | Description |
 |---------|--------|-------------|
@@ -83,6 +84,8 @@ Second game mode next to the hosted room: one player, own pace, shared per-quiz 
 | Solo run | ✅ | Per-question timer, correction right after the answer, **Suivant** when ready, `Valider` for editable answers |
 | Total time | ✅ | Sum of answer times capped at each question timer; correction screen excluded |
 | Shared leaderboard | ✅ | Per deck across versions: score desc, total time asc, finished at asc; live players ("en cours") + past runs |
+| Local solo backend | ✅ | `hashquiz dev` serves solo on :3030: SQLite `.hashquiz/solo.db`, server rescoring, WS presence; leaderboard only on that machine |
+| Supabase deploy command | ✅ | `hashquiz supabase deploy` (link, db push, function deploy, site URL secret); the npm package ships the Supabase project |
 | Run persistence | ✅ | `solo_runs` + `solo_answers`, written once at the end of the run; abandoned runs are not stored |
 | Scoring mode | ✅ | Runtime config `soloScoring` (`HASHQUIZ_SOLO_SCORING` / `VITE_SOLO_SCORING`): `browser` (default, `submit_solo_run` RPC) or `edge` (`solo-submit` Edge Function rescoring) |
 | HashQuiz interest form | ✅ | Optional email + consent on the end screen, stored in insert-only `leads` |
@@ -110,10 +113,10 @@ Second game mode next to the hosted room: one player, own pace, shared per-quiz 
 | `crypto.randomUUID()` not used | Fails on HTTP over LAN (non-secure context) |
 | No Vue Router | Linear game flow — `v-if` on phase is sufficient |
 | Supabase mode is ephemeral for rooms | Rooms use no Postgres tables: a host page reload loses the game (only solo runs are stored) |
-| Solo needs Supabase | No local (Bun) solo backend; `hashquiz dev` with the local transport stays room-only |
+| Local solo is per machine | The local backend keeps runs in `.hashquiz/solo.db` on the `hashquiz dev` host (gitignore it); hosted sites use Supabase |
 | `edge` scoring is not anti-cheat | Stops forged scores; answers stay in the client bundle and times are self-reported |
 | `playerUrl` hardcoded to port 3032 | Dedicated Vite player dev server |
 
 ---
 
-*Last updated: 2026-11-26*
+*Last updated: 2026-11-27*

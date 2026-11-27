@@ -29,6 +29,7 @@ Format reference: [deck format](https://github.com/WhiteWoodTech/hashquiz/blob/d
 ```bash
 hashquiz check decks/my-deck/index.quizv.md   # validate one deck
 hashquiz dev decks/my-deck/index.quizv.md     # local game: host :3031/host/, players :3032
+hashquiz dev decks                            # same, a folder: solo decks folder, room deck = first deck by id
 hashquiz build decks --out dist               # static site with every deck under decks/
 hashquiz supabase deploy --project <ref>      # solo backend on a Supabase project
 ```
@@ -49,7 +50,11 @@ from the environment:
 The `QUIZV_*` and `VITE_*` names (`VITE_TRANSPORT`, …) are accepted too.
 
 Decks with `solo: true` in their frontmatter can also be played alone from
-the player app (Supabase required, see the hashquiz `docs/DEPLOY.md`).
+the player app. `hashquiz dev` serves solo on its own (port 3030): runs are stored in `.hashquiz/solo.db` of
+the working directory (add `.hashquiz/` to `.gitignore`) and rescored by the server. The leaderboard exists only
+on the machine running the server and the players must reach its port 3030, so it does not work for an https
+static deploy. With `--decks <dir>` and a file, the solo decks come from that folder. For a hosted site use
+the Supabase backend (see the hashquiz `docs/DEPLOY.md`).
 
 ## Deploy the solo backend on Supabase
 
@@ -66,7 +71,16 @@ failure. The function reads `<HASHQUIZ_SITE_URL>/decks.json` at runtime, so deck
 `--site-url <url>` overrides `HASHQUIZ_SITE_URL` (an http(s) URL). It needs the
 [Supabase CLI](https://supabase.com/docs/guides/cli) on `PATH` (or `SUPABASE_BIN`), plus
 `SUPABASE_ACCESS_TOKEN` and `SUPABASE_DB_PASSWORD` in the environment (CI secrets). `--dry-run` prints the
-steps without running them. Edge scoring also needs `update solo_settings set scoring_mode = 'edge'` once.
+steps without running them. The command never changes `solo_settings`: switching to edge scoring means setting
+`HASHQUIZ_SOLO_SCORING=edge` for `hashquiz build` **and** running
+`update solo_settings set scoring_mode = 'edge'` once.
+
+Typical CI of a decks repository (secrets `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `HASHQUIZ_SITE_URL`):
+
+```bash
+hashquiz build decks --out dist
+hashquiz supabase deploy --project <project-ref>
+```
 
 ## Deploy on Vercel
 

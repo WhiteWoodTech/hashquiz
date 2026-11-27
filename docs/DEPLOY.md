@@ -4,7 +4,9 @@ This project deploys on Vercel for hosting and Supabase for realtime messaging a
 (the `supabase` backend plugin, `@quizv/backend-supabase`). Rooms only use Supabase Realtime channels. Solo mode
 stores finished runs, their answers and HashQuiz leads in Postgres and can score runs in an Edge Function. The
 Supabase CLI project is `packages/backend-supabase/supabase/` (`migrations/`, `functions/solo-submit/`); every
-CLI command below passes `--workdir packages/backend-supabase`.
+CLI command below passes `--workdir packages/backend-supabase`. Its `config.toml` needs Supabase CLI 3.x (checked
+with 3.4.0): it uses `[local_smtp]` and `auth.email.enabled` / `auth.sms.enabled`. 3.x refuses the old `[inbucket]`
+section.
 
 Without Supabase, `hashquiz dev` runs the `local` backend plugin (`@quizv/backend-local`), which serves rooms and
 solo on the dev server; see [Local development](#local-development). The runtime config field `transport`

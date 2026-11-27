@@ -8,8 +8,7 @@
 .solo-btn {
   width: 100%; padding: 0.9rem; background: var(--hq-accent); color: var(--hq-text);
   border: 2px solid var(--hq-accent); border-radius: var(--hq-radius); font-size: 1.1rem;
-  cursor: pointer; font-family: inherit; font-weight: 600;
-  transition: background 0.15s, color 0.15s;
+  cursor: pointer; font-family: var(--hq-font-pixel); font-weight: 700;
 }
 .solo-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--hq-accent) 80%, var(--hq-bg)); }
 .solo-btn:disabled { opacity: 0.4; cursor: not-allowed; }

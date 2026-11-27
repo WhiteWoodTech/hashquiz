@@ -3,7 +3,7 @@
     <!-- Progress: current question / total -->
     <div class="solo-q__progress">
       <span class="solo-q__progress-label hq-label">Q{{ solo.index + 1 }}</span>
-      <div class="solo-q__track">
+      <div class="solo-q__track hq-steps">
         <div class="solo-q__fill" :style="{ width: ((solo.index + 1) / (solo.total || 1) * 100) + '%' }" />
       </div>
       <span class="solo-q__progress-label">{{ solo.total }}</span>
@@ -39,7 +39,7 @@
 
     <button
       v-if="needsValidate && !revealed"
-      class="solo-btn solo-btn--ghost"
+      class="solo-btn solo-btn--ghost hq-press"
       :disabled="selected.size === 0"
       @click="validate"
     >
@@ -60,7 +60,7 @@
         </ul>
       </section>
 
-      <button ref="nextBtn" class="solo-btn" @click="solo.next()">Suivant →</button>
+      <button ref="nextBtn" class="solo-btn hq-press" @click="solo.next()">Suivant →</button>
     </template>
   </div>
 </template>
@@ -162,8 +162,8 @@ function validate() {
 .solo-q__progress { display: flex; align-items: center; gap: 0.6rem; width: 100%; }
 .solo-q__progress-label { font-size: 0.8rem; color: var(--hq-text-muted); min-width: 2rem; }
 .solo-q__progress-label:last-child { text-align: right; }
-.solo-q__track { flex: 1; height: 4px; background: var(--hq-border); border-radius: 2px; overflow: hidden; }
-.solo-q__fill { height: 100%; background: var(--hq-progress); border-radius: 2px; transition: width 0.3s; }
+.solo-q__track { flex: 1; height: 6px; background: var(--hq-border); border-radius: var(--hq-radius-sm); overflow: hidden; }
+.solo-q__fill { height: 100%; background: var(--hq-progress); transition: width 0.3s; }
 
 .solo-q__timer { margin: 0.5rem 0; }
 .solo-q__text { font-size: 1.25rem; text-align: center; margin: 0.5rem 0; line-height: 1.4; }
@@ -181,7 +181,7 @@ function validate() {
 .solo-q__delta { font-size: 1.15rem; font-weight: 700; }
 .solo-q__result--correct .solo-q__delta { color: var(--hq-correct); }
 .solo-q__result--wrong   .solo-q__delta { color: var(--hq-text-muted); }
-.solo-q__score { font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
+.solo-q__score { font-family: var(--hq-font-pixel); font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
 .solo-q__score small { font-size: 0.8rem; font-weight: 500; color: var(--hq-text-muted); }
 .solo-q__info { font-size: 0.8rem; color: var(--hq-text-muted); }
 @keyframes solo-pop {

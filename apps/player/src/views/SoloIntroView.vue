@@ -17,7 +17,7 @@
           required
           :maxlength="PSEUDO_MAX"
         />
-        <button class="solo-btn" type="submit" :disabled="!pseudo.trim()">Commencer</button>
+        <button class="solo-btn hq-press" type="submit" :disabled="!pseudo.trim()">Commencer</button>
       </form>
 
       <SoloLeaderboard :live="solo.liveOthers" :rows="solo.board" />

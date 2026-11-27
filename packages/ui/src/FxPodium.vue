@@ -112,7 +112,7 @@ onBeforeUnmount(() => handle?.destroy())
   top: 5cqh;
   transform: translateX(-50%);
   margin: 0;
-  font-family: var(--hq-font-display);
+  font-family: var(--hq-font-pixel);
   font-size: clamp(1.2rem, 5cqh, 4rem);
   font-weight: 700;
   color: var(--hq-accent);

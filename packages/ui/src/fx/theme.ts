@@ -16,6 +16,8 @@ export interface FxTheme {
   /** Multiplier of the dust opacity. */
   dustAlpha: number
   speed: number
+  /** Draw particles as crisp squares snapped to the pixel grid instead of discs. */
+  pixel: boolean
   fontLabel: string
   fontDisplay: string
   labelSpacing: string
@@ -43,6 +45,7 @@ export function parseFxTheme(get: (name: string) => string): FxTheme {
     dustDensity: num(str('--hq-fx-dust-density'), 1),
     dustAlpha: num(str('--hq-fx-dust-alpha'), 1),
     speed: num(str('--hq-fx-speed'), 1),
+    pixel: num(str('--hq-fx-pixel'), 0) > 0,
     fontLabel: str('--hq-font-label'),
     fontDisplay: str('--hq-font-display'),
     labelSpacing: str('--hq-label-spacing'),

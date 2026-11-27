@@ -65,8 +65,8 @@ onBeforeUnmount(() => handle?.destroy())
 }
 .fx-countdown__num {
   position: relative;
-  font-family: var(--hq-font-display);
-  font-weight: 300;
+  font-family: var(--hq-font-pixel);
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
   line-height: 1;
   color: var(--hq-text);

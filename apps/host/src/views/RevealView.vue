@@ -3,7 +3,7 @@
     <!-- Progress bar -->
     <div class="rv-progress">
       <span class="rv-progress__label hq-label">Q{{ game.questionIdx + 1 }}</span>
-      <div class="rv-progress__track">
+      <div class="rv-progress__track hq-steps">
         <div
           class="rv-progress__fill"
           :style="{ width: ((game.questionIdx + 1) / game.totalQs * 100) + '%' }"
@@ -53,7 +53,7 @@
     </div>
 
     <div class="rv-controls">
-      <button class="hq-btn-action" @click="next">⏭ Next Question</button>
+      <button class="hq-btn-action hq-press" @click="next">⏭ Next Question</button>
     </div>
   </div>
 </template>
@@ -107,14 +107,14 @@ const renderedExplanation = computed(() =>
 .rv-progress { display: flex; align-items: center; gap: 0.6rem; padding-right: 12rem; } /* clears the fullscreen button */
 .rv-progress__label { font-size: clamp(0.8rem, 1.6vmin, 1.1rem); color: var(--hq-text-muted); min-width: 2rem; }
 .rv-progress__label:last-child { text-align: right; }
-.rv-progress__track { flex: 1; height: 4px; background: var(--hq-border); border-radius: 2px; overflow: hidden; }
-.rv-progress__fill { height: 100%; background: var(--hq-progress); border-radius: 2px; }
+.rv-progress__track { flex: 1; height: 6px; background: var(--hq-border); border-radius: var(--hq-radius-sm); overflow: hidden; }
+.rv-progress__fill { height: 100%; background: var(--hq-progress); }
 
 .rv-question { font-size: clamp(1.3rem, 3.6vmin, 2.6rem); margin: 0; line-height: 1.25; }
 
 .rv-explanation {
   background: var(--hq-surface-2);
-  border-left: 3px solid var(--hq-accent-2);
+  border-left: 6px solid var(--hq-correct);
   border-radius: var(--hq-radius-sm);
   padding: 2vmin 2.4vmin;
   display: flex; flex-direction: column; gap: 0.8vmin;
@@ -156,8 +156,7 @@ const renderedExplanation = computed(() =>
 .hq-btn-action {
   padding: 1.4vmin 2.6vmin; background: var(--hq-accent); color: var(--hq-text);
   border: none; border-radius: var(--hq-radius);
-  cursor: pointer; font-size: clamp(1rem, 2.2vmin, 1.5rem); font-family: inherit; font-weight: 600;
-  transition: background 0.15s;
+  cursor: pointer; font-size: clamp(1rem, 2.2vmin, 1.5rem); font-family: var(--hq-font-pixel); font-weight: 700;
 }
 .hq-btn-action:hover { background: color-mix(in srgb, var(--hq-accent) 80%, var(--hq-bg)); }
 </style>

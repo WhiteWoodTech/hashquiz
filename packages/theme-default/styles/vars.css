@@ -1,39 +1,46 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+/* HashQuiz: pixel retromodern. The logo's violets on its night blue, a pixel display type kept for
+   titles and figures, sharp corners and two-tone offset shadows echoing the logo's "#". */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Jersey+10&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 :root {
-  --hq-bg:           #06060a;
-  --hq-surface:      #0c0c12;
-  --hq-surface-2:    #14141c;
-  --hq-border:       #22222e;
-  --hq-accent:       #7c3aed;
-  --hq-accent-2:     #06b6d4;
+  --hq-bg:           #0c0730;
+  --hq-surface:      #130a42;
+  --hq-surface-2:    #1c1352;
+  --hq-border:       #2f2470;
+  --hq-accent:       #a833f5;
+  --hq-accent-2:     #6523ee;
   /* Logo colors (docs/brand/) */
   --hq-brand-violet: #6523ee;
   --hq-brand-purple: #a833f5;
-  --hq-correct:      #22c55e;
-  --hq-wrong:        #ef4444;
-  --hq-warn: #f99e16;
-  --hq-text:         #f2f2f7;
-  --hq-text-muted:   #8a8a9a;
-  --hq-progress:     #6b6b7a;
-  --hq-font-display: 'Inter', system-ui, sans-serif;
-  --hq-font-mono:    'IBM Plex Mono', monospace;
-  --hq-radius:       6px;
-  --hq-radius-sm:    4px;
-  --hq-font-label:   'IBM Plex Mono', monospace;
-  --hq-label-spacing: .4em;
-  --hq-choice-a:     #7c3aed;
-  --hq-choice-b:     #0891b2;
-  --hq-choice-c:     #d97706;
-  --hq-choice-d:     #059669;
-  --hq-qr-dark:      #ffffff;
-  --hq-qr-light:     #111118;
-  --hq-fx-dot:       #ffffff;
+  --hq-correct:      #4ade80;
+  --hq-wrong:        #ff4d6d;
+  --hq-warn: #ffb020;
+  --hq-text:         #f9f8f8;
+  --hq-text-muted:   #a29bcf;
+  --hq-progress:     #6523ee;
+  --hq-font-display: 'Space Grotesk', system-ui, sans-serif;
+  --hq-font-pixel:   'Jersey 10', 'Space Grotesk', system-ui, sans-serif;
+  --hq-font-mono:    'JetBrains Mono', monospace;
+  --hq-radius:       0;
+  --hq-radius-sm:    0;
+  --hq-pixel:        4px;
+  --hq-step-gap:     2px;
+  --hq-font-label:   'JetBrains Mono', monospace;
+  --hq-label-spacing: .3em;
+  --hq-choice-a:     #b65cff;
+  --hq-choice-b:     #38bdf8;
+  --hq-choice-c:     #ffb020;
+  --hq-choice-d:     #2dd4bf;
+  --hq-on-choice:    #0c0730;
+  --hq-qr-dark:      #f9f8f8;
+  --hq-qr-light:     #130a42;
+  --hq-fx-dot:       #ddd2ff;
   --hq-fx-line-opacity: .2;
   --hq-fx-glow:      .35;
   --hq-fx-dust-density: 1;
   --hq-fx-dust-alpha: 1.8;
   --hq-fx-speed:     1;
+  --hq-fx-pixel:     1;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -44,6 +51,13 @@ html, body {
   font-family: var(--hq-font-display);
   margin: 0;
   min-height: 100vh;
+  /* Jersey 10 ships a single weight: never fake a bold. Its capitals are short: align every
+     font on the same cap height so the pixel type matches the size of the text around it. */
+  font-synthesis: none;
+  font-size-adjust: cap-height 0.7;
 }
+
+/* Form controls reset `font` (and so the size adjustment) in the browser stylesheet. */
+button, input, select, textarea { font-size-adjust: inherit; }
 
 a { color: var(--hq-accent); }

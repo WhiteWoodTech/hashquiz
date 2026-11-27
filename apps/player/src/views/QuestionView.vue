@@ -3,7 +3,7 @@
     <!-- Progress bar: current question / total -->
     <div class="hq-progress">
       <span class="hq-progress__label hq-label">Q{{ game.questionIdx + 1 }}</span>
-      <div class="hq-progress__track">
+      <div class="hq-progress__track hq-steps">
         <div
           class="hq-progress__fill"
           :style="{ width: ((game.questionIdx + 1) / (game.quizMeta?.totalQuestions ?? 1) * 100) + '%' }"
@@ -68,7 +68,7 @@
     <!-- Valider button: one-shoot + multiple, before submission -->
     <button
       v-if="oneShoot && isMultiple && !game.answered && !timerExpired"
-      class="hq-validate-btn"
+      class="hq-validate-btn hq-press"
       :disabled="selected.size === 0"
       @click="validateMultiple"
     >
@@ -226,8 +226,8 @@ function validateMultiple() {
 .hq-progress { display: flex; align-items: center; gap: 0.6rem; width: 100%; }
 .hq-progress__label { font-size: 0.8rem; color: var(--hq-text-muted); min-width: 2rem; }
 .hq-progress__label:last-child { text-align: right; }
-.hq-progress__track { flex: 1; height: 4px; background: var(--hq-border); border-radius: 2px; overflow: hidden; }
-.hq-progress__fill { height: 100%; background: var(--hq-progress); border-radius: 2px; transition: width 0.3s; }
+.hq-progress__track { flex: 1; height: 6px; background: var(--hq-border); border-radius: var(--hq-radius-sm); overflow: hidden; }
+.hq-progress__fill { height: 100%; background: var(--hq-progress); transition: width 0.3s; }
 
 /* Question meta */
 .hq-q-meta { display: flex; align-items: center; justify-content: space-between; width: 100%; }
@@ -235,7 +235,7 @@ function validateMultiple() {
 .hq-q-meta__tag { background: var(--hq-bg); border: 1px solid var(--hq-border); border-radius: var(--hq-radius-sm); padding: 0.15rem 0.5rem; font-size: 0.75rem; color: var(--hq-text-muted); }
 /* 3-dot difficulty */
 .hq-difficulty { display: flex; gap: 3px; align-items: center; flex-shrink: 0; }
-.hq-difficulty__dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid currentColor; background: transparent; }
+.hq-difficulty__dot { width: 8px; height: 8px; border-radius: var(--hq-radius-sm); border: 1.5px solid currentColor; background: transparent; }
 .hq-difficulty--easy   { color: var(--hq-correct); }
 .hq-difficulty--medium { color: var(--hq-warn); }
 .hq-difficulty--hard   { color: var(--hq-wrong); }
@@ -259,7 +259,7 @@ function validateMultiple() {
 }
 .hq-result .hq-result__fx { height: 88px; }
 .hq-result__line { display: flex; align-items: baseline; justify-content: center; gap: 0.75rem; }
-.hq-result__score { font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
+.hq-result__score { font-family: var(--hq-font-pixel); font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
 .hq-result__score small { font-size: 0.8rem; font-weight: 500; color: var(--hq-text-muted); }
 .hq-result__rank  { font-size: 0.85rem; color: var(--hq-text); text-transform: none; letter-spacing: 0.08em; }
 .hq-result__delta { font-size: 1.15rem; font-weight: 700; }
@@ -279,10 +279,9 @@ function validateMultiple() {
   background: transparent;
   color: var(--hq-accent);
   font-size: 1rem;
-  font-family: inherit;
-  font-weight: 600;
+  font-family: var(--hq-font-pixel);
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
 }
 .hq-validate-btn:not(:disabled):hover {
   background: var(--hq-accent);

@@ -6,7 +6,7 @@
       <!-- Tag page -->
       <template v-if="route.kind === 'tag'">
         <a class="decks__back" href="#/">← All quizzes</a>
-        <h1 class="decks__title"><span class="decks__hash">#</span>{{ route.tag }}</h1>
+        <h1 class="decks__title hq-pixel"><span class="decks__hash">#</span>{{ route.tag }}</h1>
         <ul v-if="tagDecks.length" class="decks__grid">
           <DeckCard v-for="deck in tagDecks" :key="deck.id" :deck="deck" :solo-href="soloHref(deck)" @pick="pick" />
         </ul>
@@ -15,7 +15,7 @@
 
       <!-- Full list -->
       <template v-else>
-        <h1 class="decks__title">Pick a quiz</h1>
+        <h1 class="decks__title hq-pixel">Pick a quiz</h1>
         <p v-if="loading" class="decks__empty">Loading quizzes…</p>
         <p v-else-if="loadError" class="decks__empty">Could not load the quiz list: {{ loadError }}</p>
         <ul v-else-if="decks.length" class="decks__grid">
@@ -94,7 +94,7 @@ function pick(deck: BundledDeck) {
   flex-direction: column;
   gap: 3vmin;
 }
-.decks__title { margin: 0; text-align: center; font-size: clamp(1.4rem, 3.4vmin, 2.4rem); font-weight: 600; }
+.decks__title { margin: 0; text-align: center; font-size: clamp(1.4rem, 3.4vmin, 2.4rem); }
 .decks__hash { color: var(--hq-accent); margin-right: 0.1em; }
 .decks__back {
   align-self: flex-start;

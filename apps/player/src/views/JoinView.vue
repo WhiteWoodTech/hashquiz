@@ -27,11 +27,12 @@
 <script setup lang="ts">
 import { ref, onMounted, defineAsyncComponent } from 'vue'
 import { useGameStore } from '../stores/game'
+import { soloAvailable } from '@quizv/core'
 import { config } from '../config'
 
 // The solo list (and the deck bundle it needs) loads in its own chunk, only when solo can work.
 const SoloCatalog = defineAsyncComponent(() => import('../components/SoloCatalog.vue'))
-const soloEnabled = Boolean(config.supabaseUrl && config.supabaseAnonKey)
+const soloEnabled = soloAvailable(config)
 
 const game = useGameStore()
 const code   = ref('')

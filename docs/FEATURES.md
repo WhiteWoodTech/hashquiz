@@ -61,7 +61,7 @@ See [`DEPLOY.md`](DEPLOY.md) for setup.
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| `@quizv/transport-supabase` | ✅ | Supabase Realtime Broadcast + presence transport (unit-tested with a fake client) |
+| `@quizv/backend-supabase` | ✅ | Supabase Realtime Broadcast + presence transport (unit-tested with a fake client) |
 | Host/player apps on Supabase | ✅ | `VITE_TRANSPORT=supabase` switches both apps from local WS to Supabase |
 | Vercel deployment | ✅ | `vercel.json` + `bun run build:web`, host at `/host`, player at `/` |
 | Internet multiplayer | ✅ | Players join from anywhere via URL / QR code |

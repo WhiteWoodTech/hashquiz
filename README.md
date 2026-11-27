@@ -192,8 +192,8 @@ quizv/
 ├── packages/
 │   ├── parser/           # @quizv/parser — .quizv.md → Quiz object
 │   ├── core/             # @quizv/core — GameEngine, events, types
-│   ├── transport-local/  # @quizv/transport-local — Bun WS transport
-│   ├── transport-supabase/ # @quizv/transport-supabase — cloud transport (stub)
+│   ├── backend-local/  # @quizv/backend-local — Bun WS transport
+│   ├── backend-supabase/ # @quizv/backend-supabase — cloud transport (stub)
 │   ├── server/           # @quizv/server — Bun HTTP+WS server + CLI
 │   ├── theme-default/    # @quizv/theme-default — CSS design tokens
 │   └── ui/               # @quizv/ui — shared Vue 3 components

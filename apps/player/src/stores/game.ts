@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { QuestionPublic, Score, PodiumEntry, QuizInfo, StateSnapshot } from '@quizv/core'
 import type { GameEvent } from '@quizv/core'
-import { SupabaseTransport } from '@quizv/transport-supabase'
+import { SupabaseTransport } from '@quizv/backend-supabase'
 import { GameEvents, rankOf } from '@quizv/core'
 import type { IRealtimeTransport, PlayerState } from '@quizv/core'
 

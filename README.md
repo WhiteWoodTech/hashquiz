@@ -67,6 +67,9 @@ bun install
 The `dev` command boots the WS server **and** both Vite frontends in one shot. Pass the path to a `.hashquiz.md` file:
 
 ```bash
+# Optional: clone the example decks (maxime-lenne/hashquiz-decks) into the untracked decks/ folder
+bun run decks:clone
+
 # Shortest form — uses the bun script
 bun run dev tests/fixtures/demo.hashquiz.md
 
@@ -74,13 +77,14 @@ bun run dev tests/fixtures/demo.hashquiz.md
 bun run packages/server/src/cli.ts dev tests/fixtures/demo.hashquiz.md
 
 # Override the WS / HTTP port (host and player apps stay on 3031 / 3032)
-bun run dev tests/fixtures/demo.hashquiz.md --port 4040
+bun run dev decks/decks/tech-fundamentals/index.hashquiz.md --port 4040
 
 # Pass a decks folder: it is the decks folder for solo mode, the room deck is its first deck by id
-bun run dev tests/fixtures
+bun run dev decks
 
-# With a file, --decks picks the solo decks folder (default: tests/fixtures/ in the monorepo, else the file's folder)
-bun run dev tests/fixtures/demo.hashquiz.md --decks tests/fixtures
+# With a file, --decks picks the solo decks folder (default in the monorepo: decks/, else tests/fixtures/;
+# else the file's folder)
+bun run dev tests/fixtures/demo.hashquiz.md --decks decks
 ```
 
 This starts three servers simultaneously:
@@ -165,8 +169,9 @@ Decks live in their own repositories and use the published
 - [`WhiteWoodTech/hashquiz-trainings-decks`](https://github.com/WhiteWoodTech/hashquiz-trainings-decks): agentic coding,
   cloud, GCP, MCP deep dive, observability
 
-The host app of this repository lists the [`tests/fixtures/`](tests/fixtures/) decks (set `HASHQUIZ_DECKS_DIR`,
-relative to the repo root, to list another folder). See [`docs/PACKAGE.md`](docs/PACKAGE.md) for
+The host app of this repository lists the untracked `decks/` folder (`bun run decks:clone` fills it with
+`maxime-lenne/hashquiz-decks`), else [`tests/fixtures/`](tests/fixtures/); set `HASHQUIZ_DECKS_DIR`, relative to
+the repo root, to list another folder. See [`docs/PACKAGE.md`](docs/PACKAGE.md) for
 `hashquiz build` and the publishing steps in [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 This repository only keeps the code: [`tests/fixtures/demo.hashquiz.md`](tests/fixtures/demo.hashquiz.md) is a

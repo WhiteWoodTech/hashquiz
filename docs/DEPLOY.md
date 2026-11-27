@@ -101,9 +101,9 @@ Push to the configured branch. Vercel builds and serves:
 
 `VITE_TRANSPORT=local` (the default in `.env.example`) runs
 `bun run packages/server/src/cli.ts dev tests/fixtures/demo.hashquiz.md`. No Supabase is involved. `hashquiz dev`
-takes a deck file (the room deck) or a decks folder (the decks folder for solo mode; the room deck is its first deck by
-id). With a file, `--decks <dir>` picks the solo decks folder (default: the monorepo `tests/fixtures/` or
-`HASHQUIZ_DECKS_DIR`, else the file's folder).
+takes a deck file (the room deck) or a decks folder (the decks folder for solo mode; the room deck is its first deck
+by id). With a file, `--decks <dir>` picks the solo decks folder (default: `HASHQUIZ_DECKS_DIR`, else the
+monorepo's untracked `decks/` (`bun run decks:clone`), else `tests/fixtures/`, else the file's folder).
 
 Both Vite apps list the decks of that folder, served as `/host/decks.json` and `/decks.json`.
 `tests/fixtures/demo.hashquiz.md` is a `solo: true` deck.

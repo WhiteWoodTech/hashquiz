@@ -68,14 +68,17 @@ class FakeLive implements SoloLivePort {
 let api: FakeApi
 let live: FakeLive
 let clock: number
+let reloads = 0
 const flush = () => new Promise(r => setTimeout(r, 0))
 
 function setup(backend = true) {
   api = new FakeApi()
   live = new FakeLive()
   clock = 1_000
+  reloads = 0
   setSoloDeps({
     findDeck: async id => decks[id],
+    reloadDecks: () => { reloads++ },
     backend: backend ? { api, live: () => live } : null,
     now: () => clock,
   })
@@ -256,6 +259,57 @@ describe('solo store', () => {
     expect(solo.submitState).toBe('saved')
     expect(solo.myRank).toBe(1)
     expect(api.submits.length).toBe(2)
+  })
+
+  test('a failed submit keeps its reason', async () => {
+    const solo = setup()
+    await solo.open('solo/deck')
+    api.submitResult = { ok: false, error: 'rls denied' }
+    await playToEnd(solo)
+    expect(solo.submitError).toBe('rls denied')
+    expect(reloads).toBe(0)
+  })
+
+  for (const reason of ['deck version mismatch', 'unknown deck']) {
+    test(`${reason}: the deck changed, no retry, the deck list is reloaded`, async () => {
+      const solo = setup()
+      await solo.open('solo/deck')
+      api.submitResult = { ok: false, error: reason }
+      await playToEnd(solo)
+      expect(solo.submitState).toBe('stale')
+      expect(solo.submitError).toBe(reason)
+      expect(reloads).toBe(1)
+      solo.retrySubmit()
+      await flush()
+      expect(api.submits.length).toBe(1)
+    })
+  }
+
+  test('playAgain after a changed deck re-opens it and plays the new version', async () => {
+    const solo = setup()
+    await solo.open('solo/deck')
+    api.submitResult = { ok: false, error: 'deck version mismatch' }
+    await playToEnd(solo)
+    const old = decks['solo/deck']!
+    decks['solo/deck'] = { ...old, version: 'v2' }
+    try {
+      api.submitResult = { ok: true, value: { runId: 'mine', rank: 1 } }
+      await solo.playAgain()
+      expect(solo.phase).toBe('question')
+      expect(solo.pseudo).toBe('Alice')
+      expect(solo.deck?.version).toBe('v2')
+      expect(solo.submitError).toBeNull()
+      for (let i = 0; i < 2; i++) {
+        clock += 2_000
+        solo.answer([solo.question!.choices[0]!.id])
+        solo.next()
+      }
+      await flush()
+      expect(api.submits.at(-1)?.deckVersion).toBe('v2')
+      expect(solo.submitState).toBe('saved')
+    } finally {
+      decks['solo/deck'] = old
+    }
   })
 
   test('abandon clears run without submitting', async () => {

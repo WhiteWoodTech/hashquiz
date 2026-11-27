@@ -16,6 +16,9 @@
       <button v-else-if="solo.submitState === 'error'" class="solo-end__retry" @click="solo.retrySubmit()">
         Score non enregistré — réessayer
       </button>
+      <template v-else-if="solo.submitState === 'stale'">
+        Score non enregistré : ce quiz a été mis à jour. Rejouez pour utiliser la nouvelle version.
+      </template>
     </div>
 
     <button class="solo-btn" @click="solo.playAgain()">Rejouer</button>

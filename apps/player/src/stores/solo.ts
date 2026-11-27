@@ -8,11 +8,17 @@ import {
 import type { LoadedDeck } from '@quizv/core/decks'
 
 export type SoloPhase = 'loading' | 'intro' | 'question' | 'revealed' | 'end' | 'unavailable'
-export type SubmitState = 'idle' | 'saving' | 'saved' | 'error'
+/** `stale`: the deck changed on the site since it was loaded; retrying cannot succeed, replaying can. */
+export type SubmitState = 'idle' | 'saving' | 'saved' | 'error' | 'stale'
+
+/** Submit reasons meaning the loaded deck is no longer the site's one. */
+const STALE_DECK_REASONS = new Set(['deck version mismatch', 'unknown deck'])
 
 export interface SoloDeps {
   /** Deck lookup in the runtime manifest; a rejection (manifest load error) shows `unavailable`. */
   findDeck: (id: string) => Promise<LoadedDeck | undefined>
+  /** Drops the cached deck list, so the next `findDeck` fetches the site's current one. */
+  reloadDecks?: () => void
   /**
    * null without a configured solo backend: solo is unavailable. `live` may throw (e.g. the deck channel is
    * still open): the store then shows `unavailable`.
@@ -56,6 +62,8 @@ export const useSoloStore = defineStore('solo', () => {
   /** The player's run when it is outside the fetched top. */
   const myRun = ref<RankedRun | null>(null)
   const submitState = ref<SubmitState>('idle')
+  /** Why the last submit failed (backend reason), null otherwise. */
+  const submitError = ref<string | null>(null)
 
   let presence: SoloLivePort | null = null
   let offPresence: (() => void) | null = null
@@ -99,6 +107,7 @@ export const useSoloStore = defineStore('solo', () => {
     myRank.value = null
     myRun.value = null
     submitState.value = 'idle'
+    submitError.value = null
     sync()
   }
 
@@ -246,7 +255,14 @@ export const useSoloStore = defineStore('solo', () => {
     submitState.value = 'saving'
     const r = await api.submitRun(s.toSubmission(), d.quiz)
     if (g !== gen || session.value !== s) return
-    if (!r.ok) { submitState.value = 'error'; return }
+    if (!r.ok) {
+      submitError.value = r.error
+      if (STALE_DECK_REASONS.has(r.error)) {
+        submitState.value = 'stale'
+        deps?.reloadDecks?.()
+      } else submitState.value = 'error'
+      return
+    }
     myRunId.value = r.value.runId
     myRank.value = r.value.rank
     submitState.value = 'saved'
@@ -257,8 +273,17 @@ export const useSoloStore = defineStore('solo', () => {
     if (submitState.value === 'error') void submit()
   }
 
-  function playAgain(): void {
-    if (phase.value === 'end') start(pseudo.value)
+  /** Replays with the same pseudo; after a deck change, re-opens the deck first to play its new version. */
+  async function playAgain(): Promise<void> {
+    if (phase.value !== 'end') return
+    const d = deck.value
+    if (submitState.value === 'stale' && d) {
+      const name = pseudo.value
+      await open(d.id)
+      if (phase.value === 'intro') start(name)
+      return
+    }
+    start(pseudo.value)
   }
 
   /** Leaves the solo route: nothing is stored for a run in progress. */
@@ -277,7 +302,7 @@ export const useSoloStore = defineStore('solo', () => {
 
   return {
     phase, deck, session, pseudo, question, index, total, score, correctCount, totalTimeMs, deadlineMs, lastResult,
-    live, liveOthers, top, runCount, myRunId, myRank, myRun, board, submitState,
+    live, liveOthers, top, runCount, myRunId, myRank, myRun, board, submitState, submitError,
     open, start, answer, timeout, next, retrySubmit, playAgain, abandon, submitLead,
   }
 })

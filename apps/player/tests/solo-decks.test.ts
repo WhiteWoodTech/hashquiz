@@ -39,5 +39,8 @@ describe('player decks', () => {
     expect((await mod.findDeck('room/index.quizv.md'))?.name).toBe('Room')
     expect(await mod.findDeck('nope')).toBeUndefined()
     expect(calls).toBe(2)
+    mod.resetDecks()
+    await mod.loadDecks('/decks.json')
+    expect(calls).toBe(3)
   })
 })

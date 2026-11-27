@@ -102,8 +102,17 @@ quizv/
 │   │       └── index.ts             # LocalTransport — Bun WS pub/sub
 │   ├── backend-supabase/            # @quizv/backend-supabase
 │   │   ├── package.json
-│   │   └── src/
-│   │       └── index.ts
+│   │   ├── src/
+│   │   │   ├── index.ts             # SupabaseTransport
+│   │   │   ├── solo/                # SoloApi, SoloLive, toSoloRunRow
+│   │   │   ├── edge/solo-core.ts    # Edge Function bundle entry (deck source, verifier, row mapping)
+│   │   │   └── cli/edge-bundle.ts   # `build:edge`: bundles solo-core.ts into functions/_shared/solo-core.js
+│   │   └── supabase/                # Supabase CLI project (`--workdir packages/backend-supabase`)
+│   │       ├── config.toml
+│   │       ├── migrations/          # solo_runs, solo_answers, solo_settings, leads, RPCs
+│   │       └── functions/
+│   │           ├── .env.example     # HASHQUIZ_SITE_URL for `supabase:functions` (copy to .env.local)
+│   │           └── solo-submit/index.ts # Edge Function: rescoring from the site's decks.json (edge mode)
 │   ├── server/                      # @quizv/server
 │   │   ├── package.json
 │   │   ├── tsconfig.json
@@ -149,14 +158,7 @@ quizv/
 │   └── ee/                          # Pro / Enterprise features (placeholder)
 │       ├── LICENSE                  # QuizV Enterprise License
 │       └── README.md                # Planned paid features and rules
-├── supabase/                        # Supabase CLI project (solo live mode)
-│   ├── config.toml
-│   ├── migrations/
-│   │   └── 20261126090000_solo_live.sql # solo_runs, solo_answers, solo_settings, leads, RPCs
-│   └── functions/
-│       └── solo-submit/index.ts     # Edge Function: rescoring (edge mode); _shared/generated is gitignored
 ├── scripts/
-│   ├── build-edge.ts                # `build:edge <decksDir>`: Edge Function deck data (solo decks) + verifier
 │   └── pack.ts                      # Stages the hashquiz npm package in pkg/
 ├── examples/
 │   └── demo.quizv.md                # Sample quiz file (`solo: true`)
@@ -180,11 +182,11 @@ Licensing per directory is described in [`LICENSING.md`](./LICENSING.md): `packa
 | `packages/core/src/types.ts` | Shared types: `PlayerState`, `Score`, `PodiumEntry` |
 | `packages/core/src/events.ts` | `GameEvent` union + `GameEvents` builder |
 | `packages/core/src/game.ts` | `GameEngine` — authoritative game state machine |
-| `supabase/migrations/20261126090000_solo_live.sql` | Solo schema, RLS and RPCs |
+| `packages/backend-supabase/supabase/migrations/20261126090000_solo_live.sql` | Solo schema, RLS and RPCs |
 | `packages/core/src/solo.ts` | `SoloSession` — solo run state machine |
 | `packages/server/src/server.ts` | Bun HTTP+WS server, handles all WS messages |
 | `packages/server/src/build.ts` | `hashquiz build`: static site = prebuilt apps + `host/decks.json` + `decks.json` (player) + `quizv-config.js` |
-| `packages/server/src/web-assets.ts` | `collectDecks`: the deck id rule (path relative to the decks folder), shared by both apps and `build:edge` |
+| `packages/server/src/web-assets.ts` | `collectDecks`: the deck id rule (path relative to the decks folder), shared by both apps and `hashquiz build` |
 | `packages/server/src/vite-plugin.ts` | Serves/emits `decks.json` and `quizv-config.js` for the Vite apps |
 | `packages/core/src/runtime-config.ts` | Runtime settings read by both apps (transport, Supabase, solo scoring, player URL) |
 | `packages/core/src/decks.ts` | Deck manifest parsing, `deckVersion` (content hash), `deckInfo` (card data) |

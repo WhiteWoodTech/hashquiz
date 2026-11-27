@@ -68,9 +68,9 @@ index/public/deck-ports.json
 .superpowers/
 pkg/
 
-# Supabase (generated Edge Function inputs, CLI state)
-supabase/functions/_shared/generated/
-supabase/.temp/
+# Supabase (generated Edge Function bundle, CLI state)
+packages/backend-supabase/supabase/functions/_shared/solo-core.js
+packages/backend-supabase/supabase/.temp/
 
 # HashQuiz local solo store (hashquiz dev)
 .hashquiz/

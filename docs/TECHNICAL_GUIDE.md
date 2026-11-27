@@ -250,7 +250,7 @@ Current coverage: **258 tests across 31 files, 0 failures**
 
 ## Solo Mode Storage (Supabase)
 
-Schema in `supabase/migrations/20261126090000_solo_live.sql`, hardened by
+Schema in `packages/backend-supabase/supabase/migrations/20261126090000_solo_live.sql`, hardened by
 `20261126120000_solo_hardening.sql`. RLS is enabled on every table, and table grants match the policies.
 
 | Table | Contents | anon |
@@ -294,19 +294,22 @@ topic) or replaces the socket without erroring them. Letting phoenix rejoin woul
 
 ### Edge Function `solo-submit`
 
-`supabase/functions/solo-submit/index.ts` (Deno, `verify_jwt = false`: public). Used when the runtime config
-has `soloScoring: 'edge'` (`HASHQUIZ_SOLO_SCORING` / `VITE_SOLO_SCORING=edge`).
+`packages/backend-supabase/supabase/functions/solo-submit/index.ts` (Deno, `verify_jwt = false`: public). Used
+when the runtime config has `soloScoring: 'edge'` (`HASHQUIZ_SOLO_SCORING` / `VITE_SOLO_SCORING=edge`).
 
 - `POST` a `SoloRunSubmission` JSON → `200 { runId, rank }`.
-- `422 { reason }`: `invalid json`, `unknown deck`, `deck version mismatch` (the function's deck copy differs
-  from the client's), or any `verifySoloRun` rejection reason.
+- `422 { reason }`: `invalid json`, `unknown deck`, `deck version mismatch` (the site's deck differs from the
+  client's, after one forced refetch), or any `verifySoloRun` rejection reason.
+- `503 { reason: 'decks unavailable' }`: the site's `decks.json` could not be loaded (and nothing is cached);
+  `500 { reason: 'site url not configured' }` without the `HASHQUIZ_SITE_URL` secret.
 - `405` for other methods; `OPTIONS` → `204` with CORS headers (`Access-Control-Allow-Origin: *`).
 
-It loads the deck from `_shared/generated/decks.json`, rescores with `verifySoloRun`, and stores through
-`insert_solo_run` with `SUPABASE_SERVICE_ROLE_KEY` (ignores `solo_settings`). `bun run build:edge <decksDir>`
-(`scripts/build-edge.ts`, same decks folder as `hashquiz build`) generates `_shared/generated/` (gitignored):
-`decks.json` (`{ [deckId]: { version, quiz } }`, `solo: true` decks only, ids from `collectDecks`, versions
-from `deckVersion`) and `solo-verify.js` (`Bun.build` ESM bundle of `packages/core/src/solo-verify.ts`).
+A module-level `SoloDeckSource` loads `<HASHQUIZ_SITE_URL>/decks.json` through `parseManifest` (fetch aborted
+after 5 s; TTL 5 min; forced refetch at most every 10 s; a failed load keeps the stale cache), rescores with
+`verifySoloRun`, and stores `toSoloRunRow(run)` through `insert_solo_run` with `SUPABASE_SERVICE_ROLE_KEY`
+(ignores `solo_settings`). These come from `_shared/solo-core.js` (gitignored), the `Bun.build` ESM bundle of
+`packages/backend-supabase/src/edge/solo-core.ts` written by `bun run build:edge`
+(`packages/backend-supabase/src/cli/edge-bundle.ts`).
 
 **Known limit: question selection is not replayed.** The function checks that every question exists in its
 deck, that none repeats, that each answer time is within `[0, timer]` and that the `max-time` budget holds,

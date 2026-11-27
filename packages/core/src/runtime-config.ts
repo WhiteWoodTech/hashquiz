@@ -24,6 +24,11 @@ export interface QuizvRuntimeConfig {
 
 type Env = Record<string, string | undefined>
 
+/** Whether solo mode can run: always in local mode, with a Supabase URL and anon key otherwise. */
+export function soloAvailable(config: QuizvRuntimeConfig): boolean {
+  return config.transport === 'local' || !!(config.supabaseUrl && config.supabaseAnonKey)
+}
+
 /** Builds the config from environment variables (`HASHQUIZ_*`, then `QUIZV_*`, then `VITE_*`). */
 export function configFromEnv(env: Env): QuizvRuntimeConfig {
   const pick = (name: string) =>

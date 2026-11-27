@@ -3,12 +3,15 @@
  * Stages the publishable npm package in `pkg/`:
  *   pkg/bin/hashquiz.js   CLI bundled with its workspace deps (runs on Bun)
  *   pkg/web/           prebuilt host + player apps (from `bun run build:web`)
+ *   pkg/supabase/      Supabase project for `hashquiz supabase deploy` (migrations,
+ *                      solo-submit Edge Function, freshly bundled _shared/solo-core.js)
  *
  * Usage: bun run build:web && bun scripts/pack.ts [version]
  * Then:  npm publish ./pkg --access public
  */
 import { cpSync, existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { copySupabaseProject } from '../packages/backend-supabase/src/cli'
 
 export const PACKAGE_NAME = 'hashquiz'
 
@@ -41,6 +44,9 @@ rmSync(resolve(out, 'web/host/decks.json'), { force: true })
 rmSync(resolve(out, 'web/decks.json'), { force: true })
 rmSync(resolve(out, 'web/quizv-config.js'), { force: true })
 
+// config.toml, migrations/, functions/ without .env*, plus a fresh solo-core.js bundle.
+await copySupabaseProject(resolve(root, 'packages/backend-supabase/supabase'), resolve(out, 'supabase'), 'build')
+
 cpSync(resolve(root, 'LICENSE.md'), resolve(out, 'LICENSE.md'))
 cpSync(resolve(root, 'docs/PACKAGE.md'), resolve(out, 'README.md'))
 writeFileSync(resolve(out, 'package.json'), JSON.stringify({
@@ -58,7 +64,7 @@ writeFileSync(resolve(out, 'package.json'), JSON.stringify({
   // new package unless access is explicitly public.
   publishConfig: { access: 'public', provenance: true },
   bin: { [PACKAGE_NAME]: `./bin/${PACKAGE_NAME}.js` },
-  files: ['bin', 'web', 'README.md', 'LICENSE.md'],
+  files: ['bin', 'web', 'supabase', 'README.md', 'LICENSE.md'],
   engines: { bun: '>=1.1' },
   keywords: ['quiz', 'kahoot', 'markdown', 'slides', 'multiplayer'],
 }, null, 2) + '\n')

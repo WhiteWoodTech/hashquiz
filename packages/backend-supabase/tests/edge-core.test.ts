@@ -4,7 +4,7 @@ import { homedir, tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { SoloSession, verifySoloRun, type SoloRunSubmission } from '@quizv/core'
 import { deckVersion, toDecks } from '@quizv/core/decks'
-import { bundleEdgeCore, EDGE_CORE_FILE, edgeCoreEntry } from '../src/cli/edge-bundle'
+import { bundleEdgeCore, EDGE_CORE_BANNER, EDGE_CORE_FILE, edgeCoreEntry } from '../src/cli/edge-bundle'
 
 const DEMO = readFileSync(resolve(import.meta.dir, '../../../examples/demo.quizv.md'), 'utf-8')
 const DECK = 'demo.quizv.md'
@@ -51,6 +51,35 @@ describe('edge core bundle', () => {
     expect(mod.manifestUrl('not a url')).toBeNull()
   })
 
+  // The edge runtime (Deno) has no global `Buffer`; gray-matter (front matter) needs one. Bun cannot hide its
+  // own Buffer from bundled code, so the runtime check runs in Deno (skipped where it is not installed).
+  test('bundle binds Buffer from node:buffer', () => {
+    const code = readFileSync(outFile, 'utf-8')
+    expect(code.startsWith(EDGE_CORE_BANNER)).toBe(true)
+    expect(EDGE_CORE_BANNER).toContain('from "node:buffer"')
+  })
+
+  test.skipIf(!Bun.which('deno'))('bundle loads in Deno and resolves the demo deck', () => {
+    // Recent Deno has a global Buffer, edge-runtime 1.79 (Deno 2.1) does not: remove it first.
+    const script = `
+      delete globalThis.Buffer
+      const mod = await import(${JSON.stringify(Bun.pathToFileURL(outFile).href)})
+      const content = await Deno.readTextFile(${JSON.stringify(resolve(import.meta.dir, '../../../examples/demo.quizv.md'))})
+      const source = new mod.SoloDeckSource(async () => mod.parseManifest([{ id: ${JSON.stringify(DECK)}, content }]))
+      const ok = await source.resolve(${JSON.stringify(DECK)}, ${JSON.stringify(deckVersion(DEMO))})
+      const bad = await source.resolve(${JSON.stringify(DECK)}, 'deadbeef')
+      console.log(JSON.stringify({ hasBuffer: typeof globalThis.Buffer, ok: ok.ok, bad }))
+    `
+    const res = Bun.spawnSync(['deno', 'eval', '--quiet', script], { stderr: 'pipe', stdout: 'pipe' })
+    const out = res.stdout.toString().trim()
+    expect(res.stderr.toString()).not.toContain('Skipping deck')
+    expect(res.exitCode).toBe(0)
+    const line = JSON.parse(out.split('\n').at(-1)!)
+    expect(line.hasBuffer).toBe('undefined')
+    expect(line.ok).toBe(true)
+    expect(line.bad).toEqual({ ok: false, reason: 'deck version mismatch' })
+  })
+
   test('bundle has no bare imports', () => {
     const code = readFileSync(outFile, 'utf-8')
     const specs = [
@@ -61,6 +90,8 @@ describe('edge core bundle', () => {
     ].map((m) => m[1]!)
     const bare = specs.filter((s) => !s.startsWith('./') && !s.startsWith('../') && !s.startsWith('node:'))
     expect(bare).toEqual([])
+    // node:buffer (the banner) is the only Node builtin the edge runtime has to provide
+    expect([...new Set(specs.filter((s) => s.startsWith('node:')))]).toEqual(['node:buffer'])
   })
 
   test('bundle has no absolute local paths, even when built from another cwd', async () => {

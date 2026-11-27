@@ -35,8 +35,8 @@ function printUsage(): void {
   Options:
     --port <number>         Port to listen on (default: 3030)
     --decks <dir>           Decks folder for dev with a file (default: the
-                            repo's examples/ from the sources, else the
-                            file's folder)
+                            repo's decks/ or tests/fixtures/ from the
+                            sources, else the file's folder)
     --out <dir>             Output folder for build (default: dist)
 `)
 }

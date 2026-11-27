@@ -2,7 +2,7 @@ import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
 import { HashQuizServer } from '../src/server'
 import { resolve } from 'node:path'
 
-const QUIZ = resolve(import.meta.dir, '../../../examples/demo.hashquiz.md')
+const QUIZ = resolve(import.meta.dir, '../../../tests/fixtures/demo.hashquiz.md')
 
 async function waitFor<T>(check: () => T | undefined, timeoutMs = 1000): Promise<T> {
   const deadline = Date.now() + timeoutMs

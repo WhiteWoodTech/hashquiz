@@ -11,7 +11,7 @@ import { SOLO_WS_ROLE, soloTopic, type SoloServerMsg } from '../src/solo/protoco
 import { createSoloHttpHandler, SOLO_MAX_BODY, SoloPresenceHub, type SoloConn } from '../src/solo/server'
 import { SoloStore } from '../src/solo/store'
 
-const DEMO = readFileSync(resolve(import.meta.dir, '../../../examples/demo.hashquiz.md'), 'utf-8')
+const DEMO = readFileSync(resolve(import.meta.dir, '../../../tests/fixtures/demo.hashquiz.md'), 'utf-8')
 const DECK = 'demo/index.hashquiz.md'
 const ROOM = 'room/index.hashquiz.md'
 const BASE = 'http://localhost:3030'

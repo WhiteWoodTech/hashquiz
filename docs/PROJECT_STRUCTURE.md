@@ -170,8 +170,10 @@ hashquiz/
 │   ├── pack.ts                      # Stages the hashquiz npm package in pkg/ (CLI, web apps, supabase project)
 │   ├── pack-guard.ts                # Clean build env for pack; fails if pkg/web holds Supabase settings
 │   └── tests/                       # pack-guard tests
-├── examples/
-│   └── demo.hashquiz.md                # Sample quiz file (`solo: true`)
+├── tests/
+│   └── fixtures/
+│       └── demo.hashquiz.md         # Test deck used by the test suites (`solo: true`)
+├── decks/                           # Untracked: `bun run decks:clone` (maxime-lenne/hashquiz-decks)
 ├── LICENSE.md                       # Licensing overview + HashQuiz Sustainable Use License
 ├── LICENSE_EE.md                    # HashQuiz Enterprise License
 └── CLA.md                           # Contributor License Agreement

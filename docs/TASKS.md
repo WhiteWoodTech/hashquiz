@@ -147,7 +147,7 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 - [x] `@hashquiz/core` — `GameEngine`, `GameEvent`, `IRealtimeTransport`, scoring + 14 tests
 - [x] `@hashquiz/backend-local` — `LocalTransport` (Bun WS pub/sub)
 - [x] `@hashquiz/server` — Bun HTTP+WS server + `hashquiz dev | check` CLI
-- [x] `examples/demo.hashquiz.md` — sample quiz
+- [x] `tests/fixtures/demo.hashquiz.md` — test deck (demo decks live in maxime-lenne/hashquiz-decks)
 
 ---
 

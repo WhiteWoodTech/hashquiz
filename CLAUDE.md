@@ -8,8 +8,8 @@ Main guide for AI assistants working on this repository.
 
 ```bash
 bun install                                          # Install dependencies
-bun test                                             # Run all tests (381 tests)
-bun run packages/server/src/cli.ts dev examples/demo.hashquiz.md  # Start dev stack (a decks folder works too)
+bun test                                             # Run all tests (383 tests)
+bun run packages/server/src/cli.ts dev tests/fixtures/demo.hashquiz.md  # Start dev stack (a decks folder works too)
 bun run packages/server/src/cli.ts check <file>     # Validate quiz file
 bun run lint                                         # Lint markdown and yaml
 bun run lint:md:fix                                  # Auto-fix markdown

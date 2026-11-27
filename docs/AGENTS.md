@@ -52,7 +52,7 @@ Always work on source files in `../hashquiz/`.
 
 bun install                                                    # Install deps
 bun test                                                       # Run all tests
-bun run packages/server/src/cli.ts dev examples/demo.hashquiz.md # Full dev stack
+bun run packages/server/src/cli.ts dev tests/fixtures/demo.hashquiz.md # Full dev stack
 bun run packages/server/src/cli.ts check <file>               # Validate quiz
 ```
 

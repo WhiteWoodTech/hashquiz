@@ -183,7 +183,7 @@ hashquiz/
 │           ├── App.vue
 │           ├── stores/
 │           └── views/
-└── examples/
+└── tests/fixtures/          # Test decks (demo.hashquiz.md)
 ```
 
 ### Import Order

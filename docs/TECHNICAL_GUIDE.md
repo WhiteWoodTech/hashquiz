@@ -206,9 +206,9 @@ Bun HTTP + WebSocket server. Serves the game over a single port (3030).
 - `/solo/*` → local solo API (see `@hashquiz/backend-local`), when the server has a decks folder
 
 `HashQuizServerOptions` takes `decksDir?` and `soloDbPath?`. `hashquiz dev <file | folder> [--decks <dir>]`: a file
-is the room deck and the decks folder is `--decks`, else the monorepo `repoDecksDir` (`examples/` or
-`HASHQUIZ_DECKS_DIR`), else the file's folder; a folder is the decks folder and the room deck is its first deck by
-id. The folder is passed to the Vite children as `HASHQUIZ_DECKS_DIR`, and the package's static servers serve
+is the room deck and the decks folder is `--decks`, else the monorepo `repoDecksDir` (`HASHQUIZ_DECKS_DIR`, else
+`decks/`, else `tests/fixtures/`), else the file's folder; a folder is the decks folder and the room deck is its
+first deck by id. The folder is passed to the Vite children as `HASHQUIZ_DECKS_DIR`, and the package's static servers serve
 `decks.json` and `host/decks.json` from it.
 
 ---
@@ -323,7 +323,7 @@ bun test --watch            # Watch mode
 bun test packages/core      # Single package
 ```
 
-Current coverage: **381 tests across 43 files, 0 failures**
+Current coverage: **383 tests across 43 files, 0 failures**
 
 | Package | Tests | Coverage |
 |---------|-------|----------|

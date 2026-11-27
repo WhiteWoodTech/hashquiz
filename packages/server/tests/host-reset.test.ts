@@ -2,7 +2,7 @@ import { describe, test, expect } from 'bun:test'
 import { HashQuizServer } from '../src/server'
 import { resolve } from 'node:path'
 
-const QUIZ = resolve(import.meta.dir, '../../../examples/demo.hashquiz.md')
+const QUIZ = resolve(import.meta.dir, '../../../tests/fixtures/demo.hashquiz.md')
 
 type Msg = { type: string; joinCode?: string; idx?: number; snapshot?: { phase: string; totalScore: number } }
 

@@ -5,7 +5,7 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import { resolve } from 'node:path'
 import { hashquizWeb, repoDecksDir } from '../../packages/server/src/vite-plugin'
 
-// Decks listed in the host. Defaults to the repo's `examples/`; HASHQUIZ_DECKS_DIR
+// Decks listed in the host. Defaults to the repo's `decks/` (else `tests/fixtures/`); HASHQUIZ_DECKS_DIR
 // (relative to the repo root) points it elsewhere. `hashquiz build` overrides it.
 const decksDir = repoDecksDir(resolve(__dirname, '../..'))
 

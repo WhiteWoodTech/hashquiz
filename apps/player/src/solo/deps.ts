@@ -3,7 +3,7 @@ import { createLocalSoloBackend, localSoloBaseUrl } from '@quizv/backend-local/s
 import { createSupabaseSoloBackend } from '@quizv/backend-supabase/solo'
 import type { SoloDeps } from '../stores/solo'
 import { config } from '../config'
-import { findDeck } from './decks'
+import { findDeck, resetDecks as reloadDecks } from './decks'
 
 /**
  * Real solo dependencies, picked by the runtime `transport` like rooms: `local` talks to the `hashquiz dev`
@@ -11,9 +11,9 @@ import { findDeck } from './decks'
  */
 export function defaultSoloDeps(cfg: QuizvRuntimeConfig = config, hostname: string = location.hostname): SoloDeps {
   if (cfg.transport === 'local') {
-    return { findDeck, backend: createLocalSoloBackend({ baseUrl: localSoloBaseUrl(hostname) }) }
+    return { findDeck, reloadDecks, backend: createLocalSoloBackend({ baseUrl: localSoloBaseUrl(hostname) }) }
   }
   const { supabaseUrl: url, supabaseAnonKey: anonKey, soloScoring: scoring } = cfg
-  if (!url || !anonKey) return { findDeck, backend: null }
-  return { findDeck, backend: createSupabaseSoloBackend({ url, anonKey, scoring }) }
+  if (!url || !anonKey) return { findDeck, reloadDecks, backend: null }
+  return { findDeck, reloadDecks, backend: createSupabaseSoloBackend({ url, anonKey, scoring }) }
 }

@@ -47,6 +47,8 @@ describe('edge core bundle', () => {
     expect(bundled).toEqual(verifySoloRun(QUIZ, sub))
     expect(bundled.ok).toBe(true)
     expect(mod.toSoloRunRow(bundled.run).deck_id).toBe(DECK)
+    expect(mod.manifestUrl('https://quiz.example.org/')).toBe('https://quiz.example.org/decks.json')
+    expect(mod.manifestUrl('not a url')).toBeNull()
   })
 
   test('bundle has no bare imports', () => {

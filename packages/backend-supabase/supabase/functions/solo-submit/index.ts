@@ -19,6 +19,7 @@ const SoloDeckSource = core.SoloDeckSource as new (
 const parseManifest = core.parseManifest as (json: unknown) => unknown[]
 const verifySoloRun = core.verifySoloRun as (quiz: unknown, sub: unknown) => VerifyResult
 const toSoloRunRow = core.toSoloRunRow as (run: unknown) => Record<string, unknown>
+const manifestUrlOf = core.manifestUrl as (siteUrl: string | undefined) => string | null
 
 const MANIFEST_TTL_MS = 300_000
 const MIN_REFETCH_MS = 10_000
@@ -37,8 +38,8 @@ const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPAB
   auth: { persistSession: false },
 })
 
-const siteUrl = Deno.env.get('HASHQUIZ_SITE_URL')?.trim()
-const manifestUrl = siteUrl ? new URL('decks.json', siteUrl.replace(/\/+$/, '') + '/').href : null
+// Null (500 `site url not configured`) when HASHQUIZ_SITE_URL is unset, malformed or not http(s).
+const manifestUrl = manifestUrlOf(Deno.env.get('HASHQUIZ_SITE_URL'))
 
 /** Fetches and validates the site's `decks.json`, aborting after FETCH_TIMEOUT_MS. */
 async function loadManifest(): Promise<unknown[]> {
@@ -62,7 +63,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS })
   if (req.method !== 'POST') return json(405, { reason: 'method not allowed' })
   if (!decks) {
-    console.error('HASHQUIZ_SITE_URL is not set')
+    console.error('HASHQUIZ_SITE_URL is not set or not an http(s) URL')
     return json(500, { reason: 'site url not configured' })
   }
 

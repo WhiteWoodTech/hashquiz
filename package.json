@@ -16,8 +16,8 @@
   ],
   "scripts": {
     "build": "bun run --filter='*' build",
-    "build:web": "bun run --filter='@quizv/app-host' build && bun run --filter='@quizv/app-player' build",
-    "pack": "bun run build:web && bun scripts/pack.ts",
+    "build:web": "bun -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && bun run --filter='@quizv/app-host' build && bun run --filter='@quizv/app-player' build",
+    "pack": "bun scripts/pack.ts",
     "build:edge": "bun packages/backend-supabase/src/cli/edge-bundle.ts",
     "test": "bun test",
     "dev": "bun run packages/server/src/cli.ts dev",

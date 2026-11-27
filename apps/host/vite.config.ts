@@ -10,6 +10,9 @@ import { quizvWeb, repoDecksDir } from '../../packages/server/src/vite-plugin'
 const decksDir = repoDecksDir(resolve(__dirname, '../..'))
 
 export default defineConfig({
+  // `bun run pack` (QUIZV_PACK=1) ignores .env* files: the npm package must not ship the
+  // developer's settings, which come from /quizv-config.js at run time instead.
+  envDir: process.env.QUIZV_PACK === '1' ? false : undefined,
   base: '/host/',
   plugins: [
     vue(),

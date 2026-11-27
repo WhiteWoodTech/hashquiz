@@ -12,7 +12,11 @@ function printUsage(): void {
   hashquiz <command> [options]   (quizv from the sources)
 
   Commands:
-    dev <quiz.quizv.md>     Start local dev server with hot-reload
+    dev <quiz.quizv.md | decks-dir> [--decks <dir>]
+                            Start the local dev stack. A file is the room
+                            deck; a folder is the decks folder (room deck =
+                            its first deck by id). Solo runs are stored in
+                            .hashquiz/solo.db.
     check <quiz.quizv.md>   Validate quiz file format
     build [decks-dir]       Build the static site (host + player) for a decks
                             folder (default: decks). Reads HASHQUIZ_TRANSPORT,
@@ -22,6 +26,9 @@ function printUsage(): void {
 
   Options:
     --port <number>         Port to listen on (default: 3030)
+    --decks <dir>           Decks folder for dev with a file (default: the
+                            repo's examples/ from the sources, else the
+                            file's folder)
     --out <dir>             Output folder for build (default: dist)
 `)
 }
@@ -40,11 +47,16 @@ const port = parseInt(flag('--port') ?? '3030')
 const positional = args.find((a, i) => !a.startsWith('--') && !(i > 0 && args[i - 1]!.startsWith('--')))
 
 if (command === 'dev') {
-  if (!arg) {
-    console.error('Error: provide a .quizv.md file path\n  quizv dev quiz.quizv.md')
+  if (!positional) {
+    console.error('Error: provide a .quizv.md file or a decks folder\n  quizv dev quiz.quizv.md')
     process.exit(1)
   }
-  devCommand(arg, port)
+  try {
+    devCommand(positional, port, flag('--decks'))
+  } catch (e) {
+    console.error(`✗ ${e instanceof Error ? e.message : String(e)}`)
+    process.exit(1)
+  }
 } else if (command === 'build') {
   const decksDir = positional ?? 'decks'
   const outDir = flag('--out') ?? 'dist'

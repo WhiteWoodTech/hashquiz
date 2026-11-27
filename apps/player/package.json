@@ -13,7 +13,6 @@
     "@quizv/theme-original": "workspace:*",
     "@quizv/backend-supabase": "workspace:*",
     "@quizv/ui": "workspace:*",
-    "@supabase/supabase-js": "^2.45.4",
     "marked": "18.0.11",
     "pinia": "^4.0.3",
     "vue": "^3.4.27"

@@ -1,24 +1,23 @@
 import { defineStore } from 'pinia'
 import { computed, ref, shallowRef } from 'vue'
-import { SoloSession, type QuestionPublic, type RankedRun, type SoloResult } from '@quizv/core'
+import {
+  SoloSession,
+  type LivePlayer, type Outcome, type QuestionPublic, type RankedRun, type SoloBackend, type SoloLivePort,
+  type SoloResult,
+} from '@quizv/core'
 import type { LoadedDeck } from '@quizv/core/decks'
-import type { Outcome, SoloApi } from '../solo/api'
-import type { LivePlayer, SoloLive } from '../solo/live'
 
 export type SoloPhase = 'loading' | 'intro' | 'question' | 'revealed' | 'end' | 'unavailable'
 export type SubmitState = 'idle' | 'saving' | 'saved' | 'error'
-export type SoloApiPort = Pick<SoloApi, 'submitRun' | 'fetchTop' | 'fetchCount' | 'fetchRun' | 'submitLead'> & {
-  /** The returned unsubscribe may resolve later: the store awaits it before subscribing the same deck again. */
-  onNewRun(deckId: string, cb: () => void): () => void | Promise<void>
-}
-export type SoloLivePort = Pick<SoloLive, 'key' | 'watch' | 'join' | 'update' | 'untrack' | 'leave' | 'onChange'>
 
 export interface SoloDeps {
   /** Deck lookup in the runtime manifest; a rejection (manifest load error) shows `unavailable`. */
   findDeck: (id: string) => Promise<LoadedDeck | undefined>
-  /** null without Supabase credentials: solo is unavailable. */
-  /** `live` may throw (e.g. the deck channel is still open): the store then shows `unavailable`. */
-  backend: { api: SoloApiPort; live: (deckId: string) => SoloLivePort } | null
+  /**
+   * null without a configured solo backend: solo is unavailable. `live` may throw (e.g. the deck channel is
+   * still open): the store then shows `unavailable`.
+   */
+  backend: SoloBackend | null
   now?: () => number
 }
 
@@ -29,7 +28,7 @@ export const PSEUDO_MAX = 24
 const TOP_SIZE = 20
 
 let deps: SoloDeps | null = null
-/** Injects the deck lookup and Supabase backend (real ones from `solo/deps.ts`, fakes in tests). */
+/** Injects the deck lookup and solo backend (real ones from `solo/deps.ts`, fakes in tests). */
 export function setSoloDeps(d: SoloDeps): void { deps = d }
 
 const ignore = () => {}
@@ -129,11 +128,15 @@ export const useSoloStore = defineStore('solo', () => {
     // Own row in the top: its position is the fresh rank (runs finished since may rank above it).
     const at = t.value.findIndex(r => r.id === runId)
     if (at >= 0) { myRank.value = at + 1; return }
-    // Own row outside the top: fetch it once so it can be appended below.
-    if (myRun.value?.id !== runId) {
-      const r = await api.fetchRun(runId)
-      if (g === gen && r.ok && myRunId.value === runId) myRun.value = r.value
-    }
+    // Own row outside the top: fetch it once so it can be appended below, and refresh its rank (runs finished
+    // since may rank above it).
+    const [rank, row] = await Promise.all([
+      api.fetchRank(runId),
+      myRun.value?.id === runId ? null : api.fetchRun(runId),
+    ])
+    if (g !== gen || myRunId.value !== runId) return
+    if (rank.ok) myRank.value = rank.value
+    if (row?.ok) myRun.value = row.value
   }
 
   async function open(deckId: string): Promise<void> {

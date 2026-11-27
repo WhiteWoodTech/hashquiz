@@ -1,11 +1,11 @@
 import { describe, test, expect, beforeEach } from 'bun:test'
 import { createPinia, setActivePinia } from 'pinia'
-import type { Quiz, RankedRun, SoloRunSubmission } from '@quizv/core'
+import type {
+  LivePlayer, Outcome, Quiz, RankedRun, SoloApiPort, SoloLivePort, SoloRunSubmission, SubmittedRun,
+} from '@quizv/core'
 import type { LoadedDeck } from '@quizv/core/decks'
-import type { LivePlayer } from '../src/solo/live'
-import type { Outcome } from '../src/solo/api'
 import { formatDuration } from '../src/solo/format'
-import { useSoloStore, setSoloDeps, type SoloApiPort, type SoloLivePort } from '../src/stores/solo'
+import { useSoloStore, setSoloDeps } from '../src/stores/solo'
 
 const question = (text: string) => ({
   type: 'single' as const, timer: 10, difficulty: 'easy' as const, tags: [], text,
@@ -28,10 +28,12 @@ const run = (id: string, pseudo: string, score: number): RankedRun =>
 
 class FakeApi implements SoloApiPort {
   submits: SoloRunSubmission[] = []
-  submitResult: Outcome<{ runId: string; rank: number | null }> = { ok: true, value: { runId: 'mine', rank: 2 } }
+  submitResult: Outcome<SubmittedRun> = { ok: true, value: { runId: 'mine', rank: 2 } }
   top: RankedRun[] = []
   count = 0
   runs: Record<string, RankedRun> = {}
+  ranks: Record<string, number> = {}
+  rankCalls: string[] = []
   newRunCb: (() => void) | null = null
   unsubscribed = 0
   async submitRun(sub: SoloRunSubmission) { this.submits.push(sub); return this.submitResult }
@@ -40,6 +42,11 @@ class FakeApi implements SoloApiPort {
   async fetchRun(id: string): Promise<Outcome<RankedRun>> {
     const r = this.runs[id]
     return r ? { ok: true, value: r } : { ok: false, error: 'run not found' }
+  }
+  async fetchRank(id: string): Promise<Outcome<number>> {
+    this.rankCalls.push(id)
+    const r = this.ranks[id]
+    return r === undefined ? { ok: false, error: 'run not found' } : { ok: true, value: r }
   }
   async submitLead() { return { ok: true as const, value: undefined } }
   onNewRun(_deckId: string, cb: () => void) { this.newRunCb = cb; return () => { this.unsubscribed++ } }
@@ -296,6 +303,22 @@ describe('solo store', () => {
     api.newRunCb?.()
     await flush()
     expect(solo.myRank).toBe(2)
+  })
+
+  test('own run outside the top refreshes its rank', async () => {
+    const solo = setup()
+    const others = Array.from({ length: 20 }, (_, i) => run(`r${i}`, `P${i}`, 1000 - i))
+    api.top = others
+    api.runs.mine = run('mine', 'Alice', 100)
+    api.submitResult = { ok: true, value: { runId: 'mine', rank: 25 } }
+    await solo.open('solo/deck')
+    await playToEnd(solo)
+    expect(solo.myRank).toBe(25)
+    api.ranks.mine = 27
+    api.newRunCb?.()
+    await flush()
+    expect(solo.myRank).toBe(27)
+    expect(solo.board.at(-1)).toMatchObject({ id: 'mine', rank: 27, mine: true })
   })
 
   test('new runs refetch the top', async () => {

@@ -1,7 +1,5 @@
 import type { SupabaseClient, RealtimeChannel } from '@supabase/supabase-js'
-
-export interface LivePlayer { key: string; pseudo: string; index: number; total: number; score: number }
-type Me = Omit<LivePlayer, 'key'>
+import type { LivePlayer, LiveState as Me, SoloLivePort } from '@quizv/core'
 
 /**
  * Resolves once the Realtime socket is idle or open, i.e. not mid-reconnect. Phoenix disconnects on `pagehide`
@@ -25,7 +23,7 @@ export async function realtimeSettled(
 /** Minimum delay between two channel rebuilds (see `SoloLive.rebuild`). */
 export const REBUILD_MIN_MS = 2_000
 
-export class SoloLive {
+export class SoloLive implements SoloLivePort {
   /** This client's presence key, to tell our own row apart from the others. */
   readonly key = Math.random().toString(36).slice(2, 12)
   private readonly topic: string

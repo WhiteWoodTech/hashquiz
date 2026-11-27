@@ -232,6 +232,27 @@ describe('createSoloHttpHandler', () => {
     expect(store.count(DECK)).toBe(0)
   })
 
+  test('a rank failure after a stored run is 200 with rank null', async () => {
+    const { handle, store, published } = setup()
+    store.rank = () => { throw new Error('disk I/O error') }
+    const errors: unknown[] = []
+    const orig = console.error
+    console.error = (...a: unknown[]) => { errors.push(a) }
+    let res: Response
+    try {
+      res = await call(handle, post('/solo/runs', JSON.stringify(play())))
+    } finally {
+      console.error = orig
+    }
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as { runId: string; rank: number | null }
+    expect(typeof body.runId).toBe('string')
+    expect(body.rank).toBeNull()
+    expect(store.count(DECK)).toBe(1)
+    expect(published.length).toBe(1)
+    expect(errors.length).toBe(1)
+  })
+
   test('store failures are a logged CORS 500 store failed', async () => {
     const { handle, store } = setup()
     const boom = () => { throw new Error('disk I/O error') }

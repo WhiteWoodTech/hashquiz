@@ -12,7 +12,10 @@ export type DeckLookup =
 export interface SoloDeckSourceOptions {
   /** Cache lifetime in ms (default 300_000); `Infinity` never expires. */
   ttlMs?: number
-  /** Minimum delay between two forced reloads (unknown deck or version mismatch), in ms (default 10_000). */
+  /**
+   * Minimum delay between two forced reloads (unknown deck or version mismatch), and between a failed
+   * load and the next attempt, in ms (default 10_000).
+   */
   minRefetchMs?: number
   now?: () => number
 }
@@ -32,6 +35,7 @@ export class SoloDeckSource {
   private decks: Map<string, LoadedDeck> | null = null
   private loadedAt = 0
   private lastForcedAt = -Infinity
+  private lastFailedAt = -Infinity
   private inflight: Promise<void> | null = null
   private readonly ttlMs: number
   private readonly minRefetchMs: number
@@ -66,14 +70,20 @@ export class SoloDeckSource {
     return { ok: true, deck }
   }
 
-  /** Loads the manifest, sharing an in-flight load; a failure keeps the previous cache. */
+  /**
+   * Loads the manifest, sharing an in-flight load. A failure keeps the previous cache, and no load
+   * starts within `minRefetchMs` of a failure (the caller answers from the cache meanwhile).
+   */
   private reload(): Promise<void> {
-    this.inflight ??= this.load()
+    if (this.inflight) return this.inflight
+    if (this.now() - this.lastFailedAt < this.minRefetchMs) return Promise.resolve()
+    this.inflight = this.load()
       .then((entries) => {
         this.decks = new Map(toDecks(entries).filter((d) => d.quiz.meta.solo).map((d) => [d.id, d]))
         this.loadedAt = this.now()
       })
       .catch((e) => {
+        this.lastFailedAt = this.now()
         console.error('Failed to load solo decks:', e)
       })
       .finally(() => {

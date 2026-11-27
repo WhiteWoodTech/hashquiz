@@ -100,7 +100,7 @@ bun test                  # Run all tests
 bun run build             # Build every workspace package
 bun run build:web         # Build only the host + player SPAs
 bun run pack              # Stage the hashquiz npm package in pkg/
-bun run build:edge <dir>  # Generate the solo-submit Edge Function inputs from a decks folder
+bun run build:edge        # Bundle the solo-submit Edge Function core (solo-core.js)
 bun run lint              # Lint markdown and YAML
 bun run lint:md:fix       # Auto-fix markdown
 bun run commit            # Interactive gitmoji commit
@@ -108,22 +108,26 @@ bun run commit            # Interactive gitmoji commit
 
 ### Solo mode with Supabase
 
-Solo runs, the leaderboard and HashQuiz leads are stored in Supabase (`supabase/migrations/`). Locally (Docker
-required):
+Solo runs, the leaderboard and HashQuiz leads are stored in Supabase
+(`packages/backend-supabase/supabase/migrations/`). Locally (Docker required):
 
 ```bash
-bun run supabase:start                 # local Supabase; `supabase status` prints the URL and anon key
-supabase db reset                      # apply the migrations
-bun run build:edge examples            # edge scoring only: Edge Function inputs (same decks folder as the apps)
-supabase functions serve solo-submit   # edge scoring only
+bun run supabase:start                 # local Supabase; `supabase status --workdir packages/backend-supabase`
+supabase db reset --workdir packages/backend-supabase   # apply the migrations
+bun run build:edge                     # edge scoring only: bundle the Edge Function core
+bun run supabase:functions             # edge scoring only; reads decks.json from HASHQUIZ_SITE_URL
 ```
+
+For edge scoring, copy `packages/backend-supabase/supabase/functions/.env.example` to `.env.local` next to it:
+`HASHQUIZ_SITE_URL=http://host.docker.internal:3032` points the function (in Docker) at the player dev server.
 
 Run the apps with `VITE_TRANSPORT=supabase`, `VITE_SUPABASE_URL=http://127.0.0.1:54321` and the local anon key
 (e.g. in an untracked `apps/player/.env.local` and `apps/host/.env.local`). `examples/demo.quizv.md` is a
 `solo: true` deck: the player home lists it under the join form and its host card links to `#/solo/<deckId>`.
 `VITE_SOLO_SCORING` (or `HASHQUIZ_SOLO_SCORING` for `hashquiz build`) picks `browser` (default) or `edge`
 scoring; switching to `edge` also needs `update solo_settings set scoring_mode = 'edge'`. Production steps
-(`supabase db push`, `bun run build:edge <decksDir>`, `supabase functions deploy solo-submit`) are in
+(`supabase db push`, `bun run build:edge`, `supabase functions deploy solo-submit`, the `HASHQUIZ_SITE_URL`
+secret) are in
 [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ## Decks
@@ -193,15 +197,13 @@ quizv/
 │   ├── parser/           # @quizv/parser — .quizv.md → Quiz object
 │   ├── core/             # @quizv/core — GameEngine, events, types
 │   ├── backend-local/    # @quizv/backend-local — Bun WS transport
-│   ├── backend-supabase/ # @quizv/backend-supabase — cloud transport (stub)
+│   ├── backend-supabase/ # @quizv/backend-supabase — Supabase transport, solo API, Supabase project + Edge Function
 │   ├── server/           # @quizv/server — Bun HTTP+WS server + CLI
 │   ├── theme-default/    # @quizv/theme-default — CSS design tokens
 │   └── ui/               # @quizv/ui — shared Vue 3 components
 ├── apps/
 │   ├── host/            # Vue 3 SPA — port 3031
 │   └── player/          # Vue 3 SPA — port 3032
-├── supabase/             # Supabase CLI project: migrations + solo-submit Edge Function
-├── scripts/build-edge.ts # Edge Function deck data from a decks folder (`build:edge <dir>`)
 └── examples/
     └── demo.quizv.md
 ```

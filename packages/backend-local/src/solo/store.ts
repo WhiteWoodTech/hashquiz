@@ -6,7 +6,8 @@ import { EMAIL_RE, type RankedRun, type VerifiedRun } from '@quizv/core'
 /** Server-side only (`bun:sqlite`): never import this from an app bundle. */
 export const DEFAULT_SOLO_DB = '.hashquiz/solo.db'
 
-// Mirrors supabase/migrations/20261126090000_solo_live.sql and 20261126120000_solo_hardening.sql.
+// Mirrors packages/backend-supabase/supabase/migrations/20261126090000_solo_live.sql and
+// 20261126120000_solo_hardening.sql.
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS solo_runs (
   id TEXT PRIMARY KEY,

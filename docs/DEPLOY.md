@@ -2,7 +2,9 @@
 
 This project deploys on Vercel for hosting and Supabase for realtime messaging and solo mode storage.
 Rooms only use Supabase Realtime channels. Solo mode stores finished runs, their answers and HashQuiz
-leads in Postgres (`supabase/migrations/`) and can score runs in an Edge Function (`supabase/functions/`).
+leads in Postgres and can score runs in an Edge Function. The Supabase CLI project is
+`packages/backend-supabase/supabase/` (`migrations/`, `functions/solo-submit/`); every CLI command below
+passes `--workdir packages/backend-supabase`.
 
 ## 1. Create a Supabase project
 
@@ -12,18 +14,18 @@ leads in Postgres (`supabase/migrations/`) and can score runs in an Edge Functio
 
    ```bash
    supabase login
-   supabase link --project-ref <project-ref>
-   supabase db push                                    # tables, RLS, RPCs (supabase/migrations/)
-   bun run build:edge <decksDir> && supabase functions deploy solo-submit
+   W=--workdir=packages/backend-supabase
+   supabase link --project-ref <project-ref> $W
+   supabase db push $W                                 # tables, RLS, RPCs
+   bun run build:edge && supabase functions deploy solo-submit --project-ref <project-ref> $W
+   supabase secrets set HASHQUIZ_SITE_URL=https://<deployed-site> --project-ref <project-ref> $W
    ```
 
-   Run these from this repository. `bun run build:edge <decksDir>` regenerates
-   `supabase/functions/_shared/generated/` (solo decks + the `verifySoloRun` bundle, gitignored). Pass it
-   **the same decks folder as `hashquiz build`** (e.g. a checkout of a decks repository,
-   `bun run build:edge ../markuiz-decks/decks`): deck ids (paths relative to that folder) and versions
-   (content hash) must match the `decks.json` the apps load. Redeploy the function whenever a `solo: true`
-   deck changes, otherwise edge-scored runs of that deck are rejected with `deck version mismatch` or
-   `unknown deck`.
+   Run these from this repository. `bun run build:edge` bundles the function core
+   (`functions/_shared/solo-core.js`, gitignored). The function reads the solo decks at runtime from
+   `<HASHQUIZ_SITE_URL>/decks.json` (the manifest `hashquiz build` writes), cached 5 minutes, so deck changes
+   need no redeploy: an unknown deck or a version mismatch triggers one refetch (at most every 10 s) before
+   the run is rejected. If the site is unreachable the function answers `503 decks unavailable`.
 
 ## 2. Create a Vercel project
 
@@ -90,11 +92,15 @@ Both Vite apps list the decks of `examples/` (or `QUIZV_DECKS_DIR`, relative to 
 run a local Supabase (requires Docker):
 
 ```bash
-bun run supabase:start                 # supabase start: Postgres, API, Realtime, Studio on 5432x ports
-supabase db reset                      # re-apply supabase/migrations/ on a clean database
-bun run build:edge examples            # only for edge scoring (same folder as the apps list)
-supabase functions serve solo-submit   # only for edge scoring
+bun run supabase:start                 # supabase start --workdir packages/backend-supabase (5432x ports)
+supabase db reset --workdir packages/backend-supabase   # re-apply the migrations on a clean database
+bun run build:edge                     # only for edge scoring: bundle the function core
+bun run supabase:functions             # only for edge scoring: functions serve with functions/.env.local
 ```
+
+For edge scoring, copy `packages/backend-supabase/supabase/functions/.env.example` to `.env.local`
+(`HASHQUIZ_SITE_URL=http://host.docker.internal:3032`: the edge runtime runs in Docker and reads
+`decks.json` from the player dev server).
 
 Then run the apps with, in `apps/host/.env.local` and `apps/player/.env.local`:
 
@@ -106,7 +112,7 @@ VITE_SOLO_SCORING=browser              # or edge, with `update solo_settings set
 VITE_PLAYER_URL=                       # host only; empty = http://<host>:3032/ (player Vite server) in dev
 ```
 
-`supabase status` prints the local URLs and keys; Studio is at <http://127.0.0.1:54323>.
+`supabase status --workdir packages/backend-supabase` prints the local URLs and keys; Studio is at <http://127.0.0.1:54323>.
 
 ## Decks repositories (npm package)
 
@@ -118,8 +124,8 @@ variables can use the `HASHQUIZ_*` names (`HASHQUIZ_TRANSPORT`, …). See
 
 The host app reads the deck list from `host/decks.json`, the player its solo decks from the same
 manifest at `/decks.json`, and both the settings from `/quizv-config.js` at runtime, so the same
-prebuilt apps serve any decks folder. For edge scoring, run `bun run build:edge` (step 1) with a
-checkout of the decks repository's folder, then redeploy the function.
+prebuilt apps serve any decks folder. For edge scoring, set the function's `HASHQUIZ_SITE_URL` secret to
+the decks site (step 1): it reads that site's `decks.json`, so publishing decks needs no redeploy.
 
 ## Publishing the `hashquiz` package
 

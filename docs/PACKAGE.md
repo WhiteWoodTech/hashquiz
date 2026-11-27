@@ -68,7 +68,7 @@ prebuilt core). After `hashquiz build`, deploy it with:
 HASHQUIZ_SITE_URL=https://<domain> hashquiz supabase deploy --project <project-ref> [--dry-run]
 ```
 
-It stages the project in a temp folder and runs `supabase link`, `supabase db push`,
+It stages the project in a temp folder and runs `supabase link`, `supabase db push --remote`,
 `supabase functions deploy solo-submit` and `supabase secrets set HASHQUIZ_SITE_URL=…`, stopping at the first
 failure. The function reads `<HASHQUIZ_SITE_URL>/decks.json` at runtime, so deck changes need no redeploy.
 `--site-url <url>` overrides `HASHQUIZ_SITE_URL` (an http(s) URL). It needs the

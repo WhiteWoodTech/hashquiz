@@ -51,9 +51,9 @@ describe('supabase deploy', () => {
     const steps = supabaseDeploySteps({ projectRef: 'abc', siteUrl: 'https://quiz.example.com', workdir: '/w' })
     expect(steps.map((s) => s.argv)).toEqual([
       ['supabase', 'link', '--project-ref', 'abc', '--workdir', '/w'],
-      ['supabase', 'db', 'push', '--workdir', '/w', '--yes'],
-      ['supabase', 'functions', 'deploy', 'solo-submit', '--project-ref', 'abc', '--workdir', '/w'],
-      ['supabase', 'secrets', 'set', 'HASHQUIZ_SITE_URL=https://quiz.example.com', '--project-ref', 'abc', '--workdir', '/w'],
+      ['supabase', 'db', 'push', '--remote=abc', '--workdir', '/w', '--yes'],
+      ['supabase', 'functions', 'deploy', 'solo-submit', '--remote=abc', '--workdir', '/w'],
+      ['supabase', 'secrets', 'set', 'HASHQUIZ_SITE_URL=https://quiz.example.com', '--remote=abc', '--workdir', '/w'],
     ])
     for (const s of steps) expect(s.label.length).toBeGreaterThan(0)
     const custom = supabaseDeploySteps({ projectRef: 'abc', siteUrl: 'https://x', workdir: '/w', supabaseBin: '/opt/sb' })

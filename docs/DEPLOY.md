@@ -22,9 +22,9 @@ solo on the dev server; see [Local development](#local-development). The runtime
    supabase login
    W=--workdir=packages/backend-supabase
    supabase link --project-ref <project-ref> $W
-   supabase db push $W                                 # tables, RLS, RPCs
-   bun run build:edge && supabase functions deploy solo-submit --project-ref <project-ref> $W
-   supabase secrets set HASHQUIZ_SITE_URL=https://<deployed-site> --project-ref <project-ref> $W
+   supabase db push --remote $W                        # tables, RLS, RPCs (CLI 3.x: local without --remote)
+   bun run build:edge && supabase functions deploy solo-submit --remote=<project-ref> $W
+   supabase secrets set HASHQUIZ_SITE_URL=https://<deployed-site> --remote=<project-ref> $W
    ```
 
    Or, in one command (sources or the `hashquiz` npm package; `--dry-run` prints the steps):

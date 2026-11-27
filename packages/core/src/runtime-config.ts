@@ -24,9 +24,16 @@ export interface QuizvRuntimeConfig {
 
 type Env = Record<string, string | undefined>
 
-/** Whether solo mode can run: always in local mode, with a Supabase URL and anon key otherwise. */
-export function soloAvailable(config: QuizvRuntimeConfig): boolean {
-  return config.transport === 'local' || !!(config.supabaseUrl && config.supabaseAnonKey)
+/**
+ * Whether solo mode can run. Local mode needs a plain `http:` page: the local server speaks
+ * `ws://`, which an `https:` page cannot open (mixed content). Supabase mode needs a URL and anon key.
+ */
+export function soloAvailable(
+  config: QuizvRuntimeConfig,
+  protocol: string | undefined = (globalThis as { location?: { protocol?: string } }).location?.protocol,
+): boolean {
+  if (config.transport === 'local') return protocol !== 'https:'
+  return !!(config.supabaseUrl && config.supabaseAnonKey)
 }
 
 /** Builds the config from environment variables (`HASHQUIZ_*`, then `QUIZV_*`, then `VITE_*`). */
@@ -51,20 +58,20 @@ export function renderConfigScript(config: QuizvRuntimeConfig): string {
 }
 
 /**
- * The config the running app should use: `window.__QUIZV_CONFIG__` when present,
- * otherwise the given build-time env (pass `import.meta.env`).
+ * The config the running app should use: each field of `window.__QUIZV_CONFIG__` when present,
+ * otherwise the given build-time env (pass `import.meta.env`). The injected config is written by
+ * whoever serves the app (`hashquiz dev` / `build`, the monorepo Vite plugin), so it wins.
  */
 export function readRuntimeConfig(buildEnv: Env = {}): QuizvRuntimeConfig {
   const injected = (globalThis as { __QUIZV_CONFIG__?: Partial<QuizvRuntimeConfig> }).__QUIZV_CONFIG__
   const fromBuild = configFromEnv(buildEnv)
   if (!injected) return fromBuild
   return {
-    transport: injected.transport === 'supabase' ? 'supabase' : fromBuild.transport,
+    transport: injected.transport === 'supabase' || injected.transport === 'local' ? injected.transport : fromBuild.transport,
     supabaseUrl: injected.supabaseUrl || fromBuild.supabaseUrl,
     supabaseAnonKey: injected.supabaseAnonKey || fromBuild.supabaseAnonKey,
     graceMs: injected.graceMs ?? fromBuild.graceMs,
-    // Like transport: the injected default (`browser`) never overrides an `edge` build env.
-    soloScoring: injected.soloScoring === 'edge' ? 'edge' : fromBuild.soloScoring,
+    soloScoring: injected.soloScoring === 'edge' || injected.soloScoring === 'browser' ? injected.soloScoring : fromBuild.soloScoring,
     playerUrl: injected.playerUrl || fromBuild.playerUrl,
   }
 }

@@ -71,3 +71,6 @@ pkg/
 # Supabase (generated Edge Function inputs, CLI state)
 supabase/functions/_shared/generated/
 supabase/.temp/
+
+# HashQuiz local solo store (hashquiz dev)
+.hashquiz/

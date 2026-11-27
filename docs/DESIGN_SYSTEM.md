@@ -6,12 +6,13 @@ CSS tokens, typography, spacing, and UI conventions for HashQuiz.
 
 ## Design Principles
 
-- **Pixel retromodern, measured** — the look follows the logo (`docs/brand/`): its two violets on its night blue,
+- **Pixel retromodern, measured** — the look follows the logo (`docs/brand/`): its two violets on a near-black base,
   pixel type for titles and figures only, sharp corners, hard two-tone offset shadows (the logo's purple "q" over
   its violet "#"), stepped bars and square particles. Long text stays in a modern sans: a wink at 90's games,
   never a costume
-- **Dark-first** — all surfaces use a night-blue palette
-- **Color is a signal** — the interface is night blue and white; color only carries meaning
+- **Dark-first** — all surfaces use a near-black palette; violet is kept for actions, the logo and the
+  offset shadows, never for large surfaces or figures
+- **Color is a signal** — the interface is near-black and white; color only carries meaning
   (correct, wrong, warning, answer slot, current player, main action)
 - **Legible at distance** — large type, high contrast (host screen shown on a projector)
 - **Mobile-friendly** — player UI designed for one-hand use on phones
@@ -34,7 +35,7 @@ import '@hashquiz/ui/styles/base.css'
 
 | Package | Look |
 |---------|------|
-| `@hashquiz/theme-default` | Pixel retromodern brand: Space Grotesk text, Jersey 10 pixel titles and figures, JetBrains Mono labels, logo violets on night blue, square corners, 4 px two-tone offset shadows, stepped bars, square lavender particles |
+| `@hashquiz/theme-default` | Pixel retromodern brand: Space Grotesk text, Jersey 10 pixel titles and figures, JetBrains Mono labels, logo violets on near-black, square corners, 4 px two-tone offset shadows, stepped bars, square white particles |
 | `@hashquiz/theme-original` | Previous look: Syne, `#0a0a0f` surfaces, 12/8 px radii, tight label spacing, fewer particles |
 
 `packages/ui/tests/theme-parity.test.ts` fails if the two themes do not declare exactly the same variables.
@@ -51,10 +52,10 @@ Defined in `packages/theme-*/styles/vars.css` and available globally after impor
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--hq-bg` | `#0c0730` (`#0a0a0f`) | Page background (the logo's night blue, one step darker) |
-| `--hq-surface` | `#130a42` (`#111118`) | Cards, panels (the logo's night blue) |
-| `--hq-surface-2` | `#1c1352` (`#1a1a25`) | Buttons, inputs, nested surfaces |
-| `--hq-border` | `#2f2470` (`#2a2a3a`) | Dividers, borders |
+| `--hq-bg` | `#06060a` (`#0a0a0f`) | Page background |
+| `--hq-surface` | `#0c0c12` (`#111118`) | Cards, panels |
+| `--hq-surface-2` | `#14141c` (`#1a1a25`) | Buttons, inputs, nested surfaces |
+| `--hq-border` | `#22222e` (`#2a2a3a`) | Dividers, borders |
 | `--hq-accent` | `#a833f5` (`#7c3aed`) | Main actions, focus, current player highlight (logo purple) |
 | `--hq-accent-2` | `#6523ee` (`#06b6d4`) | Offset shadows, secondary accent (logo violet) |
 | `--hq-brand-violet` | `#6523ee` | Logo "#" (`BrandLogo.vue`) |
@@ -63,7 +64,8 @@ Defined in `packages/theme-*/styles/vars.css` and available globally after impor
 | `--hq-wrong` | `#ff4d6d` (`#ef4444`) | Wrong answer state |
 | `--hq-warn` | `#ffb020` (`#f99e16`) | Warning / mid-timer state |
 | `--hq-text` | `#f9f8f8` (`#ffffff`) | Primary text (logo white) |
-| `--hq-text-muted` | `#a29bcf` (`#888899`) | Secondary text, labels (lavender, 6.4:1 on `--hq-surface-2`) |
+| `--hq-text-muted` | `#8a8a9a` (`#888899`) | Secondary text, labels |
+| `--hq-figure` | `var(--hq-text)` (`var(--hq-accent)`) | Big figures: join code, quiz metrics, scores. White in the default theme so violet stays rare |
 
 ### Answer slots
 
@@ -73,14 +75,14 @@ Defined in `packages/theme-*/styles/vars.css` and available globally after impor
 | `--hq-choice-b` | `#38bdf8` (`#0891b2`) | Answer B |
 | `--hq-choice-c` | `#ffb020` (`#d97706`) | Answer C |
 | `--hq-choice-d` | `#2dd4bf` (`#059669`) | Answer D |
-| `--hq-on-choice` | `#0c0730` (`#ffffff`) | Letter on an answer badge (at least 5.4:1 on every slot color) |
+| `--hq-on-choice` | `#06060a` (`#ffffff`) | Letter on an answer badge (at least 5.7:1 on every slot color) |
 
 ### QR code
 
 | Token | Value | Usage |
 |-------|-------|-------|
 | `--hq-qr-dark` | `#f9f8f8` (`#ffffff`) | QR modules |
-| `--hq-qr-light` | `#130a42` (`#111118`) | QR background |
+| `--hq-qr-light` | `#0c0c12` (`#111118`) | QR background |
 
 ### Typography
 
@@ -120,11 +122,11 @@ Read by the canvas scenes in `packages/ui/src/fx/` (`readFxTheme`); numbers are 
 
 | Token | Default | Original | Usage |
 |-------|---------|----------|-------|
-| `--hq-fx-dot` | `#ddd2ff` | `#ffffff` | Particle color |
+| `--hq-fx-dot` | `#ffffff` | `#ffffff` | Particle color |
 | `--hq-fx-pixel` | `1` | `0` | `1` draws particles as squares snapped to the pixel grid, `0` as discs |
 | `--hq-fx-line-opacity` | `.2` | `.15` | Opacity of the lines linking particles |
 | `--hq-fx-glow` | `.35` | `.25` | Intensity of halos |
-| `--hq-progress` | `#6523ee` | `var(--hq-accent)` | Fill of the question progress bars (logo violet, quieter than the accent) |
+| `--hq-progress` | `#6b6b7a` | `var(--hq-accent)` | Fill of the question progress bars (grey and discreet in the default theme) |
 | `--hq-fx-dust-density` | `1` | `.5` | Multiplier of the background dust count |
 | `--hq-fx-dust-alpha` | `1.8` | `1.5` | Multiplier of the background dust opacity (dust size also grows with the canvas, up to ×2.2 at 1080p) |
 | `--hq-fx-speed` | `1` | `1` | Global animation speed multiplier |
@@ -161,7 +163,7 @@ color: #888899;
 
 ## Color Is a Signal
 
-On the neutral night-blue base, a color always means something:
+On the neutral near-black base, a color always means something:
 
 | Color | Meaning |
 |-------|---------|

@@ -32,5 +32,5 @@ function rankClass(rank: number): string {
 .hq-podium__row--top3 { border-color: var(--hq-choice-c); background: color-mix(in srgb, var(--hq-choice-c) 8%, var(--hq-surface)); }
 .hq-podium__rank  { font-size: 1.3rem; min-width: 2.2rem; }
 .hq-podium__name  { flex: 1; font-weight: 600; }
-.hq-podium__score { font-family: var(--hq-font-pixel); font-weight: 700; color: var(--hq-accent); }
+.hq-podium__score { font-family: var(--hq-font-pixel); font-weight: 700; color: var(--hq-figure); }
 </style>

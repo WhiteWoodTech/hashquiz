@@ -130,6 +130,6 @@ defineProps<{
   padding: 0.5rem 1rem;
   min-width: 70px;
 }
-.qip__metric strong { font-family: var(--hq-font-pixel); font-size: 2rem; font-weight: 700; color: var(--hq-accent); line-height: 1; }
+.qip__metric strong { font-family: var(--hq-font-pixel); font-size: 2rem; font-weight: 700; color: var(--hq-figure); line-height: 1; }
 .qip__metric span { font-size: 0.875rem; color: var(--hq-text-muted); margin-top: 0.15rem; }
 </style>

@@ -19,6 +19,7 @@
   --hq-font-mono:    'IBM Plex Mono', monospace;
   --hq-radius:       12px;
   --hq-radius-sm:    8px;
+  --hq-figure:       var(--hq-accent);
   --hq-pixel:        0px;
   --hq-step-gap:     0px;
   --hq-font-label:   var(--hq-font-display);

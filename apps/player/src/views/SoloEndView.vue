@@ -43,7 +43,7 @@ const solo = useSoloStore()
 .solo-end { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; padding-top: 1rem; }
 .solo-end__summary { text-align: center; }
 .solo-end__name  { font-size: 1.3rem; font-weight: 700; margin: 0 0 0.25rem; }
-.solo-end__score { font-family: var(--hq-font-pixel); color: var(--hq-accent); font-size: 2rem; font-weight: 700; margin: 0; }
+.solo-end__score { font-family: var(--hq-font-pixel); color: var(--hq-figure); font-size: 2rem; font-weight: 700; margin: 0; }
 .solo-end__meta  { color: var(--hq-text-muted); margin: 0.35rem 0 0; font-variant-numeric: tabular-nums; }
 .solo-end__rank  { font-size: 1.15rem; font-weight: 700; margin: 0.5rem 0 0; }
 .solo-end__status { margin: 0; font-size: 0.9rem; color: var(--hq-text-muted); }

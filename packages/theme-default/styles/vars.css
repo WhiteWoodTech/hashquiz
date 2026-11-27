@@ -1,12 +1,12 @@
-/* HashQuiz: pixel retromodern. The logo's violets on its night blue, a pixel display type kept for
+/* HashQuiz: pixel retromodern. The logo's violets on a near-black base, a pixel display type kept for
    titles and figures, sharp corners and two-tone offset shadows echoing the logo's "#". */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Jersey+10&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 :root {
-  --hq-bg:           #0c0730;
-  --hq-surface:      #130a42;
-  --hq-surface-2:    #1c1352;
-  --hq-border:       #2f2470;
+  --hq-bg:           #06060a;
+  --hq-surface:      #0c0c12;
+  --hq-surface-2:    #14141c;
+  --hq-border:       #22222e;
   --hq-accent:       #a833f5;
   --hq-accent-2:     #6523ee;
   /* Logo colors (docs/brand/) */
@@ -16,13 +16,14 @@
   --hq-wrong:        #ff4d6d;
   --hq-warn: #ffb020;
   --hq-text:         #f9f8f8;
-  --hq-text-muted:   #a29bcf;
-  --hq-progress:     #6523ee;
+  --hq-text-muted:   #8a8a9a;
+  --hq-progress:     #6b6b7a;
   --hq-font-display: 'Space Grotesk', system-ui, sans-serif;
   --hq-font-pixel:   'Jersey 10', 'Space Grotesk', system-ui, sans-serif;
   --hq-font-mono:    'JetBrains Mono', monospace;
   --hq-radius:       0;
   --hq-radius-sm:    0;
+  --hq-figure:       var(--hq-text);
   --hq-pixel:        4px;
   --hq-step-gap:     2px;
   --hq-font-label:   'JetBrains Mono', monospace;
@@ -31,10 +32,10 @@
   --hq-choice-b:     #38bdf8;
   --hq-choice-c:     #ffb020;
   --hq-choice-d:     #2dd4bf;
-  --hq-on-choice:    #0c0730;
+  --hq-on-choice:    #06060a;
   --hq-qr-dark:      #f9f8f8;
-  --hq-qr-light:     #130a42;
-  --hq-fx-dot:       #ddd2ff;
+  --hq-qr-light:     #0c0c12;
+  --hq-fx-dot:       #ffffff;
   --hq-fx-line-opacity: .2;
   --hq-fx-glow:      .35;
   --hq-fx-dust-density: 1;

@@ -90,6 +90,7 @@ hashquiz/
 │   │   │   ├── solo-decks.ts        # `@hashquiz/core/solo-decks`: parseManifest, SoloDeckSource
 │   │   │   ├── scoring.ts           # calcPoints(timeRemaining, isCorrect)
 │   │   │   ├── selection.ts         # serveQuestions: shared question selection + choice shuffling
+│   │   │   ├── quiz-format.ts       # quizFormat: deck size, random draw, one-shoot for QuizInfo
 │   │   │   ├── solo.ts              # SoloSession: solo run state machine
 │   │   │   ├── solo-verify.ts       # verifySoloRun (edge rescoring), compareRuns (leaderboard order)
 │   │   │   ├── runtime-config.ts    # HashQuizRuntimeConfig: transport, Supabase, soloScoring, playerUrl
@@ -161,7 +162,7 @@ hashquiz/
 │   │       ├── PlayerList.vue       # Lobby player chips
 │   │       ├── Podium.vue           # Ranked leaderboard list
 │   │       ├── DifficultyBar.vue    # Difficulty distribution bar
-│   │       ├── QuizInfoPanel.vue    # Quiz title, tags, stats
+│   │       ├── QuizInfoPanel.vue    # Quiz card: format labels, title, tags, stats
 │   │       └── QrCode.vue           # QR code canvas (wraps `qrcode`)
 │   └── ee/                          # Pro / Enterprise features (placeholder)
 │       ├── LICENSE                  # HashQuiz Enterprise License

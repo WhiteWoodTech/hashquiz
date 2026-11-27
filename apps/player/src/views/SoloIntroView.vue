@@ -5,7 +5,7 @@
       Ce quiz n'est pas disponible en solo.
     </p>
     <template v-else>
-      <QuizInfoPanel :quiz-info="info!" compact />
+      <QuizInfoPanel :quiz-info="info!" :play-count="solo.runCount ?? undefined" compact />
 
       <form class="solo-intro__form" @submit.prevent="solo.start(pseudo)">
         <label class="solo-label" for="solo-pseudo">Votre pseudo</label>

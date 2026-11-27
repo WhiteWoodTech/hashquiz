@@ -260,3 +260,23 @@ Colors come from `--hq-qr-dark` (modules) and `--hq-qr-light` (background).
 ---
 
 *Last updated: 2026-11-25*
+
+---
+
+## QuizInfoPanel
+
+Quiz card: format labels, title, tags, description, metrics and difficulty bar (host lobby, deck grid, player lobby,
+solo catalog and intro).
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `quizInfo` | `QuizInfo` | yes | — | Card data (`deckInfo`, `buildQuizInfo` or the room's `quizMeta`) |
+| `playerCount` | `number` | no | — | Shows a **players** metric |
+| `playCount` | `number` | no | — | Shows a **plays** metric: finished solo runs on the deck (solo intro) |
+| `compact` | `boolean` | no | `false` | Smaller type and spacing (phones, deck grid) |
+
+- Labels row: `oneShoot` → accent badge **⚡ One shot** or **✏️ Editable answers**; `randomDraw` → outlined label
+  **🎲 Random draw** (`max-questions`, `max-time` or `target-difficulty`: questions drawn from the deck) or
+  **📋 Fixed list** (every question, in file order). Each is hidden when its field is absent.
+- Questions metric: `totalQuestions`, followed by `/poolSize` when a game plays only part of the deck (e.g. `10/40`).
+- `quizFormat(meta, poolSize)` (`@hashquiz/core`) fills `poolSize`, `randomDraw` and `oneShoot` for every builder.

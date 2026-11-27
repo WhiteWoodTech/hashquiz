@@ -1,6 +1,13 @@
 <template>
   <div :class="['qip', { 'qip--compact': compact }]">
-    <div class="qip__badge">🧠 {{ quizInfo.title }}</div>
+    <div v-if="quizInfo.oneShoot !== undefined || quizInfo.randomDraw !== undefined" class="qip__labels">
+      <span v-if="quizInfo.oneShoot !== undefined" class="qip__badge">
+        {{ quizInfo.oneShoot ? '⚡ One shot' : '✏️ Editable answers' }}
+      </span>
+      <span v-if="quizInfo.randomDraw !== undefined" class="qip__label">
+        {{ quizInfo.randomDraw ? '🎲 Random draw' : '📋 Fixed list' }}
+      </span>
+    </div>
 
     <div class="qip__header">
       <h2 class="qip__title">{{ quizInfo.title }}</h2>
@@ -21,12 +28,16 @@
 
     <div class="qip__metrics">
       <div class="qip__metric">
-        <strong>{{ quizInfo.totalQuestions }}</strong>
+        <strong>{{ quizInfo.totalQuestions }}<small v-if="drawnFrom">/{{ drawnFrom }}</small></strong>
         <span>questions</span>
       </div>
       <div v-if="quizInfo.tags.length" class="qip__metric">
         <strong>{{ quizInfo.tags.length }}</strong>
         <span>tags</span>
+      </div>
+      <div v-if="playCount !== undefined" class="qip__metric">
+        <strong>{{ playCount }}</strong>
+        <span>plays</span>
       </div>
       <div v-if="playerCount !== undefined" class="qip__metric">
         <strong>{{ playerCount }}</strong>
@@ -40,14 +51,23 @@
 
 <script setup lang="ts">
 import type { QuizInfo } from '@hashquiz/core'
+import { computed } from 'vue'
 import DifficultyBar from './DifficultyBar.vue'
 
-defineProps<{
+const props = defineProps<{
   quizInfo: QuizInfo
   playerCount?: number
+  /** Finished solo runs on this deck. */
+  playCount?: number
   /** Smaller type and spacing (phones, deck grid). */
   compact?: boolean
 }>()
+
+/** Deck size, shown as "10/40" when a game plays only part of the deck. */
+const drawnFrom = computed(() => {
+  const pool = props.quizInfo.poolSize
+  return pool !== undefined && pool > props.quizInfo.totalQuestions ? pool : null
+})
 </script>
 
 <style scoped>
@@ -72,16 +92,29 @@ defineProps<{
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.qip--compact .qip__badge { font-size: 0.75rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qip--compact .qip__badge { font-size: 0.75rem; }
 .qip--compact .qip__metrics { gap: 0.5rem; }
 .qip--compact .qip__metric { min-width: 0; flex: 1 1 0; padding: 0.4rem 0.5rem; }
 .qip--compact .qip__metric strong { font-size: 1.4rem; }
-.qip--compact .qip__metric span { font-size: 0.75rem; }
+.qip--compact .qip__metric strong small { font-size: 0.6em; color: var(--hq-text-muted); }
+.qip__metric span { font-size: 0.75rem; }
 .qip--compact .qip__tag { font-size: 0.75rem; }
 
+.qip__labels { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
+.qip__label {
+  font-family: var(--hq-font-label);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--hq-border);
+  border-radius: var(--hq-radius-sm);
+  color: var(--hq-text-muted);
+}
+.qip--compact .qip__label { font-size: 0.75rem; }
 .qip__badge {
   display: inline-block;
-  align-self: flex-start;
   background: var(--hq-accent);
   box-shadow: calc(var(--hq-pixel) * 0.75) calc(var(--hq-pixel) * 0.75) 0 var(--hq-accent-2);
   color: var(--hq-text);

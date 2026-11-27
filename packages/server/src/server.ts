@@ -1,6 +1,6 @@
 import { parseQuizFile, validateQuiz } from '@hashquiz/parser'
 import type { Quiz } from '@hashquiz/parser'
-import { GameEngine } from '@hashquiz/core'
+import { GameEngine, quizFormat } from '@hashquiz/core'
 import type { PlayerState, QuizInfo } from '@hashquiz/core'
 import { LocalTransport } from '@hashquiz/backend-local'
 import {
@@ -148,7 +148,10 @@ export function buildQuizInfo(quiz: Quiz): QuizInfo {
     }
   }
 
-  return { title, description, tags, totalQuestions: totalN, targetDifficulty, difficultyDistribution: dist }
+  return {
+    title, description, tags, totalQuestions: totalN, targetDifficulty, difficultyDistribution: dist,
+    ...quizFormat(quiz.meta, all.length),
+  }
 }
 
 /**

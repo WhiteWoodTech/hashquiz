@@ -76,4 +76,15 @@ describe('deckInfo', () => {
   test('untitled deck falls back to its name', () => {
     expect(deckInfo(deck({ title: '' })).title).toBe('a')
   })
+  test('format: fixed list of every question by default, one-shoot on', () => {
+    expect(deckInfo(deck())).toMatchObject({ totalQuestions: 4, poolSize: 4, randomDraw: false, oneShoot: true })
+  })
+  test('format: max-questions, max-time or target-difficulty draw at random from the deck', () => {
+    expect(deckInfo(deck({ maxQuestions: 3 }))).toMatchObject({ totalQuestions: 3, poolSize: 4, randomDraw: true })
+    expect(deckInfo(deck({ maxTimeSec: 60 })).randomDraw).toBe(true)
+    expect(deckInfo(deck({ targetDifficulty: 'easy' })).randomDraw).toBe(true)
+  })
+  test('format: one-shoot off is forwarded', () => {
+    expect(deckInfo(deck({ oneShoot: false })).oneShoot).toBe(false)
+  })
 })

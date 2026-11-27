@@ -25,13 +25,15 @@ const SECRET_ENV = ['SUPABASE_ACCESS_TOKEN', 'SUPABASE_DB_PASSWORD'] as const
 /** The four Supabase CLI calls, in order (spec §6). */
 export function supabaseDeploySteps(o: SupabaseDeployOptions): DeployStep[] {
   const bin = o.supabaseBin ?? 'supabase'
-  const ref = ['--project-ref', o.projectRef]
   const wd = ['--workdir', o.workdir]
+  // Supabase CLI 3.x: `db push` targets the local stack unless `--remote` is passed, and
+  // `--project-ref` is deprecated on functions/secrets in favour of `--remote=<ref>`.
+  const remote = `--remote=${o.projectRef}`
   return [
-    { label: 'link project', argv: [bin, 'link', ...ref, ...wd] },
-    { label: 'push migrations', argv: [bin, 'db', 'push', ...wd, '--yes'] },
-    { label: 'deploy solo-submit', argv: [bin, 'functions', 'deploy', 'solo-submit', ...ref, ...wd] },
-    { label: 'set HASHQUIZ_SITE_URL', argv: [bin, 'secrets', 'set', `HASHQUIZ_SITE_URL=${o.siteUrl}`, ...ref, ...wd] },
+    { label: 'link project', argv: [bin, 'link', '--project-ref', o.projectRef, ...wd] },
+    { label: 'push migrations', argv: [bin, 'db', 'push', remote, ...wd, '--yes'] },
+    { label: 'deploy solo-submit', argv: [bin, 'functions', 'deploy', 'solo-submit', remote, ...wd] },
+    { label: 'set HASHQUIZ_SITE_URL', argv: [bin, 'secrets', 'set', `HASHQUIZ_SITE_URL=${o.siteUrl}`, remote, ...wd] },
   ]
 }
 

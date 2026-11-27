@@ -6,7 +6,7 @@ import type { Quiz, ValidationResult } from './types'
 export type { Quiz, QuizMeta, Question, Choice, ValidationResult, ValidationError } from './types'
 
 /**
- * Parse a full .quizv.md file content into a typed Quiz object.
+ * Parse a full .hashquiz.md file content into a typed Quiz object.
  * Throws if the file cannot be parsed at all.
  */
 export function parseQuizFile(content: string): Quiz {
@@ -64,7 +64,7 @@ export function validateQuiz(quiz: Quiz): ValidationResult {
       errors.push({
         questionIndex: i,
         field: 'choices',
-        message: `Question ${i + 1} has ${q.choices.length} choices; QuizV supports at most 4`,
+        message: `Question ${i + 1} has ${q.choices.length} choices; HashQuiz supports at most 4`,
       })
     }
   }

@@ -1,5 +1,5 @@
 // Browser-safe: the local solo WS protocol shared by the dev server and the browser client.
-import type { LivePlayer, LiveState } from '@quizv/core'
+import type { LivePlayer, LiveState } from '@hashquiz/core'
 
 /** `role` query value of a solo socket: `/ws?role=solo&deck=<id>&key=<key>`. */
 export const SOLO_WS_ROLE = 'solo'

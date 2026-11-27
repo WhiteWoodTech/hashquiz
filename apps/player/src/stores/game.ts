@@ -1,11 +1,11 @@
 import { config } from '../config'
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { QuestionPublic, Score, PodiumEntry, QuizInfo, StateSnapshot } from '@quizv/core'
-import type { GameEvent } from '@quizv/core'
-import { SupabaseTransport } from '@quizv/backend-supabase'
-import { GameEvents, rankOf } from '@quizv/core'
-import type { IRealtimeTransport, PlayerState } from '@quizv/core'
+import type { QuestionPublic, Score, PodiumEntry, QuizInfo, StateSnapshot } from '@hashquiz/core'
+import type { GameEvent } from '@hashquiz/core'
+import { SupabaseTransport } from '@hashquiz/backend-supabase'
+import { GameEvents, rankOf } from '@hashquiz/core'
+import type { IRealtimeTransport, PlayerState } from '@hashquiz/core'
 
 export type PlayerPhase = 'join' | 'lobby' | 'question' | 'podium'
 export type ConnectionStatus = 'connecting' | 'connected' | 'reconnecting' | 'offline'
@@ -15,7 +15,7 @@ interface StateSnapshotMsg { type: 'state_snapshot'; playerId: string; snapshot:
 type ServerMsg = GameEvent | JoinedMsg | StateSnapshotMsg
 
 const HOST_PRESENCE_ID = '__host__'
-const SESSION_KEY = 'quizv:player-session'
+const SESSION_KEY = 'hashquiz:player-session'
 
 interface PersistedSession {
   playerId: string

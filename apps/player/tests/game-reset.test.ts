@@ -79,7 +79,7 @@ describe('player store — game_reset (Rejouer)', () => {
 
   test('session survives game_ended so a player reloading on the podium rejoins the same room', () => {
     const { game } = playOneGame()
-    const raw = store.get('quizv:player-session')
+    const raw = store.get('hashquiz:player-session')
     expect(raw).toBeDefined()
     expect(JSON.parse(raw!)).toMatchObject({ code: 'ROOM42', playerId: game.playerId, pseudo: 'Alice' })
   })

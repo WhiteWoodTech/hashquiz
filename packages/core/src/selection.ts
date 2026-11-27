@@ -1,4 +1,4 @@
-import type { Quiz, Question } from '@quizv/parser'
+import type { Quiz, Question } from '@hashquiz/parser'
 import type { QuestionPublic } from './types'
 
 /** A question as served to players, with provenance back to the authored deck. */

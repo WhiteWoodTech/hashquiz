@@ -3,20 +3,20 @@ import vue from '@vitejs/plugin-vue'
 import UnoCSS from 'unocss/vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import { resolve } from 'node:path'
-import { quizvWeb, repoDecksDir } from '../../packages/server/src/vite-plugin'
+import { hashquizWeb, repoDecksDir } from '../../packages/server/src/vite-plugin'
 
 // Same decks as the host (`/decks.json`, solo decks): see apps/host/vite.config.ts.
 const decksDir = repoDecksDir(resolve(__dirname, '../..'))
 
 export default defineConfig({
-  // `bun run pack` (QUIZV_PACK=1) ignores .env* files: the npm package must not ship the
-  // developer's settings, which come from /quizv-config.js at run time instead.
-  envDir: process.env.QUIZV_PACK === '1' ? false : undefined,
+  // `bun run pack` (HASHQUIZ_PACK=1) ignores .env* files: the npm package must not ship the
+  // developer's settings, which come from /hashquiz-config.js at run time instead.
+  envDir: process.env.HASHQUIZ_PACK === '1' ? false : undefined,
   base: '/',
   plugins: [
     vue(),
     UnoCSS(),
-    quizvWeb({ decksDir, emitConfig: true }),
+    hashquizWeb({ decksDir, emitConfig: true }),
     nodePolyfills({ include: ['buffer', 'process'] }),
   ],
   server: { port: 3032, host: '0.0.0.0' },

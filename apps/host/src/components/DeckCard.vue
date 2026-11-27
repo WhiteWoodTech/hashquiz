@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { QuizInfoPanel } from '@quizv/ui'
+import { QuizInfoPanel } from '@hashquiz/ui'
 import type { BundledDeck } from '../decks'
 import { deckInfo } from '../deck-browse'
 
@@ -29,22 +29,22 @@ const info = computed(() => deckInfo(props.deck))
   color: inherit;
   background: none;
   border: none;
-  border-radius: var(--qv-radius);
+  border-radius: var(--hq-radius);
   cursor: pointer;
 }
 .deck-card__btn :deep(.qip) { height: 100%; transition: border-color 0.15s, transform 0.15s; }
-.deck-card__btn:hover :deep(.qip) { border-color: var(--qv-accent); transform: translateY(-2px); }
-.deck-card__btn:focus-visible { outline: 2px solid var(--qv-accent); outline-offset: 3px; }
+.deck-card__btn:hover :deep(.qip) { border-color: var(--hq-accent); transform: translateY(-2px); }
+.deck-card__btn:focus-visible { outline: 2px solid var(--hq-accent); outline-offset: 3px; }
 .deck-card__solo {
   align-self: flex-end;
   padding: 0.25rem 0.7rem;
-  color: var(--qv-accent);
+  color: var(--hq-accent);
   text-decoration: none;
   font-size: clamp(0.85rem, 1.8vmin, 1.2rem);
-  border-radius: var(--qv-radius-sm);
+  border-radius: var(--hq-radius-sm);
 }
 .deck-card__solo:hover { text-decoration: underline; }
-.deck-card__solo:focus-visible { outline: 2px solid var(--qv-accent); outline-offset: 2px; }
+.deck-card__solo:focus-visible { outline: 2px solid var(--hq-accent); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   .deck-card__btn:hover :deep(.qip) { transform: none; }
 }

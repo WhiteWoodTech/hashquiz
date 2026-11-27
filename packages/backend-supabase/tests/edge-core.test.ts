@@ -2,12 +2,12 @@ import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { homedir, tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
-import { SoloSession, verifySoloRun, type SoloRunSubmission } from '@quizv/core'
-import { deckVersion, toDecks } from '@quizv/core/decks'
+import { SoloSession, verifySoloRun, type SoloRunSubmission } from '@hashquiz/core'
+import { deckVersion, toDecks } from '@hashquiz/core/decks'
 import { bundleEdgeCore, EDGE_CORE_BANNER, EDGE_CORE_FILE, edgeCoreEntry } from '../src/cli/edge-bundle'
 
-const DEMO = readFileSync(resolve(import.meta.dir, '../../../examples/demo.quizv.md'), 'utf-8')
-const DECK = 'demo.quizv.md'
+const DEMO = readFileSync(resolve(import.meta.dir, '../../../examples/demo.hashquiz.md'), 'utf-8')
+const DECK = 'demo.hashquiz.md'
 const QUIZ = toDecks([{ id: DECK, content: DEMO }])[0]!.quiz
 
 let dir = ''
@@ -64,7 +64,7 @@ describe('edge core bundle', () => {
     const script = `
       delete globalThis.Buffer
       const mod = await import(${JSON.stringify(Bun.pathToFileURL(outFile).href)})
-      const content = await Deno.readTextFile(${JSON.stringify(resolve(import.meta.dir, '../../../examples/demo.quizv.md'))})
+      const content = await Deno.readTextFile(${JSON.stringify(resolve(import.meta.dir, '../../../examples/demo.hashquiz.md'))})
       const source = new mod.SoloDeckSource(async () => mod.parseManifest([{ id: ${JSON.stringify(DECK)}, content }]))
       const ok = await source.resolve(${JSON.stringify(DECK)}, ${JSON.stringify(deckVersion(DEMO))})
       const bad = await source.resolve(${JSON.stringify(DECK)}, 'deadbeef')

@@ -6,9 +6,9 @@
  *   pkg/supabase/      Supabase project for `hashquiz supabase deploy` (migrations,
  *                      solo-submit Edge Function, freshly bundled _shared/solo-core.js)
  *
- * The apps are built here with a clean env (no `VITE_*` / `QUIZV_*` / `HASHQUIZ_*`, `.env*`
- * files ignored via `QUIZV_PACK=1`), so a developer's Supabase settings never ship: the
- * deployment settings come from `/quizv-config.js` at run time. `pkg/web` is then checked.
+ * The apps are built here with a clean env (no `VITE_*` / `HASHQUIZ_*`, `.env*`
+ * files ignored via `HASHQUIZ_PACK=1`), so a developer's Supabase settings never ship: the
+ * deployment settings come from `/hashquiz-config.js` at run time. `pkg/web` is then checked.
  *
  * Usage: bun scripts/pack.ts [version]   (`bun run pack`)
  * Then:  npm publish ./pkg --access public
@@ -50,7 +50,7 @@ cpSync(resolve(root, 'dist'), resolve(out, 'web'), { recursive: true })
 // Deck list and settings belong to each site: `build` writes them.
 rmSync(resolve(out, 'web/host/decks.json'), { force: true })
 rmSync(resolve(out, 'web/decks.json'), { force: true })
-rmSync(resolve(out, 'web/quizv-config.js'), { force: true })
+rmSync(resolve(out, 'web/hashquiz-config.js'), { force: true })
 
 const envFiles = ['apps/host', 'apps/player'].flatMap(app =>
   ['.env', '.env.local', '.env.production', '.env.production.local'].map(f => resolve(root, app, f)))

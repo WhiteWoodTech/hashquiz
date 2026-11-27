@@ -8,7 +8,7 @@ export type { DeckManifestEntry }
 const SKIP = new Set(['node_modules', 'dist', '.git'])
 
 /**
- * Every `*.quizv.md` under `dir` (recursive), sorted by id. The single deck id rule
+ * Every `*.hashquiz.md` under `dir` (recursive), sorted by id. The single deck id rule
  * (path relative to the decks folder), shared by both apps and the solo Edge Function.
  */
 export function collectDecks(dir: string): DeckManifestEntry[] {
@@ -18,7 +18,7 @@ export function collectDecks(dir: string): DeckManifestEntry[] {
       if (SKIP.has(name) || name.startsWith('.')) continue
       const p = join(d, name)
       if (statSync(p).isDirectory()) walk(p)
-      else if (name.endsWith('.quizv.md')) {
+      else if (name.endsWith('.hashquiz.md')) {
         out.push({ id: relative(dir, p).split(sep).join('/'), content: readFileSync(p, 'utf-8') })
       }
     }

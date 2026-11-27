@@ -3,11 +3,11 @@ import { existsSync, mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { readFileSync } from 'node:fs'
-import { compareRuns, verifySoloRun, type RankedRun, type VerifiedRun } from '@quizv/core'
+import { compareRuns, verifySoloRun, type RankedRun, type VerifiedRun } from '@hashquiz/core'
 import { parseQuizFile } from '../../parser/src/index'
 import { SoloStore } from '../src/solo/store'
 
-const quiz = parseQuizFile(readFileSync(resolve(import.meta.dir, '../../../examples/demo.quizv.md'), 'utf-8'))
+const quiz = parseQuizFile(readFileSync(resolve(import.meta.dir, '../../../examples/demo.hashquiz.md'), 'utf-8'))
 
 /** Answers every question with the correct choices, taking `ms` per answer (wrong when `wrong`). */
 function build(deckId: string, pseudo: string, ms: number, wrong = false): VerifiedRun {

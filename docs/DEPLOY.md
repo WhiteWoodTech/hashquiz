@@ -1,14 +1,14 @@
 # Deploy
 
 This project deploys on Vercel for hosting and Supabase for realtime messaging and solo mode storage
-(the `supabase` backend plugin, `@quizv/backend-supabase`). Rooms only use Supabase Realtime channels. Solo mode
+(the `supabase` backend plugin, `@hashquiz/backend-supabase`). Rooms only use Supabase Realtime channels. Solo mode
 stores finished runs, their answers and HashQuiz leads in Postgres and can score runs in an Edge Function. The
 Supabase CLI project is `packages/backend-supabase/supabase/` (`migrations/`, `functions/solo-submit/`); every
 CLI command below passes `--workdir packages/backend-supabase`. Its `config.toml` needs Supabase CLI 3.x (checked
 with 3.4.0): it uses `[local_smtp]` and `auth.email.enabled` / `auth.sms.enabled`. 3.x refuses the old `[inbucket]`
 section.
 
-Without Supabase, `hashquiz dev` runs the `local` backend plugin (`@quizv/backend-local`), which serves rooms and
+Without Supabase, `hashquiz dev` runs the `local` backend plugin (`@hashquiz/backend-local`), which serves rooms and
 solo on the dev server; see [Local development](#local-development). The runtime config field `transport`
 (`local` or `supabase`) picks the backend for rooms and solo.
 
@@ -61,8 +61,8 @@ Set these for Production and Preview:
 | `VITE_SOLO_SCORING` | `browser` (default) or `edge` |
 | `VITE_PLAYER_URL` | Optional player URL for the host's solo links; empty = same origin |
 
-Each name can also be written `HASHQUIZ_*` or `QUIZV_*` (`HASHQUIZ_SOLO_SCORING`, …; `HASHQUIZ_*` wins).
-`hashquiz build` writes them into `/quizv-config.js`, read by both apps at runtime
+Each name can also be written `HASHQUIZ_*` (`HASHQUIZ_SOLO_SCORING`, …), which wins over `VITE_*`.
+`hashquiz build` writes them into `/hashquiz-config.js`, read by both apps at runtime
 (`packages/core/src/runtime-config.ts`).
 
 ### Solo scoring mode
@@ -100,13 +100,13 @@ Push to the configured branch. Vercel builds and serves:
 ## Local development
 
 `VITE_TRANSPORT=local` (the default in `.env.example`) runs
-`bun run packages/server/src/cli.ts dev examples/demo.quizv.md`. No Supabase is involved. `hashquiz dev` takes a
+`bun run packages/server/src/cli.ts dev examples/demo.hashquiz.md`. No Supabase is involved. `hashquiz dev` takes a
 deck file (the room deck) or a decks folder (the decks folder for solo mode; the room deck is its first deck by
 id). With a file, `--decks <dir>` picks the solo decks folder (default: the monorepo `examples/` or
-`QUIZV_DECKS_DIR`, else the file's folder).
+`HASHQUIZ_DECKS_DIR`, else the file's folder).
 
 Both Vite apps list the decks of that folder, served as `/host/decks.json` and `/decks.json`.
-`examples/demo.quizv.md` is a `solo: true` deck.
+`examples/demo.hashquiz.md` is a `solo: true` deck.
 
 ### Local solo (no Supabase)
 
@@ -139,7 +139,7 @@ bun run supabase:functions             # only for edge scoring: functions serve 
 For edge scoring, copy `packages/backend-supabase/supabase/functions/.env.example` to
 `packages/backend-supabase/supabase/functions/.env.local` (`HASHQUIZ_SITE_URL=http://host.docker.internal:3032`:
 the edge runtime runs in Docker and reads `decks.json` from the player dev server, so it must be running). The dev
-servers accept the `host.docker.internal` Host header for this (`server.allowedHosts`, set by the `quizv-web` Vite
+servers accept the `host.docker.internal` Host header for this (`server.allowedHosts`, set by the `hashquiz-web` Vite
 plugin in dev only).
 
 Then run the apps with, in `apps/host/.env.local` and `apps/player/.env.local`:
@@ -156,8 +156,8 @@ VITE_PLAYER_URL=                       # host only; empty = http://<host>:3032/ 
 
 ## Decks repositories (npm package)
 
-Decks live in their own repositories (`maxime-lenne/markuiz-decks`,
-`WhiteWoodTech/markuiz-decks`) that depend on the `hashquiz` npm package and run
+Decks live in their own repositories (`maxime-lenne/hashquiz-decks`,
+`WhiteWoodTech/hashquiz-trainings-decks`) that depend on the `hashquiz` npm package and run
 `hashquiz build decks --out dist` on Vercel. Steps 1 to 5 apply to them; the
 variables can use the `HASHQUIZ_*` names (`HASHQUIZ_TRANSPORT`, …). See
 [`PACKAGE.md`](PACKAGE.md).
@@ -174,7 +174,7 @@ with `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD` and `HASHQUIZ_SITE_URL` (th
 Deck changes only need the site redeployed: the function reads `decks.json` at runtime.
 
 The host app reads the deck list from `host/decks.json`, the player its solo decks from the same
-manifest at `/decks.json`, and both the settings from `/quizv-config.js` at runtime, so the same
+manifest at `/decks.json`, and both the settings from `/hashquiz-config.js` at runtime, so the same
 prebuilt apps serve any decks folder. For edge scoring, set the function's `HASHQUIZ_SITE_URL` secret to
 the decks site (step 1): it reads that site's `decks.json`, so publishing decks needs no redeploy.
 
@@ -199,8 +199,8 @@ apps) and `bun run release`, which sets the version in `package.json` and
 `pkg/package.json` and publishes `pkg/` with a provenance attestation.
 
 `bun run pack` runs `build:web` itself (which starts by deleting `dist/`, so no stale assets ship) with a clean
-env: no `VITE_*`, `QUIZV_*` or `HASHQUIZ_*` variables, and `QUIZV_PACK=1` makes both Vite configs skip `.env*`
-files. The published apps take their settings from `/quizv-config.js` only. It then fails if `pkg/web` contains
+env: no `VITE_*` or `HASHQUIZ_*` variables, and `HASHQUIZ_PACK=1` makes both Vite configs skip `.env*`
+files. The published apps take their settings from `/hashquiz-config.js` only. It then fails if `pkg/web` contains
 the local Supabase port `54321`, a JWT (`eyJ…`) or a Supabase URL / anon key set in `apps/*/.env*` or the
 environment (`scripts/pack-guard.ts`).
 

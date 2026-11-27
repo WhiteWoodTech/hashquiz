@@ -4,8 +4,8 @@ import {
   SoloSession,
   type LivePlayer, type Outcome, type QuestionPublic, type RankedRun, type SoloBackend, type SoloLivePort,
   type SoloResult,
-} from '@quizv/core'
-import type { LoadedDeck } from '@quizv/core/decks'
+} from '@hashquiz/core'
+import type { LoadedDeck } from '@hashquiz/core/decks'
 
 export type SoloPhase = 'loading' | 'intro' | 'question' | 'revealed' | 'end' | 'unavailable'
 /** `stale`: the deck changed on the site since it was loaded; retrying cannot succeed, replaying can. */

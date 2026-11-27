@@ -17,7 +17,7 @@ bun add -d hashquiz@beta   # prereleases until 1.0.0
 ```text
 decks/
   my-deck/
-    index.quizv.md
+    index.hashquiz.md
 package.json
 vercel.json
 ```
@@ -27,16 +27,16 @@ Format reference: [deck format](https://github.com/WhiteWoodTech/hashquiz/blob/d
 ## Commands
 
 ```bash
-hashquiz check decks/my-deck/index.quizv.md   # validate one deck
-hashquiz dev decks/my-deck/index.quizv.md     # local game: host :3031/host/, players :3032
+hashquiz check decks/my-deck/index.hashquiz.md   # validate one deck
+hashquiz dev decks/my-deck/index.hashquiz.md     # local game: host :3031/host/, players :3032
 hashquiz dev decks                            # same, a folder: solo decks folder, room deck = first deck by id
 hashquiz build decks --out dist               # static site with every deck under decks/
 hashquiz supabase deploy --project <ref>      # solo backend on a Supabase project
 ```
 
-`build` validates every `*.quizv.md` under the folder, copies the apps and
+`build` validates every `*.hashquiz.md` under the folder, copies the apps and
 writes `host/decks.json` (host deck list), the same `decks.json` at the root
-(player solo decks) and `quizv-config.js`. It reads the deployment settings
+(player solo decks) and `hashquiz-config.js`. It reads the deployment settings
 from the environment:
 
 | Variable | Value |
@@ -47,8 +47,8 @@ from the environment:
 | `HASHQUIZ_SOLO_SCORING` | Solo run scoring: `browser` (default) or `edge` |
 | `HASHQUIZ_PLAYER_URL` | Optional player URL for the host's solo links (default: same origin) |
 
-The `QUIZV_*` and `VITE_*` names (`VITE_TRANSPORT`, …) are accepted too. The prebuilt apps carry no
-settings of their own: whatever `quizv-config.js` says (including `local` and `browser`) is what they use.
+The `VITE_*` names (`VITE_TRANSPORT`, …) are accepted too. The prebuilt apps carry no
+settings of their own: whatever `hashquiz-config.js` says (including `local` and `browser`) is what they use.
 
 Decks with `solo: true` in their frontmatter can also be played alone from
 the player app. `hashquiz dev` serves solo on its own (port 3030): runs are stored in `.hashquiz/solo.db` of

@@ -1,9 +1,9 @@
 # Audit SEO et référencement LLM (GEO)
 
 Audit réalisé le 25 novembre 2026 sur la branche `develop` (commit `30a6af8`) et sur le déploiement Vercel
-(`quizv-phi.vercel.app`, servi sous `quizv-white-wood-tech.vercel.app`).
+(sous-domaine `*.vercel.app` du projet, servi sous deux noms d'hôte).
 
-Objectif : rendre QuizV (Quizdown) trouvable sur Google/Bing **et** citable par les moteurs de réponse IA
+Objectif : rendre HashQuiz trouvable sur Google/Bing **et** citable par les moteurs de réponse IA
 (ChatGPT, Claude, Perplexity, Gemini, Google AI Overviews), sans dégrader l'expérience de jeu.
 
 ## Sommaire
@@ -20,13 +20,13 @@ Objectif : rendre QuizV (Quizdown) trouvable sur Google/Bing **et** citable par 
 
 Le site déployé est aujourd'hui **une application, pas un site** : la racine `/` est l'écran « Join Game » du joueur
 et `/host` le tableau de bord de l'animateur. Les deux pages renvoient un HTML de 372 octets avec un `<div id="app">`
-vide : sans exécuter le JavaScript, un robot ne voit qu'un titre (« QuizV Player ») et rien d'autre.
+vide : sans exécuter le JavaScript, un robot ne voit qu'un titre (« HashQuiz Player ») et rien d'autre.
 
 | Domaine | Note | Commentaire |
 | --- | --- | --- |
 | Indexabilité technique | 🔴 | Pas de `robots.txt`, `sitemap.xml`, favicon, meta description ni canonical |
 | Contenu indexable | 🔴 | Aucune page de contenu : tout est rendu côté client, derrière un écran de jeu |
-| Marque et domaine | 🟠 | Nom hésitant (QuizV / Quizdown), sous-domaine `vercel.app`, pas de domaine propre |
+| Marque et domaine | 🟠 | Nom non stabilisé au moment de l'audit (renommé depuis en HashQuiz), sous-domaine `vercel.app`, pas de domaine propre |
 | Performance | 🟢 | HTML servi depuis le CDN Vercel (Paris, HTTP/2, cache HIT), DOM complet en ~230 ms |
 | Référencement LLM | 🔴 | Pas de `llms.txt`, pas de données structurées, aucune page citable |
 | Potentiel | 🟢 | ~195 questions rédigées en français avec explications : un vrai gisement de contenu |
@@ -34,7 +34,7 @@ vide : sans exécuter le JavaScript, un robot ne voit qu'un titre (« QuizV Play
 **Le point clé** : le meilleur levier n'est pas de « référencer l'application », mais d'ajouter du **contenu public
 lisible sans JavaScript**. L'architecture retenue (voir [5.2](#priorité-2--important-sous-un-à-deux-mois)) :
 
-- un **site statique séparé** porte l'acquisition : accueil, landing, documentation du format `.quizv.md`, FAQ ;
+- un **site statique séparé** porte l'acquisition : accueil, landing, documentation du format `.hashquiz.md`, FAQ ;
 - l'**application** garde ses propres pages publiques : l'index des quiz publics, une page par quiz et une page de
   détails ; ces pages doivent être pré-rendues pour être indexables ;
 - les écrans de jeu (host, lobby, partie) restent en `noindex`.
@@ -45,8 +45,8 @@ Mesures faites le 25/11/2026 depuis un navigateur, sur le déploiement de produc
 
 | Élément | État | Détail |
 | --- | --- | --- |
-| `GET /` | 200 | `text/html`, 372 octets, `<title>QuizV Player</title>`, corps vide |
-| `GET /host` | 200 | 380 octets, `<title>QuizV Host</title>`, corps vide |
+| `GET /` | 200 | `text/html`, 372 octets, `<title>HashQuiz Player</title>`, corps vide |
+| `GET /host` | 200 | 380 octets, `<title>HashQuiz Host</title>`, corps vide |
 | `GET /robots.txt` | 404 | Page d'erreur texte de Vercel |
 | `GET /sitemap.xml` | 404 | — |
 | `GET /llms.txt` | 404 | — |
@@ -57,7 +57,7 @@ Mesures faites le 25/11/2026 depuis un navigateur, sur le déploiement de produc
 | Meta description | absente | Dans `apps/host/index.html` et `apps/player/index.html` |
 | Open Graph / Twitter Card | absents | Un lien partagé (Slack, LinkedIn, WhatsApp) n'a ni titre propre ni image |
 | Canonical | absent | Deux noms d'hôte `vercel.app` servent le même contenu |
-| Titres `h1` | 1 | « QuizV » sur l'écran joueur, rien de descriptif |
+| Titres `h1` | 1 | « HashQuiz » sur l'écran joueur, rien de descriptif |
 | JavaScript | 333 Ko (joueur), 659 Ko (host) | Non minifié/compressé mesuré ; le host embarque tous les decks (`import.meta.glob`) |
 | Routage | hash `#/tag/<tag>` | Les pages de tags du host ne sont pas des URL indexables (le fragment est ignoré) |
 | En-têtes | ok | Pas de `X-Robots-Tag`, `cache-control: must-revalidate` sur le HTML, assets hachés |
@@ -67,11 +67,11 @@ Il n'existe pas de dossier `public/` dans les apps : c'est là que doivent aller
 
 ## 3. Constat contenu et marque
 
-- **Nom** : le dépôt, le code et les titres disent « QuizV », le projet s'appelle « Quizdown ». Moteurs et LLM
-  associent une entité à un nom stable : il faut en choisir un et s'y tenir partout (title, README, OG, JSON-LD).
+- **Nom** : au moment de l'audit, le dépôt, le code et le projet portaient des noms différents. Moteurs et LLM
+  associent une entité à un nom stable : le nom retenu est HashQuiz, à tenir partout (title, README, OG, JSON-LD).
 - **Langue** : interface en anglais (« Enter the game code to join »), contenu des decks en français. Choisir la langue
   principale du site public (le français semble naturel) et déclarer `lang="fr"`.
-- **Pas de page d'accueil explicative** : rien ne dit à un visiteur (ou à un robot) ce qu'est QuizV, à qui il
+- **Pas de page d'accueil explicative** : rien ne dit à un visiteur (ou à un robot) ce qu'est HashQuiz, à qui il
   s'adresse, ni en quoi il diffère de Kahoot.
 - **Gisement inexploité** : 8 decks (Agentic Coding, Cloud, GCP, Docker, IA générative, MCP ×2, Observability),
   ~195 questions avec explications (`> ...`), des métadonnées propres (titre, description, tags, difficulté).
@@ -94,8 +94,8 @@ préfèrent les **réponses courtes et factuelles**, et s'appuient sur des **ent
 | Passages citables (définition, comparatif, FAQ) | Absents |
 | Présence sur les sources que les LLM lisent (GitHub, npm, Product Hunt, articles) | GitHub seulement, README en anglais orienté « LAN » |
 
-Opportunité spécifique à QuizV : le format `.quizv.md` est **un format que les LLM peuvent écrire**. Documenter ce
-format dans `llms.txt` permet à un utilisateur de demander à ChatGPT ou Claude « génère-moi un quiz Quizdown sur
+Opportunité spécifique à HashQuiz : le format `.hashquiz.md` est **un format que les LLM peuvent écrire**. Documenter ce
+format dans `llms.txt` permet à un utilisateur de demander à ChatGPT ou Claude « génère-moi un quiz HashQuiz sur
 Kubernetes » et d'obtenir un fichier valide. C'est à la fois du GEO et une fonctionnalité produit.
 
 ## 5. Préconisations par priorité
@@ -108,14 +108,14 @@ Bases techniques sans lesquelles rien d'autre ne sert. Faible effort, fort impac
 
 | # | Action | Effort | Où |
 | --- | --- | --- | --- |
-| P1.1 | **Choisir un nom unique** (QuizV ou Quizdown) et l'utiliser dans tous les `<title>`, le README et les métadonnées | S | `apps/*/index.html`, `README.md` |
+| P1.1 | ✅ **Nom unique** : HashQuiz, utilisé dans tous les `<title>`, le README et les métadonnées | S | `apps/*/index.html`, `README.md` |
 | P1.2 | Ajouter `robots.txt` : autoriser le site public, **bloquer `/host`** et les écrans de jeu, déclarer le sitemap | S | `apps/player/public/robots.txt` |
 | P1.3 | Ajouter `<meta name="robots" content="noindex">` sur le host (et sur le joueur tant qu'il n'y a pas de landing) | S | `apps/host/index.html` |
 | P1.4 | `lang="fr"`, `<meta name="description">`, `<link rel="canonical">`, `theme-color` dans les deux `index.html` | S | `apps/*/index.html` |
 | P1.5 | Favicon (SVG + PNG 180 px pour iOS) et `manifest.webmanifest` minimal | S | `apps/*/public/` |
 | P1.6 | Balises Open Graph et Twitter Card avec une image 1200×630 : le lien de partage d'une partie doit être beau | S | `apps/player/index.html` |
-| P1.7 | Publier un premier `llms.txt` (présentation, liens, résumé du format `.quizv.md`) | S | `apps/player/public/llms.txt` |
-| P1.8 | Rattacher un **domaine propre** (ex. `quizdown.app` ou `quizv.fr`) et rediriger en 301 les `*.vercel.app` | S | Vercel, `vercel.json` |
+| P1.7 | Publier un premier `llms.txt` (présentation, liens, résumé du format `.hashquiz.md`) | S | `apps/player/public/llms.txt` |
+| P1.8 | Rattacher un **domaine propre** (ex. `hashquiz.app` ou `hashquiz.fr`) et rediriger en 301 les `*.vercel.app` | S | Vercel, `vercel.json` |
 | P1.9 | Inscrire le domaine dans Google Search Console et Bing Webmaster Tools (Bing alimente ChatGPT Search et Copilot) | S | Hors dépôt |
 
 ### Priorité 2 : important, sous un à deux mois
@@ -128,7 +128,7 @@ Le contenu public se répartit sur deux projets, chacun avec un rôle clair :
 
 | Projet | Rôle | Pages | Indexation |
 | --- | --- | --- | --- |
-| **Site statique** (nouveau) | Acquisition : expliquer, convaincre, être cité | Accueil, landing, format `.quizv.md`, alternative à Kahoot, FAQ, `llms.txt` | Indexé, priorité SEO et GEO |
+| **Site statique** (nouveau) | Acquisition : expliquer, convaincre, être cité | Accueil, landing, format `.hashquiz.md`, alternative à Kahoot, FAQ, `llms.txt` | Indexé, priorité SEO et GEO |
 | **Application** (existante) | Catalogue et jeu | Index des quiz publics, une page par quiz, page de détails | Pages catalogue indexées (pré-rendues) |
 | **Application** (existante) | Partie en cours | Host, lobby, question, podium, écran joueur | `noindex` |
 
@@ -149,7 +149,7 @@ Points d'attention liés à cette séparation :
 | # | Action | Effort | Où |
 | --- | --- | --- | --- |
 | P2.1 | **Accueil / landing** : proposition de valeur en 1 phrase, 3 bénéfices, captures, CTA « Lancer une partie » vers l'app et « Voir les quiz » vers le catalogue | M | Site statique |
-| P2.2 | Page **« Format .quizv.md »** : spécification complète, exemple minimal copiable, erreurs courantes du `check` | M | Site statique, `/docs/format` |
+| P2.2 | Page **« Format .hashquiz.md »** : spécification complète, exemple minimal copiable, erreurs courantes du `check` | M | Site statique, `/docs/format` |
 | P2.3 | Page **« Alternative à Kahoot »** : tableau comparatif honnête (prix, compte requis, hors-ligne, open source, format) | S | Site statique |
 | P2.4 | **FAQ** de 8 à 12 questions réelles (« Faut-il un compte ? », « Combien de joueurs ? », « Ça marche sans Internet ? ») avec balisage `FAQPage` | S | Site statique |
 | P2.5 | `llms.txt` et `llms-full.txt` (spécification du format + 1 deck complet en Markdown brut) servis par le site statique, avec des liens vers le catalogue de l'app | S | Site statique |
@@ -179,18 +179,18 @@ Consolider l'autorité et mesurer.
 | # | Action | Effort | Où |
 | --- | --- | --- | --- |
 | P3.1 | Version anglaise du site public avec `hreflang` (fr / en / x-default) | L | Pages pré-rendues |
-| P3.2 | Blog ou guides : « Animer un quiz en formation », « Créer un quiz avec ChatGPT au format Quizdown »… 1 article par mois | L | `/guides` |
+| P3.2 | Blog ou guides : « Animer un quiz en formation », « Créer un quiz avec ChatGPT au format HashQuiz »… 1 article par mois | L | `/guides` |
 | P3.3 | README GitHub enrichi (français + anglais, GIF de démo, lien vers le site, topics GitHub : `quiz`, `kahoot-alternative`, `markdown`, `self-hosted`) | S | `README.md`, réglages GitHub |
 | P3.4 | Présence externe : Product Hunt, AlternativeTo (fiche « Alternative à Kahoot »), awesome-lists self-hosted, article dev.to / LinkedIn | M | Hors dépôt |
 | P3.5 | Galerie communautaire de decks (contribution par PR) : chaque deck ajouté = une page indexée de plus | L | `decks/`, CONTRIBUTING |
 | P3.6 | Allègement du bundle host (charger les decks à la demande plutôt que tous via `import.meta.glob` eager) | M | `apps/host/src/decks.ts` |
 | P3.7 | Image OG dynamique par deck (titre + tags) | M | Vercel OG ou génération au build |
-| P3.8 | Suivi GEO mensuel : poser 10 questions types à ChatGPT, Perplexity, Claude, Gemini et noter si QuizV est cité | S | Tableau de suivi |
+| P3.8 | Suivi GEO mensuel : poser 10 questions types à ChatGPT, Perplexity, Claude, Gemini et noter si HashQuiz est cité | S | Tableau de suivi |
 | P3.9 | Analytics respectueux de la vie privée (Plausible, Umami ou Vercel Analytics) sur le site public uniquement | S | Pages publiques |
 
 ### Arbitrage sur les crawlers IA
 
-Recommandation : **autoriser** les robots d'IA sur le contenu public. QuizV est un projet open source qui a intérêt à
+Recommandation : **autoriser** les robots d'IA sur le contenu public. HashQuiz est un projet open source qui a intérêt à
 être cité ; bloquer `GPTBot` ou `ClaudeBot` retirerait le site des réponses IA sans rien protéger (le code est déjà
 public sur GitHub). On bloque seulement `/host` et les écrans de partie, qui n'ont aucune valeur pour personne.
 
@@ -199,7 +199,7 @@ public sur GitHub). On bloque seulement `/host` et les écrans de partie, qui n'
 ### `robots.txt`
 
 ```txt
-# QuizV : site public indexable, application de jeu exclue
+# HashQuiz : site public indexable, application de jeu exclue
 User-agent: *
 Allow: /
 Disallow: /host
@@ -231,7 +231,7 @@ autorisées ; seuls les écrans de jeu sont exclus. Si l'app est sur un sous-dom
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QuizV — quiz multijoueur en temps réel, écrit en Markdown</title>
+  <title>HashQuiz — quiz multijoueur en temps réel, écrit en Markdown</title>
   <meta name="description" content="Alternative open source à Kahoot : écrivez vos quiz en Markdown, vos joueurs
     rejoignent avec un code ou un QR code, sans compte.">
   <link rel="canonical" href="https://example.com/">
@@ -240,8 +240,8 @@ autorisées ; seuls les écrans de jeu sont exclus. Si l'app est sur un sous-dom
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="QuizV">
-  <meta property="og:title" content="QuizV — quiz multijoueur en temps réel">
+  <meta property="og:site_name" content="HashQuiz">
+  <meta property="og:title" content="HashQuiz — quiz multijoueur en temps réel">
   <meta property="og:description" content="Rejoignez la partie avec le code affiché à l'écran.">
   <meta property="og:image" content="https://example.com/og.png">
   <meta property="og:locale" content="fr_FR">
@@ -254,10 +254,10 @@ Sur le host, ajouter en plus `<meta name="robots" content="noindex, nofollow">`.
 ### `llms.txt`
 
 ```md
-# QuizV
+# HashQuiz
 
-> QuizV est une alternative open source à Kahoot : des quiz multijoueurs en temps réel, écrits en Markdown
-> (fichiers `.quizv.md`), que les joueurs rejoignent depuis leur téléphone avec un code, sans créer de compte.
+> HashQuiz est une alternative open source à Kahoot : des quiz multijoueurs en temps réel, écrits en Markdown
+> (fichiers `.hashquiz.md`), que les joueurs rejoignent depuis leur téléphone avec un code, sans créer de compte.
 
 - Licence MIT, code source : https://github.com/WhiteWoodTech/hashquiz
 - Fonctionne en réseau local (WebSocket) ou en ligne (Vercel + Supabase Realtime)
@@ -265,7 +265,7 @@ Sur le host, ajouter en plus `<meta name="robots" content="noindex, nofollow">`.
 
 ## Documentation
 
-- [Format .quizv.md](https://example.com/docs/format): écrire un quiz en Markdown + frontmatter YAML
+- [Format .hashquiz.md](https://example.com/docs/format): écrire un quiz en Markdown + frontmatter YAML
 - [Déployer](https://github.com/WhiteWoodTech/hashquiz/blob/develop/docs/DEPLOY.md): Vercel et Supabase
 
 ## Quiz disponibles
@@ -307,7 +307,7 @@ Sur le host, ajouter en plus `<meta name="robots" content="noindex, nofollow">`.
 ### Mise en œuvre suggérée du pré-rendu
 
 **Pages publiques de l'application.** Pas besoin de migrer vers Nuxt. Un script Bun lancé avant `build:web` peut lire
-`decks/**/*.quizv.md` avec `@quizv/parser` (déjà utilisé par le host) et écrire des fichiers HTML statiques :
+`decks/**/*.hashquiz.md` avec `@hashquiz/parser` (déjà utilisé par le host) et écrire des fichiers HTML statiques :
 `dist/quiz/index.html`, `dist/quiz/<id>/index.html`, `dist/quiz/<id>/details/index.html` et
 `dist/quiz/tag/<tag>/index.html`, ainsi que le `sitemap.xml` de l'app. Ces pages peuvent ensuite être « hydratées » par
 Vue pour l'interactivité (bouton « Jouer »), mais leur contenu doit être présent dans le HTML. Les réécritures de
@@ -315,7 +315,7 @@ Vue pour l'interactivité (bouton « Jouer »), mais leur contenu doit être pr�
 petite app Vue dédiée au catalogue.
 
 **Site statique.** N'importe quel générateur statique convient (Astro est un bon choix : HTML pur par défaut,
-Markdown natif, sitemap intégré). Il peut lire les mêmes `.quizv.md` du dépôt pour générer `llms-full.txt` et les
+Markdown natif, sitemap intégré). Il peut lire les mêmes `.hashquiz.md` du dépôt pour générer `llms-full.txt` et les
 résumés de quiz, afin que les deux projets restent synchronisés sans copie manuelle.
 
 ## 7. Indicateurs de suivi
@@ -325,6 +325,6 @@ résumés de quiz, afin que les deux projets restent synchronisés sans copie ma
 | Pages indexées | Search Console, Bing Webmaster | Accueil + docs + tous les decks |
 | Impressions sur « alternative kahoot », « quiz markdown », « quiz sans compte » | Search Console | En progression mensuelle |
 | Résultats enrichis valides (`FAQPage`, `Quiz`) | Test des résultats enrichis Google | 0 erreur |
-| Citations dans les réponses IA (10 requêtes types) | Test manuel mensuel | Au moins 2 moteurs sur 4 citent QuizV |
+| Citations dans les réponses IA (10 requêtes types) | Test manuel mensuel | Au moins 2 moteurs sur 4 citent HashQuiz |
 | Visites référentes depuis `chatgpt.com`, `perplexity.ai` | Analytics | Mesurées et en hausse |
 | Étoiles et forks GitHub | GitHub | Suivi de tendance |

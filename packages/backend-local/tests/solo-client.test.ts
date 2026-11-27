@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from 'bun:test'
-import type { LivePlayer, Quiz, SoloRunSubmission } from '@quizv/core'
+import type { LivePlayer, Quiz, SoloRunSubmission } from '@hashquiz/core'
 import { createLocalSoloBackend, localSoloBaseUrl, soloTopic } from '../src/solo/client'
 
 const BASE = 'http://studio.local:3030'

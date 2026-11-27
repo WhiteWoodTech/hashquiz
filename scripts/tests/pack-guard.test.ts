@@ -44,8 +44,8 @@ describe('bakedEnvValues', () => {
 })
 
 describe('cleanBuildEnv', () => {
-  test('drops VITE_*, QUIZV_* and HASHQUIZ_* and sets QUIZV_PACK', () => {
-    expect(cleanBuildEnv({ PATH: '/bin', VITE_TRANSPORT: 'supabase', QUIZV_DECKS_DIR: 'x', HASHQUIZ_SUPABASE_URL: 'u' }))
-      .toEqual({ PATH: '/bin', QUIZV_PACK: '1' })
+  test('drops VITE_* and HASHQUIZ_* and sets HASHQUIZ_PACK', () => {
+    expect(cleanBuildEnv({ PATH: '/bin', VITE_TRANSPORT: 'supabase', HASHQUIZ_DECKS_DIR: 'x', HASHQUIZ_SUPABASE_URL: 'u' }))
+      .toEqual({ PATH: '/bin', HASHQUIZ_PACK: '1' })
   })
 })

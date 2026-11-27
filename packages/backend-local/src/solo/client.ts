@@ -3,7 +3,7 @@ import {
   EMAIL_RE,
   type LivePlayer, type LiveState, type Outcome, type RankedRun, type SoloApiPort, type SoloBackend,
   type SoloLivePort, type SoloRunSubmission, type SubmittedRun,
-} from '@quizv/core'
+} from '@hashquiz/core'
 import { SOLO_WS_ROLE, type SoloClientMsg, type SoloServerMsg } from './protocol'
 
 export * from './protocol'

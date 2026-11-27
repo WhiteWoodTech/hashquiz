@@ -4,24 +4,24 @@ import { parseFxTheme } from '../src/fx/theme'
 const getter = (vars: Record<string, string>) => (name: string) => vars[name] ?? ''
 
 const full: Record<string, string> = {
-  '--qv-fx-dot': ' white ',
-  '--qv-text': ' textcolor',
-  '--qv-text-muted': 'mutedcolor ',
-  '--qv-accent': ' accentcolor ',
-  '--qv-correct': ' okcolor',
-  '--qv-wrong': 'kocolor ',
-  '--qv-choice-a': ' choice-a ',
-  '--qv-choice-b': ' choice-b',
-  '--qv-choice-c': 'choice-c ',
-  '--qv-choice-d': ' choice-d ',
-  '--qv-fx-line-opacity': ' .2',
-  '--qv-fx-glow': ' .35 ',
-  '--qv-fx-dust-density': ' .5',
-  '--qv-fx-dust-alpha': ' 1.8 ',
-  '--qv-fx-speed': ' 1.5 ',
-  '--qv-font-label': " 'IBM Plex Mono', monospace ",
-  '--qv-font-display': ' Inter, sans-serif ',
-  '--qv-label-spacing': ' .4em ',
+  '--hq-fx-dot': ' white ',
+  '--hq-text': ' textcolor',
+  '--hq-text-muted': 'mutedcolor ',
+  '--hq-accent': ' accentcolor ',
+  '--hq-correct': ' okcolor',
+  '--hq-wrong': 'kocolor ',
+  '--hq-choice-a': ' choice-a ',
+  '--hq-choice-b': ' choice-b',
+  '--hq-choice-c': 'choice-c ',
+  '--hq-choice-d': ' choice-d ',
+  '--hq-fx-line-opacity': ' .2',
+  '--hq-fx-glow': ' .35 ',
+  '--hq-fx-dust-density': ' .5',
+  '--hq-fx-dust-alpha': ' 1.8 ',
+  '--hq-fx-speed': ' 1.5 ',
+  '--hq-font-label': " 'IBM Plex Mono', monospace ",
+  '--hq-font-display': ' Inter, sans-serif ',
+  '--hq-label-spacing': ' .4em ',
 }
 
 describe('parseFxTheme', () => {
@@ -64,10 +64,10 @@ describe('parseFxTheme', () => {
   test('invalid numeric values fall back without NaN', () => {
     const t = parseFxTheme(
       getter({
-        '--qv-fx-line-opacity': 'abc',
-        '--qv-fx-glow': '  ',
-        '--qv-fx-dust-density': 'NaN',
-        '--qv-fx-speed': 'fast',
+        '--hq-fx-line-opacity': 'abc',
+        '--hq-fx-glow': '  ',
+        '--hq-fx-dust-density': 'NaN',
+        '--hq-fx-speed': 'fast',
       }),
     )
     expect(t.lineOpacity).toBe(0.2)

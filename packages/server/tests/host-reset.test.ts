@@ -1,8 +1,8 @@
 import { describe, test, expect } from 'bun:test'
-import { QuizvServer } from '../src/server'
+import { HashQuizServer } from '../src/server'
 import { resolve } from 'node:path'
 
-const QUIZ = resolve(import.meta.dir, '../../../examples/demo.quizv.md')
+const QUIZ = resolve(import.meta.dir, '../../../examples/demo.hashquiz.md')
 
 type Msg = { type: string; joinCode?: string; idx?: number; snapshot?: { phase: string; totalScore: number } }
 
@@ -26,10 +26,10 @@ function open(url: string): Promise<{ ws: WebSocket; messages: Msg[] }> {
   })
 }
 
-describe('QuizvServer — host_reset (Rejouer)', () => {
+describe('HashQuizServer — host_reset (Rejouer)', () => {
   test('after game_ended, host_reset returns the same room to the lobby and a new game can start', async () => {
     const port = 45_000 + Math.floor(Math.random() * 10_000)
-    new QuizvServer({ quizFile: QUIZ, port, graceMs: 0 }).start()
+    new HashQuizServer({ quizFile: QUIZ, port, graceMs: 0 }).start()
 
     const host = await open(`ws://localhost:${port}/ws?role=host`)
     const { joinCode } = await waitFor(() => host.messages.find(m => m.type === 'host_connected'))

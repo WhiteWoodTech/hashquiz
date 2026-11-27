@@ -4,7 +4,7 @@ description: >
   Quiz sur l'IA et le développement IA — LLM, Prompt Engineering,
   Context Engineering, Agents, Agentic Coding, RAG
 theme: default
-author: QuizV
+author: HashQuiz
 tags: [ia, llm, prompt, agents, rag, coding]
 one-shoot: true
 max-questions: 12

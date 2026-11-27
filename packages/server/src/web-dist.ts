@@ -9,13 +9,13 @@ import { resolve } from 'node:path'
 export function findWebDist(): string | null {
   const here = import.meta.dirname
   const candidates = [
-    resolve(here, '../web'), // npm package: bin/quizv.js → web/
+    resolve(here, '../web'), // npm package: bin/hashquiz.js → web/
     resolve(here, '../../../dist'), // monorepo: packages/server/src → dist/
   ]
   return candidates.find((d) => existsSync(resolve(d, 'host/index.html'))) ?? null
 }
 
-/** Monorepo root when running from the quizv sources (apps can run under Vite). */
+/** Monorepo root when running from the hashquiz sources (apps can run under Vite). */
 export function findMonorepoRoot(): string | null {
   const root = resolve(import.meta.dirname, '../../..')
   return existsSync(resolve(root, 'apps/host/vite.config.ts')) ? root : null

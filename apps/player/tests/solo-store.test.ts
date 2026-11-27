@@ -2,8 +2,8 @@ import { describe, test, expect, beforeEach } from 'bun:test'
 import { createPinia, setActivePinia } from 'pinia'
 import type {
   LivePlayer, Outcome, Quiz, RankedRun, SoloApiPort, SoloLivePort, SoloRunSubmission, SubmittedRun,
-} from '@quizv/core'
-import type { LoadedDeck } from '@quizv/core/decks'
+} from '@hashquiz/core'
+import type { LoadedDeck } from '@hashquiz/core/decks'
 import { formatDuration } from '../src/solo/format'
 import { useSoloStore, setSoloDeps } from '../src/stores/solo'
 

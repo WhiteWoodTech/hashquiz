@@ -1,6 +1,6 @@
 /**
  * Theme snapshot for canvas scenes. Every color, font and intensity a scene
- * uses comes from a `--qv-*` CSS variable read here; nothing is hardcoded.
+ * uses comes from a `--hq-*` CSS variable read here; nothing is hardcoded.
  */
 export interface FxTheme {
   dot: string
@@ -31,21 +31,21 @@ function num(raw: string, fallback: number): number {
 export function parseFxTheme(get: (name: string) => string): FxTheme {
   const str = (name: string) => (get(name) ?? '').trim()
   return {
-    dot: str('--qv-fx-dot'),
-    text: str('--qv-text'),
-    muted: str('--qv-text-muted'),
-    accent: str('--qv-accent'),
-    ok: str('--qv-correct'),
-    ko: str('--qv-wrong'),
-    choices: [str('--qv-choice-a'), str('--qv-choice-b'), str('--qv-choice-c'), str('--qv-choice-d')],
-    lineOpacity: num(str('--qv-fx-line-opacity'), 0.2),
-    glow: num(str('--qv-fx-glow'), 0.3),
-    dustDensity: num(str('--qv-fx-dust-density'), 1),
-    dustAlpha: num(str('--qv-fx-dust-alpha'), 1),
-    speed: num(str('--qv-fx-speed'), 1),
-    fontLabel: str('--qv-font-label'),
-    fontDisplay: str('--qv-font-display'),
-    labelSpacing: str('--qv-label-spacing'),
+    dot: str('--hq-fx-dot'),
+    text: str('--hq-text'),
+    muted: str('--hq-text-muted'),
+    accent: str('--hq-accent'),
+    ok: str('--hq-correct'),
+    ko: str('--hq-wrong'),
+    choices: [str('--hq-choice-a'), str('--hq-choice-b'), str('--hq-choice-c'), str('--hq-choice-d')],
+    lineOpacity: num(str('--hq-fx-line-opacity'), 0.2),
+    glow: num(str('--hq-fx-glow'), 0.3),
+    dustDensity: num(str('--hq-fx-dust-density'), 1),
+    dustAlpha: num(str('--hq-fx-dust-alpha'), 1),
+    speed: num(str('--hq-fx-speed'), 1),
+    fontLabel: str('--hq-font-label'),
+    fontDisplay: str('--hq-font-display'),
+    labelSpacing: str('--hq-label-spacing'),
   }
 }
 

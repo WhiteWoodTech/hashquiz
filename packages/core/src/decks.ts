@@ -1,5 +1,5 @@
-import { parseQuizFile } from '@quizv/parser'
-import type { Quiz } from '@quizv/parser'
+import { parseQuizFile } from '@hashquiz/parser'
+import type { Quiz } from '@hashquiz/parser'
 import type { QuizInfo } from './types'
 
 /**
@@ -7,9 +7,9 @@ import type { QuizInfo } from './types'
  * served by the Vite plugin in dev (`collectDecks` in packages/server/src/web-assets.ts).
  */
 export interface DeckManifestEntry {
-  /** Path relative to the decks folder, e.g. `docker-fundamentals/index.quizv.md`. */
+  /** Path relative to the decks folder, e.g. `docker-fundamentals/index.hashquiz.md`. */
   id: string
-  /** Raw `.quizv.md` content, parsed in the browser. */
+  /** Raw `.hashquiz.md` content, parsed in the browser. */
   content: string
 }
 

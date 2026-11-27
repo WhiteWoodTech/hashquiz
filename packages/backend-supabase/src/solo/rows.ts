@@ -1,5 +1,5 @@
 // Pure mapping, no Supabase import: shared by browser scoring and the Edge Function bundle.
-import type { VerifiedRun } from '@quizv/core'
+import type { VerifiedRun } from '@hashquiz/core'
 
 /** The `p_run` JSON of the `submit_solo_run` RPC: a verified run in the database's snake_case. */
 export interface SoloRunRow {

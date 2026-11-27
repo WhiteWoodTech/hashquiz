@@ -17,9 +17,9 @@
 
 <script setup lang="ts">
 import { onMounted, shallowRef } from 'vue'
-import { QuizInfoPanel } from '@quizv/ui'
-import type { QuizInfo } from '@quizv/core'
-import { deckInfo } from '@quizv/core/decks'
+import { QuizInfoPanel } from '@hashquiz/ui'
+import type { QuizInfo } from '@hashquiz/core'
+import { deckInfo } from '@hashquiz/core/decks'
 import { loadSoloDecks } from '../solo/decks'
 import { soloHash } from '../solo/route'
 
@@ -41,18 +41,18 @@ onMounted(async () => {
   font-size: 1rem;
   font-weight: 600;
   text-align: center;
-  color: var(--qv-text-muted);
+  color: var(--hq-text-muted);
 }
 .solo-catalog__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }
 .solo-catalog__card {
   display: block;
   color: inherit;
   text-decoration: none;
-  border-radius: var(--qv-radius);
+  border-radius: var(--hq-radius);
 }
 .solo-catalog__card :deep(.qip) { transition: border-color 0.15s, transform 0.15s; }
-.solo-catalog__card:hover :deep(.qip) { border-color: var(--qv-accent); transform: translateY(-2px); }
-.solo-catalog__card:focus-visible { outline: 2px solid var(--qv-accent); outline-offset: 3px; }
+.solo-catalog__card:hover :deep(.qip) { border-color: var(--hq-accent); transform: translateY(-2px); }
+.solo-catalog__card:focus-visible { outline: 2px solid var(--hq-accent); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   .solo-catalog__card:hover :deep(.qip) { transform: none; }
 }

@@ -1,11 +1,11 @@
-# QuizV — Design Spec
+# HashQuiz — Design Spec
 
 **Date:** 2026-03-31
 **Status:** Approved
 
 ## Context
 
-Build **QuizV**, a Kahoot-style real-time quiz platform. Starting point: a standalone single-player HTML prototype (`quiz-ia-dev.html`). Goal: a full multiplayer system where quizzes are written in Markdown and the tool works both offline (LAN, like Slidev) and in the cloud (Vercel + Supabase).
+Build **HashQuiz**, a Kahoot-style real-time quiz platform. Starting point: a standalone single-player HTML prototype (`quiz-ia-dev.html`). Goal: a full multiplayer system where quizzes are written in Markdown and the tool works both offline (LAN, like Slidev) and in the cloud (Vercel + Supabase).
 
 ---
 
@@ -19,8 +19,8 @@ Build **QuizV**, a Kahoot-style real-time quiz platform. Starting point: a stand
 | Standalone realtime | Bun WebSocket server | LAN multiplayer, no internet required |
 | Transport | `IRealtimeTransport` interface | Pluggable: local WS or Supabase |
 | Quiz format | Slidev-style `---` + YAML frontmatter | Familiar, composable |
-| File extension | `.quizv.md` | Unique and clearly identifiable |
-| Naming | `@quizv/*` packages, `--qv-*` CSS vars, `quizv` CLI | User-specified |
+| File extension | `.hashquiz.md` | Unique and clearly identifiable |
+| Naming | `@hashquiz/*` packages, `--hq-*` CSS vars, `hashquiz` CLI | User-specified |
 | Slidev integration | Phase 4 (standalone first) | Most flexible |
 | Host auth | Supabase Auth magic link | Persistent quizzes |
 | Deployment | Vercel + Supabase cloud | Self-hosted |
@@ -30,19 +30,19 @@ Build **QuizV**, a Kahoot-style real-time quiz platform. Starting point: a stand
 ## Monorepo Structure
 
 ```
-quizv/
+hashquiz/
 ├── apps/
 │   ├── host/                    # Vue 3 + Vite — host dashboard (desktop)
 │   └── player/                  # Vue 3 + Vite — player UI (mobile-first)
 ├── packages/
-│   ├── parser/                  # @quizv/parser
-│   ├── core/                    # @quizv/core — game engine + transport interface
-│   ├── server/                  # @quizv/server — Bun HTTP + WS standalone server + CLI
-│   ├── transport-local/         # @quizv/transport-local — Bun WS (standalone)
-│   ├── transport-supabase/      # @quizv/transport-supabase — Supabase Realtime
-│   ├── ui/                      # @quizv/ui — shared Vue components
-│   ├── theme-default/           # @quizv/theme-default
-│   └── slidev-addon/            # slidev-addon-quizv (Phase 4)
+│   ├── parser/                  # @hashquiz/parser
+│   ├── core/                    # @hashquiz/core — game engine + transport interface
+│   ├── server/                  # @hashquiz/server — Bun HTTP + WS standalone server + CLI
+│   ├── transport-local/         # @hashquiz/transport-local — Bun WS (standalone)
+│   ├── transport-supabase/      # @hashquiz/transport-supabase — Supabase Realtime
+│   ├── ui/                      # @hashquiz/ui — shared Vue components
+│   ├── theme-default/           # @hashquiz/theme-default
+│   └── slidev-addon/            # slidev-addon-hashquiz (Phase 4)
 ├── supabase/
 │   ├── migrations/
 │   └── types.ts
@@ -56,7 +56,7 @@ quizv/
 
 | Mode | Command | Realtime | Database | Auth |
 |---|---|---|---|---|
-| Standalone | `quizv dev quiz.quizv.md` | Bun WS (LAN) | In-memory | None |
+| Standalone | `hashquiz dev quiz.hashquiz.md` | Bun WS (LAN) | In-memory | None |
 | Production | Vercel deploy | Supabase Realtime | Postgres | Supabase Auth |
 
 Players join standalone mode via local IP: `http://192.168.x.x:3030/play`
@@ -141,7 +141,7 @@ points = isCorrect ? Math.max(10, Math.round(50 + timeRemaining * 5)) : 0
 
 ---
 
-## Quiz File Format (`.quizv.md`)
+## Quiz File Format (`.hashquiz.md`)
 
 ```markdown
 ---
@@ -214,40 +214,40 @@ Dependencies: `gray-matter`, `unified`, `remark-parse`, `remark-gfm`
 
 ## CLI
 
-Binary: `quizv`
+Binary: `hashquiz`
 Entry: `packages/server/src/cli.ts`
 
 ```bash
-quizv dev quiz.quizv.md      # Local Bun server with hot-reload
-quizv check quiz.quizv.md    # Validate format
-quizv upload quiz.quizv.md   # Push to Supabase
+hashquiz dev quiz.hashquiz.md      # Local Bun server with hot-reload
+hashquiz check quiz.hashquiz.md    # Validate format
+hashquiz upload quiz.hashquiz.md   # Push to Supabase
 ```
 
 ---
 
 ## Theme System
 
-Package naming: `@quizv/theme-{name}`
+Package naming: `@hashquiz/theme-{name}`
 
 ```
 packages/theme-default/
-├── styles/vars.css      # --qv-* CSS custom properties
+├── styles/vars.css      # --hq-* CSS custom properties
 └── components/          # optional Vue component overrides
 ```
 
 CSS contract:
 ```css
 :root {
-  --qv-bg:           #0a0a0f;
-  --qv-surface:      #111118;
-  --qv-accent:       #7c3aed;
-  --qv-accent-2:     #06b6d4;
-  --qv-correct:      #22c55e;
-  --qv-wrong:        #ef4444;
-  --qv-font-display: 'Syne', sans-serif;
-  --qv-font-mono:    'IBM Plex Mono', monospace;
-  --qv-radius:       12px;
-  --qv-timer-ring:   var(--qv-accent);
+  --hq-bg:           #0a0a0f;
+  --hq-surface:      #111118;
+  --hq-accent:       #7c3aed;
+  --hq-accent-2:     #06b6d4;
+  --hq-correct:      #22c55e;
+  --hq-wrong:        #ef4444;
+  --hq-font-display: 'Syne', sans-serif;
+  --hq-font-mono:    'IBM Plex Mono', monospace;
+  --hq-radius:       12px;
+  --hq-timer-ring:   var(--hq-accent);
 }
 ```
 
@@ -258,7 +258,7 @@ CSS contract:
 ### Host App (desktop)
 
 1. Landing → Auth (magic link)
-2. Dashboard → quiz list, upload `.quizv.md`
+2. Dashboard → quiz list, upload `.hashquiz.md`
 3. Lobby → QR code + 6-char join code, live player list, Launch button
 4. Question → question text, live answer distribution chart, timer ring, Next button
 5. Reveal → correct answer, score updates, explanation
@@ -277,9 +277,9 @@ CSS contract:
 
 ## Phase 4 — Slidev Addon
 
-Package: `slidev-addon-quizv`
+Package: `slidev-addon-hashquiz`
 
-- `<QuizvEmbed>` component usable inside Slidev slides
+- `<HashQuizEmbed>` component usable inside Slidev slides
 - Embeds QR code + live answer distribution overlay on slide
 - Host controls via Slidev presenter notes panel
 
@@ -290,15 +290,15 @@ Package: `slidev-addon-quizv`
 | Phase | Scope |
 |---|---|
 | 1 | Repo bootstrap (Bun workspaces, all package stubs, Vite apps) |
-| 2 | `@quizv/parser` + unit tests |
-| 3 | `@quizv/core` (transport interface, game state machine) + both transports |
-| 4 | `@quizv/server` (Bun HTTP + WS) + `quizv` CLI |
-| 5 | `@quizv/ui` components + `@quizv/theme-default` |
+| 2 | `@hashquiz/parser` + unit tests |
+| 3 | `@hashquiz/core` (transport interface, game state machine) + both transports |
+| 4 | `@hashquiz/server` (Bun HTTP + WS) + `hashquiz` CLI |
+| 5 | `@hashquiz/ui` components + `@hashquiz/theme-default` |
 | 6 | `apps/host` — all screens |
 | 7 | `apps/player` — all screens |
 | 8 | Supabase migrations, RLS, Realtime config |
 | 9 | Vercel deployment + env config |
-| 10 | `slidev-addon-quizv` (future) |
+| 10 | `slidev-addon-hashquiz` (future) |
 
 ---
 
@@ -306,13 +306,13 @@ Package: `slidev-addon-quizv`
 
 ```bash
 # Standalone
-quizv dev examples/demo.quizv.md
+hashquiz dev examples/demo.hashquiz.md
 # → http://localhost:3030 (host) + http://192.168.x.x:3030/play (player)
 
 # Parser
 bun test packages/parser
 
 # Cloud
-quizv upload examples/demo.quizv.md
+hashquiz upload examples/demo.hashquiz.md
 # → verify full game flow on Vercel + Supabase
 ```

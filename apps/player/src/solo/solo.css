@@ -1,19 +1,19 @@
 /* Shared controls of the solo screens (same look as the join screen). */
 .solo-input {
-  width: 100%; padding: 0.85rem; background: var(--qv-surface);
-  border: 1px solid var(--qv-border); border-radius: var(--qv-radius);
-  color: var(--qv-text); font-size: 1rem; font-family: inherit;
+  width: 100%; padding: 0.85rem; background: var(--hq-surface);
+  border: 1px solid var(--hq-border); border-radius: var(--hq-radius);
+  color: var(--hq-text); font-size: 1rem; font-family: inherit;
 }
-.solo-input:focus { outline: none; border-color: var(--qv-accent); }
+.solo-input:focus { outline: none; border-color: var(--hq-accent); }
 .solo-btn {
-  width: 100%; padding: 0.9rem; background: var(--qv-accent); color: var(--qv-text);
-  border: 2px solid var(--qv-accent); border-radius: var(--qv-radius); font-size: 1.1rem;
+  width: 100%; padding: 0.9rem; background: var(--hq-accent); color: var(--hq-text);
+  border: 2px solid var(--hq-accent); border-radius: var(--hq-radius); font-size: 1.1rem;
   cursor: pointer; font-family: inherit; font-weight: 600;
   transition: background 0.15s, color 0.15s;
 }
-.solo-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--qv-accent) 80%, var(--qv-bg)); }
+.solo-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--hq-accent) 80%, var(--hq-bg)); }
 .solo-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.solo-btn--ghost { background: transparent; color: var(--qv-accent); }
-.solo-btn--ghost:hover:not(:disabled) { background: var(--qv-accent); color: var(--qv-text); }
-.solo-btn:focus-visible, .solo-input:focus-visible { outline: 2px solid var(--qv-accent-2); outline-offset: 2px; }
-.solo-label { font-size: 0.85rem; color: var(--qv-text-muted); }
+.solo-btn--ghost { background: transparent; color: var(--hq-accent); }
+.solo-btn--ghost:hover:not(:disabled) { background: var(--hq-accent); color: var(--hq-text); }
+.solo-btn:focus-visible, .solo-input:focus-visible { outline: 2px solid var(--hq-accent-2); outline-offset: 2px; }
+.solo-label { font-size: 0.85rem; color: var(--hq-text-muted); }

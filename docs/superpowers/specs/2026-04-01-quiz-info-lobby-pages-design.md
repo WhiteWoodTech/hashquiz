@@ -19,7 +19,7 @@ Pas de nouvel événement protocolaire — les métadonnées sont statiques et n
 
 ---
 
-## 1. Nouveau type `QuizInfo` — `@quizv/core`
+## 1. Nouveau type `QuizInfo` — `@hashquiz/core`
 
 Fichier : `packages/core/src/types.ts`
 
@@ -109,7 +109,7 @@ interface JoinedMsg {
 
 Ajouter :
 ```ts
-import type { QuizInfo } from '@quizv/core'
+import type { QuizInfo } from '@hashquiz/core'
 
 const quizMeta = ref<QuizInfo | null>(null)
 ```
@@ -127,7 +127,7 @@ Exposer dans le `return` du store.
 
 Même pattern :
 ```ts
-import type { QuizInfo } from '@quizv/core'
+import type { QuizInfo } from '@hashquiz/core'
 
 const quizMeta = ref<QuizInfo | null>(null)
 ```
@@ -164,9 +164,9 @@ Ajouter un panneau info quiz **au-dessus** du layout QR code / joueurs existant.
 ### Barre de distribution
 
 Barre segmentée horizontale 3 couleurs :
-- easy → `--qv-correct` (vert)
-- medium → `--qv-warning` (orange)
-- hard → `--qv-error` (rouge)
+- easy → `--hq-correct` (vert)
+- medium → `--hq-warning` (orange)
+- hard → `--hq-error` (rouge)
 
 Légende inline : `easy 20% · medium 20% · hard 60%`
 

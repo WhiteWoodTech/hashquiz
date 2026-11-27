@@ -1,8 +1,8 @@
 ---
-title: QuizV Demo
+title: HashQuiz Demo
 description: A demonstration quiz about web technologies
 theme: default
-author: QuizV
+author: HashQuiz
 tags: [demo, web]
 solo: true
 ---

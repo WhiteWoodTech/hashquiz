@@ -1,5 +1,5 @@
 {
-  "name": "@quizv/backend-local",
+  "name": "@hashquiz/backend-local",
   "version": "0.0.1",
   "license": "SEE LICENSE IN ../../LICENSE.md",
   "type": "module",
@@ -10,7 +10,7 @@
     "./solo-server": "./src/solo/server-entry.ts"
   },
   "dependencies": {
-    "@quizv/core": "workspace:*"
+    "@hashquiz/core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.4.5",

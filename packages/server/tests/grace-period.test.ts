@@ -1,8 +1,8 @@
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
-import { QuizvServer } from '../src/server'
+import { HashQuizServer } from '../src/server'
 import { resolve } from 'node:path'
 
-const QUIZ = resolve(import.meta.dir, '../../../examples/demo.quizv.md')
+const QUIZ = resolve(import.meta.dir, '../../../examples/demo.hashquiz.md')
 
 async function waitFor<T>(check: () => T | undefined, timeoutMs = 1000): Promise<T> {
   const deadline = Date.now() + timeoutMs
@@ -16,14 +16,14 @@ async function waitFor<T>(check: () => T | undefined, timeoutMs = 1000): Promise
 
 interface ServerHandle {
   port: number
-  server: QuizvServer
+  server: HashQuizServer
   joinCode: string
 }
 
 async function makeServer(graceMs: number): Promise<ServerHandle> {
   // Pick a random high port to avoid collisions
   const port = 35_000 + Math.floor(Math.random() * 10_000)
-  const server = new QuizvServer({ quizFile: QUIZ, port, graceMs })
+  const server = new HashQuizServer({ quizFile: QUIZ, port, graceMs })
   server.start()
   // Reach into the instance to grab the join code (not exposed publicly, so we go through a side channel)
   // Trick: open a host WS, read the host_connected payload
@@ -62,7 +62,7 @@ function joinPlayer(port: number, joinCode: string, playerId: string, pseudo: st
   })
 }
 
-describe('QuizvServer — grace period and rejoin', () => {
+describe('HashQuizServer — grace period and rejoin', () => {
   test('player who reconnects within graceMs preserves their slot (no player_left broadcast)', async () => {
     const { port, joinCode } = await makeServer(500)
     const hostMessages: Array<{ type: string; playerId?: string; player?: { id: string } }> = []

@@ -46,9 +46,9 @@ describe('hash route', () => {
 
 describe('soloUrl', () => {
   test('joins base and hash with exactly one slash', () => {
-    const want = 'https://x.app/#/solo/docker%2Fquiz.quizv.md'
-    expect(soloUrl('docker/quiz.quizv.md', 'https://x.app/')).toBe(want)
-    expect(soloUrl('docker/quiz.quizv.md', 'https://x.app')).toBe(want)
+    const want = 'https://x.app/#/solo/docker%2Fquiz.hashquiz.md'
+    expect(soloUrl('docker/quiz.hashquiz.md', 'https://x.app/')).toBe(want)
+    expect(soloUrl('docker/quiz.hashquiz.md', 'https://x.app')).toBe(want)
   })
 })
 
@@ -59,8 +59,8 @@ describe('playerBaseUrl', () => {
   })
   test('dev defaults to the player Vite server on :3032, same host', () => {
     expect(playerBaseUrl({ dev: true, playerUrl: '' }, loc)).toBe('http://192.168.1.20:3032/')
-    expect(soloUrl('docker-fundamentals/index.quizv.md', playerBaseUrl({ dev: true }, loc)))
-      .toBe('http://192.168.1.20:3032/#/solo/docker-fundamentals%2Findex.quizv.md')
+    expect(soloUrl('docker-fundamentals/index.hashquiz.md', playerBaseUrl({ dev: true }, loc)))
+      .toBe('http://192.168.1.20:3032/#/solo/docker-fundamentals%2Findex.hashquiz.md')
   })
   test('production defaults to the same origin', () => {
     expect(playerBaseUrl({ dev: false }, { protocol: 'https:', hostname: 'q.app', origin: 'https://q.app' }))

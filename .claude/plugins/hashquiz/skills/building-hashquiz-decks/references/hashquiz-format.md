@@ -1,10 +1,10 @@
-# QuizV Format Specification (`.quizv.md`)
+# HashQuiz Format Specification (`.hashquiz.md`)
 
-Complete reference for the `.quizv.md` file format, derived from the `@quizv/parser` package.
+Complete reference for the `.hashquiz.md` file format, derived from the `@hashquiz/parser` package.
 
 ## File Structure
 
-A `.quizv.md` file consists of a **quiz-level frontmatter** block followed by **question blocks** separated by `---`:
+A `.hashquiz.md` file consists of a **quiz-level frontmatter** block followed by **question blocks** separated by `---`:
 
 ```markdown
 ---

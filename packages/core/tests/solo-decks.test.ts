@@ -4,8 +4,8 @@ import { resolve } from 'node:path'
 import { deckVersion, type DeckManifestEntry } from '../src/decks'
 import { parseManifest, SoloDeckSource } from '../src/solo-decks'
 
-const demo = readFileSync(resolve(import.meta.dir, '../../../examples/demo.quizv.md'), 'utf-8')
-const edited = demo.replace('title: QuizV Demo', 'title: QuizV Demo (edited)')
+const demo = readFileSync(resolve(import.meta.dir, '../../../examples/demo.hashquiz.md'), 'utf-8')
+const edited = demo.replace('title: HashQuiz Demo', 'title: HashQuiz Demo (edited)')
 const roomOnly = `---
 title: Room only
 solo: false
@@ -22,8 +22,8 @@ timer: 20
 - [ ] B
 `
 const manifest = (content = demo): DeckManifestEntry[] => [
-  { id: 'demo.quizv.md', content },
-  { id: 'room.quizv.md', content: roomOnly },
+  { id: 'demo.hashquiz.md', content },
+  { id: 'room.hashquiz.md', content: roomOnly },
 ]
 
 /** A loader that counts calls and returns `results[call]` (the last one repeats). */
@@ -68,10 +68,10 @@ describe('SoloDeckSource', () => {
   test('resolves a solo deck by id and version', async () => {
     const l = fakeLoader(manifest())
     const src = new SoloDeckSource(l.load, { now: clock().now })
-    const r = await src.resolve('demo.quizv.md', deckVersion(demo))
+    const r = await src.resolve('demo.hashquiz.md', deckVersion(demo))
     expect(r.ok).toBe(true)
     if (r.ok) {
-      expect(r.deck.id).toBe('demo.quizv.md')
+      expect(r.deck.id).toBe('demo.hashquiz.md')
       expect(r.deck.version).toBe(deckVersion(demo))
     }
     expect(l.calls).toBe(1)
@@ -80,13 +80,13 @@ describe('SoloDeckSource', () => {
   test('non-solo deck is unknown deck', async () => {
     const l = fakeLoader(manifest())
     const src = new SoloDeckSource(l.load, { now: clock().now })
-    expect(await src.resolve('room.quizv.md', deckVersion(roomOnly))).toEqual({ ok: false, reason: 'unknown deck' })
+    expect(await src.resolve('room.hashquiz.md', deckVersion(roomOnly))).toEqual({ ok: false, reason: 'unknown deck' })
   })
 
   test('reloads once on version mismatch, then accepts the new version', async () => {
     const l = fakeLoader(manifest(), manifest(edited))
     const src = new SoloDeckSource(l.load, { now: clock().now })
-    const r = await src.resolve('demo.quizv.md', deckVersion(edited))
+    const r = await src.resolve('demo.hashquiz.md', deckVersion(edited))
     expect(r.ok).toBe(true)
     if (r.ok) expect(r.deck.version).toBe(deckVersion(edited))
     expect(l.calls).toBe(2)
@@ -95,7 +95,7 @@ describe('SoloDeckSource', () => {
   test('still mismatching after the reload is deck version mismatch', async () => {
     const l = fakeLoader(manifest())
     const src = new SoloDeckSource(l.load, { now: clock().now })
-    expect(await src.resolve('demo.quizv.md', 'deadbeef')).toEqual({ ok: false, reason: 'deck version mismatch' })
+    expect(await src.resolve('demo.hashquiz.md', 'deadbeef')).toEqual({ ok: false, reason: 'deck version mismatch' })
     expect(l.calls).toBe(2)
   })
 
@@ -103,13 +103,13 @@ describe('SoloDeckSource', () => {
     const l = fakeLoader(manifest())
     const c = clock()
     const src = new SoloDeckSource(l.load, { minRefetchMs: 10_000, now: c.now })
-    expect((await src.resolve('demo.quizv.md', 'bogus')).ok).toBe(false)
+    expect((await src.resolve('demo.hashquiz.md', 'bogus')).ok).toBe(false)
     expect(l.calls).toBe(2)
     c.t = 5_000
-    expect(await src.resolve('demo.quizv.md', 'bogus')).toEqual({ ok: false, reason: 'deck version mismatch' })
+    expect(await src.resolve('demo.hashquiz.md', 'bogus')).toEqual({ ok: false, reason: 'deck version mismatch' })
     expect(l.calls).toBe(2)
     c.t = 10_001
-    await src.resolve('demo.quizv.md', 'bogus')
+    await src.resolve('demo.hashquiz.md', 'bogus')
     expect(l.calls).toBe(3)
   })
 
@@ -117,9 +117,9 @@ describe('SoloDeckSource', () => {
     const l = fakeLoader(manifest())
     const c = clock()
     const src = new SoloDeckSource(l.load, { ttlMs: 1000, now: c.now })
-    await src.resolve('demo.quizv.md', deckVersion(demo))
+    await src.resolve('demo.hashquiz.md', deckVersion(demo))
     c.t = 1001
-    expect((await src.resolve('demo.quizv.md', deckVersion(demo))).ok).toBe(true)
+    expect((await src.resolve('demo.hashquiz.md', deckVersion(demo))).ok).toBe(true)
     expect(l.calls).toBe(2)
   })
 
@@ -128,9 +128,9 @@ describe('SoloDeckSource', () => {
     const l = fakeLoader(manifest(), new Error('site down'))
     const c = clock()
     const src = new SoloDeckSource(l.load, { ttlMs: 1000, now: c.now })
-    await src.resolve('demo.quizv.md', deckVersion(demo))
+    await src.resolve('demo.hashquiz.md', deckVersion(demo))
     c.t = 1001
-    expect((await src.resolve('demo.quizv.md', deckVersion(demo))).ok).toBe(true)
+    expect((await src.resolve('demo.hashquiz.md', deckVersion(demo))).ok).toBe(true)
     expect(l.calls).toBe(2)
     expect(errors).toHaveBeenCalledTimes(1)
   })
@@ -139,7 +139,7 @@ describe('SoloDeckSource', () => {
     const errors = muteErrors()
     const l = fakeLoader(new Error('site down'))
     const src = new SoloDeckSource(l.load, { now: clock().now })
-    expect(await src.resolve('demo.quizv.md', deckVersion(demo))).toEqual({ ok: false, reason: 'decks unavailable' })
+    expect(await src.resolve('demo.hashquiz.md', deckVersion(demo))).toEqual({ ok: false, reason: 'decks unavailable' })
     expect(errors).toHaveBeenCalledTimes(1)
   })
 
@@ -148,11 +148,11 @@ describe('SoloDeckSource', () => {
     const l = fakeLoader(manifest(), new Error('site down'))
     const c = clock()
     const src = new SoloDeckSource(l.load, { ttlMs: 1000, minRefetchMs: 10_000, now: c.now })
-    await src.resolve('demo.quizv.md', deckVersion(demo))
+    await src.resolve('demo.hashquiz.md', deckVersion(demo))
     c.t = 1001
-    expect((await src.resolve('demo.quizv.md', deckVersion(demo))).ok).toBe(true)
+    expect((await src.resolve('demo.hashquiz.md', deckVersion(demo))).ok).toBe(true)
     c.t = 2000
-    expect((await src.resolve('demo.quizv.md', deckVersion(demo))).ok).toBe(true)
+    expect((await src.resolve('demo.hashquiz.md', deckVersion(demo))).ok).toBe(true)
     expect(l.calls).toBe(2)
     expect(errors).toHaveBeenCalledTimes(1)
   })
@@ -162,11 +162,11 @@ describe('SoloDeckSource', () => {
     const l = fakeLoader(new Error('site down'), manifest())
     const c = clock()
     const src = new SoloDeckSource(l.load, { minRefetchMs: 10_000, now: c.now })
-    expect(await src.resolve('demo.quizv.md', deckVersion(demo))).toEqual({ ok: false, reason: 'decks unavailable' })
-    expect(await src.resolve('demo.quizv.md', deckVersion(demo))).toEqual({ ok: false, reason: 'decks unavailable' })
+    expect(await src.resolve('demo.hashquiz.md', deckVersion(demo))).toEqual({ ok: false, reason: 'decks unavailable' })
+    expect(await src.resolve('demo.hashquiz.md', deckVersion(demo))).toEqual({ ok: false, reason: 'decks unavailable' })
     expect(l.calls).toBe(1)
     c.t = 10_000
-    expect((await src.resolve('demo.quizv.md', deckVersion(demo))).ok).toBe(true)
+    expect((await src.resolve('demo.hashquiz.md', deckVersion(demo))).ok).toBe(true)
     expect(l.calls).toBe(2)
   })
 
@@ -175,8 +175,8 @@ describe('SoloDeckSource', () => {
     let calls = 0
     const load = () => { calls++; return new Promise<DeckManifestEntry[]>((r) => { release = r }) }
     const src = new SoloDeckSource(load, { now: clock().now })
-    const a = src.resolve('demo.quizv.md', deckVersion(demo))
-    const b = src.resolve('demo.quizv.md', deckVersion(demo))
+    const a = src.resolve('demo.hashquiz.md', deckVersion(demo))
+    const b = src.resolve('demo.hashquiz.md', deckVersion(demo))
     release(manifest())
     expect((await a).ok).toBe(true)
     expect((await b).ok).toBe(true)

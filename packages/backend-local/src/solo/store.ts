@@ -1,7 +1,7 @@
 import { Database } from 'bun:sqlite'
 import { mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'
-import { EMAIL_RE, type RankedRun, type VerifiedRun } from '@quizv/core'
+import { EMAIL_RE, type RankedRun, type VerifiedRun } from '@hashquiz/core'
 
 /** Server-side only (`bun:sqlite`): never import this from an app bundle. */
 export const DEFAULT_SOLO_DB = '.hashquiz/solo.db'

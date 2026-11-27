@@ -1,17 +1,17 @@
 ---
-description: Scaffold a new QuizV deck with frontmatter, assets/, and sources/ directories
+description: Scaffold a new HashQuiz deck with frontmatter, assets/, and sources/ directories
 argument-hint: "[topic]"
 allowed-tools: Read, Write, Bash, Glob, Grep, AskUserQuestion
 ---
 
-# Scaffold a New QuizV Deck
+# Scaffold a New HashQuiz Deck
 
 Create a new quiz deck structure in the `decks/` directory.
 
 ## Instructions
 
-Read the skill reference first: load `skills/building-quizv-decks/SKILL.md`
-and `skills/building-quizv-decks/references/quizv-format.md` from `${CLAUDE_PLUGIN_ROOT}`.
+Read the skill reference first: load `skills/building-hashquiz-decks/SKILL.md`
+and `skills/building-hashquiz-decks/references/hashquiz-format.md` from `${CLAUDE_PLUGIN_ROOT}`.
 
 ### Step 1 — Gather Information
 
@@ -44,7 +44,7 @@ Check that `decks/<slug>/` does not already exist. If it does, ask the user for 
 
 Create the following files:
 
-**`decks/<slug>/index.quizv.md`** — Quiz frontmatter only (no questions yet):
+**`decks/<slug>/index.hashquiz.md`** — Quiz frontmatter only (no questions yet):
 
 ```markdown
 ---
@@ -73,7 +73,7 @@ Notes on frontmatter:
 Tell the user:
 
 1. Place source documents (PDFs, notes, articles, briefs) in `decks/<slug>/sources/`
-2. Then run `/quizv:plan` to plan the quiz content
-3. Or run `/quizv:create` directly to generate questions without a plan
+2. Then run `/hashquiz:plan` to plan the quiz content
+3. Or run `/hashquiz:create` directly to generate questions without a plan
 
 Mention the language that was selected so the user knows all generated content will be in that language.

@@ -1,6 +1,6 @@
 # Component Reference
 
-Complete API reference for all components in `@quizv/ui`.
+Complete API reference for all components in `@hashquiz/ui`.
 
 Import from the package barrel:
 
@@ -8,21 +8,21 @@ Import from the package barrel:
 import {
   BrandLogo, FxBackdrop, FxCountdown, FxHourglass, FxLobby, FxReveal, FxVerdict, FxPodium,
   AnswerButton, PlayerList, Podium, QrCode, DifficultyBar, QuizInfoPanel,
-} from '@quizv/ui'
+} from '@hashquiz/ui'
 ```
 
 ---
 
 ## Fx components
 
-Canvas scenes driven by the theme tokens (`--qv-*`, `--qv-fx-*`). The shared engine lives in
+Canvas scenes driven by the theme tokens (`--hq-*`, `--hq-fx-*`). The shared engine lives in
 `packages/ui/src/fx/` (`loop.ts` render loop, `draw.ts` primitives, `layout.ts` pure geometry, `theme.ts`
 token reader, `scenes/` one file per scene). Common behavior:
 
 - `prefers-reduced-motion: reduce` — no particle movement; the final state fades in, information is identical
 - The render loop pauses while the tab is hidden
 - No color or font is hardcoded: everything is read from CSS variables
-- The canvas is `aria-hidden`; the information is also available as DOM text (labels, `aria-label`, `.qv-sr-only`)
+- The canvas is `aria-hidden`; the information is also available as DOM text (labels, `aria-label`, `.hq-sr-only`)
 - Animations never block buttons or events
 
 ### FxCountdown
@@ -56,7 +56,7 @@ no props. Geometry (`hourglassHalfWidth`, `hourglassSlots`) lives in `fx/layout.
 
 ### BrandLogo
 
-The QuizV wordmark. By default fixed top left, grey and discreet (`--qv-text-muted`, opacity 0.7, like the host
+The HashQuiz wordmark. By default fixed top left, grey and discreet (`--hq-text-muted`, opacity 0.7, like the host
 fullscreen button): mounted once in the player `App.vue` and in the host lobby. `centered` renders a large accent
 wordmark in the page flow (host deck pages).
 
@@ -70,7 +70,7 @@ for small groups.
 | Prop | Type | Required | Default | Description |
 |------|------|----------|---------|-------------|
 | `players` | `{ id: string; pseudo?: string }[]` | yes | — | One dot per entry (no pseudo: anonymous dot) |
-| `highlightId` | `string` | no | — | Dot drawn in `--qv-accent` (the current player) |
+| `highlightId` | `string` | no | — | Dot drawn in `--hq-accent` (the current player) |
 | `labels` | `number` | no | `8` | Number of most recent pseudos labelled |
 | `spread` | `number` | no | `0.05` | Spiral spread, relative to the smaller canvas side |
 
@@ -81,7 +81,7 @@ for small groups.
 ### FxReveal
 
 Answer reveal: one particle per vote falls into its answer column and stacks, then the correct columns turn
-`--qv-correct` while the others dim and percentages count up. Replaces `AnswerBarChart`.
+`--hq-correct` while the others dim and percentages count up. Replaces `AnswerBarChart`.
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
@@ -98,13 +98,13 @@ Column stacks shrink to fit the canvas, so 100 votes in one column stay on scree
 
 ### FxVerdict
 
-Verdict of the current player after the reveal: 13 glowing nodes converge onto a check in `--qv-correct`, joined
-by thin constellation lines; or, when wrong or unanswered, they form a cross in `--qv-wrong` that cracks, its dots
+Verdict of the current player after the reveal: 13 glowing nodes converge onto a check in `--hq-correct`, joined
+by thin constellation lines; or, when wrong or unanswered, they form a cross in `--hq-wrong` that cracks, its dots
 falling onto an invisible floor where they pile up. The check loops (play, hold ~1.2 s, fade, replay). The cross lines
 vanish when it shatters and return as the dots reassemble. The cross loop never fades: each iteration starts from the
 dots lying on the floor, which rise back up to reassemble the cross, then crack and fall again.
 With reduced motion the final shape is static.
-The canvas is `aria-hidden`: the parent view renders the points and a screen-reader verdict (`.qv-sr-only`).
+The canvas is `aria-hidden`: the parent view renders the points and a screen-reader verdict (`.hq-sr-only`).
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
@@ -119,13 +119,13 @@ The canvas is `aria-hidden`: the parent view renders the points and a screen-rea
 ### FxPodium
 
 Animated podium of the top 3: columns of particles proportional to the scores, with name and score. Once the winner's
-column has formed, a ring and burst celebrate them, then smaller fireworks (mostly white, sometimes `--qv-accent`) keep
+column has formed, a ring and burst celebrate them, then smaller fireworks (mostly white, sometimes `--hq-accent`) keep
 popping above the podium every 0.8–1.6 s (at most 250 live sparks). No fireworks with reduced motion.
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `podium` | `PodiumEntry[]` | yes | Sorted ranking; only the first 3 are drawn |
-| `highlightId` | `string` | no | Player id highlighted in `--qv-accent`; if ranked below 3, their rank is shown |
+| `highlightId` | `string` | no | Player id highlighted in `--hq-accent`; if ranked below 3, their rank is shown |
 
 ```vue
 <FxPodium :podium="game.podium" :highlight-id="game.playerId" />
@@ -166,10 +166,10 @@ Answer choice button with multiple visual states. Supports multi-select: remains
 
 | `colorId` | Color |
 |-----------|-------|
-| `a` | `var(--qv-choice-a)` |
-| `b` | `var(--qv-choice-b)` |
-| `c` | `var(--qv-choice-c)` |
-| `d` | `var(--qv-choice-d)` |
+| `a` | `var(--hq-choice-a)` |
+| `b` | `var(--hq-choice-b)` |
+| `c` | `var(--hq-choice-c)` |
+| `d` | `var(--hq-choice-d)` |
 
 ### Usage
 
@@ -255,7 +255,7 @@ Canvas-based QR code generator. Used on the host lobby to display the player joi
 <QrCode :value="game.playerUrl" :size="220" />
 ```
 
-Colors come from `--qv-qr-dark` (modules) and `--qv-qr-light` (background).
+Colors come from `--hq-qr-dark` (modules) and `--hq-qr-light` (background).
 
 ---
 

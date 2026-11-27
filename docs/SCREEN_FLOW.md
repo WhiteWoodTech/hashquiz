@@ -16,9 +16,9 @@ HostPhase: 'connecting' → 'lobby' → 'question' → 'revealed' → 'finished'
 
 | Phase | Trigger | View | Actions |
 |-------|---------|------|---------|
-| `deck-select` | Initial load without a server | `DeckSelectView` | Grid of quiz cards (`QuizInfoPanel`) and a tag list; a card starts the deck. Tag pages live on the URL hash (`#/tag/<tag>`): same page design, cards filtered to the tag, back link to the list. Backdrop fixed, QuizV logo centered |
+| `deck-select` | Initial load without a server | `DeckSelectView` | Grid of quiz cards (`QuizInfoPanel`) and a tag list; a card starts the deck. Tag pages live on the URL hash (`#/tag/<tag>`): same page design, cards filtered to the tag, back link to the list. Backdrop fixed, HashQuiz logo centered |
 | `connecting` | Initial load / WS close or error | "Connecting…" spinner | — |
-| `lobby` | `host_connected` or `game_reset` received | `LobbyView` | One centered column that scrolls over two screens: the quiz card, vertically centered (first screen), then join link + join code, QR code, player count and Start button. Grey QuizV logo fixed top left. Several constellations (`FxLobby`, 12 players max each) fill the left and right side areas, with the `PlayerList` name lists at the bottom of each side |
+| `lobby` | `host_connected` or `game_reset` received | `LobbyView` | One centered column that scrolls over two screens: the quiz card, vertically centered (first screen), then join link + join code, QR code, player count and Start button. Grey HashQuiz logo fixed top left. Several constellations (`FxLobby`, 12 players max each) fill the left and right side areas, with the `PlayerList` name lists at the bottom of each side |
 | `question` | `question_started` received | `QuestionView` | Countdown (`FxCountdown`), answer count, Reveal |
 | `revealed` | `answer_revealed` received | `RevealView` | Vote particles (`FxReveal`), score deltas, Next button |
 | `finished` | `game_ended` received | `PodiumView` | Animated podium (`FxPodium`), full leaderboard, **🔁 Rejouer** button (sends `host_reset`) |
@@ -86,7 +86,7 @@ PlayerPhase: 'join' → 'lobby' → 'question' → 'podium' (→ 'lobby' on game
 | Phase | Trigger | View | Actions |
 |-------|---------|------|---------|
 | `join` | Initial load | `JoinView` | Enter join code, pseudo, email. Below the form, when solo is available (local transport, or Supabase credentials set), « Ou jouez en solo » lists the solo decks of the runtime `decks.json` (`SoloCatalog`, lazy-loaded chunk; hidden while loading, on error or without solo decks); each card links to `#/solo/<deckId>` |
-| `lobby` | `player_joined` (own join confirmed), or `game_reset` from the podium | `LobbyView` | Grey QuizV logo top left, quiz card (same look as the host lobby, compact on phones), dot hourglass (`FxHourglass`) with "Waiting for the host…", and the room constellation (`FxLobby`) |
+| `lobby` | `player_joined` (own join confirmed), or `game_reset` from the podium | `LobbyView` | Grey HashQuiz logo top left, quiz card (same look as the host lobby, compact on phones), dot hourglass (`FxHourglass`) with "Waiting for the host…", and the room constellation (`FxLobby`) |
 | `question` | `question_started` received | `QuestionView` | Answer grid + countdown; once `answer_revealed` arrives, a result block replaces the countdown at the top (verdict constellation, total score, rank, points gained, speed); no tinted background, the shared `FxBackdrop` dust stays |
 | `podium` | `game_ended` received | `PodiumView` | Final rank + score, animated podium (`FxPodium`) |
 
@@ -137,7 +137,7 @@ PlayerPhase: 'join' → 'lobby' → 'question' → 'podium' (→ 'lobby' on game
 
 ### Rank
 
-After each reveal the store computes the player's rank with `rankOf(scores, playerId)` from `@quizv/core`
+After each reveal the store computes the player's rank with `rankOf(scores, playerId)` from `@hashquiz/core`
 (returns `{ rank, total }` or `null`) and exposes it as `rank` / `playerTotal`. The question view shows it as
 `3e / 12`.
 

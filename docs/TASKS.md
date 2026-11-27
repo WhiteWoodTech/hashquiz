@@ -1,6 +1,6 @@
 # Tasks
 
-Project task backlog for QuizV.
+Project task backlog for HashQuiz.
 
 ---
 
@@ -37,10 +37,10 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 - [ ] Legal review of `LICENSE.md`, `LICENSE_EE.md` and `CLA.md`
 - [ ] Decide the licensor entity and transfer the IP to the company before fundraising
 - [ ] Implement offline license key verification in `packages/ee/` (signed file, public key)
-- [ ] Add extension points in core/server/apps for `@quizv/ee` features
+- [ ] Add extension points in core/server/apps for `@hashquiz/ee` features
 - [ ] Set up a CLA bot on pull requests
 
-- [ ] Série en cours (streak) : calculer dans `@quizv/core` le nombre de bonnes réponses consécutives par joueur,
+- [ ] Série en cours (streak) : calculer dans `@hashquiz/core` le nombre de bonnes réponses consécutives par joueur,
       l'envoyer dans `answer_revealed` et l'afficher sur l'écran verdict joueur
 - [ ] Dépassements au classement : envoyer le rang précédent et le nouveau rang de chaque joueur
       (`answer_revealed` ou nouvel événement), puis ajouter un écran classement animé entre deux questions côté animateur
@@ -72,10 +72,10 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 | # | Task | Description |
 |---|------|-------------|
 | 1 | Supabase schema | Only if persistence is needed: migrations for `quizzes`, `game_sessions`, `game_players`, `game_answers` |
-| ~~2~~ | ~~`@quizv/backend-supabase`~~ | ✅ Done: `IRealtimeTransport` on Supabase Realtime Broadcast + presence |
+| ~~2~~ | ~~`@hashquiz/backend-supabase`~~ | ✅ Done: `IRealtimeTransport` on Supabase Realtime Broadcast + presence |
 | 3 | Host auth | Magic link login via Supabase Auth |
 | 4 | Quiz persistence | Save/load quizzes tied to host account |
-| 5 | `quizv upload` CLI | Upload a `.quizv.md` file to Supabase |
+| 5 | `hashquiz upload` CLI | Upload a `.hashquiz.md` file to Supabase |
 | ~~6~~ | ~~Vercel deployment~~ | ✅ Done: `vercel.json` + env vars, see [`DEPLOY.md`](DEPLOY.md) |
 | 7 | Cloud E2E test | Full game flow via Supabase transport |
 
@@ -83,8 +83,8 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
 | # | Task | Description |
 |---|------|-------------|
-| 8 | `slidev-addon-quizv` scaffold | Package setup, register Vue component |
-| 9 | `<QuizvEmbed>` component | QR code + live answer overlay on slide |
+| 8 | `slidev-addon-hashquiz` scaffold | Package setup, register Vue component |
+| 9 | `<HashQuizEmbed>` component | QR code + live answer overlay on slide |
 | 10 | Presenter controls | Host controls in Slidev presenter notes panel |
 | 11 | Answer animation | Player answers animate as overlay on slide |
 
@@ -92,17 +92,17 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
 | # | Task | Description |
 |---|------|-------------|
-| 12 | Hot reload | Reload quiz without restarting server on `.quizv.md` change |
+| 12 | Hot reload | Reload quiz without restarting server on `.hashquiz.md` change |
 | 13 | Question types | Add `type: multiple` explicit support + display hint |
 | 14 | Leaderboard between questions | Show top 5 snapshot between question and next question |
 | 15 | Timer sync | Broadcast `timer_tick` events for host/player sync |
-| 17 | Theming | Add `@quizv/theme-dark` and `@quizv/theme-minimal` variants |
+| 17 | Theming | Add `@hashquiz/theme-dark` and `@hashquiz/theme-minimal` variants |
 
 ---
 
 ## Completed
 
-- [x] Backend plugins : `@quizv/backend-local` / `@quizv/backend-supabase` derrière les ports de `@quizv/core`
+- [x] Backend plugins : `@hashquiz/backend-local` / `@hashquiz/backend-supabase` derrière les ports de `@hashquiz/core`
       (`SoloBackend`), solo local sur `hashquiz dev` (SQLite `.hashquiz/solo.db`, rescoring serveur, présence WS),
       Edge Function qui lit `decks.json` depuis `HASHQUIZ_SITE_URL`, commande `hashquiz supabase deploy`, projet
       Supabase livré dans le paquet npm
@@ -126,12 +126,12 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
 ### Phase 2 — Vue Apps
 
-- [x] `@quizv/theme-default` — CSS tokens (`--qv-*`)
-- [x] `@quizv/ui` — `TimerRing`, `AnswerButton`, `AnswerBarChart`, `PlayerList`, `Podium`, `QrCode`
+- [x] `@hashquiz/theme-default` — CSS tokens (`--hq-*`)
+- [x] `@hashquiz/ui` — `TimerRing`, `AnswerButton`, `AnswerBarChart`, `PlayerList`, `Podium`, `QrCode`
 - [x] `apps/host` — Lobby, Question, Reveal, Podium views
 - [x] `apps/player` — Join, Lobby, Question, Feedback, Podium views
 - [x] Multi-select answers with auto-submit at timer expiry
-- [x] `quizv dev` spawns Vite host (3031) + player (3032) apps
+- [x] `hashquiz dev` spawns Vite host (3031) + player (3032) apps
 - [x] `choiceCounts` in `answer_revealed` for host bar chart
 - [x] `playerUrl` in `host_connected` for QR code
 - [x] Socket identity guard (prevents stale WS close resetting phase)
@@ -142,12 +142,12 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
 ### Phase 1 — Core Engine
 
-- [x] Initialize monorepo (`quizv/` with Bun workspaces)
-- [x] `@quizv/parser` — `parseQuizFile()` + `validateQuiz()` + 13 tests
-- [x] `@quizv/core` — `GameEngine`, `GameEvent`, `IRealtimeTransport`, scoring + 14 tests
-- [x] `@quizv/backend-local` — `LocalTransport` (Bun WS pub/sub)
-- [x] `@quizv/server` — Bun HTTP+WS server + `quizv dev | check` CLI
-- [x] `examples/demo.quizv.md` — sample quiz
+- [x] Initialize monorepo (`hashquiz/` with Bun workspaces)
+- [x] `@hashquiz/parser` — `parseQuizFile()` + `validateQuiz()` + 13 tests
+- [x] `@hashquiz/core` — `GameEngine`, `GameEvent`, `IRealtimeTransport`, scoring + 14 tests
+- [x] `@hashquiz/backend-local` — `LocalTransport` (Bun WS pub/sub)
+- [x] `@hashquiz/server` — Bun HTTP+WS server + `hashquiz dev | check` CLI
+- [x] `examples/demo.hashquiz.md` — sample quiz
 
 ---
 

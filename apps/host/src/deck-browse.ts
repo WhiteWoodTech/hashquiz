@@ -1,7 +1,7 @@
-import type { BrowsableDeck } from '@quizv/core/decks'
+import type { BrowsableDeck } from '@hashquiz/core/decks'
 
-// deckInfo lives in @quizv/core so the player solo screens use the same card data.
-export { deckInfo, type BrowsableDeck } from '@quizv/core/decks'
+// deckInfo lives in @hashquiz/core so the player solo screens use the same card data.
+export { deckInfo, type BrowsableDeck } from '@hashquiz/core/decks'
 
 export interface TagCount {
   tag: string

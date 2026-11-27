@@ -1,6 +1,6 @@
 # Features
 
-Feature list and roadmap for QuizV, organized by phase.
+Feature list and roadmap for HashQuiz, organized by phase.
 
 ---
 
@@ -8,7 +8,7 @@ Feature list and roadmap for QuizV, organized by phase.
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| `.quizv.md` parser | ✅ | Parse quiz files with YAML frontmatter and GFM choices |
+| `.hashquiz.md` parser | ✅ | Parse quiz files with YAML frontmatter and GFM choices |
 | Quiz validation | ✅ | `validateQuiz()` reports malformed questions |
 | `GameEngine` state machine | ✅ | `lobby → active → finished` transitions |
 | `IRealtimeTransport` interface | ✅ | Pluggable transport layer |
@@ -17,8 +17,8 @@ Feature list and roadmap for QuizV, organized by phase.
 | Host role auth | ✅ | `host_*` commands rejected if `role !== 'host'` |
 | Player join code guard | ✅ | WS upgrade rejected on wrong `?code=` |
 | Scoring formula | ✅ | 500–1000 pts based on answer speed |
-| `quizv dev` CLI | ✅ | Starts WS server from a `.quizv.md` file |
-| `quizv check` CLI | ✅ | Validates a quiz file and reports errors |
+| `hashquiz dev` CLI | ✅ | Starts WS server from a `.hashquiz.md` file |
+| `hashquiz check` CLI | ✅ | Validates a quiz file and reports errors |
 | Unit tests | ✅ | 381 tests across 43 files (parser, core, decks, backends, UI, apps), 0 failures |
 
 ---
@@ -27,7 +27,7 @@ Feature list and roadmap for QuizV, organized by phase.
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| `@quizv/theme-default` | ✅ | CSS custom properties (`--qv-*`), new look; `@quizv/theme-original` keeps the previous one |
+| `@hashquiz/theme-default` | ✅ | CSS custom properties (`--hq-*`), new look; `@hashquiz/theme-original` keeps the previous one |
 | `FxCountdown` component | ✅ | Particle countdown ring (replaces `TimerRing`) |
 | `AnswerButton` component | ✅ | Multi-state button with 4 color variants |
 | `FxReveal` component | ✅ | Vote particles falling into answer columns (replaces `AnswerBarChart`) |
@@ -48,7 +48,7 @@ Feature list and roadmap for QuizV, organized by phase.
 | Player app — Verdict | ✅ | Correct/wrong + points earned + rank (`3e / 12`), shown in the question view |
 | Player app — Podium | ✅ | Final rank + score |
 | Multi-select answers | ✅ | Toggle choices until timer ends, auto-submit |
-| `quizv dev` spawns Vite | ✅ | Host (3031) + Player (3032) Vite servers |
+| `hashquiz dev` spawns Vite | ✅ | Host (3031) + Player (3032) Vite servers |
 | `choiceCounts` in reveal | ✅ | Per-choice answer counts for the host reveal animation (`FxReveal`) |
 | `playerUrl` in `host_connected` | ✅ | Pre-filled join URL for QR code |
 
@@ -61,13 +61,13 @@ See [`DEPLOY.md`](DEPLOY.md) for setup.
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| `@quizv/backend-supabase` | ✅ | Supabase Realtime Broadcast + presence transport (unit-tested with a fake client) |
+| `@hashquiz/backend-supabase` | ✅ | Supabase Realtime Broadcast + presence transport (unit-tested with a fake client) |
 | Host/player apps on Supabase | ✅ | `VITE_TRANSPORT=supabase` switches both apps from local WS to Supabase |
 | Vercel deployment | ✅ | `vercel.json` + `bun run build:web`, host at `/host`, player at `/` |
 | Internet multiplayer | ✅ | Players join from anywhere via URL / QR code |
 | Host authentication | ⬜ | Supabase Auth (magic link) |
 | Quiz persistence | ⬜ | Save/load quizzes from Supabase Postgres |
-| `quizv upload` CLI | ⬜ | Push quiz to Supabase |
+| `hashquiz upload` CLI | ⬜ | Push quiz to Supabase |
 
 ---
 
@@ -89,7 +89,7 @@ plugin: Supabase (Postgres tables + Realtime) or the local `hashquiz dev` server
 | Run persistence | ✅ | `solo_runs` + `solo_answers`, written once at the end of the run; abandoned runs are not stored |
 | Scoring mode | ✅ | Runtime config `soloScoring` (`HASHQUIZ_SOLO_SCORING` / `VITE_SOLO_SCORING`): `browser` (default, `submit_solo_run` RPC) or `edge` (`solo-submit` Edge Function rescoring) |
 | HashQuiz interest form | ✅ | Optional email + consent on the end screen, stored in insert-only `leads` |
-| Runtime solo decks | ✅ | The player reads the same `decks.json` as the host (written by `hashquiz build`); `deckVersion` and `deckInfo` shared in `@quizv/core/decks` |
+| Runtime solo decks | ✅ | The player reads the same `decks.json` as the host (written by `hashquiz build`); `deckVersion` and `deckInfo` shared in `@hashquiz/core/decks` |
 | Home-page solo list | ✅ | « Ou jouez en solo » under the join form lists the solo decks |
 | Async room | ⬜ | End date, private code, shared persisted leaderboard (reuses the solo storage) |
 
@@ -99,8 +99,8 @@ plugin: Supabase (Postgres tables + Realtime) or the local `hashquiz dev` server
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| `slidev-addon-quizv` | ⬜ | Embed live quizzes in Slidev presentations |
-| `<QuizvEmbed>` component | ⬜ | QR code + answer overlay on slides |
+| `slidev-addon-hashquiz` | ⬜ | Embed live quizzes in Slidev presentations |
+| `<HashQuizEmbed>` component | ⬜ | QR code + answer overlay on slides |
 | Presenter controls | ⬜ | Host controls in Slidev presenter notes |
 | Live answer animation | ⬜ | Answers animate as overlay on slide |
 

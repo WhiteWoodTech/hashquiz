@@ -1,5 +1,5 @@
 // Standalone-bundled for Deno (Supabase Edge Function): import only types and calcPoints.
-import type { Quiz } from '@quizv/parser'
+import type { Quiz } from '@hashquiz/parser'
 import type { SoloAnswer, SoloRunSubmission } from './solo'
 import { calcPoints } from './scoring'
 

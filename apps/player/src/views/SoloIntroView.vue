@@ -27,9 +27,9 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { QuizInfoPanel } from '@quizv/ui'
+import { QuizInfoPanel } from '@hashquiz/ui'
 import { useSoloStore, PSEUDO_MAX } from '../stores/solo'
-import { deckInfo } from '@quizv/core/decks'
+import { deckInfo } from '@hashquiz/core/decks'
 import SoloLeaderboard from '../components/SoloLeaderboard.vue'
 import '../solo/solo.css'
 
@@ -41,5 +41,5 @@ const info = computed(() => (solo.deck ? deckInfo(solo.deck) : null))
 <style scoped>
 .solo-intro { display: flex; flex-direction: column; gap: 1.25rem; padding-top: 1rem; }
 .solo-intro__form { display: flex; flex-direction: column; gap: 0.6rem; }
-.solo-intro__unavailable { text-align: center; color: var(--qv-text-muted); padding-top: 3rem; font-size: 1.1rem; }
+.solo-intro__unavailable { text-align: center; color: var(--hq-text-muted); padding-top: 3rem; font-size: 1.1rem; }
 </style>

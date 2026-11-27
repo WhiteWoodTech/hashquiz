@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test'
-import type { Quiz, Question } from '@quizv/parser'
+import type { Quiz, Question } from '@hashquiz/parser'
 import { serveQuestions } from '../src/selection'
 
 const makeQuestion = (n: number): Question => ({

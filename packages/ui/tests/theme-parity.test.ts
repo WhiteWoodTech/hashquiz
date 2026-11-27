@@ -4,15 +4,15 @@ import { join } from 'node:path'
 
 const root = join(import.meta.dir, '..', '..')
 const read = (pkg: string) => readFileSync(join(root, pkg, 'styles', 'vars.css'), 'utf8')
-const names = (css: string) => new Set(css.match(/--qv-[a-z0-9-]+(?=\s*:)/g) ?? [])
+const names = (css: string) => new Set(css.match(/--hq-[a-z0-9-]+(?=\s*:)/g) ?? [])
 
 const REQUIRED = [
-  '--qv-bg', '--qv-surface', '--qv-surface-2', '--qv-border', '--qv-accent', '--qv-accent-2',
-  '--qv-correct', '--qv-wrong', '--qv-warn', '--qv-text', '--qv-text-muted', '--qv-progress', '--qv-font-display',
-  '--qv-font-mono', '--qv-radius', '--qv-radius-sm',
-  '--qv-font-label', '--qv-label-spacing', '--qv-choice-a', '--qv-choice-b', '--qv-choice-c',
-  '--qv-choice-d', '--qv-qr-dark', '--qv-qr-light', '--qv-fx-dot', '--qv-fx-line-opacity',
-  '--qv-fx-glow', '--qv-fx-dust-density', '--qv-fx-speed',
+  '--hq-bg', '--hq-surface', '--hq-surface-2', '--hq-border', '--hq-accent', '--hq-accent-2',
+  '--hq-correct', '--hq-wrong', '--hq-warn', '--hq-text', '--hq-text-muted', '--hq-progress', '--hq-font-display',
+  '--hq-font-mono', '--hq-radius', '--hq-radius-sm',
+  '--hq-font-label', '--hq-label-spacing', '--hq-choice-a', '--hq-choice-b', '--hq-choice-c',
+  '--hq-choice-d', '--hq-qr-dark', '--hq-qr-light', '--hq-fx-dot', '--hq-fx-line-opacity',
+  '--hq-fx-glow', '--hq-fx-dust-density', '--hq-fx-speed',
 ]
 
 describe('theme parity', () => {

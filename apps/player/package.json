@@ -1,5 +1,5 @@
 {
-  "name": "@quizv/app-player",
+  "name": "@hashquiz/app-player",
   "version": "0.0.1",
   "license": "SEE LICENSE IN ../../LICENSE.md",
   "type": "module",
@@ -8,12 +8,12 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@quizv/core": "workspace:*",
-    "@quizv/theme-default": "workspace:*",
-    "@quizv/theme-original": "workspace:*",
-    "@quizv/backend-local": "workspace:*",
-    "@quizv/backend-supabase": "workspace:*",
-    "@quizv/ui": "workspace:*",
+    "@hashquiz/core": "workspace:*",
+    "@hashquiz/theme-default": "workspace:*",
+    "@hashquiz/theme-original": "workspace:*",
+    "@hashquiz/backend-local": "workspace:*",
+    "@hashquiz/backend-supabase": "workspace:*",
+    "@hashquiz/ui": "workspace:*",
     "marked": "18.0.11",
     "pinia": "^4.0.3",
     "vue": "^3.4.27"

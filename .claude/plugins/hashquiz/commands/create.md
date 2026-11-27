@@ -1,16 +1,16 @@
 ---
-description: Generate quiz questions in index.quizv.md from an existing plan.md
+description: Generate quiz questions in index.hashquiz.md from an existing plan.md
 argument-hint: "[deck-slug]"
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 ---
 
 # Generate Quiz Questions
 
-Generate the full quiz content in `index.quizv.md` from an existing `plan.md`.
+Generate the full quiz content in `index.hashquiz.md` from an existing `plan.md`.
 
 ## Instructions
 
-Read the skill reference first: load `skills/building-quizv-decks/references/quizv-format.md` from `${CLAUDE_PLUGIN_ROOT}`.
+Read the skill reference first: load `skills/building-hashquiz-decks/references/hashquiz-format.md` from `${CLAUDE_PLUGIN_ROOT}`.
 
 ### Step 1 — Detect the Deck
 
@@ -20,19 +20,19 @@ Find the target deck:
 2. If `$ARGUMENTS` is provided, treat it as the deck slug and look for `decks/<slug>/`
 3. Otherwise, list available decks in `decks/` and ask the user which one to generate
 
-Verify that `decks/<slug>/index.quizv.md` exists.
+Verify that `decks/<slug>/index.hashquiz.md` exists.
 
 ### Step 2 — Read Plan and Context
 
 1. **Read `decks/<slug>/sources/plan.md`** — this is the primary guide for question generation.
-If no plan exists, warn the user and suggest running `/quizv:plan` first. If they want to proceed without a plan,
+If no plan exists, warn the user and suggest running `/hashquiz:plan` first. If they want to proceed without a plan,
 ask them what questions they want and generate directly.
-2. **Read the frontmatter** of `index.quizv.md` to get quiz metadata
+2. **Read the frontmatter** of `index.hashquiz.md` to get quiz metadata
 3. **Read source files** in `decks/<slug>/sources/` for accurate content to base questions on
 
 ### Step 3 — Generate Questions
 
-Write the complete `index.quizv.md` file with:
+Write the complete `index.hashquiz.md` file with:
 
 1. **Keep the existing frontmatter** exactly as-is from the scaffold
 2. **Generate each question** following the plan, in order
@@ -60,7 +60,7 @@ tags: [{tag1}, {tag2}]
 
 ### Question Quality Rules
 
-1. **Exactly match the `.quizv.md` format** — frontmatter, `##` heading, GFM task list, blockquote
+1. **Exactly match the `.hashquiz.md` format** — frontmatter, `##` heading, GFM task list, blockquote
 2. **Every question MUST have an explanation** in a blockquote (`> ...`)
 3. **Minimum 2 choices**, typically 4 for single-choice
 4. **At least 1 correct answer** per question
@@ -83,7 +83,7 @@ tags: [{tag1}, {tag2}]
 After writing the file, run the validation command:
 
 ```bash
-bun run packages/server/src/cli.ts check decks/<slug>/index.quizv.md
+bun run packages/server/src/cli.ts check decks/<slug>/index.hashquiz.md
 ```
 
 If validation fails, fix the issues and re-validate.
@@ -95,4 +95,4 @@ Report to the user:
 - Number of questions generated
 - Difficulty breakdown
 - Validation result
-- Suggest running the dev server to preview: `bun run packages/server/src/cli.ts dev decks/<slug>/index.quizv.md`
+- Suggest running the dev server to preview: `bun run packages/server/src/cli.ts dev decks/<slug>/index.hashquiz.md`

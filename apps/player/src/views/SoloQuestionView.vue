@@ -2,7 +2,7 @@
   <div class="solo-q" v-if="q">
     <!-- Progress: current question / total -->
     <div class="solo-q__progress">
-      <span class="solo-q__progress-label qv-label">Q{{ solo.index + 1 }}</span>
+      <span class="solo-q__progress-label hq-label">Q{{ solo.index + 1 }}</span>
       <div class="solo-q__track">
         <div class="solo-q__fill" :style="{ width: ((solo.index + 1) / (solo.total || 1) * 100) + '%' }" />
       </div>
@@ -14,7 +14,7 @@
     </div>
     <div v-else-if="result" role="status" :class="['solo-q__result', result.isCorrect ? 'solo-q__result--correct' : 'solo-q__result--wrong']">
       <FxVerdict class="solo-q__fx" :correct="result.isCorrect" :delta="result.points" :answered="result.answered" />
-      <span class="qv-sr-only">{{ result.isCorrect ? 'Bonne réponse' : result.answered ? 'Mauvaise réponse' : 'Temps écoulé' }}</span>
+      <span class="hq-sr-only">{{ result.isCorrect ? 'Bonne réponse' : result.answered ? 'Mauvaise réponse' : 'Temps écoulé' }}</span>
       <span class="solo-q__delta">+{{ result.points }} pts</span>
       <span class="solo-q__score">{{ solo.score }} <small>pts</small></span>
       <span class="solo-q__info">
@@ -51,7 +51,7 @@
       <div v-if="explanationHtml" class="solo-q__explanation" v-html="explanationHtml" />
 
       <section v-if="solo.liveOthers.length" class="solo-q__live" aria-label="Joueurs en cours">
-        <h3 class="solo-q__live-title qv-label">En ce moment</h3>
+        <h3 class="solo-q__live-title hq-label">En ce moment</h3>
         <ul>
           <li v-for="p in solo.liveOthers" :key="p.key">
             <span class="solo-q__live-name">{{ p.pseudo }}</span>
@@ -68,7 +68,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import { marked } from 'marked'
-import { AnswerButton, FxCountdown, FxVerdict } from '@quizv/ui'
+import { AnswerButton, FxCountdown, FxVerdict } from '@hashquiz/ui'
 import { useSoloStore } from '../stores/solo'
 import '../solo/solo.css'
 
@@ -160,10 +160,10 @@ function validate() {
 .solo-q { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding-top: 0.5rem; }
 
 .solo-q__progress { display: flex; align-items: center; gap: 0.6rem; width: 100%; }
-.solo-q__progress-label { font-size: 0.8rem; color: var(--qv-text-muted); min-width: 2rem; }
+.solo-q__progress-label { font-size: 0.8rem; color: var(--hq-text-muted); min-width: 2rem; }
 .solo-q__progress-label:last-child { text-align: right; }
-.solo-q__track { flex: 1; height: 4px; background: var(--qv-border); border-radius: 2px; overflow: hidden; }
-.solo-q__fill { height: 100%; background: var(--qv-progress); border-radius: 2px; transition: width 0.3s; }
+.solo-q__track { flex: 1; height: 4px; background: var(--hq-border); border-radius: 2px; overflow: hidden; }
+.solo-q__fill { height: 100%; background: var(--hq-progress); border-radius: 2px; transition: width 0.3s; }
 
 .solo-q__timer { margin: 0.5rem 0; }
 .solo-q__text { font-size: 1.25rem; text-align: center; margin: 0.5rem 0; line-height: 1.4; }
@@ -179,11 +179,11 @@ function validate() {
 }
 .solo-q__result .solo-q__fx { height: 88px; }
 .solo-q__delta { font-size: 1.15rem; font-weight: 700; }
-.solo-q__result--correct .solo-q__delta { color: var(--qv-correct); }
-.solo-q__result--wrong   .solo-q__delta { color: var(--qv-text-muted); }
+.solo-q__result--correct .solo-q__delta { color: var(--hq-correct); }
+.solo-q__result--wrong   .solo-q__delta { color: var(--hq-text-muted); }
 .solo-q__score { font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
-.solo-q__score small { font-size: 0.8rem; font-weight: 500; color: var(--qv-text-muted); }
-.solo-q__info { font-size: 0.8rem; color: var(--qv-text-muted); }
+.solo-q__score small { font-size: 0.8rem; font-weight: 500; color: var(--hq-text-muted); }
+.solo-q__info { font-size: 0.8rem; color: var(--hq-text-muted); }
 @keyframes solo-pop {
   from { opacity: 0; transform: scale(0.8); }
   to   { opacity: 1; transform: scale(1); }
@@ -194,24 +194,24 @@ function validate() {
 
 .solo-q__explanation {
   width: 100%; margin: 0; padding: 0.75rem 1rem; line-height: 1.5;
-  background: var(--qv-surface); border: 1px solid var(--qv-border); border-radius: var(--qv-radius);
-  color: var(--qv-text-muted);
+  background: var(--hq-surface); border: 1px solid var(--hq-border); border-radius: var(--hq-radius);
+  color: var(--hq-text-muted);
 }
 
 .solo-q__explanation :deep(p) { margin: 0 0 0.5rem; }
 .solo-q__explanation :deep(p:last-child) { margin: 0; }
 .solo-q__explanation :deep(code) {
-  background: var(--qv-surface-2); border: 1px solid var(--qv-border); border-radius: var(--qv-radius-sm);
+  background: var(--hq-surface-2); border: 1px solid var(--hq-border); border-radius: var(--hq-radius-sm);
   padding: 0.1rem 0.35rem; font-size: 0.9em;
 }
-.solo-q__explanation :deep(strong) { color: var(--qv-text); }
+.solo-q__explanation :deep(strong) { color: var(--hq-text); }
 .solo-q__explanation :deep(ul),
 .solo-q__explanation :deep(ol) { margin: 0.25rem 0; padding-left: 1.25rem; }
 
 .solo-q__live { width: 100%; }
-.solo-q__live-title { margin: 0 0 0.35rem; font-size: 0.75rem; color: var(--qv-text-muted); }
+.solo-q__live-title { margin: 0 0 0.35rem; font-size: 0.75rem; color: var(--hq-text-muted); }
 .solo-q__live ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.25rem; }
 .solo-q__live li { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.85rem; }
 .solo-q__live-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.solo-q__live-meta { color: var(--qv-text-muted); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.solo-q__live-meta { color: var(--hq-text-muted); font-variant-numeric: tabular-nums; flex-shrink: 0; }
 </style>

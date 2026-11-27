@@ -1,6 +1,6 @@
-import { fetchDecks, type LoadedDeck } from '@quizv/core/decks'
+import { fetchDecks, type LoadedDeck } from '@hashquiz/core/decks'
 
-export { toDecks } from '@quizv/core/decks'
+export { toDecks } from '@hashquiz/core/decks'
 
 /** A deck listed by the host (id from `collectDecks`, parsed quiz, content version). */
 export type BundledDeck = LoadedDeck

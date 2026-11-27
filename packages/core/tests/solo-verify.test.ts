@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test'
-import type { Quiz, Question } from '@quizv/parser'
+import type { Quiz, Question } from '@hashquiz/parser'
 import { SoloSession } from '../src/solo'
 import { verifySoloRun, compareRuns, type RankedRun } from '../src/solo-verify'
 import type { SoloRunSubmission } from '../src/solo'

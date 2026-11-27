@@ -1,7 +1,7 @@
 {
-  "name": "quizv",
+  "name": "hashquiz",
   "version": "0.1.0",
-  "description": "Create, plan, and generate QuizV quiz decks from sources and web research",
+  "description": "Create, plan, and generate HashQuiz quiz decks from sources and web research",
   "author": {
     "name": "Maxime Lenne",
     "email": "hello@maxime-lenne.fr"

@@ -29,14 +29,14 @@ defineProps<{
 </script>
 
 <style scoped>
-.diff-bar__track { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--qv-border); }
+.diff-bar__track { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--hq-border); }
 .diff-bar__seg { height: 100%; transition: width 0.4s ease; }
-.diff-bar__seg--easy   { background: var(--qv-correct); }
-.diff-bar__seg--medium { background: var(--qv-warn); }
-.diff-bar__seg--hard   { background: var(--qv-wrong); }
-.diff-bar__legend { margin: 0.4rem 0 0; font-size: 0.875rem; color: var(--qv-text-muted); display: flex; align-items: center; gap: 0.5rem; }
+.diff-bar__seg--easy   { background: var(--hq-correct); }
+.diff-bar__seg--medium { background: var(--hq-warn); }
+.diff-bar__seg--hard   { background: var(--hq-wrong); }
+.diff-bar__legend { margin: 0.4rem 0 0; font-size: 0.875rem; color: var(--hq-text-muted); display: flex; align-items: center; gap: 0.5rem; }
 .diff-bar__dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
-.diff-bar__dot--easy   { background: var(--qv-correct); }
-.diff-bar__dot--medium { background: var(--qv-warn); }
-.diff-bar__dot--hard   { background: var(--qv-wrong); }
+.diff-bar__dot--easy   { background: var(--hq-correct); }
+.diff-bar__dot--medium { background: var(--hq-warn); }
+.diff-bar__dot--hard   { background: var(--hq-wrong); }
 </style>

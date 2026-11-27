@@ -1,18 +1,18 @@
-## [2.0.0](https://github.com/maxime-lenne/quizv/compare/v1.0.0...v2.0.0) (2026-03-31)
+## [2.0.0](https://github.com/WhiteWoodTech/hashquiz/compare/v1.0.0...v2.0.0) (2026-03-31)
 
 ### Features
 
 - ✨ Multi-select answers: toggle until timer ends, auto-submit at 0
-- ✨ quizv dev spawns Vite apps for host and player
+- ✨ hashquiz dev spawns Vite apps for host and player
 - ✨ Player app: Join, Lobby, Question, Feedback, Podium views
 - ✨ Host app: Lobby, Question, Reveal, Podium views
-- ✨ Add PlayerList, Podium, QrCode to @quizv/ui
-- ✨ Add AnswerButton and AnswerBarChart to @quizv/ui
-- ✨ Add @quizv/ui package with TimerRing component
+- ✨ Add PlayerList, Podium, QrCode to @hashquiz/ui
+- ✨ Add AnswerButton and AnswerBarChart to @hashquiz/ui
+- ✨ Add @hashquiz/ui package with TimerRing component
 - ✨ Add choiceCounts to answer_revealed, playerUrl to host_connected
 - 📦 Player app infrastructure: Vite + Pinia + game store
 - 📦 Host app infrastructure: Vite + Pinia + game store
-- 📦 Add @quizv/theme-default CSS token package
+- 📦 Add @hashquiz/theme-default CSS token package
 
 ### Bug Fixes
 
@@ -29,17 +29,17 @@
 
 ---
 
-## [1.0.0](https://github.com/maxime-lenne/quizv/compare/v0.0.1...v1.0.0) (2026-03-31)
+## [1.0.0](https://github.com/WhiteWoodTech/hashquiz/compare/v0.0.1...v1.0.0) (2026-03-31)
 
 ### Features
 
 - ✨ Player UX: answer time display and persistent score bar
 - ✨ Fix join code, timer UX, and host timer sync
 - ✨ Improve host page: game state display and WS connection guard
-- ✨ Implement @quizv/server — Bun HTTP+WS dev server and CLI
-- ✨ Implement @quizv/transport-local — Bun WebSocket transport
-- ✨ Implement @quizv/core — game engine, scoring, events
-- ✨ Implement @quizv/parser — parseQuizFile and validateQuiz
+- ✨ Implement @hashquiz/server — Bun HTTP+WS dev server and CLI
+- ✨ Implement @hashquiz/transport-local — Bun WebSocket transport
+- ✨ Implement @hashquiz/core — game engine, scoring, events
+- ✨ Implement @hashquiz/parser — parseQuizFile and validateQuiz
 
 ### Bug Fixes
 
@@ -55,8 +55,8 @@
 ### Packages
 
 - 📦 Add Vue 3 app stubs and transport-supabase stub
-- 📦 Add @quizv/core — types, transport interface, game events
-- 📦 Add @quizv/parser package scaffold with types
+- 📦 Add @hashquiz/core — types, transport interface, game events
+- 📦 Add @hashquiz/parser package scaffold with types
 
 ### Configuration
 
@@ -65,14 +65,14 @@
 
 ### Tests
 
-- 🧪 Add failing tests for @quizv/parser
+- 🧪 Add failing tests for @hashquiz/parser
 
 ### Documentation
 
-- 📝 Add demo.quizv.md example quiz file
+- 📝 Add demo.hashquiz.md example quiz file
 
 ---
 
 ## 0.0.1 (2026-03-31)
 
-- 📦 Initialize quizv monorepo
+- 📦 Initialize hashquiz monorepo

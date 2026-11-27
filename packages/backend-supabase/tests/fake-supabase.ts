@@ -1,4 +1,4 @@
-import type { GameEvent, PlayerState } from '@quizv/core'
+import type { GameEvent, PlayerState } from '@hashquiz/core'
 
 type BroadcastCb = (msg: { payload: GameEvent }) => void
 type PresenceCb = () => void

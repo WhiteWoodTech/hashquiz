@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'bun:test'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Quiz, SoloRunSubmission } from '@quizv/core'
-import type { VerifiedRun } from '@quizv/core'
+import type { Quiz, SoloRunSubmission } from '@hashquiz/core'
+import type { VerifiedRun } from '@hashquiz/core'
 import { SoloApi, SoloLive, realtimeSettled, toSoloRunRow } from '../src/solo'
 
 const quiz: Quiz = {

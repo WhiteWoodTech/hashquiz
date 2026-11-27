@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient, type RealtimeChannel } from '@supabase/supabase-js'
-import type { IRealtimeTransport, Unsubscribe, GameEvent, PlayerState } from '@quizv/core'
+import type { IRealtimeTransport, Unsubscribe, GameEvent, PlayerState } from '@hashquiz/core'
 
 export interface SupabaseTransportOptions {
   url?: string

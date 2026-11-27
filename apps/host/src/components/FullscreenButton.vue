@@ -2,7 +2,7 @@
   <button
     v-if="supported && !isFullscreen"
     type="button"
-    class="fs-btn qv-label"
+    class="fs-btn hq-label"
     @click="enter"
   >
     ⛶ Fullscreen
@@ -40,15 +40,15 @@ onBeforeUnmount(() => document.removeEventListener('fullscreenchange', sync))
   z-index: 50;
   padding: 0.6vmin 1.2vmin;
   font-size: clamp(0.65rem, 1.1vmin, 0.9rem);
-  color: var(--qv-text-muted);
+  color: var(--hq-text-muted);
   background: transparent;
-  border: 1px solid var(--qv-border);
-  border-radius: var(--qv-radius-sm);
+  border: 1px solid var(--hq-border);
+  border-radius: var(--hq-radius-sm);
   cursor: pointer;
   opacity: 0.7;
   transition: opacity 0.2s, color 0.2s;
 }
 .fs-btn:hover,
-.fs-btn:focus-visible { opacity: 1; color: var(--qv-text); }
-.fs-btn:focus-visible { outline: 2px solid var(--qv-accent); outline-offset: 2px; }
+.fs-btn:focus-visible { opacity: 1; color: var(--hq-text); }
+.fs-btn:focus-visible { outline: 2px solid var(--hq-accent); outline-offset: 2px; }
 </style>

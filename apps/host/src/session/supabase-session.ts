@@ -1,7 +1,7 @@
-import { GameEngine, readRuntimeConfig } from '@quizv/core'
-import type { GameEvent, IRealtimeTransport, PlayerState, QuizInfo } from '@quizv/core'
-import { GameEvents } from '@quizv/core'
-import type { Quiz } from '@quizv/parser'
+import { GameEngine, readRuntimeConfig } from '@hashquiz/core'
+import type { GameEvent, IRealtimeTransport, PlayerState, QuizInfo } from '@hashquiz/core'
+import { GameEvents } from '@hashquiz/core'
+import type { Quiz } from '@hashquiz/parser'
 
 export const HOST_PRESENCE_ID = '__host__'
 
@@ -20,7 +20,7 @@ export interface HostSessionOptions {
 
 function resolveGraceMs(opt?: number): number {
   if (typeof opt === 'number' && Number.isFinite(opt) && opt >= 0) return opt
-  // Runtime config (/quizv-config.js) or VITE_QUIZV_GRACE_MS. import.meta.env is undefined under bun test.
+  // Runtime config (/hashquiz-config.js) or HASHQUIZ_GRACE_MS / VITE_GRACE_MS. import.meta.env is undefined under bun test.
   const fromConfig = readRuntimeConfig((import.meta.env ?? {}) as unknown as Record<string, string | undefined>).graceMs
   if (fromConfig !== undefined) return fromConfig
   return 60_000

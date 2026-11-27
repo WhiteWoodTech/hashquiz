@@ -1,5 +1,5 @@
 ---
-description: Plan quiz content from sources and generate a plan.md for a QuizV deck
+description: Plan quiz content from sources and generate a plan.md for a HashQuiz deck
 argument-hint: "[deck-slug]"
 allowed-tools: Read, Write, Bash, Glob, Grep, AskUserQuestion, WebSearch, WebFetch
 ---
@@ -10,8 +10,8 @@ Generate a `plan.md` document that structures the quiz before generating questio
 
 ## Instructions
 
-Read the skill references first: load `skills/building-quizv-decks/references/quizv-format.md`
-and `skills/building-quizv-decks/references/plan-template.md` from `${CLAUDE_PLUGIN_ROOT}`.
+Read the skill references first: load `skills/building-hashquiz-decks/references/hashquiz-format.md`
+and `skills/building-hashquiz-decks/references/plan-template.md` from `${CLAUDE_PLUGIN_ROOT}`.
 
 ### Step 1 — Detect the Deck
 
@@ -21,11 +21,11 @@ Find the target deck:
 2. If `$ARGUMENTS` is provided, treat it as the deck slug and look for `decks/<slug>/`
 3. Otherwise, list available decks in `decks/` and ask the user which one to plan
 
-Verify that `decks/<slug>/index.quizv.md` exists. If not, suggest running `/quizv:new` first.
+Verify that `decks/<slug>/index.hashquiz.md` exists. If not, suggest running `/hashquiz:new` first.
 
 ### Step 2 — Read Context
 
-1. **Read the frontmatter** of `decks/<slug>/index.quizv.md` to understand title, description, tags, language,
+1. **Read the frontmatter** of `decks/<slug>/index.hashquiz.md` to understand title, description, tags, language,
 and any constraints (max-questions, max-time, target-difficulty)
 2. **Read all files in `decks/<slug>/sources/`** to understand the source material available.
 Read every file fully — these are the primary content for quiz questions.
@@ -73,4 +73,4 @@ Present a summary to the user:
 - Tag/topic coverage
 - Any gaps or concerns
 
-Ask the user to review `sources/plan.md` and make adjustments before proceeding to `/quizv:create`.
+Ask the user to review `sources/plan.md` and make adjustments before proceeding to `/hashquiz:create`.

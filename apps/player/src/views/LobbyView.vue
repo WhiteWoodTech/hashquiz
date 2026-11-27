@@ -19,7 +19,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useGameStore } from '../stores/game'
-import { FxHourglass, FxLobby, QuizInfoPanel } from '@quizv/ui'
+import { FxHourglass, FxLobby, QuizInfoPanel } from '@hashquiz/ui'
 const game = useGameStore()
 // The player only knows the head count: anonymous dots, 'p0' being themself.
 const dots = computed(() =>

@@ -7,6 +7,13 @@ import { dirname, join } from 'node:path'
 /** Where the bundle lives, relative to a supabase/ project dir (gitignored, rebuilt before deploy). */
 export const EDGE_CORE_FILE = 'functions/_shared/solo-core.js'
 
+/**
+ * First line of the bundle. gray-matter (deck front matter) uses Node's global `Buffer`, which the Supabase
+ * edge runtime (Deno) does not define. A module-level import binds `Buffer` for all bundled code (CommonJS
+ * wrappers included) without touching globalThis.
+ */
+export const EDGE_CORE_BANNER = 'import { Buffer } from "node:buffer";\n'
+
 /** The TypeScript entry when running from sources, else null (e.g. from a compiled binary). */
 export function edgeCoreEntry(): string | null {
   const entry = join(import.meta.dir, '../edge/solo-core.ts')
@@ -22,7 +29,7 @@ export async function bundleEdgeCore(outFile: string): Promise<void> {
     throw new Error(`edge bundle failed:\n${result.logs.map((l) => String(l)).join('\n')}`)
   }
   await mkdir(dirname(outFile), { recursive: true })
-  await Bun.write(outFile, stripModulePathComments(await result.outputs[0]!.text()))
+  await Bun.write(outFile, EDGE_CORE_BANNER + stripModulePathComments(await result.outputs[0]!.text()))
 }
 
 /** Bun prefixes each bundled module with a `// <path>` comment, absolute when built outside the repo cwd. */

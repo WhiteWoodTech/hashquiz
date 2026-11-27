@@ -67,7 +67,7 @@ bun run packages/server/src/cli.ts check <file>               # Validate quiz
 | `@hashquiz/backend-local` | Local backend: `LocalTransport` (Bun WebSocket pub/sub) + local solo (SQLite, WS presence) |
 | `@hashquiz/backend-supabase` | Supabase backend: rooms transport, solo API and presence, `supabase/` project (migrations, Edge Function), `hashquiz supabase deploy` |
 | `@hashquiz/server` | Bun HTTP+WS server + `hashquiz` CLI |
-| `@hashquiz/theme-default` | CSS custom properties (`--hq-*`), new look |
+| `@hashquiz/theme-default` | CSS custom properties (`--hq-*`), pixel retromodern brand look |
 | `@hashquiz/theme-original` | Same variables, previous look (switch via the `main.ts` import) |
 | `@hashquiz/ui` | Shared Vue 3 components |
 | `packages/ee` | Pro / Enterprise features — HashQuiz Enterprise License (placeholder) |

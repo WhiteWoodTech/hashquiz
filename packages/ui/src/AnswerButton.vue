@@ -44,7 +44,7 @@ const emit = defineEmits<{ select: [id: string] }>()
 @media (hover: hover) {
   .hq-btn:not(:disabled):hover    { border-color: var(--c); }
 }
-.hq-btn--selected                  { border-color: var(--c); background: color-mix(in srgb, var(--c) 18%, var(--hq-surface-2)); }
+.hq-btn--selected                  { box-shadow: var(--hq-pixel) var(--hq-pixel) 0 var(--c); border-color: var(--c); background: color-mix(in srgb, var(--c) 18%, var(--hq-surface-2)); }
 .hq-btn--correct                   { border-color: var(--hq-correct); background: color-mix(in srgb, var(--hq-correct) 18%, var(--hq-surface-2)); }
 .hq-btn--wrong                     { border-color: var(--hq-wrong); background: color-mix(in srgb, var(--hq-wrong) 12%, var(--hq-surface-2)); opacity: 0.65; }
 .hq-btn--disabled                  { opacity: 0.45; cursor: not-allowed; }
@@ -56,8 +56,9 @@ const emit = defineEmits<{ select: [id: string] }>()
   align-items: center;
   justify-content: center;
   background: var(--c);
-  color: var(--hq-text);
-  border-radius: 6px;
+  color: var(--hq-on-choice);
+  border-radius: var(--hq-radius-sm);
+  font-family: var(--hq-font-pixel);
   font-weight: 700;
   font-size: 0.9rem;
   flex-shrink: 0;

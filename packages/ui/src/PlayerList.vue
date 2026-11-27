@@ -21,7 +21,7 @@ function initial(pseudo: string): string {
 <style scoped>
 .hq-players { display: flex; flex-wrap: wrap; gap: 0.5rem; min-height: 2.5rem; align-items: flex-start; }
 .hq-players--end { justify-content: flex-end; text-align: right; }
-.hq-players__chip { display: flex; align-items: center; gap: 0.45rem; background: var(--hq-surface-2); padding: 0.3rem 0.65rem; border-radius: 2rem; font-size: 0.9rem; }
-.hq-players__avatar { width: 1.5rem; height: 1.5rem; background: var(--hq-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; flex-shrink: 0; }
+.hq-players__chip { display: flex; align-items: center; gap: 0.45rem; background: var(--hq-surface-2); padding: 0.3rem 0.65rem; border-radius: var(--hq-radius-sm); font-size: 0.9rem; }
+.hq-players__avatar { width: 1.5rem; height: 1.5rem; background: var(--hq-accent); color: var(--hq-text); border-radius: var(--hq-radius-sm); display: flex; align-items: center; justify-content: center; font-family: var(--hq-font-pixel); font-weight: 700; font-size: 0.75rem; flex-shrink: 0; }
 .hq-players__empty { color: var(--hq-text-muted); font-size: 0.9rem; }
 </style>

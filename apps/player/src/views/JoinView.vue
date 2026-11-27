@@ -15,7 +15,7 @@
 
       <p v-if="game.connectError" class="join__error">{{ game.connectError }}</p>
 
-      <button class="hq-btn-primary" :disabled="!code.trim() || !pseudo.trim()" @click="joinGame">
+      <button class="hq-btn-primary hq-press" :disabled="!code.trim() || !pseudo.trim()" @click="joinGame">
         Join Game
       </button>
     </div>
@@ -75,8 +75,7 @@ function joinGame() {
 .hq-btn-primary {
   padding: 0.9rem; background: var(--hq-accent); color: var(--hq-text);
   border: none; border-radius: var(--hq-radius); font-size: 1.1rem;
-  cursor: pointer; font-family: inherit; font-weight: 600; margin-top: 0.25rem;
-  transition: background 0.15s;
+  cursor: pointer; font-family: var(--hq-font-pixel); font-weight: 700; margin-top: 0.25rem;
 }
 .hq-btn-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--hq-accent) 80%, var(--hq-bg)); }
 .hq-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }

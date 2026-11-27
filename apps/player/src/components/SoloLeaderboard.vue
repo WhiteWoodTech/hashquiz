@@ -51,8 +51,8 @@ defineProps<{ live: LivePlayer[]; rows: BoardRow[] }>()
 .solo-board__rank { font-weight: 700; color: var(--hq-text-muted); }
 .solo-board__badge { font-weight: 600; color: var(--hq-accent-2); }
 .solo-board__dot::before {
-  content: ''; display: block; width: 0.5rem; height: 0.5rem; border-radius: 50%;
-  background: var(--hq-accent-2); animation: solo-pulse 1.6s ease-in-out infinite;
+  content: ''; display: block; width: 0.5rem; height: 0.5rem; border-radius: var(--hq-radius-sm);
+  background: var(--hq-accent-2); animation: solo-pulse 1.6s steps(2, jump-none) infinite;
 }
 @keyframes solo-pulse { 50% { opacity: 0.3; } }
 @media (prefers-reduced-motion: reduce) { .solo-board__dot::before { animation: none; } }

@@ -10,14 +10,22 @@ const TAU = Math.PI * 2
 export const clamp01 = (v: number): number => Math.min(Math.max(v, 0), 1)
 const rand = (a: number, b: number): number => a + Math.random() * (b - a)
 
-/** Filled circle. `color` defaults to `theme.dot`. */
+/**
+ * Filled particle of radius `r`: a circle, or a square snapped to the pixel grid
+ * when `theme.pixel` is set. `color` defaults to `theme.dot`.
+ */
 export function dot(f: Frame, x: number, y: number, r: number, alpha: number, color?: string): void {
   const { ctx } = f
   ctx.globalAlpha = clamp01(alpha)
   ctx.fillStyle = color ?? f.theme.dot
-  ctx.beginPath()
-  ctx.arc(x, y, Math.max(r, 0), 0, TAU)
-  ctx.fill()
+  if (f.theme.pixel) {
+    const s = Math.max(Math.round(r * 2), 1)
+    ctx.fillRect(Math.round(x - s / 2), Math.round(y - s / 2), s, s)
+  } else {
+    ctx.beginPath()
+    ctx.arc(x, y, Math.max(r, 0), 0, TAU)
+    ctx.fill()
+  }
   ctx.globalAlpha = 1
 }
 

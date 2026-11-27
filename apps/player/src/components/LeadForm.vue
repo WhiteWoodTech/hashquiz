@@ -18,7 +18,7 @@
         <input v-model="consent" type="checkbox" required />
         <span>J'accepte d'être recontacté·e au sujet de HashQuiz</span>
       </label>
-      <button class="solo-btn solo-btn--ghost" type="submit" :disabled="!canSend">Tenir au courant</button>
+      <button class="solo-btn solo-btn--ghost hq-press" type="submit" :disabled="!canSend">Tenir au courant</button>
       <p v-if="state === 'error'" class="lead__error" role="status">Oups, réessayez.</p>
     </form>
   </section>

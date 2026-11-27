@@ -110,7 +110,7 @@ defineExpose({
 }
 .fx-reveal__label--dim { opacity: 0.75; }
 .fx-reveal__letter {
-  font-family: var(--hq-font-display);
+  font-family: var(--hq-font-pixel);
   font-weight: 600;
   font-size: clamp(1.4rem, 4.2vmin, 3rem);
   line-height: 1;

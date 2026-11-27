@@ -21,7 +21,7 @@ const game = useGameStore()
 <style scoped>
 .feedback { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; gap: 0.75rem; }
 .feedback__icon   { font-size: 5rem; margin: 0; line-height: 1; }
-.feedback__delta  { font-size: 2rem; font-weight: 700; margin: 0; }
+.feedback__delta  { font-family: var(--hq-font-pixel); font-size: 2rem; font-weight: 700; margin: 0; }
 .feedback__correct .feedback__icon  { color: var(--hq-correct); }
 .feedback__correct .feedback__delta { color: var(--hq-correct); }
 .feedback__wrong .feedback__icon    { color: var(--hq-wrong); }

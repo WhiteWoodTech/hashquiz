@@ -23,7 +23,7 @@
           <a class="lobby__link lobby__bare" :href="qrUrl" target="_blank" rel="noopener">{{ qrUrl }}</a>
           <div class="lobby__code-box lobby__bare">
             <p class="lobby__code-label hq-label">Join code</p>
-            <p class="lobby__code">{{ game.joinCode }}</p>
+            <p class="lobby__code hq-pixel">{{ game.joinCode }}</p>
           </div>
         </div>
         <div class="lobby__qr lobby__bare">
@@ -35,7 +35,7 @@
             <span class="lobby__count-label hq-label">Joueurs</span>
           </div>
           <button
-            class="hq-btn-primary"
+            class="hq-btn-primary hq-press"
             :disabled="game.players.length === 0"
             @click="game.send('host_start')"
           >
@@ -174,7 +174,7 @@ onBeforeUnmount(() => { if (popTimer) clearTimeout(popTimer) })
 .lobby__link:hover { text-decoration: underline; }
 .lobby__code-box { text-align: center; }
 .lobby__code-label { margin: 0; color: var(--hq-text-muted); font-size: clamp(0.75rem, 1.8vmin, 1.1rem); }
-.lobby__code { margin: 0.6vmin 0 0; font-size: clamp(2.5rem, 8vmin, 5.5rem); font-weight: 700; letter-spacing: 0.2em; color: var(--hq-accent); line-height: 1.1; }
+.lobby__code { margin: 0.6vmin 0 0; font-size: clamp(2.5rem, 8vmin, 5.5rem); letter-spacing: 0.16em; color: var(--hq-accent); line-height: 1.1; }
 .lobby__qr { display: flex; justify-content: center; width: 100%; }
 /* qrcode sets an inline 800px size on the canvas: override it to fit the column. */
 .lobby__qr :deep(.hq-qr) { width: min(100%, 34vh) !important; height: auto !important; aspect-ratio: 1; image-rendering: pixelated; }
@@ -189,8 +189,8 @@ onBeforeUnmount(() => { if (popTimer) clearTimeout(popTimer) })
 }
 .lobby__count--pop { transform: scale(1.25); transition-duration: 0.12s; }
 .lobby__count-num {
-  font-family: var(--hq-font-display);
-  font-weight: 300;
+  font-family: var(--hq-font-pixel);
+  font-weight: 500;
   font-size: clamp(3rem, 10vmin, 7rem);
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -207,8 +207,7 @@ onBeforeUnmount(() => { if (popTimer) clearTimeout(popTimer) })
   width: min(100%, 28rem); padding: 1.6vmin 2vmin;
   background: var(--hq-accent); color: var(--hq-text);
   border: none; border-radius: var(--hq-radius); font-size: clamp(1rem, 2.4vmin, 1.6rem);
-  cursor: pointer; font-family: inherit; font-weight: 600;
-  transition: background 0.15s;
+  cursor: pointer; font-family: var(--hq-font-pixel); font-weight: 700;
 }
 .hq-btn-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--hq-accent) 80%, var(--hq-bg)); }
 .hq-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }

@@ -15,15 +15,19 @@
   --hq-text-muted:   #888899;
   --hq-progress:     var(--hq-accent);
   --hq-font-display: 'Syne', system-ui, sans-serif;
+  --hq-font-pixel:   var(--hq-font-display);
   --hq-font-mono:    'IBM Plex Mono', monospace;
   --hq-radius:       12px;
   --hq-radius-sm:    8px;
+  --hq-pixel:        0px;
+  --hq-step-gap:     0px;
   --hq-font-label:   var(--hq-font-display);
   --hq-label-spacing: .05em;
   --hq-choice-a:     #7c3aed;
   --hq-choice-b:     #0891b2;
   --hq-choice-c:     #d97706;
   --hq-choice-d:     #059669;
+  --hq-on-choice:    #ffffff;
   --hq-qr-dark:      #ffffff;
   --hq-qr-light:     #111118;
   --hq-fx-dot:       #ffffff;
@@ -32,6 +36,7 @@
   --hq-fx-dust-density: .5;
   --hq-fx-dust-alpha: 1.5;
   --hq-fx-speed:     1;
+  --hq-fx-pixel:     0;
 }
 
 *, *::before, *::after { box-sizing: border-box; }

@@ -17,3 +17,31 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* Pixel display type: titles, codes, big figures. Long text stays in --hq-font-display. */
+.hq-pixel {
+  font-family: var(--hq-font-pixel);
+  letter-spacing: 0.03em;
+}
+
+/* Pixel press: a hard two-tone shadow (the logo's offset violets), `--hq-pixel` wide,
+   that the element sinks into when pressed. A zero `--hq-pixel` turns it off. */
+.hq-press {
+  box-shadow: var(--hq-pixel) var(--hq-pixel) 0 var(--hq-accent-2);
+  transition: transform 0.08s steps(2), box-shadow 0.08s steps(2), background 0.15s, border-color 0.15s;
+}
+.hq-press:active:not(:disabled) {
+  transform: translate(calc(var(--hq-pixel) / 2), calc(var(--hq-pixel) / 2));
+  box-shadow: calc(var(--hq-pixel) / 2) calc(var(--hq-pixel) / 2) 0 var(--hq-accent-2);
+}
+.hq-press:disabled { box-shadow: none; }
+
+/* Stepped track: a bar cut into 8px pixel blocks, `--hq-step-gap` apart (0 = plain bar). */
+.hq-steps {
+  -webkit-mask: repeating-linear-gradient(90deg, black 0 8px, transparent 8px calc(8px + var(--hq-step-gap)));
+  mask: repeating-linear-gradient(90deg, black 0 8px, transparent 8px calc(8px + var(--hq-step-gap)));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hq-press, .hq-press:active:not(:disabled) { transition: none; transform: none; }
+}

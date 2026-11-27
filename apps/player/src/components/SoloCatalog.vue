@@ -50,8 +50,12 @@ onMounted(async () => {
   text-decoration: none;
   border-radius: var(--hq-radius);
 }
-.solo-catalog__card :deep(.qip) { transition: border-color 0.15s, transform 0.15s; }
-.solo-catalog__card:hover :deep(.qip) { border-color: var(--hq-accent); transform: translateY(-2px); }
+.solo-catalog__card :deep(.qip) { transition: border-color 0.15s, transform 0.12s steps(2), box-shadow 0.12s steps(2); }
+.solo-catalog__card:hover :deep(.qip) {
+  border-color: var(--hq-accent);
+  transform: translate(calc(var(--hq-pixel) * -1), calc(var(--hq-pixel) * -1));
+  box-shadow: var(--hq-pixel) var(--hq-pixel) 0 var(--hq-accent-2);
+}
 .solo-catalog__card:focus-visible { outline: 2px solid var(--hq-accent); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   .solo-catalog__card:hover :deep(.qip) { transform: none; }

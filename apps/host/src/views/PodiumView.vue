@@ -1,12 +1,12 @@
 <template>
   <div class="podium-view">
     <div class="podium-view__scene">
-      <h1>🏆 Game Over!</h1>
+      <h1 class="hq-pixel">🏆 Game Over!</h1>
       <FxPodium :podium="game.podium" />
     </div>
     <aside class="podium-view__ranking">
       <Podium :podium="game.podium" />
-      <button class="hq-btn-primary" @click="game.send('host_reset')">
+      <button class="hq-btn-primary hq-press" @click="game.send('host_reset')">
         🔁 Rejouer
       </button>
     </aside>
@@ -63,8 +63,7 @@ h1 {
   width: min(100%, 28rem); padding: 1.6vmin 2vmin;
   background: var(--hq-accent); color: var(--hq-text);
   border: none; border-radius: var(--hq-radius); font-size: clamp(1rem, 2.4vmin, 1.6rem);
-  cursor: pointer; font-family: inherit; font-weight: 600;
-  transition: background 0.15s;
+  cursor: pointer; font-family: var(--hq-font-pixel); font-weight: 700;
 }
 .hq-btn-primary:hover { background: color-mix(in srgb, var(--hq-accent) 80%, var(--hq-bg)); }
 .hq-btn-primary:focus-visible { outline: 2px solid var(--hq-text); outline-offset: 3px; }

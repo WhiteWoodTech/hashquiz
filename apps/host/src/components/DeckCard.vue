@@ -32,8 +32,12 @@ const info = computed(() => deckInfo(props.deck))
   border-radius: var(--hq-radius);
   cursor: pointer;
 }
-.deck-card__btn :deep(.qip) { height: 100%; transition: border-color 0.15s, transform 0.15s; }
-.deck-card__btn:hover :deep(.qip) { border-color: var(--hq-accent); transform: translateY(-2px); }
+.deck-card__btn :deep(.qip) { height: 100%; transition: border-color 0.15s, transform 0.12s steps(2), box-shadow 0.12s steps(2); }
+.deck-card__btn:hover :deep(.qip) {
+  border-color: var(--hq-accent);
+  transform: translate(calc(var(--hq-pixel) * -1), calc(var(--hq-pixel) * -1));
+  box-shadow: var(--hq-pixel) var(--hq-pixel) 0 var(--hq-accent-2);
+}
 .deck-card__btn:focus-visible { outline: 2px solid var(--hq-accent); outline-offset: 3px; }
 .deck-card__solo {
   align-self: flex-end;

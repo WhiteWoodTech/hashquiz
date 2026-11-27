@@ -82,8 +82,10 @@ defineProps<{
 .qip__badge {
   display: inline-block;
   align-self: flex-start;
-  background: linear-gradient(135deg, var(--hq-accent), var(--hq-accent-2));
+  background: var(--hq-accent);
+  box-shadow: calc(var(--hq-pixel) * 0.75) calc(var(--hq-pixel) * 0.75) 0 var(--hq-accent-2);
   color: var(--hq-text);
+  font-family: var(--hq-font-label);
   font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -93,7 +95,7 @@ defineProps<{
 }
 
 .qip__header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; }
-.qip__title { font-size: 3rem; font-weight: 700; margin: 0; color: var(--hq-text); }
+.qip__title { font-family: var(--hq-font-pixel); font-size: 3rem; font-weight: 700; margin: 0; color: var(--hq-text); }
 
 .qip__content { display: flex; flex-direction: column; gap: 0; }
 .qip__tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.5rem; }
@@ -128,6 +130,6 @@ defineProps<{
   padding: 0.5rem 1rem;
   min-width: 70px;
 }
-.qip__metric strong { font-size: 2rem; font-weight: 700; color: var(--hq-accent); line-height: 1; }
+.qip__metric strong { font-family: var(--hq-font-pixel); font-size: 2rem; font-weight: 700; color: var(--hq-accent); line-height: 1; }
 .qip__metric span { font-size: 0.875rem; color: var(--hq-text-muted); margin-top: 0.15rem; }
 </style>

@@ -33,6 +33,6 @@ const medal = computed(() => {
 .podium-view__rank { text-align: center; }
 .podium-view__medal { font-size: 3.5rem; margin: 0; line-height: 1; }
 .podium-view__name  { font-size: 1.3rem; font-weight: 700; margin: 0.5rem 0 0.25rem; }
-.podium-view__score { color: var(--hq-accent); font-size: 1.5rem; font-weight: 700; margin: 0; }
+.podium-view__score { font-family: var(--hq-font-pixel); color: var(--hq-accent); font-size: 1.5rem; font-weight: 700; margin: 0; }
 .podium-view__fx { height: 22rem; }
 </style>

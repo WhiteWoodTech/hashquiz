@@ -143,6 +143,33 @@ describe('SoloDeckSource', () => {
     expect(errors).toHaveBeenCalledTimes(1)
   })
 
+  test('failed reloads back off', async () => {
+    const errors = muteErrors()
+    const l = fakeLoader(manifest(), new Error('site down'))
+    const c = clock()
+    const src = new SoloDeckSource(l.load, { ttlMs: 1000, minRefetchMs: 10_000, now: c.now })
+    await src.resolve('demo.quizv.md', deckVersion(demo))
+    c.t = 1001
+    expect((await src.resolve('demo.quizv.md', deckVersion(demo))).ok).toBe(true)
+    c.t = 2000
+    expect((await src.resolve('demo.quizv.md', deckVersion(demo))).ok).toBe(true)
+    expect(l.calls).toBe(2)
+    expect(errors).toHaveBeenCalledTimes(1)
+  })
+
+  test('cold load failure backs off before retrying', async () => {
+    muteErrors()
+    const l = fakeLoader(new Error('site down'), manifest())
+    const c = clock()
+    const src = new SoloDeckSource(l.load, { minRefetchMs: 10_000, now: c.now })
+    expect(await src.resolve('demo.quizv.md', deckVersion(demo))).toEqual({ ok: false, reason: 'decks unavailable' })
+    expect(await src.resolve('demo.quizv.md', deckVersion(demo))).toEqual({ ok: false, reason: 'decks unavailable' })
+    expect(l.calls).toBe(1)
+    c.t = 10_000
+    expect((await src.resolve('demo.quizv.md', deckVersion(demo))).ok).toBe(true)
+    expect(l.calls).toBe(2)
+  })
+
   test('concurrent resolves share one load', async () => {
     let release!: (m: DeckManifestEntry[]) => void
     let calls = 0

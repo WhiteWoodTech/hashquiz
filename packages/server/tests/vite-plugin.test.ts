@@ -32,3 +32,13 @@ describe('quizvWeb config', () => {
     expect(emittedConfig({ VITE_TRANSPORT: 'supabase' })).toMatchObject({ transport: 'local' })
   })
 })
+
+describe('quizvWeb dev server', () => {
+  // The Edge Function served by `supabase functions serve` (Docker) reads decks.json from the player dev server.
+  test('accepts host.docker.internal on the dev server only', () => {
+    const plugin = quizvWeb({}) as unknown as Record<string, Hook>
+    const config = plugin.config!({}, { command: 'serve', mode: 'development' }) as Record<string, unknown>
+    expect(config).toEqual({ server: { allowedHosts: ['host.docker.internal'] } })
+    expect(plugin.config!({}, { command: 'build', mode: 'production' })).toBeUndefined()
+  })
+})

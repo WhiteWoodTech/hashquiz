@@ -12,6 +12,13 @@ export function repoDecksDir(repoRoot: string): string {
   return resolve(repoRoot, process.env.QUIZV_DECKS_DIR ?? 'examples')
 }
 
+/**
+ * Extra Host headers the dev servers accept. `supabase functions serve` runs the solo-submit Edge Function in
+ * Docker, which reads the player's `decks.json` through `http://host.docker.internal:3032`; Vite's host check
+ * would answer 403. Dev only: builds and `vite preview` are not affected.
+ */
+export const DEV_ALLOWED_HOSTS = ['host.docker.internal']
+
 export interface QuizvWebPluginOptions {
   /** Decks folder listed in `<base>decks.json` (host deck list, player solo decks). */
   decksDir?: string
@@ -31,6 +38,10 @@ export function quizvWeb(options: QuizvWebPluginOptions): Plugin {
   const config = () => renderConfigScript(configFromEnv({ ...fileEnv, ...process.env }))
   return {
     name: 'quizv-web',
+    config(_config, env) {
+      // Vite concatenates allowedHosts arrays, so an app config can still add its own hosts.
+      return env.command === 'serve' ? { server: { allowedHosts: [...DEV_ALLOWED_HOSTS] } } : undefined
+    },
     configResolved(resolved) {
       fileEnv = { ...(resolved.env as Record<string, string | undefined>) }
     },

@@ -138,7 +138,9 @@ bun run supabase:functions             # only for edge scoring: functions serve 
 
 For edge scoring, copy `packages/backend-supabase/supabase/functions/.env.example` to
 `packages/backend-supabase/supabase/functions/.env.local` (`HASHQUIZ_SITE_URL=http://host.docker.internal:3032`:
-the edge runtime runs in Docker and reads `decks.json` from the player dev server, so it must be running).
+the edge runtime runs in Docker and reads `decks.json` from the player dev server, so it must be running). The dev
+servers accept the `host.docker.internal` Host header for this (`server.allowedHosts`, set by the `quizv-web` Vite
+plugin in dev only).
 
 Then run the apps with, in `apps/host/.env.local` and `apps/player/.env.local`:
 

@@ -93,7 +93,14 @@ export function createSoloHttpHandler(o: SoloServiceOptions): (req: Request) => 
     if (!verified.ok) return reason(422, verified.reason)
     const runId = o.store.insertRun(verified.run, new Date().toISOString())
     o.publish(soloTopic(deckId), { type: 'solo_new_run', deckId })
-    return json(200, { runId, rank: o.store.rank(runId) })
+    // The run is stored: a rank failure must not turn into an error a client would retry (duplicate run).
+    let rank: number | null = null
+    try {
+      rank = o.store.rank(runId)
+    } catch (e) {
+      console.error('Failed to rank solo run:', e)
+    }
+    return json(200, { runId, rank })
   }
 
   async function submitLead(req: Request): Promise<Response> {

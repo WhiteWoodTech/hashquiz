@@ -323,7 +323,7 @@ bun test --watch            # Watch mode
 bun test packages/core      # Single package
 ```
 
-Current coverage: **378 tests across 43 files, 0 failures**
+Current coverage: **381 tests across 43 files, 0 failures**
 
 | Package | Tests | Coverage |
 |---------|-------|----------|

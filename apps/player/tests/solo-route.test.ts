@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test'
-import { parseSoloHash, soloHash } from '../src/solo/route'
+import { MENU_HASH, parseSoloHash, soloHash } from '../src/solo/route'
 
 describe('solo route', () => {
   test('round-trips ids containing slashes and spaces', () => {
@@ -15,5 +15,8 @@ describe('solo route', () => {
     expect(parseSoloHash('')).toBeNull()
     expect(parseSoloHash('#/solo/')).toBeNull()
     expect(parseSoloHash('#/solo/%E0%A4%A')).toBeNull()
+  })
+  test('the menu hash is not a solo route (the end screen\'s Menu button leaves solo)', () => {
+    expect(parseSoloHash(MENU_HASH)).toBeNull()
   })
 })

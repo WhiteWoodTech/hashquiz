@@ -3,8 +3,22 @@ import type { Quiz } from '@quizv/parser'
 import { GameEngine } from '@quizv/core'
 import type { PlayerState, QuizInfo } from '@quizv/core'
 import { LocalTransport } from '@quizv/backend-local'
+import {
+  createSoloHttpHandler,
+  DEFAULT_SOLO_DB,
+  SOLO_WS_ROLE,
+  SoloPresenceHub,
+  SoloStore,
+  soloTopic,
+  type SoloConn,
+  type SoloServerMsg,
+} from '@quizv/backend-local/solo-server'
+import { parseManifest, SoloDeckSource } from '@quizv/core/solo-decks'
 import { readFileSync } from 'node:fs'
 import { networkInterfaces } from 'node:os'
+import { resolve } from 'node:path'
+import type { Server, ServerWebSocket } from 'bun'
+import { collectDecks } from './web-assets'
 
 /** Get the first non-loopback IPv4 address (for QR code URL) */
 function getLocalIP(): string {
@@ -19,6 +33,17 @@ function getLocalIP(): string {
   return 'localhost'
 }
 
+/** Solo hub connection over a Bun socket: drops messages once the socket is no longer open. */
+function soloConn(ws: ServerWebSocket<unknown>, deckId: string, key: string): SoloConn {
+  return {
+    deckId,
+    key,
+    send(data) {
+      if (ws.readyState === WebSocket.OPEN) ws.send(data)
+    },
+  }
+}
+
 /** Generate a random 6-char alphanumeric join code */
 function generateJoinCode(): string {
   return Math.random().toString(36).slice(2, 8).toUpperCase()
@@ -29,6 +54,25 @@ export interface QuizvServerOptions {
   quizFile: string
   /** Grace period in ms before a disconnected player is removed. Defaults to QUIZV_GRACE_MS env var or 60000. */
   graceMs?: number
+  /** Decks folder of the local solo service (`/solo/*`, `role=solo` sockets); solo is off without it. */
+  decksDir?: string
+  /** SQLite file of the local solo leaderboard. Defaults to `.hashquiz/solo.db` in the working directory. */
+  soloDbPath?: string
+}
+
+/** Longest accepted `deck` / `key` query value of a solo socket. */
+const SOLO_PARAM_MAX = 200
+
+type WsData =
+  | { role: typeof SOLO_WS_ROLE; deckId: string; key: string; conn?: SoloConn }
+  | { role: string; playerId: string }
+
+const isSolo = (d: WsData): d is Extract<WsData, { deckId: string }> => d.role === SOLO_WS_ROLE
+
+interface SoloService {
+  http: (req: Request) => Promise<Response | null>
+  hub: SoloPresenceHub
+  store: SoloStore
 }
 
 const DEFAULT_GRACE_MS = 60_000
@@ -124,6 +168,8 @@ export class QuizvServer {
   private quizMeta: QuizInfo
   private graceMs: number
   private graceTimers: Map<string, ReturnType<typeof setTimeout>> = new Map()
+  private server: Server<WsData> | null = null
+  private solo: SoloService | null = null
 
   constructor(options: QuizvServerOptions) {
     this.port = options.port ?? 3030
@@ -146,18 +192,49 @@ export class QuizvServer {
 
     this.engine = new GameEngine(quiz, this.transport, this.joinCode)
     this.quizMeta = buildQuizInfo(quiz)
+
+    if (options.decksDir) this.solo = this._createSolo(options.decksDir, options.soloDbPath)
+  }
+
+  /** Local solo service: decks read from disk (no TTL, a version mismatch reloads), runs in SQLite. */
+  private _createSolo(decksDir: string, dbPath?: string): SoloService {
+    const decks = new SoloDeckSource(async () => parseManifest(collectDecks(decksDir)), { ttlMs: Infinity })
+    const store = SoloStore.open(dbPath ?? resolve(DEFAULT_SOLO_DB))
+    const publish = (topic: string, msg: SoloServerMsg) => { this.server?.publish(topic, JSON.stringify(msg)) }
+    return { http: createSoloHttpHandler({ decks, store, publish }), hub: new SoloPresenceHub(publish), store }
+  }
+
+  /** Stops listening and closes the solo store. */
+  stop(): void {
+    this.server?.stop(true)
+    this.server = null
+    for (const t of this.graceTimers.values()) clearTimeout(t)
+    this.graceTimers.clear()
+    this.solo?.store.close()
+    this.solo = null
   }
 
   start(): void {
     const self = this
-    const server = Bun.serve({
+    const server = Bun.serve<WsData>({
       port: this.port,
-      fetch(req, server) {
+      async fetch(req, server) {
         const url = new URL(req.url)
 
         // WebSocket upgrade
         if (req.headers.get('upgrade') === 'websocket') {
           const role = url.searchParams.get('role') ?? 'player'
+          if (role === SOLO_WS_ROLE) {
+            // Solo sockets need no join code: they only see one deck's presence and new runs.
+            if (!self.solo) return new Response('Solo is not enabled', { status: 404 })
+            const deckId = url.searchParams.get('deck')
+            const key = url.searchParams.get('key') ?? crypto.randomUUID()
+            const sane = (v: string | null): v is string => !!v && v.length <= SOLO_PARAM_MAX
+            if (!sane(deckId) || !sane(key)) return new Response('Invalid deck or key', { status: 400 })
+            const data: WsData = { role, deckId, key }
+            if (server.upgrade(req, { data })) return undefined
+            return new Response('WebSocket upgrade failed', { status: 400 })
+          }
           const playerId = url.searchParams.get('id') ?? crypto.randomUUID()
           // Players must provide the correct join code
           if (role === 'player' && url.searchParams.get('code') !== self.joinCode) {
@@ -166,6 +243,11 @@ export class QuizvServer {
           const upgraded = server.upgrade(req, { data: { role, playerId } })
           if (upgraded) return undefined
           return new Response('WebSocket upgrade failed', { status: 400 })
+        }
+
+        if (self.solo) {
+          const res = await self.solo.http(req)
+          if (res) return res
         }
 
         // Player join page
@@ -182,7 +264,15 @@ export class QuizvServer {
       },
       websocket: {
         open(ws) {
-          const { role, playerId } = ws.data as { role: string; playerId: string }
+          const data = ws.data
+          if (isSolo(data)) {
+            if (!self.solo) return
+            ws.subscribe(soloTopic(data.deckId))
+            data.conn = soloConn(ws, data.deckId, data.key)
+            self.solo.hub.open(data.conn)
+            return
+          }
+          const { role, playerId } = data
           ws.subscribe(`game:${self.joinCode}`)
           if (role === 'host') {
             const localIP = getLocalIP()
@@ -200,6 +290,11 @@ export class QuizvServer {
           }
         },
         message(ws, raw) {
+          const data = ws.data
+          if (isSolo(data)) {
+            if (data.conn) self.solo?.hub.message(data.conn, String(raw))
+            return
+          }
           try {
             const msg = JSON.parse(String(raw)) as {
               type: string
@@ -282,7 +377,12 @@ export class QuizvServer {
           }
         },
         close(ws) {
-          const { role, playerId } = ws.data as { role: string; playerId: string }
+          const data = ws.data
+          if (isSolo(data)) {
+            if (data.conn) self.solo?.hub.close(data.conn)
+            return
+          }
+          const { role, playerId } = data
           if (role === 'host') return
           if (!self.engine.state.players.has(playerId)) return
           self.engine.markPlayerDisconnected(playerId)
@@ -302,6 +402,7 @@ export class QuizvServer {
       },
     })
 
+    this.server = server
     // Attach server to transport for WS broadcast
     this.transport.attachServer(server)
 

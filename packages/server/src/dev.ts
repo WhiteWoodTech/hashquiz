@@ -1,9 +1,33 @@
 import { QuizvServer } from './server'
 import { existsSync, statSync, watch } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { spawn, type ChildProcess } from 'node:child_process'
 import { renderConfigScript } from '@quizv/core'
 import { findMonorepoRoot, findWebDist } from './web-dist'
+import { collectDecks, renderDecksJson } from './web-assets'
+import { repoDecksDir } from './vite-plugin'
+
+/**
+ * What `hashquiz dev <arg>` runs. A file is the room deck; the decks folder (host list, solo decks) is
+ * `--decks`, else the monorepo's `repoDecksDir`, else the file's folder. A folder is the decks folder,
+ * and its first deck by id is the room deck (`--decks` is then ignored).
+ */
+export function resolveDevTarget(
+  arg: string,
+  opts: { decksFlag?: string | undefined; repoRoot: string | null },
+): { quizFile: string; decksDir: string } {
+  const target = resolve(arg)
+  if (!existsSync(target)) throw new Error(`${arg} not found`)
+  if (statSync(target).isDirectory()) {
+    const first = collectDecks(target)[0]
+    if (!first) throw new Error(`no .quizv.md deck in ${arg}`)
+    return { quizFile: join(target, first.id), decksDir: target }
+  }
+  const decksDir = opts.decksFlag
+    ? resolve(opts.decksFlag)
+    : opts.repoRoot ? repoDecksDir(opts.repoRoot) : dirname(target)
+  return { quizFile: target, decksDir }
+}
 
 /**
  * Run the full dev stack:
@@ -13,24 +37,27 @@ import { findMonorepoRoot, findWebDist } from './web-dist'
  * From the quizv sources the apps run under Vite (hot reload); from the npm
  * package the prebuilt apps are served as static files.
  */
-export function devCommand(quizFile: string, port?: number): void {
-  const absPath = resolve(quizFile)
-  const server = new QuizvServer({ quizFile: absPath, port })
+export function devCommand(arg: string, port?: number, decksFlag?: string): void {
+  const repo = findMonorepoRoot()
+  const { quizFile: absPath, decksDir } = resolveDevTarget(arg, { decksFlag, repoRoot: repo })
+  const server = new QuizvServer({ quizFile: absPath, port, decksDir })
   server.start()
+  console.log(`  Room deck: ${absPath}\n  Decks:     ${decksDir}\n`)
 
   const children: ChildProcess[] = []
-  const repo = findMonorepoRoot()
   if (repo) {
-    children.push(spawn('bun', ['run', 'dev'], { cwd: resolve(repo, 'apps/host'), stdio: 'inherit', shell: false }))
-    children.push(spawn('bun', ['run', 'dev'], { cwd: resolve(repo, 'apps/player'), stdio: 'inherit', shell: false }))
+    const env = { ...process.env, QUIZV_DECKS_DIR: decksDir }
+    for (const app of ['apps/host', 'apps/player']) {
+      children.push(spawn('bun', ['run', 'dev'], { cwd: resolve(repo, app), stdio: 'inherit', shell: false, env }))
+    }
   } else {
     const web = findWebDist()
     if (!web) {
       console.error('Prebuilt web apps not found: reinstall the hashquiz package.')
       process.exit(1)
     }
-    serveStatic(web, 3031, '/host/')
-    serveStatic(web, 3032, '/')
+    serveStatic(web, 3031, '/host/', decksDir)
+    serveStatic(web, 3032, '/', decksDir)
     console.log('  Host app:   http://localhost:3031/host/\n  Player app: http://localhost:3032/\n')
   }
 
@@ -39,12 +66,12 @@ export function devCommand(quizFile: string, port?: number): void {
   process.on('SIGTERM', stop)
 
   watch(absPath, () => {
-    console.log(`\n  📄 ${quizFile} changed. Restart server to reload.\n`)
+    console.log(`\n  📄 ${absPath} changed. Restart server to reload.\n`)
   })
 }
 
-/** Minimal static server for the prebuilt apps, local transport config. */
-function serveStatic(root: string, port: number, home: string): void {
+/** Minimal static server for the prebuilt apps, local transport config, decks listed from `decksDir`. */
+function serveStatic(root: string, port: number, home: string, decksDir: string): void {
   const config = renderConfigScript({ transport: 'local', soloScoring: 'browser' })
   Bun.serve({
     port,
@@ -53,6 +80,9 @@ function serveStatic(root: string, port: number, home: string): void {
       const { pathname } = new URL(req.url)
       if (pathname === '/quizv-config.js') {
         return new Response(config, { headers: { 'Content-Type': 'text/javascript' } })
+      }
+      if (pathname === '/decks.json' || pathname === '/host/decks.json') {
+        return new Response(renderDecksJson(decksDir), { headers: { 'Content-Type': 'application/json' } })
       }
       if (pathname === '/' && home !== '/') return Response.redirect(home, 302)
       const file = resolve(join(root, decodeURIComponent(pathname)))

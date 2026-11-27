@@ -213,6 +213,55 @@ describe('createSoloHttpHandler', () => {
     expect(responses[0]!.headers.get('access-control-allow-methods')).toContain('POST')
   })
 
+  test('body streamed over 64 KiB without content-length is 413', async () => {
+    const { handle, store } = setup()
+    const chunk = new TextEncoder().encode('x'.repeat(16_384))
+    let sent = 0
+    const body = new ReadableStream<Uint8Array>({
+      pull(c) {
+        if (sent++ < 8) c.enqueue(chunk)
+        else c.close()
+      },
+    })
+    const req = new Request(BASE + '/solo/runs', { method: 'POST', body })
+    expect(req.headers.get('content-length')).toBeNull()
+    const res = await call(handle, req)
+    expect(res.status).toBe(413)
+    expect(res.headers.get('access-control-allow-origin')).toBe('*')
+    expect(sent).toBeLessThan(8) // reading stopped early
+    expect(store.count(DECK)).toBe(0)
+  })
+
+  test('store failures are a logged CORS 500 store failed', async () => {
+    const { handle, store } = setup()
+    const boom = () => { throw new Error('disk I/O error') }
+    for (const m of ['insertRun', 'insertLead', 'top', 'run', 'count', 'rank'] as const) {
+      (store as unknown as Record<string, unknown>)[m] = boom
+    }
+    const errors: unknown[] = []
+    const orig = console.error
+    console.error = (...a: unknown[]) => { errors.push(a) }
+    try {
+      const q = encodeURIComponent(DECK)
+      for (const req of [
+        post('/solo/runs', JSON.stringify(play())),
+        post('/solo/leads', JSON.stringify({ email: 'a@b.co', deckId: DECK })),
+        get(`/solo/runs?deck=${q}`),
+        get('/solo/runs/x'),
+        get(`/solo/count?deck=${q}`),
+        get('/solo/rank/x'),
+      ]) {
+        const res = await call(handle, req)
+        expect(res.status).toBe(500)
+        expect(await res.json()).toEqual({ reason: 'store failed' })
+        expect(res.headers.get('access-control-allow-origin')).toBe('*')
+      }
+    } finally {
+      console.error = orig
+    }
+    expect(errors.length).toBe(6)
+  })
+
   test('other paths return null', async () => {
     const { handle } = setup()
     expect(await handle(get('/ws'))).toBeNull()

@@ -77,3 +77,6 @@ packages/backend-supabase/supabase/.temp/
 
 # Claude Code local settings (per developer)
 .claude/settings.local.json
+
+# Local decks for the dev stack (bun run decks:clone, from maxime-lenne/hashquiz-decks)
+/decks/

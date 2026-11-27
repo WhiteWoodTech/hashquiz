@@ -54,3 +54,25 @@ describe('resolveDevTarget', () => {
     expect(() => resolveDevTarget(dir, { repoRoot: null })).toThrow(/no \.hashquiz\.md/)
   })
 })
+
+describe('repoDecksDir', () => {
+  const saved = process.env.HASHQUIZ_DECKS_DIR
+  afterEach(() => {
+    if (saved === undefined) delete process.env.HASHQUIZ_DECKS_DIR
+    else process.env.HASHQUIZ_DECKS_DIR = saved
+  })
+
+  test('HASHQUIZ_DECKS_DIR wins, relative to the repo root', () => {
+    const root = tmp()
+    process.env.HASHQUIZ_DECKS_DIR = 'other'
+    expect(repoDecksDir(root)).toBe(join(root, 'other'))
+  })
+
+  test('the untracked decks/ folder when it exists, else tests/fixtures/', () => {
+    delete process.env.HASHQUIZ_DECKS_DIR
+    const root = tmp()
+    expect(repoDecksDir(root)).toBe(join(root, 'tests/fixtures'))
+    mkdirSync(join(root, 'decks'))
+    expect(repoDecksDir(root)).toBe(join(root, 'decks'))
+  })
+})

@@ -2,7 +2,7 @@ import { config } from '../config'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { PlayerState, QuestionPublic, Score, PodiumEntry, QuizInfo } from '@hashquiz/core'
-import type { GameEvent } from '@hashquiz/core'
+import type { GameEvent, IRealtimeTransport } from '@hashquiz/core'
 import { SupabaseHostSession } from '../session/supabase-session'
 import { SupabaseTransport } from '@hashquiz/backend-supabase'
 import { generateJoinCode } from '../session/join-code'
@@ -25,6 +25,11 @@ type ServerMsg =
   | { type: 'host_ready'; joinCode: string; totalQuestions: number; playerUrl: string; quizMeta: QuizInfo }
 
 export type HostAction = 'host_start' | 'host_reveal' | 'host_next' | 'host_reset'
+
+type TransportFactory = (opts: { url: string; anonKey: string }) => IRealtimeTransport
+let makeTransport: TransportFactory = opts => new SupabaseTransport(opts)
+/** Swaps the Supabase realtime transport (tests inject an in-memory one). */
+export function setHostTransport(f: TransportFactory): void { makeTransport = f }
 
 export const useGameStore = defineStore('game', () => {
   const phase        = ref<HostPhase>('connecting')
@@ -54,7 +59,7 @@ export const useGameStore = defineStore('game', () => {
       return
     }
     session?.dispose()
-    const transport = new SupabaseTransport({ url, anonKey })
+    const transport = makeTransport({ url, anonKey })
     const code = generateJoinCode()
     session = new SupabaseHostSession({
       quiz: deck.quiz,
@@ -91,6 +96,17 @@ export const useGameStore = defineStore('game', () => {
     // Use socket identity so stale close/error events from a replaced socket don't reset phase
     socket.onerror = () => { if (ws === socket) phase.value = 'connecting' }
     socket.onclose = () => { if (ws === socket) phase.value = 'connecting' }
+  }
+
+  function clearGame() {
+    question.value     = null
+    questionIdx.value  = 0
+    answerCount.value  = 0
+    correctIds.value   = []
+    choiceCounts.value = {}
+    explanation.value  = undefined
+    scores.value       = []
+    podium.value       = []
   }
 
   function handle(msg: ServerMsg) {
@@ -141,16 +157,9 @@ export const useGameStore = defineStore('game', () => {
         break
       case 'game_reset':
         // "Rejouer": same room, same players, fresh game state
-        question.value     = null
-        questionIdx.value  = 0
-        answerCount.value  = 0
-        correctIds.value   = []
-        choiceCounts.value = {}
-        explanation.value  = undefined
-        scores.value       = []
-        podium.value       = []
-        players.value      = players.value.map(p => ({ ...p, score: 0 }))
-        phase.value        = 'lobby'
+        clearGame()
+        players.value = players.value.map(p => ({ ...p, score: 0 }))
+        phase.value   = 'lobby'
         break
     }
   }
@@ -168,11 +177,28 @@ export const useGameStore = defineStore('game', () => {
     session = null
   }
 
+  /** The local server hosts a single deck: only the Supabase mode has a deck list to go back to. */
+  const canGoToMenu = config.transport === 'supabase'
+
+  /** "Menu": leaves the finished room (its players keep their podium) and goes back to the deck list. */
+  function backToMenu() {
+    if (!canGoToMenu || phase.value !== 'finished') return
+    disposeSession()
+    clearGame()
+    players.value  = []
+    joinCode.value = ''
+    playerUrl.value = ''
+    totalQs.value  = 0
+    quizMeta.value = null
+    phase.value    = 'deck-select'
+  }
+
   return {
     phase, joinCode, playerUrl, totalQs, players,
     question, questionIdx, answerCount, correctIds,
     choiceCounts, explanation, scores, podium,
     quizMeta,
-    connect, send, startWithDeck, disposeSession,
+    canGoToMenu,
+    connect, send, startWithDeck, disposeSession, backToMenu,
   }
 })

@@ -9,19 +9,19 @@ Host and player application screen flows driven by WebSocket events.
 **Tech:** Vue 3 SPA at `http://localhost:3031`
 
 ```
-HostPhase: 'connecting' → 'lobby' → 'question' → 'revealed' → 'finished' (→ 'lobby' via Rejouer)
+HostPhase: 'connecting' → 'lobby' → 'question' → 'revealed' → 'finished' (→ 'lobby' via Rejouer, → 'deck-select' via Menu)
 ```
 
 ### Screen Transitions
 
 | Phase | Trigger | View | Actions |
 |-------|---------|------|---------|
-| `deck-select` | Initial load without a server | `DeckSelectView` | Grid of quiz cards (`QuizInfoPanel`) and a tag list; a card starts the deck. Tag pages live on the URL hash (`#/tag/<tag>`): same page design, cards filtered to the tag, back link to the list. Backdrop fixed, HashQuiz logo centered |
+| `deck-select` | Initial load without a server, or **🏠 Menu** on the podium | `DeckSelectView` | Grid of quiz cards (`QuizInfoPanel`) and a tag list; a card starts the deck. Tag pages live on the URL hash (`#/tag/<tag>`): same page design, cards filtered to the tag, back link to the list. Backdrop fixed, HashQuiz logo centered |
 | `connecting` | Initial load / WS close or error | "Connecting…" spinner | — |
 | `lobby` | `host_connected` or `game_reset` received | `LobbyView` | One centered column that scrolls over two screens: the quiz card, vertically centered (first screen), then join link + join code, QR code, player count and Start button. Grey HashQuiz logo fixed top left. Several constellations (`FxLobby`, 12 players max each) fill the left and right side areas, with the `PlayerList` name lists at the bottom of each side |
 | `question` | `question_started` received | `QuestionView` | Countdown (`FxCountdown`), answer count, Reveal |
 | `revealed` | `answer_revealed` received | `RevealView` | Vote particles (`FxReveal`), score deltas, Next button |
-| `finished` | `game_ended` received | `PodiumView` | Animated podium (`FxPodium`), full leaderboard, **🔁 Rejouer** button (sends `host_reset`) |
+| `finished` | `game_ended` received | `PodiumView` | Animated podium (`FxPodium`), full leaderboard, **🔁 Rejouer** button (sends `host_reset`) and, without a local server (Supabase mode), **🏠 Menu** beside it: leaves the room (players keep their podium) and goes back to `DeckSelectView` |
 
 ### Fullscreen
 
@@ -69,6 +69,8 @@ hidden when the browser does not support the Fullscreen API.
          │ ◄── game_reset: same room/code, same players, scores 0
          ▼
      LobbyView (Start Game runs a fresh game)
+
+     PodiumView ── [🏠 Menu] (Supabase mode) → leaves the room → DeckSelectView
 ```
 
 ---
@@ -152,7 +154,7 @@ Solo runs on the backend of the runtime `transport`: the `hashquiz dev` server i
 port 3030), Supabase otherwise; no host, no join code. The hosted-room phases above are unchanged.
 
 ```
-SoloPhase: 'loading' → 'unavailable' | 'intro' → 'question' → 'revealed' → ('question' …) → 'end' (→ 'question' via Rejouer)
+SoloPhase: 'loading' → 'unavailable' | 'intro' → 'question' → 'revealed' → ('question' …) → 'end' (→ 'question' via Rejouer, → player home via Menu)
 ```
 
 ### Screen Transitions
@@ -164,7 +166,7 @@ SoloPhase: 'loading' → 'unavailable' | 'intro' → 'question' → 'revealed' �
 | `intro` | Hash `#/solo/<deckId>` on a solo deck | `SoloIntroView` | Quiz card, pseudo field (no email), **Commencer**, leaderboard (`SoloLeaderboard`: live players "en cours" + past runs) |
 | `question` | Start, or **Suivant** | `SoloQuestionView` | Answer grid + countdown (the question `timer`); **Valider** makes the answer final when it is not a one-tap case |
 | `revealed` | Final answer or timeout | `SoloQuestionView` | Correction (verdict, correct answers, explanation, points, running score), live players on this quiz, **Suivant** (no auto-advance) |
-| `end` | Last correction passed | `SoloEndView` | Score, total time, rank, full leaderboard with own row highlighted, **Rejouer** (new run, new row), HashQuiz interest form (`LeadForm`) |
+| `end` | Last correction passed | `SoloEndView` | Score, total time, rank, full leaderboard with own row highlighted, **Rejouer** (new run, new row) and **Menu** beside it (hash `#/`: back to the player home, `JoinView` + solo list), HashQuiz interest form (`LeadForm`) |
 
 ### Solo Flow Diagram
 
@@ -189,8 +191,9 @@ SoloPhase: 'loading' → 'unavailable' | 'intro' → 'question' → 'revealed' �
          ▼
   ┌──────────────┐
   │ SoloEnd      │  Run saved (local server, RPC or Edge Function), score, time, rank,
-  │              │  leaderboard, [Rejouer], HashQuiz form
+  │              │  leaderboard, [Rejouer] [Menu], HashQuiz form
   └──────────────┘
+         │ [Menu] → #/ → JoinView (solo list)
 ```
 
 ### Answer finality

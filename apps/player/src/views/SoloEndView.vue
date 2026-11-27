@@ -21,7 +21,10 @@
       </template>
     </div>
 
-    <button class="solo-btn hq-press" @click="solo.playAgain()">Rejouer</button>
+    <div class="solo-end__actions">
+      <button class="solo-btn hq-press" @click="solo.playAgain()">Rejouer</button>
+      <a class="solo-btn solo-btn--ghost hq-press" :href="MENU_HASH">Menu</a>
+    </div>
 
     <SoloLeaderboard :live="solo.liveOthers" :rows="solo.board" />
 
@@ -32,6 +35,7 @@
 <script setup lang="ts">
 import { useSoloStore } from '../stores/solo'
 import { formatDuration } from '../solo/format'
+import { MENU_HASH } from '../solo/route'
 import SoloLeaderboard from '../components/SoloLeaderboard.vue'
 import LeadForm from '../components/LeadForm.vue'
 import '../solo/solo.css'
@@ -46,6 +50,8 @@ const solo = useSoloStore()
 .solo-end__score { font-family: var(--hq-font-pixel); color: var(--hq-figure); font-size: 2rem; font-weight: 700; margin: 0; }
 .solo-end__meta  { color: var(--hq-text-muted); margin: 0.35rem 0 0; font-variant-numeric: tabular-nums; }
 .solo-end__rank  { font-size: 1.15rem; font-weight: 700; margin: 0.5rem 0 0; }
+.solo-end__actions { display: flex; gap: 0.75rem; width: 100%; }
+.solo-end__actions .solo-btn { flex: 1 1 0; display: block; text-align: center; text-decoration: none; }
 .solo-end__status { margin: 0; font-size: 0.9rem; color: var(--hq-text-muted); }
 .solo-end__status:empty { display: none; }
 .solo-end__retry {

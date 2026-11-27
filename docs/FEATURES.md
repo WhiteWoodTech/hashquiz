@@ -19,7 +19,7 @@ Feature list and roadmap for HashQuiz, organized by phase.
 | Scoring formula | ✅ | 500–1000 pts based on answer speed |
 | `hashquiz dev` CLI | ✅ | Starts WS server from a `.hashquiz.md` file |
 | `hashquiz check` CLI | ✅ | Validates a quiz file and reports errors |
-| Unit tests | ✅ | 381 tests across 43 files (parser, core, decks, backends, UI, apps), 0 failures |
+| Unit tests | ✅ | 388 tests across 44 files (parser, core, decks, backends, UI, apps), 0 failures |
 
 ---
 

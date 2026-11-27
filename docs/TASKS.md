@@ -72,7 +72,7 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 | # | Task | Description |
 |---|------|-------------|
 | 1 | Supabase schema | Only if persistence is needed: migrations for `quizzes`, `game_sessions`, `game_players`, `game_answers` |
-| ~~2~~ | ~~`@quizv/transport-supabase`~~ | ✅ Done: `IRealtimeTransport` on Supabase Realtime Broadcast + presence |
+| ~~2~~ | ~~`@quizv/backend-supabase`~~ | ✅ Done: `IRealtimeTransport` on Supabase Realtime Broadcast + presence |
 | 3 | Host auth | Magic link login via Supabase Auth |
 | 4 | Quiz persistence | Save/load quizzes tied to host account |
 | 5 | `quizv upload` CLI | Upload a `.quizv.md` file to Supabase |
@@ -141,7 +141,7 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 - [x] Initialize monorepo (`quizv/` with Bun workspaces)
 - [x] `@quizv/parser` — `parseQuizFile()` + `validateQuiz()` + 13 tests
 - [x] `@quizv/core` — `GameEngine`, `GameEvent`, `IRealtimeTransport`, scoring + 14 tests
-- [x] `@quizv/transport-local` — `LocalTransport` (Bun WS pub/sub)
+- [x] `@quizv/backend-local` — `LocalTransport` (Bun WS pub/sub)
 - [x] `@quizv/server` — Bun HTTP+WS server + `quizv dev | check` CLI
 - [x] `examples/demo.quizv.md` — sample quiz
 

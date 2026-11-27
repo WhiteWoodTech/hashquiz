@@ -2,7 +2,7 @@ import { parseQuizFile, validateQuiz } from '@quizv/parser'
 import type { Quiz } from '@quizv/parser'
 import { GameEngine } from '@quizv/core'
 import type { PlayerState, QuizInfo } from '@quizv/core'
-import { LocalTransport } from '@quizv/transport-local'
+import { LocalTransport } from '@quizv/backend-local'
 import { readFileSync } from 'node:fs'
 import { networkInterfaces } from 'node:os'
 

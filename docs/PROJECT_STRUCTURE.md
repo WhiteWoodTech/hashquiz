@@ -95,12 +95,12 @@ quizv/
 │   │   │   └── game.ts              # GameEngine state machine
 │   │   └── tests/
 │   │       └── game.test.ts         # 14 tests
-│   ├── transport-local/             # @quizv/transport-local
+│   ├── backend-local/             # @quizv/backend-local
 │   │   ├── package.json
 │   │   ├── tsconfig.json
 │   │   └── src/
 │   │       └── index.ts             # LocalTransport — Bun WS pub/sub
-│   ├── transport-supabase/          # @quizv/transport-supabase
+│   ├── backend-supabase/          # @quizv/backend-supabase
 │   │   ├── package.json
 │   │   └── src/
 │   │       └── index.ts

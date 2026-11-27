@@ -1,5 +1,5 @@
 {
-  "name": "@quizv/transport-local",
+  "name": "@quizv/backend-supabase",
   "version": "0.0.1",
   "license": "SEE LICENSE IN ../../LICENSE.md",
   "type": "module",
@@ -7,8 +7,12 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "scripts": {
+    "test": "bun test"
+  },
   "dependencies": {
-    "@quizv/core": "workspace:*"
+    "@quizv/core": "workspace:*",
+    "@supabase/supabase-js": "^2.45.4"
   },
   "devDependencies": {
     "typescript": "^5.4.5",

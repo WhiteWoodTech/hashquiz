@@ -99,7 +99,7 @@ function calcPoints(timeRemaining: number, isCorrect: boolean): number {
 
 Points range: 500 (last second) to 1000 (instant answer).
 
-### `@quizv/transport-local`
+### `@quizv/backend-local`
 
 Implements `IRealtimeTransport` using Bun's native WebSocket pub/sub:
 
@@ -242,7 +242,7 @@ Current coverage: **258 tests across 31 files, 0 failures**
 | `@quizv/core` | 91 | GameEngine transitions, scoring, choiceCounts, question selection, `SoloSession`, `verifySoloRun`, `compareRuns`, runtime config, deck manifest (`toDecks`, `deckVersion`, `deckInfo`) |
 | `@quizv/ui` | 45 | Theme parity, Fx layout |
 | `@quizv/server` | 14 | `collectDecks`, `hashquiz build`, server |
-| `@quizv/transport-supabase` | 7 | Supabase transport |
+| `@quizv/backend-supabase` | 7 | Supabase transport |
 | `apps/player` | 59 | Solo API, route, store, runtime deck list |
 | `apps/host` | 12 | Deck browsing, manifest parsing, solo link |
 
@@ -348,7 +348,7 @@ stable versions (npm `latest`), a manual run on `develop` publishes
 |-----------|--------|
 | `crypto.randomUUID()` not used | Fails on HTTP over LAN (requires secure context) |
 | No Vue Router | Linear game flow — `v-if` on phase is sufficient |
-| `@quizv/transport-supabase` is a stub | Planned for Phase 3 (cloud/internet games) |
+| `@quizv/backend-supabase` is a stub | Planned for Phase 3 (cloud/internet games) |
 | `playerUrl` hardcoded to port 3032 | Phase 2 dedicated Vite player server port |
 
 ---

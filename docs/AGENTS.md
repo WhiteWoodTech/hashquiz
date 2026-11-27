@@ -64,8 +64,8 @@ bun run packages/server/src/cli.ts check <file>               # Validate quiz
 |---------|-------------|
 | `@quizv/parser` | Parse `.quizv.md` files → typed `Quiz` objects |
 | `@quizv/core` | `GameEngine`, `GameEvent` union, `IRealtimeTransport`, scoring |
-| `@quizv/transport-local` | `LocalTransport` — Bun WebSocket pub/sub |
-| `@quizv/transport-supabase` | Cloud transport stub (Phase 3) |
+| `@quizv/backend-local` | `LocalTransport` — Bun WebSocket pub/sub |
+| `@quizv/backend-supabase` | Cloud transport stub (Phase 3) |
 | `@quizv/server` | Bun HTTP+WS server + `quizv` CLI |
 | `@quizv/theme-default` | CSS custom properties (`--qv-*`), new look |
 | `@quizv/theme-original` | Same variables, previous look (switch via the `main.ts` import) |
@@ -142,7 +142,7 @@ Design tokens from `@quizv/theme-default/styles/vars.css` are available as `var(
 - Do not add `any` types without justification
 - Do not call `crypto.randomUUID()` — it fails on HTTP over LAN; use `Math.random()` instead
 - Do not add Vue Router — navigation is phase-driven (`v-if` on store phase)
-- Do not import `@quizv/transport-supabase` in production paths — it is a stub
+- Do not import `@quizv/backend-supabase` in production paths — it is a stub
 - Do not call `ws.send()` without checking `readyState === WebSocket.OPEN`
 - Do not put paid features outside `packages/ee/` or `*.ee.*` files, and do not make MIT packages
   (`@quizv/parser`, skills, MCP) depend on fair-code or Enterprise code — see [`LICENSING.md`](./LICENSING.md)

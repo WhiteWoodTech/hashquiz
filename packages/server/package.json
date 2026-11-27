@@ -16,7 +16,7 @@
   "dependencies": {
     "@quizv/core": "workspace:*",
     "@quizv/parser": "workspace:*",
-    "@quizv/transport-local": "workspace:*"
+    "@quizv/backend-local": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.4.5",

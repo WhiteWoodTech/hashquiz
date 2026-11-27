@@ -4,7 +4,7 @@ import { ref } from 'vue'
 import type { PlayerState, QuestionPublic, Score, PodiumEntry, QuizInfo } from '@quizv/core'
 import type { GameEvent } from '@quizv/core'
 import { SupabaseHostSession } from '../session/supabase-session'
-import { SupabaseTransport } from '@quizv/transport-supabase'
+import { SupabaseTransport } from '@quizv/backend-supabase'
 import { generateJoinCode } from '../session/join-code'
 import type { BundledDeck } from '../decks'
 

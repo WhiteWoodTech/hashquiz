@@ -107,8 +107,16 @@ Points range: 500 (last second) to 1000 (instant answer).
   `onNewRun`. `SoloLivePort`: `watch`, `join`, `update`, `untrack`, `leave`, `onChange`. Methods never throw:
   failures resolve to `{ ok: false, error }` (`Outcome<T>`). `submitRun` keeps the `quiz` argument for the
   browser-scored Supabase mode; server-scored backends ignore it.
-- `soloAvailable(config)` (`runtime-config.ts`): `local` is always available, `supabase` needs the URL and the
-  anon key.
+- `soloAvailable(config, protocol = location.protocol)` (`runtime-config.ts`): `local` is available on `http:`
+  pages only (its `ws://` socket is mixed content on `https:`), `supabase` needs the URL and the anon key.
+- `readRuntimeConfig(import.meta.env)`: each field of the injected `window.__QUIZV_CONFIG__` wins over the build
+  env when present (an injected `local` / `browser` overrides a `supabase` / `edge` build). The monorepo Vite
+  plugin builds `/quizv-config.js` from the `VITE_*` values Vite loaded from the app's `.env*` files plus the
+  process env (process env wins), so it matches the developer's setup.
+
+The player solo store keeps the submit failure reason (`submitError`). `deck version mismatch` and
+`unknown deck` set `submitState = 'stale'`: no retry button, the message « ce quiz a été mis à jour. Rejouez
+pour utiliser la nouvelle version. », the cached `decks.json` is dropped and **Rejouer** re-opens the deck.
 
 The runtime config field `transport` (`local` | `supabase`) selects the backend for rooms **and** solo; apps
 import `@quizv/backend-*` only, never `@supabase/supabase-js` or `bun:sqlite`.
@@ -116,9 +124,10 @@ import `@quizv/backend-*` only, never `@supabase/supabase-js` or `bun:sqlite`.
 **`SoloDeckSource`** (`@quizv/core/solo-decks`) is the one deck lookup used by the local server and the Edge
 Function: a cached `decks.json` manifest (`parseManifest` checks its shape), solo decks only (`solo: true`),
 TTL 5 min by default. An unknown deck or a version mismatch triggers **one** forced reload before the run is
-rejected, throttled by `minRefetchMs` (10 s) so bogus versions cannot hammer the source; a failed reload keeps
-the stale cache and backs off. Lookup failures are `unknown deck`, `deck version mismatch` or
-`decks unavailable`. Every backend scores through `verifySoloRun` and orders runs with `compareRuns`.
+rejected, throttled by `minRefetchMs` (10 s; 1 s for the local server, which reads from disk) so bogus
+versions cannot hammer the source; a failed reload keeps the stale cache and backs off. Lookup failures are
+`unknown deck`, `deck version mismatch` or `decks unavailable`. Every backend scores through `verifySoloRun`
+and orders runs with `compareRuns`.
 
 ### `@quizv/backend-local`
 
@@ -163,10 +172,12 @@ topic `solo:<deckId>` and receives the current player list on open.
 | Server → clients | `solo_new_run { deckId }` | A run was stored; leaderboards refetch |
 
 Closing the socket removes its row. The browser client reconnects after a fixed delay while not left and
-re-tracks its last state.
+re-tracks its last state. Presence keys are not authenticated: a client can track any row under any key, so
+the live list is cosmetic and spoofable (the same holds for Supabase presence). Stored runs are always rescored.
 
 **SQLite** (`.hashquiz/solo.db` in the working directory, parent folder created on open; WAL mode,
-`PRAGMA user_version = 1`). The tables mirror Supabase:
+`PRAGMA user_version = 1`). If the store cannot open (read-only folder, locked or corrupt file) the server logs
+a warning and runs with solo disabled; rooms still start. The tables mirror Supabase:
 
 | Table | Columns |
 |-------|---------|
@@ -312,18 +323,19 @@ bun test --watch            # Watch mode
 bun test packages/core      # Single package
 ```
 
-Current coverage: **360 tests across 40 files, 0 failures**
+Current coverage: **378 tests across 43 files, 0 failures**
 
 | Package | Tests | Coverage |
 |---------|-------|----------|
 | `@quizv/parser` | 30 | Parse paths, edge cases, validation, `solo` flag |
-| `@quizv/core` | 105 | GameEngine transitions, scoring, choiceCounts, question selection, `SoloSession`, `verifySoloRun`, `compareRuns`, runtime config (`soloAvailable`), deck manifest (`toDecks`, `deckVersion`, `deckInfo`), `parseManifest`, `SoloDeckSource` |
+| `@quizv/core` | 109 | GameEngine transitions, scoring, choiceCounts, question selection, `SoloSession`, `verifySoloRun`, `compareRuns`, runtime config (`soloAvailable`), deck manifest (`toDecks`, `deckVersion`, `deckInfo`), `parseManifest`, `SoloDeckSource` |
 | `@quizv/ui` | 45 | Theme parity, Fx layout |
-| `@quizv/server` | 24 | `collectDecks`, `hashquiz build`, `resolveDevTarget`, server, local solo on a real port |
+| `@quizv/server` | 28 | `collectDecks`, `hashquiz build`, `resolveDevTarget`, server, local solo on a real port (deck reload, store that cannot open), Vite plugin config |
 | `@quizv/backend-local` | 55 | Transport, `SoloStore` ordering and rank, HTTP handler, presence hub, browser client |
-| `@quizv/backend-supabase` | 52 | Transport, `SoloApi` / `SoloLive`, `toSoloRunRow`, edge bundle, deploy steps and staging |
-| `apps/player` | 37 | Route, store, runtime deck list |
+| `@quizv/backend-supabase` | 54 | Transport, `SoloApi` / `SoloLive`, `toSoloRunRow`, edge bundle, `manifestUrl`, deploy steps and staging |
+| `apps/player` | 41 | Route, store (incl. changed deck), runtime deck list |
 | `apps/host` | 12 | Deck browsing, manifest parsing, solo link |
+| `scripts/` | 4 | Pack guard: clean build env, baked Supabase settings |
 
 ---
 
@@ -382,7 +394,8 @@ when the runtime config has `soloScoring: 'edge'` (`HASHQUIZ_SOLO_SCORING` / `VI
 - `422 { reason }`: `invalid json`, `unknown deck`, `deck version mismatch` (the site's deck differs from the
   client's, after one forced refetch), or any `verifySoloRun` rejection reason.
 - `503 { reason: 'decks unavailable' }`: the site's `decks.json` could not be loaded (and nothing is cached);
-  `500 { reason: 'site url not configured' }` without the `HASHQUIZ_SITE_URL` secret.
+  `500 { reason: 'site url not configured' }` when the `HASHQUIZ_SITE_URL` secret is unset, malformed or not
+  `http(s)` (`manifestUrl`, logged; the function no longer crashes at load).
 - `405` for other methods; `OPTIONS` → `204` with CORS headers (`Access-Control-Allow-Origin: *`).
 
 A module-level `SoloDeckSource` loads `<HASHQUIZ_SITE_URL>/decks.json` through `parseManifest` (fetch aborted

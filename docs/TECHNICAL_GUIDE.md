@@ -99,9 +99,30 @@ function calcPoints(timeRemaining: number, isCorrect: boolean): number {
 
 Points range: 500 (last second) to 1000 (instant answer).
 
+**Backend ports.** `@quizv/core` holds the ports only; each backend plugin implements them:
+
+- `IRealtimeTransport` (rooms): `broadcast` / `subscribe`.
+- `SoloBackend` (`packages/core/src/solo-backend.ts`): `{ api: SoloApiPort; live(deckId): SoloLivePort }`.
+  `SoloApiPort`: `submitRun(sub, quiz)`, `fetchTop`, `fetchRun`, `fetchCount`, `fetchRank`, `submitLead`,
+  `onNewRun`. `SoloLivePort`: `watch`, `join`, `update`, `untrack`, `leave`, `onChange`. Methods never throw:
+  failures resolve to `{ ok: false, error }` (`Outcome<T>`). `submitRun` keeps the `quiz` argument for the
+  browser-scored Supabase mode; server-scored backends ignore it.
+- `soloAvailable(config)` (`runtime-config.ts`): `local` is always available, `supabase` needs the URL and the
+  anon key.
+
+The runtime config field `transport` (`local` | `supabase`) selects the backend for rooms **and** solo; apps
+import `@quizv/backend-*` only, never `@supabase/supabase-js` or `bun:sqlite`.
+
+**`SoloDeckSource`** (`@quizv/core/solo-decks`) is the one deck lookup used by the local server and the Edge
+Function: a cached `decks.json` manifest (`parseManifest` checks its shape), solo decks only (`solo: true`),
+TTL 5 min by default. An unknown deck or a version mismatch triggers **one** forced reload before the run is
+rejected, throttled by `minRefetchMs` (10 s) so bogus versions cannot hammer the source; a failed reload keeps
+the stale cache and backs off. Lookup failures are `unknown deck`, `deck version mismatch` or
+`decks unavailable`. Every backend scores through `verifySoloRun` and orders runs with `compareRuns`.
+
 ### `@quizv/backend-local`
 
-Implements `IRealtimeTransport` using Bun's native WebSocket pub/sub:
+`LocalTransport` implements `IRealtimeTransport` using Bun's native WebSocket pub/sub:
 
 ```typescript
 interface IRealtimeTransport {
@@ -109,6 +130,56 @@ interface IRealtimeTransport {
   subscribe(channel: string, handler: (event: GameEvent) => void): Unsubscribe
 }
 ```
+
+It also holds the **local solo backend**, served by the `hashquiz dev` Bun server. Subpath exports keep
+`bun:sqlite` out of the browser bundles: `@quizv/backend-local/solo-client` (browser: `fetch` + `WebSocket`,
+`createLocalSoloBackend`) and `@quizv/backend-local/solo-server` (Bun: `SoloStore`, `createSoloHttpHandler`,
+`SoloPresenceHub`).
+
+**HTTP** (dev server, port 3030, CORS `*`, `OPTIONS` answers 204, bodies up to 64 KiB). Solo routes exist only
+when the server has a decks folder (`decksDir`):
+
+| Method + path | Response |
+|---|---|
+| `POST /solo/runs` (`SoloRunSubmission`) | 200 `{ runId, rank }` · 422 `{ reason }` · 413 · 503 `{ reason: 'decks unavailable' }` |
+| `GET /solo/runs?deck=<id>&limit=<n>` | 200 `RankedRun[]` (limit clamped to 1–100, default 20) |
+| `GET /solo/runs/<runId>` | 200 `RankedRun` · 404 |
+| `GET /solo/count?deck=<id>` | 200 `{ count }` |
+| `GET /solo/rank/<runId>` | 200 `{ rank }` · 404 |
+| `POST /solo/leads` (`{ email, deckId }`) | 204 · 422 |
+
+**Scoring.** `POST /solo/runs` resolves the deck through a `SoloDeckSource` (loader: `collectDecks(decksDir)`,
+no TTL, edits are picked up by the version-mismatch reload), then `verifySoloRun`. The submitted body carries no
+score. The runtime `soloScoring` setting is ignored in local mode: the server always rescores.
+
+**WebSocket** `ws://<host>:3030/ws?role=solo&deck=<id>&key=<key>` (no join code). The socket subscribes to the
+topic `solo:<deckId>` and receives the current player list on open.
+
+| Direction | Message | Meaning |
+|---|---|---|
+| Client → server | `solo_track { state }` | Join or update this player's row (`pseudo`, `index`, `total`, `score`) |
+| Client → server | `solo_untrack` | Remove the row (finished or abandoned) |
+| Server → clients | `solo_presence { deckId, players }` | Full list, on every change |
+| Server → clients | `solo_new_run { deckId }` | A run was stored; leaderboards refetch |
+
+Closing the socket removes its row. The browser client reconnects after a fixed delay while not left and
+re-tracks its last state.
+
+**SQLite** (`.hashquiz/solo.db` in the working directory, parent folder created on open; WAL mode,
+`PRAGMA user_version = 1`). The tables mirror Supabase:
+
+| Table | Columns |
+|-------|---------|
+| `solo_runs` | `id` (text), `deck_id`, `deck_version`, `room_id` (null), `pseudo` (1–24), `score`, `correct_count`, `question_count`, `total_time_ms`, `finished_at` (ISO UTC, ms) |
+| `solo_answers` | `run_id`, `position`, `deck_index`, `choices` (JSON text), `is_correct`, `answer_time_ms`, `points` |
+| `leads` | `email` (≤ 254), `consent` (always 1), `deck_id` (≤ 200), `created_at` |
+
+A run and its answers are written in one transaction. Top and rank use the same predicate as `solo_rank`
+(`compareRuns` order: score desc, total time asc, finished at asc).
+
+**Degradation.** The leaderboard exists only on the machine running `hashquiz dev` (add `.hashquiz/` to the
+`.gitignore` of a decks repository), nothing is deployed online, and players must reach port 3030 of that machine
+(the player app calls `http://<page hostname>:3030`): unsuitable for https static deploys.
 
 ### `@quizv/server`
 
@@ -121,6 +192,13 @@ Bun HTTP + WebSocket server. Serves the game over a single port (3030).
 - `GET /` → host HTML (redirect to Vite in Phase 2)
 - `GET /play` → player HTML
 - `GET /ws` → WebSocket upgrade
+- `/solo/*` → local solo API (see `@quizv/backend-local`), when the server has a decks folder
+
+`QuizvServerOptions` takes `decksDir?` and `soloDbPath?`. `hashquiz dev <file | folder> [--decks <dir>]`: a file
+is the room deck and the decks folder is `--decks`, else the monorepo `repoDecksDir` (`examples/` or
+`QUIZV_DECKS_DIR`), else the file's folder; a folder is the decks folder and the room deck is its first deck by
+id. The folder is passed to the Vite children as `QUIZV_DECKS_DIR`, and the package's static servers serve
+`decks.json` and `host/decks.json` from it.
 
 ---
 
@@ -234,23 +312,26 @@ bun test --watch            # Watch mode
 bun test packages/core      # Single package
 ```
 
-Current coverage: **258 tests across 31 files, 0 failures**
+Current coverage: **360 tests across 40 files, 0 failures**
 
 | Package | Tests | Coverage |
 |---------|-------|----------|
 | `@quizv/parser` | 30 | Parse paths, edge cases, validation, `solo` flag |
-| `@quizv/core` | 91 | GameEngine transitions, scoring, choiceCounts, question selection, `SoloSession`, `verifySoloRun`, `compareRuns`, runtime config, deck manifest (`toDecks`, `deckVersion`, `deckInfo`) |
+| `@quizv/core` | 105 | GameEngine transitions, scoring, choiceCounts, question selection, `SoloSession`, `verifySoloRun`, `compareRuns`, runtime config (`soloAvailable`), deck manifest (`toDecks`, `deckVersion`, `deckInfo`), `parseManifest`, `SoloDeckSource` |
 | `@quizv/ui` | 45 | Theme parity, Fx layout |
-| `@quizv/server` | 14 | `collectDecks`, `hashquiz build`, server |
-| `@quizv/backend-supabase` | 7 | Supabase transport |
-| `apps/player` | 59 | Solo API, route, store, runtime deck list |
+| `@quizv/server` | 24 | `collectDecks`, `hashquiz build`, `resolveDevTarget`, server, local solo on a real port |
+| `@quizv/backend-local` | 55 | Transport, `SoloStore` ordering and rank, HTTP handler, presence hub, browser client |
+| `@quizv/backend-supabase` | 52 | Transport, `SoloApi` / `SoloLive`, `toSoloRunRow`, edge bundle, deploy steps and staging |
+| `apps/player` | 37 | Route, store, runtime deck list |
 | `apps/host` | 12 | Deck browsing, manifest parsing, solo link |
 
 ---
 
 ## Solo Mode Storage (Supabase)
 
-Schema in `packages/backend-supabase/supabase/migrations/20261126090000_solo_live.sql`, hardened by
+Supabase backend (`@quizv/backend-supabase`); the local backend mirrors these tables in SQLite (see
+`@quizv/backend-local`). Schema in
+`packages/backend-supabase/supabase/migrations/20261126090000_solo_live.sql`, hardened by
 `20261126120000_solo_hardening.sql`. RLS is enabled on every table, and table grants match the policies.
 
 | Table | Contents | anon |
@@ -309,7 +390,14 @@ after 5 s; TTL 5 min; forced refetch at most every 10 s; a failed load keeps the
 `verifySoloRun`, and stores `toSoloRunRow(run)` through `insert_solo_run` with `SUPABASE_SERVICE_ROLE_KEY`
 (ignores `solo_settings`). These come from `_shared/solo-core.js` (gitignored), the `Bun.build` ESM bundle of
 `packages/backend-supabase/src/edge/solo-core.ts` written by `bun run build:edge`
-(`packages/backend-supabase/src/cli/edge-bundle.ts`).
+(`packages/backend-supabase/src/cli/edge-bundle.ts`). Locally the edge runtime runs in Docker, so
+`functions/.env.local` (from `.env.example`) sets `HASHQUIZ_SITE_URL=http://host.docker.internal:3032`.
+
+**Deploy.** `hashquiz supabase deploy --project <ref> [--site-url <url>] [--dry-run]` needs the Supabase CLI,
+`SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD` and an http(s) site URL (`--site-url` or `HASHQUIZ_SITE_URL`). It
+stages the project shipped in the npm package (`supabase/`, with a prebuilt `solo-core.js`) into a temp folder
+and runs `supabase link`, `db push`, `functions deploy solo-submit` and `secrets set HASHQUIZ_SITE_URL=<url>`,
+stopping at the first failure. It never touches `solo_settings`. See [`DEPLOY.md`](DEPLOY.md).
 
 **Known limit: question selection is not replayed.** The function checks that every question exists in its
 deck, that none repeats, that each answer time is within `[0, timer]` and that the `max-time` budget holds,
@@ -351,9 +439,9 @@ stable versions (npm `latest`), a manual run on `develop` publishes
 |-----------|--------|
 | `crypto.randomUUID()` not used | Fails on HTTP over LAN (requires secure context) |
 | No Vue Router | Linear game flow — `v-if` on phase is sufficient |
-| `@quizv/backend-supabase` is a stub | Planned for Phase 3 (cloud/internet games) |
+| Local solo is per machine | Runs live in `.hashquiz/solo.db` on the `hashquiz dev` host; hosted sites use Supabase |
 | `playerUrl` hardcoded to port 3032 | Phase 2 dedicated Vite player server port |
 
 ---
 
-*Last updated: 2026-11-26*
+*Last updated: 2026-11-27*

@@ -1,10 +1,14 @@
 # Deploy
 
-This project deploys on Vercel for hosting and Supabase for realtime messaging and solo mode storage.
-Rooms only use Supabase Realtime channels. Solo mode stores finished runs, their answers and HashQuiz
-leads in Postgres and can score runs in an Edge Function. The Supabase CLI project is
-`packages/backend-supabase/supabase/` (`migrations/`, `functions/solo-submit/`); every CLI command below
-passes `--workdir packages/backend-supabase`.
+This project deploys on Vercel for hosting and Supabase for realtime messaging and solo mode storage
+(the `supabase` backend plugin, `@quizv/backend-supabase`). Rooms only use Supabase Realtime channels. Solo mode
+stores finished runs, their answers and HashQuiz leads in Postgres and can score runs in an Edge Function. The
+Supabase CLI project is `packages/backend-supabase/supabase/` (`migrations/`, `functions/solo-submit/`); every
+CLI command below passes `--workdir packages/backend-supabase`.
+
+Without Supabase, `hashquiz dev` runs the `local` backend plugin (`@quizv/backend-local`), which serves rooms and
+solo on the dev server; see [Local development](#local-development). The runtime config field `transport`
+(`local` or `supabase`) picks the backend for rooms and solo.
 
 ## 1. Create a Supabase project
 
@@ -21,9 +25,14 @@ passes `--workdir packages/backend-supabase`.
    supabase secrets set HASHQUIZ_SITE_URL=https://<deployed-site> --project-ref <project-ref> $W
    ```
 
-   Or, in one command (sources or the `hashquiz` npm package; needs `SUPABASE_ACCESS_TOKEN` and
-   `SUPABASE_DB_PASSWORD`; `--dry-run` prints the steps):
+   Or, in one command (sources or the `hashquiz` npm package; `--dry-run` prints the steps):
    `bun run packages/server/src/cli.ts supabase deploy --project <project-ref> --site-url https://<deployed-site>`.
+   Prerequisites: the Supabase CLI on `PATH` (or `SUPABASE_BIN`), and in the environment
+   `SUPABASE_ACCESS_TOKEN` and `SUPABASE_DB_PASSWORD`; the site URL comes from `--site-url` or
+   `HASHQUIZ_SITE_URL` and must be an http(s) URL. The command stages the project in a temp folder and runs
+   `supabase link`, `db push`, `functions deploy solo-submit` and `secrets set HASHQUIZ_SITE_URL=<url>`,
+   stopping at the first failure. It **never changes `solo_settings`**: the scoring mode is a separate manual
+   step (see Solo scoring mode).
 
    Run these from this repository. `bun run build:edge` bundles the function core
    (`functions/_shared/solo-core.js`, gitignored). The function reads the solo decks at runtime from
@@ -62,7 +71,8 @@ copy of the deck. Switch **both** together:
 
 1. Set `VITE_SOLO_SCORING=edge` (or `HASHQUIZ_SOLO_SCORING=edge`) in Vercel and redeploy.
 2. In the SQL editor: `update solo_settings set scoring_mode = 'edge';` (the RPC then refuses browser-scored
-   runs).
+   runs). `hashquiz supabase deploy` does not do this: switching to edge scoring means setting the runtime
+   config **and** the database row.
 
 Switch back with `browser` in both places. `edge` stops forged scores, not cheating in general: correct answers
 are still in the client bundle and answer times are self-reported. The function does not replay random
@@ -87,24 +97,41 @@ Push to the configured branch. Vercel builds and serves:
 
 ## Local development
 
-`VITE_TRANSPORT=local` (the default in `.env.example`) keeps using
-`bun run packages/server/src/cli.ts dev examples/demo.quizv.md`. No Supabase is involved, and solo mode is not
-available.
+`VITE_TRANSPORT=local` (the default in `.env.example`) runs
+`bun run packages/server/src/cli.ts dev examples/demo.quizv.md`. No Supabase is involved. `hashquiz dev` takes a
+deck file (the room deck) or a decks folder (the decks folder for solo mode; the room deck is its first deck by
+id). With a file, `--decks <dir>` picks the solo decks folder (default: the monorepo `examples/` or
+`QUIZV_DECKS_DIR`, else the file's folder).
 
-Both Vite apps list the decks of `examples/` (or `QUIZV_DECKS_DIR`, relative to the repo root), served as
-`/host/decks.json` and `/decks.json`. `examples/demo.quizv.md` is a `solo: true` deck. To work on solo mode,
-run a local Supabase (requires Docker):
+Both Vite apps list the decks of that folder, served as `/host/decks.json` and `/decks.json`.
+`examples/demo.quizv.md` is a `solo: true` deck.
+
+### Local solo (no Supabase)
+
+With the local transport the dev server (port 3030) also serves solo mode: runs go to SQLite
+(`.hashquiz/solo.db` in the working directory), the server rescores every run against its own decks (the
+`soloScoring` setting is ignored), and live players and new runs travel over the existing WebSocket. Degradation
+to know about:
+
+- The leaderboard lives only on the machine running `hashquiz dev`. Add `.hashquiz/` to the `.gitignore` of a
+  decks repository.
+- Nothing deploys online. Players must reach port 3030 of that machine (the player app calls
+  `http://<page hostname>:3030`), so it is unsuitable for https static deploys: use the Supabase backend there.
+
+### Local Supabase
+
+To work on the Supabase backend, run a local Supabase (requires Docker):
 
 ```bash
 bun run supabase:start                 # supabase start --workdir packages/backend-supabase (5432x ports)
 supabase db reset --workdir packages/backend-supabase   # re-apply the migrations on a clean database
-bun run build:edge                     # only for edge scoring: bundle the function core
+bun run build:edge                     # only for edge scoring: bundle the function core (solo-core.js)
 bun run supabase:functions             # only for edge scoring: functions serve with functions/.env.local
 ```
 
-For edge scoring, copy `packages/backend-supabase/supabase/functions/.env.example` to `.env.local`
-(`HASHQUIZ_SITE_URL=http://host.docker.internal:3032`: the edge runtime runs in Docker and reads
-`decks.json` from the player dev server).
+For edge scoring, copy `packages/backend-supabase/supabase/functions/.env.example` to
+`packages/backend-supabase/supabase/functions/.env.local` (`HASHQUIZ_SITE_URL=http://host.docker.internal:3032`:
+the edge runtime runs in Docker and reads `decks.json` from the player dev server, so it must be running).
 
 Then run the apps with, in `apps/host/.env.local` and `apps/player/.env.local`:
 
@@ -125,6 +152,17 @@ Decks live in their own repositories (`maxime-lenne/markuiz-decks`,
 `hashquiz build decks --out dist` on Vercel. Steps 1 to 5 apply to them; the
 variables can use the `HASHQUIZ_*` names (`HASHQUIZ_TRANSPORT`, …). See
 [`PACKAGE.md`](PACKAGE.md).
+
+Typical CI sequence of a decks repository (the package ships the Supabase project, no checkout of this
+repository needed):
+
+```bash
+hashquiz build decks --out dist        # static site + decks.json (deployed to Vercel)
+hashquiz supabase deploy --project <ref>   # migrations, Edge Function, HASHQUIZ_SITE_URL secret
+```
+
+with `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD` and `HASHQUIZ_SITE_URL` (the deployed site) as CI secrets.
+Deck changes only need the site redeployed: the function reads `decks.json` at runtime.
 
 The host app reads the deck list from `host/decks.json`, the player its solo decks from the same
 manifest at `/decks.json`, and both the settings from `/quizv-config.js` at runtime, so the same

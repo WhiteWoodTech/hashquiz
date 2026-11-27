@@ -68,13 +68,19 @@ bun run packages/server/src/cli.ts dev examples/demo.quizv.md
 
 # Override the WS / HTTP port (host and player apps stay on 3031 / 3032)
 bun run dev examples/quiz-ia-dev.quizv.md --port 4040
+
+# Pass a decks folder: it is the decks folder for solo mode, the room deck is its first deck by id
+bun run dev examples
+
+# With a file, --decks picks the solo decks folder (default: examples/ in the monorepo, else the file's folder)
+bun run dev examples/demo.quizv.md --decks examples
 ```
 
 This starts three servers simultaneously:
 
 | Server | URL | Role |
 |--------|-----|------|
-| WS / HTTP | `ws://localhost:3030` | Game logic + join codes |
+| WS / HTTP | `ws://localhost:3030` | Game logic + join codes, local solo backend (`/solo/*`) |
 | Host app | `http://localhost:3031` | Desktop dashboard |
 | Player app | `http://localhost:3032` | Mobile client |
 
@@ -100,11 +106,22 @@ bun test                  # Run all tests
 bun run build             # Build every workspace package
 bun run build:web         # Build only the host + player SPAs
 bun run pack              # Stage the hashquiz npm package in pkg/
-bun run build:edge        # Bundle the solo-submit Edge Function core (solo-core.js)
+bun run build:edge        # Bundle the solo-submit Edge Function core (solo-core.js), edge scoring only
 bun run lint              # Lint markdown and YAML
 bun run lint:md:fix       # Auto-fix markdown
 bun run commit            # Interactive gitmoji commit
 ```
+
+### Solo mode locally (no Supabase)
+
+With the local transport (the default), `hashquiz dev` also serves solo mode: the Bun server on port 3030 stores
+finished runs in SQLite (`.hashquiz/solo.db` in the working directory), rescores them itself against its decks
+folder, and pushes live players and new runs over the existing WebSocket. The player home lists the decks with
+`solo: true` (`examples/demo.quizv.md` is one) and the player app reaches `http://<page hostname>:3030`.
+
+Limits: the leaderboard exists only on the machine running `hashquiz dev` (add `.hashquiz/` to the
+`.gitignore` of a decks repository), nothing is deployed online, and players must reach port 3030 of that
+machine. A page served over https (a static deploy) cannot call it, so use the Supabase backend there.
 
 ### Solo mode with Supabase
 
@@ -126,9 +143,7 @@ Run the apps with `VITE_TRANSPORT=supabase`, `VITE_SUPABASE_URL=http://127.0.0.1
 `solo: true` deck: the player home lists it under the join form and its host card links to `#/solo/<deckId>`.
 `VITE_SOLO_SCORING` (or `HASHQUIZ_SOLO_SCORING` for `hashquiz build`) picks `browser` (default) or `edge`
 scoring; switching to `edge` also needs `update solo_settings set scoring_mode = 'edge'`. Production steps
-(`supabase db push`, `bun run build:edge`, `supabase functions deploy solo-submit`, the `HASHQUIZ_SITE_URL`
-secret) are in
-[`docs/DEPLOY.md`](docs/DEPLOY.md).
+(`hashquiz supabase deploy` or the manual `supabase` commands) are in [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ## Decks
 
@@ -196,14 +211,14 @@ quizv/
 ├── packages/
 │   ├── parser/           # @quizv/parser — .quizv.md → Quiz object
 │   ├── core/             # @quizv/core — GameEngine, events, types
-│   ├── backend-local/    # @quizv/backend-local — Bun WS transport
-│   ├── backend-supabase/ # @quizv/backend-supabase — Supabase transport, solo API, Supabase project + Edge Function
+│   ├── backend-local/    # @quizv/backend-local — Bun WS transport, local solo backend (SQLite)
+│   ├── backend-supabase/ # @quizv/backend-supabase — Supabase transport, solo API, Supabase project
 │   ├── server/           # @quizv/server — Bun HTTP+WS server + CLI
 │   ├── theme-default/    # @quizv/theme-default — CSS design tokens
 │   └── ui/               # @quizv/ui — shared Vue 3 components
 ├── apps/
-│   ├── host/            # Vue 3 SPA — port 3031
-│   └── player/          # Vue 3 SPA — port 3032
+│   ├── host/             # Vue 3 SPA — port 3031
+│   └── player/           # Vue 3 SPA — port 3032
 └── examples/
     └── demo.quizv.md
 ```

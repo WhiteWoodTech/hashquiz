@@ -63,9 +63,9 @@ bun run packages/server/src/cli.ts check <file>               # Validate quiz
 | Package | Description |
 |---------|-------------|
 | `@quizv/parser` | Parse `.quizv.md` files → typed `Quiz` objects |
-| `@quizv/core` | `GameEngine`, `GameEvent` union, `IRealtimeTransport`, scoring |
-| `@quizv/backend-local` | `LocalTransport` — Bun WebSocket pub/sub |
-| `@quizv/backend-supabase` | Cloud transport stub (Phase 3) |
+| `@quizv/core` | `GameEngine`, `GameEvent` union, `IRealtimeTransport`, `SoloBackend` ports, `SoloDeckSource`, scoring |
+| `@quizv/backend-local` | Local backend: `LocalTransport` (Bun WebSocket pub/sub) + local solo (SQLite, WS presence) |
+| `@quizv/backend-supabase` | Supabase backend: rooms transport, solo API and presence, `supabase/` project (migrations, Edge Function), `hashquiz supabase deploy` |
 | `@quizv/server` | Bun HTTP+WS server + `quizv` CLI |
 | `@quizv/theme-default` | CSS custom properties (`--qv-*`), new look |
 | `@quizv/theme-original` | Same variables, previous look (switch via the `main.ts` import) |
@@ -132,7 +132,7 @@ Design tokens from `@quizv/theme-default/styles/vars.css` are available as `var(
 
 ### Pre-commit Checklist
 
-- [ ] `bun test` passes (27+ tests, 0 failures)
+- [ ] `bun test` passes (360+ tests, 0 failures)
 - [ ] No debug `console.log` left in code
 - [ ] Documentation updated if behavior changed
 - [ ] Commit uses gitmoji format
@@ -142,7 +142,8 @@ Design tokens from `@quizv/theme-default/styles/vars.css` are available as `var(
 - Do not add `any` types without justification
 - Do not call `crypto.randomUUID()` — it fails on HTTP over LAN; use `Math.random()` instead
 - Do not add Vue Router — navigation is phase-driven (`v-if` on store phase)
-- Do not import `@quizv/backend-supabase` in production paths — it is a stub
+- Do not import `@supabase/supabase-js` or `bun:sqlite` in the apps — import `@quizv/backend-supabase` /
+  `@quizv/backend-local` (browser subpaths only), which sit behind the ports in `@quizv/core`
 - Do not call `ws.send()` without checking `readyState === WebSocket.OPEN`
 - Do not put paid features outside `packages/ee/` or `*.ee.*` files, and do not make MIT packages
   (`@quizv/parser`, skills, MCP) depend on fair-code or Enterprise code — see [`LICENSING.md`](./LICENSING.md)

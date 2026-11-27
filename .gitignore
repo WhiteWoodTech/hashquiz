@@ -74,3 +74,6 @@ packages/backend-supabase/supabase/.temp/
 
 # HashQuiz local solo store (hashquiz dev)
 .hashquiz/
+
+# Claude Code local settings (per developer)
+.claude/settings.local.json

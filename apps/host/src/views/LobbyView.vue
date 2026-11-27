@@ -174,7 +174,7 @@ onBeforeUnmount(() => { if (popTimer) clearTimeout(popTimer) })
 .lobby__link:hover { text-decoration: underline; }
 .lobby__code-box { text-align: center; }
 .lobby__code-label { margin: 0; color: var(--hq-text-muted); font-size: clamp(0.75rem, 1.8vmin, 1.1rem); }
-.lobby__code { margin: 0.6vmin 0 0; font-size: clamp(2.5rem, 8vmin, 5.5rem); letter-spacing: 0.16em; color: var(--hq-accent); line-height: 1.1; }
+.lobby__code { margin: 0.6vmin 0 0; font-size: clamp(2.5rem, 8vmin, 5.5rem); letter-spacing: 0.16em; color: var(--hq-figure); line-height: 1.1; }
 .lobby__qr { display: flex; justify-content: center; width: 100%; }
 /* qrcode sets an inline 800px size on the canvas: override it to fit the column. */
 .lobby__qr :deep(.hq-qr) { width: min(100%, 34vh) !important; height: auto !important; aspect-ratio: 1; image-rendering: pixelated; }

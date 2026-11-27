@@ -97,6 +97,7 @@
         "@quizv/core": "workspace:*",
         "@quizv/parser": "workspace:*",
         "@quizv/backend-local": "workspace:*",
+        "@quizv/backend-supabase": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "latest",

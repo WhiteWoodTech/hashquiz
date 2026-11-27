@@ -30,6 +30,7 @@ Format reference: [deck format](https://github.com/WhiteWoodTech/hashquiz/blob/d
 hashquiz check decks/my-deck/index.quizv.md   # validate one deck
 hashquiz dev decks/my-deck/index.quizv.md     # local game: host :3031/host/, players :3032
 hashquiz build decks --out dist               # static site with every deck under decks/
+hashquiz supabase deploy --project <ref>      # solo backend on a Supabase project
 ```
 
 `build` validates every `*.quizv.md` under the folder, copies the apps and
@@ -49,6 +50,23 @@ The `QUIZV_*` and `VITE_*` names (`VITE_TRANSPORT`, …) are accepted too.
 
 Decks with `solo: true` in their frontmatter can also be played alone from
 the player app (Supabase required, see the hashquiz `docs/DEPLOY.md`).
+
+## Deploy the solo backend on Supabase
+
+The package ships the Supabase project (`supabase/`: migrations, the `solo-submit` Edge Function and its
+prebuilt core). After `hashquiz build`, deploy it with:
+
+```bash
+HASHQUIZ_SITE_URL=https://<domain> hashquiz supabase deploy --project <project-ref> [--dry-run]
+```
+
+It stages the project in a temp folder and runs `supabase link`, `supabase db push`,
+`supabase functions deploy solo-submit` and `supabase secrets set HASHQUIZ_SITE_URL=…`, stopping at the first
+failure. The function reads `<HASHQUIZ_SITE_URL>/decks.json` at runtime, so deck changes need no redeploy.
+`--site-url <url>` overrides `HASHQUIZ_SITE_URL` (an http(s) URL). It needs the
+[Supabase CLI](https://supabase.com/docs/guides/cli) on `PATH` (or `SUPABASE_BIN`), plus
+`SUPABASE_ACCESS_TOKEN` and `SUPABASE_DB_PASSWORD` in the environment (CI secrets). `--dry-run` prints the
+steps without running them. Edge scoring also needs `update solo_settings set scoring_mode = 'edge'` once.
 
 ## Deploy on Vercel
 

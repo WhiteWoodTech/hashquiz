@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 import { devCommand } from './dev'
 import { buildSite } from './build'
+import { supabaseCommand } from '@quizv/backend-supabase/cli'
 import { parseQuizFile, validateQuiz } from '@quizv/parser'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -23,6 +24,13 @@ function printUsage(): void {
                             HASHQUIZ_SUPABASE_URL, HASHQUIZ_SUPABASE_ANON_KEY,
                             HASHQUIZ_SOLO_SCORING, HASHQUIZ_PLAYER_URL
                             (or their QUIZV_* / VITE_* names) from the environment.
+    supabase deploy --project <ref> [--site-url <url>] [--dry-run]
+                            Deploy the solo backend to a Supabase project:
+                            migrations, the solo-submit Edge Function and its
+                            HASHQUIZ_SITE_URL secret (the site serving
+                            decks.json; flag or env). Needs the Supabase CLI
+                            (or SUPABASE_BIN), SUPABASE_ACCESS_TOKEN and
+                            SUPABASE_DB_PASSWORD.
 
   Options:
     --port <number>         Port to listen on (default: 3030)
@@ -67,6 +75,8 @@ if (command === 'dev') {
     console.error(`✗ ${e instanceof Error ? e.message : String(e)}`)
     process.exit(1)
   }
+} else if (command === 'supabase') {
+  process.exit(await supabaseCommand(args, process.env))
 } else if (command === 'check') {
   if (!arg) {
     console.error('Error: provide a .quizv.md file path\n  quizv check quiz.quizv.md')

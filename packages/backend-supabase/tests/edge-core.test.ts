@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { homedir, tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { SoloSession, verifySoloRun, type SoloRunSubmission } from '@quizv/core'
 import { deckVersion, toDecks } from '@quizv/core/decks'
@@ -59,5 +59,25 @@ describe('edge core bundle', () => {
     ].map((m) => m[1]!)
     const bare = specs.filter((s) => !s.startsWith('./') && !s.startsWith('../') && !s.startsWith('node:'))
     expect(bare).toEqual([])
+  })
+
+  test('bundle has no absolute local paths, even when built from another cwd', async () => {
+    const prev = process.cwd()
+    const other = join(dir, 'other-cwd.js')
+    process.chdir(tmpdir())
+    try {
+      await bundleEdgeCore(other)
+    } finally {
+      process.chdir(prev)
+    }
+    const repo = resolve(import.meta.dir, '../../..')
+    for (const file of [outFile, other]) {
+      const code = readFileSync(file, 'utf-8')
+      expect(code).not.toContain(homedir())
+      expect(code).not.toContain(repo)
+      expect(code).not.toMatch(/\/(Users|home)\//)
+      // Bun's per-module path comments are stripped
+      expect(code).not.toMatch(/^\/\/ \S+\.[cm]?[jt]sx?$/m)
+    }
   })
 })

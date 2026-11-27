@@ -21,6 +21,10 @@ passes `--workdir packages/backend-supabase`.
    supabase secrets set HASHQUIZ_SITE_URL=https://<deployed-site> --project-ref <project-ref> $W
    ```
 
+   Or, in one command (sources or the `hashquiz` npm package; needs `SUPABASE_ACCESS_TOKEN` and
+   `SUPABASE_DB_PASSWORD`; `--dry-run` prints the steps):
+   `bun run packages/server/src/cli.ts supabase deploy --project <project-ref> --site-url https://<deployed-site>`.
+
    Run these from this repository. `bun run build:edge` bundles the function core
    (`functions/_shared/solo-core.js`, gitignored). The function reads the solo decks at runtime from
    `<HASHQUIZ_SITE_URL>/decks.json` (the manifest `hashquiz build` writes), cached 5 minutes, so deck changes

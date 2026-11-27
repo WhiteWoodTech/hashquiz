@@ -22,7 +22,12 @@ export async function bundleEdgeCore(outFile: string): Promise<void> {
     throw new Error(`edge bundle failed:\n${result.logs.map((l) => String(l)).join('\n')}`)
   }
   await mkdir(dirname(outFile), { recursive: true })
-  await Bun.write(outFile, await result.outputs[0]!.text())
+  await Bun.write(outFile, stripModulePathComments(await result.outputs[0]!.text()))
+}
+
+/** Bun prefixes each bundled module with a `// <path>` comment, absolute when built outside the repo cwd. */
+export function stripModulePathComments(code: string): string {
+  return code.replace(/^\/\/ [^\n]*\.(?:[cm]?[jt]sx?|json)\n/gm, '')
 }
 
 if (import.meta.main) {

@@ -6,7 +6,7 @@ import { resolveDevTarget } from '../src/dev'
 import { repoDecksDir } from '../src/vite-plugin'
 
 const REPO = resolve(import.meta.dir, '../../..')
-const DEMO = resolve(REPO, 'examples/demo.hashquiz.md')
+const DEMO = resolve(REPO, 'tests/fixtures/demo.hashquiz.md')
 
 const dirs: string[] = []
 afterEach(() => { for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true }) })

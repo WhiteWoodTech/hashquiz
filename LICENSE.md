@@ -9,7 +9,7 @@ See [`docs/LICENSING.md`](docs/LICENSING.md) for a plain-language FAQ.
 | Tier | License | Applies to |
 |------|---------|------------|
 | Format & tooling | [MIT](packages/parser/LICENSE) | `packages/parser/` (the `.hashquiz.md` format), `.claude/plugins/hashquiz/` (Claude skills and commands), and any future MCP server package marked MIT |
-| Product | **HashQuiz Sustainable Use License** (below) | Everything else, unless stated otherwise: `packages/core`, `packages/server`, `packages/transport-*`, `packages/ui`, `packages/theme-default`, `apps/host`, `apps/player`, `decks/`, `examples/` |
+| Product | **HashQuiz Sustainable Use License** (below) | Everything else, unless stated otherwise: `packages/core`, `packages/server`, `packages/transport-*`, `packages/ui`, `packages/theme-default`, `apps/host`, `apps/player`, `decks/`, `tests/` |
 | Pro / Enterprise | [HashQuiz Enterprise License](LICENSE_EE.md) | `packages/ee/`, and any file whose name contains `.ee.` or whose path contains a `.ee` directory |
 
 When a directory contains its own `LICENSE` file, that file takes precedence for its contents.

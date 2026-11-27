@@ -5,11 +5,11 @@ import { configFromEnv, renderConfigScript } from '../../core/src/runtime-config
 import { renderDecksJson } from './web-assets'
 
 /**
- * Decks folder listed by the monorepo apps: the repo's `examples/`, or `HASHQUIZ_DECKS_DIR`
+ * Decks folder listed by the monorepo apps: the repo's `tests/fixtures/`, or `HASHQUIZ_DECKS_DIR`
  * (relative to the repo root). `hashquiz build` writes its own `decks.json` instead.
  */
 export function repoDecksDir(repoRoot: string): string {
-  return resolve(repoRoot, process.env.HASHQUIZ_DECKS_DIR ?? 'examples')
+  return resolve(repoRoot, process.env.HASHQUIZ_DECKS_DIR ?? 'tests/fixtures')
 }
 
 /**

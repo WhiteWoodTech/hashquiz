@@ -4,7 +4,7 @@ import { resolve } from 'node:path'
 import { deckVersion, type DeckManifestEntry } from '../src/decks'
 import { parseManifest, SoloDeckSource } from '../src/solo-decks'
 
-const demo = readFileSync(resolve(import.meta.dir, '../../../examples/demo.hashquiz.md'), 'utf-8')
+const demo = readFileSync(resolve(import.meta.dir, '../../../tests/fixtures/demo.hashquiz.md'), 'utf-8')
 const edited = demo.replace('title: HashQuiz Demo', 'title: HashQuiz Demo (edited)')
 const roomOnly = `---
 title: Room only

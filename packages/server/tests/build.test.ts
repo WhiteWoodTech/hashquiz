@@ -8,7 +8,7 @@ import { findWebDist } from '../src/web-dist'
 
 const tmp = mkdtempSync(join(tmpdir(), 'hashquiz-build-'))
 afterAll(() => rmSync(tmp, { recursive: true, force: true }))
-const demo = readFileSync(resolve(import.meta.dirname, '../../../examples/demo.hashquiz.md'), 'utf-8')
+const demo = readFileSync(resolve(import.meta.dirname, '../../../tests/fixtures/demo.hashquiz.md'), 'utf-8')
 
 function decksDir(files: Record<string, string>): string {
   const dir = mkdtempSync(join(tmp, 'decks-'))

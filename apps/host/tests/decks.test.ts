@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { toDecks } from '../src/decks'
 
-const demo = readFileSync(resolve(import.meta.dirname, '../../../examples/demo.hashquiz.md'), 'utf-8')
+const demo = readFileSync(resolve(import.meta.dirname, '../../../tests/fixtures/demo.hashquiz.md'), 'utf-8')
 
 describe('toDecks', () => {
   test('parses manifest entries and names them by title', () => {

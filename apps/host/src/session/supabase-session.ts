@@ -1,4 +1,4 @@
-import { GameEngine, readRuntimeConfig } from '@hashquiz/core'
+import { GameEngine, quizFormat, readRuntimeConfig } from '@hashquiz/core'
 import type { GameEvent, IRealtimeTransport, PlayerState, QuizInfo } from '@hashquiz/core'
 import { GameEvents } from '@hashquiz/core'
 import type { Quiz } from '@hashquiz/parser'
@@ -56,13 +56,16 @@ export class SupabaseHostSession {
       title: opts.quiz.meta.title,
       ...(opts.quiz.meta.description !== undefined && { description: opts.quiz.meta.description }),
       tags: opts.quiz.meta.tags ?? [],
-      totalQuestions: opts.quiz.questions.length,
+      totalQuestions: opts.quiz.meta.maxQuestions !== undefined
+        ? Math.min(opts.quiz.meta.maxQuestions, opts.quiz.questions.length)
+        : opts.quiz.questions.length,
       ...(opts.quiz.meta.targetDifficulty !== undefined && { targetDifficulty: opts.quiz.meta.targetDifficulty }),
       difficultyDistribution: {
         easy:   pct(easy),
         medium: pct(medium),
         hard:   pct(hard),
       },
+      ...quizFormat(opts.quiz.meta, opts.quiz.questions.length),
     }
 
     // Forward all events on the channel back to listeners, and feed answers into the engine
@@ -97,7 +100,9 @@ export class SupabaseHostSession {
       this.emit({
         type: 'host_ready',
         joinCode: opts.joinCode,
-        totalQuestions: opts.quiz.questions.length,
+        totalQuestions: opts.quiz.meta.maxQuestions !== undefined
+        ? Math.min(opts.quiz.meta.maxQuestions, opts.quiz.questions.length)
+        : opts.quiz.questions.length,
         playerUrl: `${opts.origin}/?code=${opts.joinCode}`,
         quizMeta: this.quizInfo,
       })

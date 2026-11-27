@@ -1,6 +1,7 @@
 import { parseQuizFile } from '@hashquiz/parser'
 import type { Quiz } from '@hashquiz/parser'
 import type { QuizInfo } from './types'
+import { quizFormat, type QuizFormatMeta } from './quiz-format'
 
 /**
  * One deck of the runtime manifest (`decks.json`), written by `hashquiz build` and
@@ -61,7 +62,7 @@ export interface BrowsableDeck {
   id: string
   name: string
   quiz: {
-    meta: {
+    meta: QuizFormatMeta & {
       title: string
       description?: string
       tags: string[]
@@ -85,5 +86,6 @@ export function deckInfo(deck: BrowsableDeck): QuizInfo {
     totalQuestions: meta.maxQuestions !== undefined ? Math.min(meta.maxQuestions, total) : total,
     ...(meta.targetDifficulty !== undefined && { targetDifficulty: meta.targetDifficulty }),
     difficultyDistribution: { easy: pct('easy'), medium: pct('medium'), hard: pct('hard') },
+    ...quizFormat(meta, total),
   }
 }

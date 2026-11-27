@@ -1,5 +1,6 @@
 export type { Quiz, Question, Choice, QuizMeta } from '@hashquiz/parser'
 export * from './types'
+export * from './quiz-format'
 export type * from './transport'
 export * from './events'
 export { GameEngine } from './game'

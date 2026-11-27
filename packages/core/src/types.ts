@@ -59,4 +59,10 @@ export interface QuizInfo {
     medium: number
     hard: number
   }
+  /** Questions in the deck; above `totalQuestions` when a game plays only part of them. */
+  poolSize?: number
+  /** Questions drawn at random from the deck (max-questions, max-time or target-difficulty), not a fixed list. */
+  randomDraw?: boolean
+  /** one-shoot: the first answer is final. */
+  oneShoot?: boolean
 }

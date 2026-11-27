@@ -34,6 +34,13 @@ describe('buildQuizInfo — no targetDifficulty', () => {
     expect(info.totalQuestions).toBe(2)
   })
 
+  test('format labels: deck size, random draw, one-shoot', () => {
+    expect(buildQuizInfo(makeQuiz({}, [q('easy'), q('hard')])))
+      .toMatchObject({ poolSize: 2, randomDraw: false, oneShoot: true })
+    expect(buildQuizInfo(makeQuiz({ maxQuestions: 1, oneShoot: false }, [q('easy'), q('hard')])))
+      .toMatchObject({ totalQuestions: 1, poolSize: 2, randomDraw: true, oneShoot: false })
+  })
+
   test('description and tags forwarded', () => {
     const quiz = makeQuiz({ description: 'Desc', tags: ['ts', 'vue'] }, [q('easy')])
     const info = buildQuizInfo(quiz)

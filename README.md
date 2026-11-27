@@ -192,14 +192,14 @@ quizv/
 ├── packages/
 │   ├── parser/           # @quizv/parser — .quizv.md → Quiz object
 │   ├── core/             # @quizv/core — GameEngine, events, types
-│   ├── backend-local/  # @quizv/backend-local — Bun WS transport
+│   ├── backend-local/    # @quizv/backend-local — Bun WS transport
 │   ├── backend-supabase/ # @quizv/backend-supabase — cloud transport (stub)
 │   ├── server/           # @quizv/server — Bun HTTP+WS server + CLI
 │   ├── theme-default/    # @quizv/theme-default — CSS design tokens
 │   └── ui/               # @quizv/ui — shared Vue 3 components
 ├── apps/
-│   ├── host/             # Vue 3 SPA — port 3031
-│   └── player/           # Vue 3 SPA — port 3032
+│   ├── host/            # Vue 3 SPA — port 3031
+│   └── player/          # Vue 3 SPA — port 3032
 ├── supabase/             # Supabase CLI project: migrations + solo-submit Edge Function
 ├── scripts/build-edge.ts # Edge Function deck data from a decks folder (`build:edge <dir>`)
 └── examples/

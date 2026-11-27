@@ -26,6 +26,7 @@ export interface LivePlayer {
 
 export type LiveState = Omit<LivePlayer, 'key'>
 
+/** Same check as the `leads.email` constraint in the Supabase database. */
 export const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
 
 export interface SoloApiPort {

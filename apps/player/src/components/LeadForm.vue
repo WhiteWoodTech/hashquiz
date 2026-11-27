@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { EMAIL_RE } from '../solo/api'
+import { EMAIL_RE } from '@quizv/core'
 import { useSoloStore } from '../stores/solo'
 
 const solo = useSoloStore()

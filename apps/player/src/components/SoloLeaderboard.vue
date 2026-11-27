@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import type { LivePlayer } from '../solo/live'
+import type { LivePlayer } from '@quizv/core'
 import type { BoardRow } from '../stores/solo'
 import { formatDuration } from '../solo/format'
 

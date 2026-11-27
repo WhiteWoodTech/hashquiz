@@ -1,8 +1,8 @@
 import { describe, test, expect } from 'bun:test'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Quiz, SoloRunSubmission } from '@quizv/core'
-import { SoloApi } from '../src/solo/api'
-import { SoloLive, realtimeSettled } from '../src/solo/live'
+import type { VerifiedRun } from '@quizv/core'
+import { SoloApi, SoloLive, realtimeSettled, toSoloRunRow } from '../src/solo'
 
 const quiz: Quiz = {
   meta: { title: 'T', theme: 'default', tags: [], oneShoot: true, solo: true },
@@ -198,6 +198,34 @@ describe('SoloApi reads and leads', () => {
     await off1()
     api.onNewRun('d', () => {})
     expect(c.channels.length).toBe(2)
+  })
+})
+
+describe('SoloApi.fetchRank', () => {
+  test('fetchRank calls solo_rank', async () => {
+    const { c, as } = make()
+    c.rpcResults.solo_rank = { data: 3 }
+    expect(await new SoloApi(as(), 'browser').fetchRank('run-1')).toEqual({ ok: true, value: 3 })
+    expect(c.rpcCalls).toEqual([{ fn: 'solo_rank', args: { p_run_id: 'run-1' } }])
+    c.rpcResults.solo_rank = { data: null, error: { message: 'boom' } }
+    expect((await new SoloApi(as(), 'browser').fetchRank('run-1')).ok).toBe(false)
+    c.rpcResults.solo_rank = { data: null, error: null }
+    expect(await new SoloApi(as(), 'browser').fetchRank('run-1')).toEqual({ ok: false, error: 'run not found' })
+  })
+})
+
+describe('toSoloRunRow', () => {
+  test('toSoloRunRow maps a verified run to snake_case', () => {
+    const run: VerifiedRun = {
+      deckId: 'folder/deck', deckVersion: 'v1', pseudo: 'Alice', score: 950, correctCount: 1, questionCount: 1,
+      totalTimeMs: 3000,
+      answers: [{ position: 0, deckIndex: 4, choices: [1, 2], isCorrect: true, answerTimeMs: 3000, points: 950 }],
+    }
+    expect(toSoloRunRow(run)).toEqual({
+      deck_id: 'folder/deck', deck_version: 'v1', pseudo: 'Alice', score: 950, correct_count: 1, question_count: 1,
+      total_time_ms: 3000,
+      answers: [{ position: 0, deck_index: 4, choices: [1, 2], is_correct: true, answer_time_ms: 3000, points: 950 }],
+    })
   })
 })
 

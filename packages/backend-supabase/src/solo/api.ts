@@ -1,9 +1,12 @@
 import type { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js'
+import {
+  EMAIL_RE, verifySoloRun,
+  type Outcome, type Quiz, type RankedRun, type SoloApiPort, type SoloRunSubmission, type SubmittedRun,
+} from '@quizv/core'
 import { REBUILD_MIN_MS, realtimeSettled } from './live'
-import { verifySoloRun, type Quiz, type RankedRun, type SoloRunSubmission } from '@quizv/core'
+import { toSoloRunRow } from './rows'
 
 export type ScoringMode = 'browser' | 'edge'
-export type Outcome<T> = { ok: true; value: T } | { ok: false; error: string }
 
 interface RunRow {
   id: string
@@ -23,17 +26,14 @@ const toRanked = (r: RunRow): RankedRun => ({
   finishedAt: r.finished_at,
 })
 
-/** Same check as the `leads.email` constraint in the database. */
-export const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
-
 const message = (e: unknown): string => (e instanceof Error ? e.message : String(e))
 const fail = (error: string): { ok: false; error: string } => ({ ok: false, error })
 
 /** Thin Supabase wrapper for solo runs. No method throws: failures resolve to `{ ok: false }`. */
-export class SoloApi {
+export class SoloApi implements SoloApiPort {
   constructor(private client: SupabaseClient, private mode: ScoringMode) {}
 
-  async submitRun(sub: SoloRunSubmission, quiz: Quiz): Promise<Outcome<{ runId: string; rank: number | null }>> {
+  async submitRun(sub: SoloRunSubmission, quiz: Quiz): Promise<Outcome<SubmittedRun>> {
     try {
       return this.mode === 'edge' ? await this.submitEdge(sub) : await this.submitBrowser(sub, quiz)
     } catch (e) {
@@ -41,7 +41,7 @@ export class SoloApi {
     }
   }
 
-  private async submitEdge(sub: SoloRunSubmission): Promise<Outcome<{ runId: string; rank: number | null }>> {
+  private async submitEdge(sub: SoloRunSubmission): Promise<Outcome<SubmittedRun>> {
     const { data, error } = await this.client.functions.invoke('solo-submit', { body: sub })
     if (error) {
       const ctx = (error as { context?: unknown }).context
@@ -58,28 +58,11 @@ export class SoloApi {
     return { ok: true, value: { runId: d.runId, rank: d.rank ?? null } }
   }
 
-  private async submitBrowser(sub: SoloRunSubmission, quiz: Quiz): Promise<Outcome<{ runId: string; rank: number | null }>> {
+  private async submitBrowser(sub: SoloRunSubmission, quiz: Quiz): Promise<Outcome<SubmittedRun>> {
     const v = verifySoloRun(quiz, sub)
     if (!v.ok) return fail(v.reason)
-    const run = v.run
     const { data: runId, error } = await this.client.rpc('submit_solo_run', {
-      p_run: {
-        deck_id: run.deckId,
-        deck_version: run.deckVersion,
-        pseudo: run.pseudo,
-        score: run.score,
-        correct_count: run.correctCount,
-        question_count: run.questionCount,
-        total_time_ms: run.totalTimeMs,
-        answers: run.answers.map(a => ({
-          position: a.position,
-          deck_index: a.deckIndex,
-          choices: a.choices,
-          is_correct: a.isCorrect,
-          answer_time_ms: a.answerTimeMs,
-          points: a.points,
-        })),
-      },
+      p_run: toSoloRunRow(v.run),
     })
     if (error) return fail(error.message)
     if (typeof runId !== 'string') return fail('invalid response')
@@ -124,6 +107,18 @@ export class SoloApi {
         .eq('deck_id', deckId)
       if (error) return fail(error.message)
       return { ok: true, value: count ?? 0 }
+    } catch (e) {
+      return fail(message(e))
+    }
+  }
+
+  /** Current rank of a stored run on its deck leaderboard. */
+  async fetchRank(runId: string): Promise<Outcome<number>> {
+    try {
+      const { data, error } = await this.client.rpc('solo_rank', { p_run_id: runId })
+      if (error) return fail(error.message)
+      if (typeof data !== 'number') return fail('run not found')
+      return { ok: true, value: data }
     } catch (e) {
       return fail(message(e))
     }

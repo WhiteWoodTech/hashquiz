@@ -21,13 +21,19 @@ export interface QuizvWebPluginOptions {
 
 /**
  * Serves (dev) and emits (build) the two runtime files the web apps load:
- * `/quizv-config.js` (deployment settings from the env) and `<base>decks.json`.
+ * `/quizv-config.js` (deployment settings from the env and `.env*` files) and `<base>decks.json`.
  * `hashquiz build` writes the same files next to the prebuilt apps.
  */
 export function quizvWeb(options: QuizvWebPluginOptions): Plugin {
-  const config = () => renderConfigScript(configFromEnv(process.env))
+  // `VITE_*` values Vite loaded from the app's `.env*` files (none when `envDir` is false), so
+  // the served config matches the build env; the process env (`HASHQUIZ_*` first) still wins.
+  let fileEnv: Record<string, string | undefined> = {}
+  const config = () => renderConfigScript(configFromEnv({ ...fileEnv, ...process.env }))
   return {
     name: 'quizv-web',
+    configResolved(resolved) {
+      fileEnv = { ...(resolved.env as Record<string, string | undefined>) }
+    },
     configureServer(server) {
       const base = server.config.base
       server.middlewares.use((req, res, next) => {

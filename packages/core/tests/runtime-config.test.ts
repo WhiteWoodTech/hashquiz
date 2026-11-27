@@ -27,11 +27,21 @@ describe('readRuntimeConfig', () => {
     g.__QUIZV_CONFIG__ = { transport: 'supabase', supabaseUrl: 'u', supabaseAnonKey: 'k' }
     expect(readRuntimeConfig({ VITE_TRANSPORT: 'local' })).toMatchObject({ transport: 'supabase', supabaseUrl: 'u' })
   })
-  test('injected solo settings: edge and player URL win, the browser default keeps an edge build env', () => {
+  test('injected solo settings: edge and player URL win', () => {
     g.__QUIZV_CONFIG__ = { transport: 'local', soloScoring: 'edge', playerUrl: 'https://p.app/' }
     expect(readRuntimeConfig({ VITE_PLAYER_URL: 'v' })).toMatchObject({ soloScoring: 'edge', playerUrl: 'https://p.app/' })
+  })
+  test('injected local transport overrides a supabase build env', () => {
     g.__QUIZV_CONFIG__ = { transport: 'local', soloScoring: 'browser' }
-    expect(readRuntimeConfig({ VITE_SOLO_SCORING: 'edge', VITE_PLAYER_URL: 'v' })).toMatchObject({ soloScoring: 'edge', playerUrl: 'v' })
+    expect(readRuntimeConfig({ VITE_TRANSPORT: 'supabase', VITE_SUPABASE_URL: 'u', VITE_SUPABASE_ANON_KEY: 'k' }).transport).toBe('local')
+  })
+  test('injected browser scoring overrides an edge build env', () => {
+    g.__QUIZV_CONFIG__ = { transport: 'local', soloScoring: 'browser' }
+    expect(readRuntimeConfig({ VITE_SOLO_SCORING: 'edge', VITE_PLAYER_URL: 'v' })).toMatchObject({ soloScoring: 'browser', playerUrl: 'v' })
+  })
+  test('fields missing from the injected config come from the build env', () => {
+    g.__QUIZV_CONFIG__ = { supabaseUrl: 'u' }
+    expect(readRuntimeConfig({ VITE_TRANSPORT: 'supabase', VITE_SOLO_SCORING: 'edge' })).toMatchObject({ transport: 'supabase', soloScoring: 'edge', supabaseUrl: 'u' })
   })
   test('falls back to the build env', () => {
     expect(readRuntimeConfig({ VITE_TRANSPORT: 'supabase' }).transport).toBe('supabase')
@@ -50,5 +60,10 @@ describe('soloAvailable', () => {
   test('soloAvailable: supabase needs url and anon key', () => {
     expect(soloAvailable({ transport: 'supabase', supabaseUrl: 'u', soloScoring: 'browser' })).toBe(false)
     expect(soloAvailable({ transport: 'supabase', supabaseUrl: 'u', supabaseAnonKey: 'k', soloScoring: 'browser' })).toBe(true)
+  })
+  test('soloAvailable: local is off on https pages (ws:// would be mixed content)', () => {
+    expect(soloAvailable({ transport: 'local', soloScoring: 'browser' }, 'https:')).toBe(false)
+    expect(soloAvailable({ transport: 'local', soloScoring: 'browser' }, 'http:')).toBe(true)
+    expect(soloAvailable({ transport: 'supabase', supabaseUrl: 'u', supabaseAnonKey: 'k', soloScoring: 'browser' }, 'https:')).toBe(true)
   })
 })

@@ -1,9 +1,9 @@
-import type { Quiz } from '@quizv/parser'
+import type { Quiz } from '@hashquiz/parser'
 import type { SoloRunSubmission } from './solo'
 import type { RankedRun } from './solo-verify'
 
 /**
- * Ports of a solo backend plugin (`@quizv/backend-local`, `@quizv/backend-supabase`).
+ * Ports of a solo backend plugin (`@hashquiz/backend-local`, `@hashquiz/backend-supabase`).
  * Methods never throw: failures resolve to `{ ok: false, error }`.
  */
 

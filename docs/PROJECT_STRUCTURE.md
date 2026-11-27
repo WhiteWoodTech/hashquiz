@@ -1,23 +1,24 @@
 # Project Structure
 
-Directory layout and file map for the QuizV monorepo.
+Directory layout and file map for the HashQuiz monorepo.
 
 ---
 
 ## Directory Organization
 
 ```text
-quizv/
+hashquiz/
 ├── apps/
 │   ├── host/                        # Vue 3 SPA — host dashboard (port 3031)
 │   │   ├── index.html
+│   │   ├── public/                  # favicon.svg, favicon-32.png, apple-touch-icon.png
 │   │   ├── package.json
 │   │   ├── vite.config.ts
 │   │   ├── uno.config.ts
 │   │   └── src/
 │   │       ├── main.ts
 │   │       ├── App.vue
-│   │       ├── config.ts            # Runtime config (/quizv-config.js or VITE_* env)
+│   │       ├── config.ts            # Runtime config (/hashquiz-config.js or VITE_* env)
 │   │       ├── decks.ts             # Loads decks.json (deck list) at startup
 │   │       ├── stores/
 │   │       │   └── game.ts          # Pinia store — HostPhase state machine
@@ -35,17 +36,18 @@ quizv/
 │   │           └── PodiumView.vue   # Animated podium + leaderboard
 │   └── player/                      # Vue 3 SPA — player UI (port 3032)
 │       ├── index.html
+│       ├── public/                  # favicon.svg, favicon-32.png, apple-touch-icon.png
 │       ├── package.json
 │       ├── vite.config.ts
 │       ├── uno.config.ts
 │       └── src/
 │           ├── main.ts
 │           ├── App.vue
-│           ├── config.ts            # Runtime config (/quizv-config.js or VITE_* env)
+│           ├── config.ts            # Runtime config (/hashquiz-config.js or VITE_* env)
 │           ├── stores/
 │           │   ├── game.ts          # Pinia store — PlayerPhase state machine
 │           │   └── solo.ts          # Pinia store — solo run (SoloPhase), leaderboard, live presence
-│           ├── solo/                # Solo live mode (loaded on #/solo/<deckId> only); backends live in @quizv/backend-*
+│           ├── solo/                # Solo live mode (loaded on #/solo/<deckId> only); backends live in @hashquiz/backend-*
 │           │   ├── route.ts         # parseSoloHash, soloHash
 │           │   ├── decks.ts         # Runtime deck list: /decks.json (cached), findDeck, loadSoloDecks
 │           │   ├── catalog.ts       # soloDecks filter
@@ -66,7 +68,7 @@ quizv/
 │               ├── FeedbackView.vue # Unused (not imported; in the backlog for removal)
 │               └── PodiumView.vue   # Final rank + score + animated podium
 ├── packages/
-│   ├── parser/                      # @quizv/parser
+│   ├── parser/                      # @hashquiz/parser
 │   │   ├── package.json
 │   │   ├── tsconfig.json
 │   │   ├── src/
@@ -76,7 +78,7 @@ quizv/
 │   │   │   └── parse-meta.ts        # Parse YAML frontmatter
 │   │   └── tests/
 │   │       └── parser.test.ts       # 13 tests
-│   ├── core/                        # @quizv/core
+│   ├── core/                        # @hashquiz/core
 │   │   ├── package.json
 │   │   ├── tsconfig.json
 │   │   ├── src/
@@ -85,17 +87,17 @@ quizv/
 │   │   │   ├── events.ts            # GameEvent discriminated union + GameEvents builder
 │   │   │   ├── transport.ts         # IRealtimeTransport interface
 │   │   │   ├── solo-backend.ts      # SoloBackend ports (SoloApiPort, SoloLivePort, Outcome, EMAIL_RE)
-│   │   │   ├── solo-decks.ts        # `@quizv/core/solo-decks`: parseManifest, SoloDeckSource
+│   │   │   ├── solo-decks.ts        # `@hashquiz/core/solo-decks`: parseManifest, SoloDeckSource
 │   │   │   ├── scoring.ts           # calcPoints(timeRemaining, isCorrect)
 │   │   │   ├── selection.ts         # serveQuestions: shared question selection + choice shuffling
 │   │   │   ├── solo.ts              # SoloSession: solo run state machine
 │   │   │   ├── solo-verify.ts       # verifySoloRun (edge rescoring), compareRuns (leaderboard order)
-│   │   │   ├── runtime-config.ts    # QuizvRuntimeConfig: transport, Supabase, soloScoring, playerUrl
-│   │   │   ├── decks.ts             # `@quizv/core/decks`: toDecks/fetchDecks (decks.json), deckVersion, deckInfo
+│   │   │   ├── runtime-config.ts    # HashQuizRuntimeConfig: transport, Supabase, soloScoring, playerUrl
+│   │   │   ├── decks.ts             # `@hashquiz/core/decks`: toDecks/fetchDecks (decks.json), deckVersion, deckInfo
 │   │   │   └── game.ts              # GameEngine state machine
 │   │   └── tests/
 │   │       └── game.test.ts         # 14 tests
-│   ├── backend-local/               # @quizv/backend-local
+│   ├── backend-local/               # @hashquiz/backend-local
 │   │   ├── package.json
 │   │   ├── tsconfig.json
 │   │   └── src/
@@ -106,7 +108,7 @@ quizv/
 │   │           ├── store.ts         # SoloStore on bun:sqlite (.hashquiz/solo.db)
 │   │           ├── server.ts        # createSoloHttpHandler, SoloPresenceHub (Bun)
 │   │           └── server-entry.ts  # `./solo-server` barrel
-│   ├── backend-supabase/            # @quizv/backend-supabase
+│   ├── backend-supabase/            # @hashquiz/backend-supabase
 │   │   ├── package.json
 │   │   ├── src/
 │   │   │   ├── index.ts             # SupabaseTransport
@@ -119,28 +121,28 @@ quizv/
 │   │       └── functions/
 │   │           ├── .env.example     # HASHQUIZ_SITE_URL for `supabase:functions` (copy to .env.local)
 │   │           └── solo-submit/index.ts # Edge Function: rescoring from the site's decks.json (edge mode)
-│   ├── server/                      # @quizv/server
+│   ├── server/                      # @hashquiz/server
 │   │   ├── package.json
 │   │   ├── tsconfig.json
 │   │   └── src/
-│   │       ├── cli.ts               # CLI entry — `quizv dev | check | build | supabase deploy`
-│   │       ├── server.ts            # QuizvServer — Bun HTTP + WebSocket
+│   │       ├── cli.ts               # CLI entry — `hashquiz dev | check | build | supabase deploy`
+│   │       ├── server.ts            # HashQuizServer — Bun HTTP + WebSocket
 │   │       └── dev.ts               # devCommand — spawns Vite apps
-│   ├── theme-default/               # @quizv/theme-default (new look: Inter + IBM Plex Mono)
+│   ├── theme-default/               # @hashquiz/theme-default (new look: Inter + IBM Plex Mono)
 │   │   ├── package.json
 │   │   ├── index.ts
 │   │   └── styles/
-│   │       └── vars.css             # --qv-* CSS custom properties
-│   ├── theme-original/              # @quizv/theme-original (previous look: Syne), same variables
+│   │       └── vars.css             # --hq-* CSS custom properties
+│   ├── theme-original/              # @hashquiz/theme-original (previous look: Syne), same variables
 │   │   ├── package.json
 │   │   ├── index.ts
 │   │   └── styles/
 │   │       └── vars.css
-│   ├── ui/                          # @quizv/ui
+│   ├── ui/                          # @hashquiz/ui
 │   │   ├── package.json
 │   │   ├── tsconfig.json
 │   │   ├── styles/
-│   │   │   └── base.css             # .qv-label and .qv-sr-only utilities
+│   │   │   └── base.css             # .hq-label and .hq-sr-only utilities
 │   │   ├── tests/                   # theme parity, no hardcoded colors, fx layout/theme
 │   │   └── src/
 │   │       ├── index.ts             # Barrel export
@@ -153,7 +155,7 @@ quizv/
 │   │       │   ├── loop.ts          # rAF loop, reduced motion, visibility pause
 │   │       │   ├── draw.ts          # Drawing primitives (dots, glow, dust)
 │   │       │   ├── layout.ts        # Pure geometry (countdown, stacks, podium slots)
-│   │       │   ├── theme.ts         # Reads --qv-* / --qv-fx-* from CSS
+│   │       │   ├── theme.ts         # Reads --hq-* / --hq-fx-* from CSS
 │   │       │   └── scenes/          # countdown, lobby, reveal, verdict, podium
 │   │       ├── AnswerButton.vue     # Answer choice button (multi-state)
 │   │       ├── PlayerList.vue       # Lobby player chips
@@ -162,21 +164,21 @@ quizv/
 │   │       ├── QuizInfoPanel.vue    # Quiz title, tags, stats
 │   │       └── QrCode.vue           # QR code canvas (wraps `qrcode`)
 │   └── ee/                          # Pro / Enterprise features (placeholder)
-│       ├── LICENSE                  # QuizV Enterprise License
+│       ├── LICENSE                  # HashQuiz Enterprise License
 │       └── README.md                # Planned paid features and rules
 ├── scripts/
 │   ├── pack.ts                      # Stages the hashquiz npm package in pkg/ (CLI, web apps, supabase project)
 │   ├── pack-guard.ts                # Clean build env for pack; fails if pkg/web holds Supabase settings
 │   └── tests/                       # pack-guard tests
 ├── examples/
-│   └── demo.quizv.md                # Sample quiz file (`solo: true`)
-├── LICENSE.md                       # Licensing overview + QuizV Sustainable Use License
-├── LICENSE_EE.md                    # QuizV Enterprise License
+│   └── demo.hashquiz.md                # Sample quiz file (`solo: true`)
+├── LICENSE.md                       # Licensing overview + HashQuiz Sustainable Use License
+├── LICENSE_EE.md                    # HashQuiz Enterprise License
 └── CLA.md                           # Contributor License Agreement
 ```
 
 Licensing per directory is described in [`LICENSING.md`](./LICENSING.md): `packages/parser` and
-`.claude/plugins/quizv` are MIT, `packages/ee` is Enterprise, everything else is fair-code.
+`.claude/plugins/hashquiz` are MIT, `packages/ee` is Enterprise, everything else is fair-code.
 
 ---
 
@@ -193,15 +195,15 @@ Licensing per directory is described in [`LICENSING.md`](./LICENSING.md): `packa
 | `packages/backend-supabase/supabase/migrations/20261126090000_solo_live.sql` | Solo schema, RLS and RPCs |
 | `packages/core/src/solo.ts` | `SoloSession` — solo run state machine |
 | `packages/server/src/server.ts` | Bun HTTP+WS server, handles all WS messages |
-| `packages/server/src/build.ts` | `hashquiz build`: static site = prebuilt apps + `host/decks.json` + `decks.json` (player) + `quizv-config.js` |
+| `packages/server/src/build.ts` | `hashquiz build`: static site = prebuilt apps + `host/decks.json` + `decks.json` (player) + `hashquiz-config.js` |
 | `packages/server/src/web-assets.ts` | `collectDecks`: the deck id rule (path relative to the decks folder), shared by both apps and `hashquiz build` |
-| `packages/server/src/vite-plugin.ts` | Serves/emits `decks.json` and `quizv-config.js` for the Vite apps |
+| `packages/server/src/vite-plugin.ts` | Serves/emits `decks.json` and `hashquiz-config.js` for the Vite apps |
 | `packages/core/src/runtime-config.ts` | Runtime settings read by both apps (transport, Supabase, solo scoring, player URL) |
 | `packages/core/src/decks.ts` | Deck manifest parsing, `deckVersion` (content hash), `deckInfo` (card data) |
 | `scripts/pack.ts` | Stages the `hashquiz` npm package in `pkg/` (see `docs/PACKAGE.md`) |
 | `scripts/pack-guard.ts` | Clean env for the pack build; refuses a `pkg/web` with a baked Supabase URL / key |
-| `packages/theme-default/styles/vars.css` | All `--qv-*` design tokens (same set in `theme-original`) |
-| `packages/ui/styles/base.css` | `.qv-label` and `.qv-sr-only` utilities |
+| `packages/theme-default/styles/vars.css` | All `--hq-*` design tokens (same set in `theme-original`) |
+| `packages/ui/styles/base.css` | `.hq-label` and `.hq-sr-only` utilities |
 | `packages/ui/src/fx/` | Canvas engine behind the Fx components |
 
 ---

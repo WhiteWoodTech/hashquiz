@@ -29,14 +29,14 @@ describe('player decks', () => {
       calls++
       if (fail) return new Response('down', { status: 503 })
       return Response.json([
-        { id: 'room/index.quizv.md', content: quiz('Room', false) },
-        { id: 'solo/index.quizv.md', content: quiz('Solo', true) },
+        { id: 'room/index.hashquiz.md', content: quiz('Room', false) },
+        { id: 'solo/index.hashquiz.md', content: quiz('Solo', true) },
       ])
     }) as unknown as typeof fetch
     await expect(mod.loadDecks('/decks.json')).rejects.toThrow(/503/)
     fail = false
-    expect((await mod.loadSoloDecks()).map(d => d.id)).toEqual(['solo/index.quizv.md'])
-    expect((await mod.findDeck('room/index.quizv.md'))?.name).toBe('Room')
+    expect((await mod.loadSoloDecks()).map(d => d.id)).toEqual(['solo/index.hashquiz.md'])
+    expect((await mod.findDeck('room/index.hashquiz.md'))?.name).toBe('Room')
     expect(await mod.findDeck('nope')).toBeUndefined()
     expect(calls).toBe(2)
     mod.resetDecks()

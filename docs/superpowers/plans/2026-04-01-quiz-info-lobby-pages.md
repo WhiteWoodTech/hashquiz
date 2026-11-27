@@ -6,7 +6,7 @@
 
 **Architecture:** Enrichir les messages WS `host_connected` et `joined` avec un objet `QuizInfo` calculé côté serveur. Les stores Pinia host et player stockent ces métadonnées. Les composants `LobbyView` les affichent.
 
-**Tech Stack:** TypeScript strict, Bun test, Vue 3 + Pinia + UnoCSS, tokens CSS `--qv-*`
+**Tech Stack:** TypeScript strict, Bun test, Vue 3 + Pinia + UnoCSS, tokens CSS `--hq-*`
 
 ---
 
@@ -39,7 +39,7 @@ Expected: `Switched to a new branch 'feat/quiz-info-lobby-pages'`
 
 ---
 
-## Task 2 : Ajouter `QuizInfo` dans `@quizv/core`
+## Task 2 : Ajouter `QuizInfo` dans `@hashquiz/core`
 
 **Files:**
 - Modify: `packages/core/src/types.ts`
@@ -83,7 +83,7 @@ describe('QuizInfo type', () => {
 - [ ] **Lancer le test pour confirmer qu'il échoue**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 bun test packages/core/tests/quiz-info.test.ts
 ```
 
@@ -142,7 +142,7 @@ git commit -m "✨ Core: add QuizInfo type"
 **Files:**
 - Modify: `packages/server/src/server.ts`
 
-La fonction calcule `QuizInfo` depuis un objet `Quiz` (type `@quizv/parser`).
+La fonction calcule `QuizInfo` depuis un objet `Quiz` (type `@hashquiz/parser`).
 
 ### Logique de calcul de `difficultyDistribution`
 
@@ -162,7 +162,7 @@ Créer `packages/server/tests/build-quiz-info.test.ts` :
 ```ts
 import { describe, test, expect } from 'bun:test'
 import { buildQuizInfo } from '../src/server'
-import type { Quiz } from '@quizv/parser'
+import type { Quiz } from '@hashquiz/parser'
 
 const makeQuiz = (overrides: Partial<Quiz['meta']> = {}, questions: Quiz['questions'] = []): Quiz => ({
   meta: { title: 'Test', theme: 'default', tags: [], oneShoot: true, ...overrides },
@@ -250,14 +250,14 @@ Expected: `Cannot find module` ou `buildQuizInfo is not exported`
 
 - [ ] **Implémenter `buildQuizInfo` dans `packages/server/src/server.ts`**
 
-Ajouter **avant** la classe `QuizvServer` (après les imports) :
+Ajouter **avant** la classe `HashQuizServer` (après les imports) :
 
 ```ts
-import type { Quiz } from '@quizv/parser'
-import type { QuizInfo } from '@quizv/core'
+import type { Quiz } from '@hashquiz/parser'
+import type { QuizInfo } from '@hashquiz/core'
 ```
 
-Ces imports sont déjà présents — vérifier et ne pas dupliquer. Ajouter `QuizInfo` à l'import existant de `@quizv/core` si nécessaire.
+Ces imports sont déjà présents — vérifier et ne pas dupliquer. Ajouter `QuizInfo` à l'import existant de `@hashquiz/core` si nécessaire.
 
 Puis ajouter la fonction :
 
@@ -357,7 +357,7 @@ git commit -m "✨ Server: add buildQuizInfo() utility"
 **Files:**
 - Modify: `packages/server/src/server.ts`
 
-- [ ] **Modifier le handler `open` du WebSocket dans `QuizvServer.start()`**
+- [ ] **Modifier le handler `open` du WebSocket dans `HashQuizServer.start()`**
 
 Localiser le bloc `if (role === 'host')` dans `websocket.open` et remplacer par :
 
@@ -374,7 +374,7 @@ if (role === 'host') {
 }
 ```
 
-- [ ] **Ajouter `quizMeta` comme propriété de `QuizvServer`**
+- [ ] **Ajouter `quizMeta` comme propriété de `HashQuizServer`**
 
 Dans le corps de la classe, après `private quizFile: string`, ajouter :
 
@@ -399,7 +399,7 @@ ws.send(JSON.stringify({ type: 'joined', player, quizMeta: self.quizMeta }))
 - [ ] **Vérifier que le build TypeScript ne signale pas d'erreur**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 bun run --cwd packages/server tsc --noEmit
 ```
 
@@ -434,7 +434,7 @@ Ouvrir `apps/host/src/stores/game.ts`.
 Ajouter l'import en tête :
 
 ```ts
-import type { QuizInfo } from '@quizv/core'
+import type { QuizInfo } from '@hashquiz/core'
 ```
 
 Mettre à jour l'interface `HostConnectedMsg` :
@@ -502,7 +502,7 @@ Ouvrir `apps/player/src/stores/game.ts`.
 Ajouter l'import en tête :
 
 ```ts
-import type { QuizInfo } from '@quizv/core'
+import type { QuizInfo } from '@hashquiz/core'
 ```
 
 Mettre à jour l'interface `JoinedMsg` :
@@ -555,7 +555,7 @@ Ajouter un panneau quiz info **au-dessus** du layout existant. Le panneau n'est 
 ```vue
 <template>
   <div class="lobby">
-    <h1 class="lobby__title">QuizV</h1>
+    <h1 class="lobby__title">HashQuiz</h1>
 
     <!-- Quiz info panel -->
     <div v-if="game.quizMeta" class="quiz-info">
@@ -601,7 +601,7 @@ Ajouter un panneau quiz info **au-dessus** du layout existant. Le panneau n'est 
         <p class="lobby__count">{{ game.players.length }} player{{ game.players.length !== 1 ? 's' : '' }} connected</p>
         <PlayerList :players="game.players" />
         <button
-          class="qv-btn-primary"
+          class="hq-btn-primary"
           :disabled="game.players.length === 0"
           @click="game.send('host_start')"
         >
@@ -614,64 +614,64 @@ Ajouter un panneau quiz info **au-dessus** du layout existant. Le panneau n'est 
 
 <script setup lang="ts">
 import { useGameStore } from '../stores/game'
-import { QrCode, PlayerList } from '@quizv/ui'
+import { QrCode, PlayerList } from '@hashquiz/ui'
 import DifficultyBar from '../components/DifficultyBar.vue'
 const game = useGameStore()
 </script>
 
 <style scoped>
 .lobby { max-width: 960px; margin: 0 auto; }
-.lobby__title { font-size: 2.5rem; color: var(--qv-accent); margin-bottom: 2rem; }
+.lobby__title { font-size: 2.5rem; color: var(--hq-accent); margin-bottom: 2rem; }
 .lobby__main { display: grid; grid-template-columns: auto 1fr; gap: 3rem; align-items: start; }
 .lobby__qr { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
-.lobby__url { font-size: 0.75rem; color: var(--qv-text-muted); word-break: break-all; max-width: 220px; text-align: center; }
-.lobby__code-box { background: var(--qv-surface); border-radius: var(--qv-radius); padding: 1.25rem; margin-bottom: 1rem; }
-.lobby__code-label { margin: 0; color: var(--qv-text-muted); font-size: 0.85rem; }
-.lobby__code { margin: 0.25rem 0 0; font-size: 3rem; font-weight: 700; letter-spacing: 0.2em; color: var(--qv-accent); }
-.lobby__count { color: var(--qv-text-muted); margin: 0 0 0.75rem; }
-.qv-btn-primary {
+.lobby__url { font-size: 0.75rem; color: var(--hq-text-muted); word-break: break-all; max-width: 220px; text-align: center; }
+.lobby__code-box { background: var(--hq-surface); border-radius: var(--hq-radius); padding: 1.25rem; margin-bottom: 1rem; }
+.lobby__code-label { margin: 0; color: var(--hq-text-muted); font-size: 0.85rem; }
+.lobby__code { margin: 0.25rem 0 0; font-size: 3rem; font-weight: 700; letter-spacing: 0.2em; color: var(--hq-accent); }
+.lobby__count { color: var(--hq-text-muted); margin: 0 0 0.75rem; }
+.hq-btn-primary {
   margin-top: 1.5rem; width: 100%; padding: 0.9rem;
-  background: var(--qv-accent); color: #fff;
-  border: none; border-radius: var(--qv-radius); font-size: 1.1rem;
+  background: var(--hq-accent); color: #fff;
+  border: none; border-radius: var(--hq-radius); font-size: 1.1rem;
   cursor: pointer; font-family: inherit; font-weight: 600;
   transition: background 0.15s;
 }
-.qv-btn-primary:hover:not(:disabled) { background: #6d28d9; }
-.qv-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.hq-btn-primary:hover:not(:disabled) { background: #6d28d9; }
+.hq-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* Quiz info panel */
 .quiz-info {
-  background: var(--qv-surface);
-  border: 1px solid var(--qv-border);
-  border-radius: var(--qv-radius);
+  background: var(--hq-surface);
+  border: 1px solid var(--hq-border);
+  border-radius: var(--hq-radius);
   padding: 1.5rem;
   margin-bottom: 2rem;
 }
 .quiz-info__header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.75rem; }
-.quiz-info__title { font-size: 1.4rem; font-weight: 700; margin: 0 0 0.25rem; color: var(--qv-text); }
-.quiz-info__description { margin: 0 0 0.75rem; color: var(--qv-text-muted); font-size: 0.9rem; line-height: 1.5; }
+.quiz-info__title { font-size: 1.4rem; font-weight: 700; margin: 0 0 0.25rem; color: var(--hq-text); }
+.quiz-info__description { margin: 0 0 0.75rem; color: var(--hq-text-muted); font-size: 0.9rem; line-height: 1.5; }
 .quiz-info__tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.25rem; }
 .quiz-info__tag {
-  background: var(--qv-bg);
-  border: 1px solid var(--qv-border);
-  border-radius: var(--qv-radius);
+  background: var(--hq-bg);
+  border: 1px solid var(--hq-border);
+  border-radius: var(--hq-radius);
   padding: 0.2rem 0.6rem;
   font-size: 0.75rem;
-  color: var(--qv-text-muted);
+  color: var(--hq-text-muted);
 }
 .quiz-info__target-badge {
   flex-shrink: 0;
   padding: 0.3rem 0.75rem;
-  border-radius: var(--qv-radius);
+  border-radius: var(--hq-radius);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.05em;
 }
-.quiz-info__target-badge--easy   { background: rgba(16,185,129,0.15); color: var(--qv-correct); }
-.quiz-info__target-badge--medium { background: rgba(245,158,11,0.15);  color: var(--qv-warning); }
-.quiz-info__target-badge--hard   { background: rgba(239,68,68,0.15);   color: var(--qv-error);   }
+.quiz-info__target-badge--easy   { background: rgba(16,185,129,0.15); color: var(--hq-correct); }
+.quiz-info__target-badge--medium { background: rgba(245,158,11,0.15);  color: var(--hq-warning); }
+.quiz-info__target-badge--hard   { background: rgba(239,68,68,0.15);   color: var(--hq-error);   }
 .quiz-info__metrics { display: flex; gap: 1.5rem; margin-bottom: 0.75rem; }
-.quiz-info__metric { font-size: 0.8rem; color: var(--qv-text-muted); }
+.quiz-info__metric { font-size: 0.8rem; color: var(--hq-text-muted); }
 </style>
 ```
 
@@ -711,25 +711,25 @@ defineProps<{
 </script>
 
 <style scoped>
-.diff-bar__track { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--qv-border); }
+.diff-bar__track { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--hq-border); }
 .diff-bar__seg { height: 100%; transition: width 0.4s ease; }
-.diff-bar__seg--easy   { background: var(--qv-correct); }
-.diff-bar__seg--medium { background: var(--qv-warning); }
-.diff-bar__seg--hard   { background: var(--qv-error);   }
-.diff-bar__legend { margin: 0.4rem 0 0; font-size: 0.75rem; color: var(--qv-text-muted); display: flex; align-items: center; gap: 0.5rem; }
+.diff-bar__seg--easy   { background: var(--hq-correct); }
+.diff-bar__seg--medium { background: var(--hq-warning); }
+.diff-bar__seg--hard   { background: var(--hq-error);   }
+.diff-bar__legend { margin: 0.4rem 0 0; font-size: 0.75rem; color: var(--hq-text-muted); display: flex; align-items: center; gap: 0.5rem; }
 .diff-bar__dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
-.diff-bar__dot--easy   { background: var(--qv-correct); }
-.diff-bar__dot--medium { background: var(--qv-warning); }
-.diff-bar__dot--hard   { background: var(--qv-error);   }
+.diff-bar__dot--easy   { background: var(--hq-correct); }
+.diff-bar__dot--medium { background: var(--hq-warning); }
+.diff-bar__dot--hard   { background: var(--hq-error);   }
 </style>
 ```
 
 - [ ] **Vérifier que les tokens CSS existent**
 
-Chercher `--qv-correct`, `--qv-warning`, `--qv-error` dans le thème :
+Chercher `--hq-correct`, `--hq-warning`, `--hq-error` dans le thème :
 
 ```bash
-grep -r "\-\-qv-correct\|--qv-warning\|--qv-error" /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv/packages/theme-default/
+grep -r "\-\-hq-correct\|--hq-warning\|--hq-error" /path/to/hashquiz/packages/theme-default/
 ```
 
 Si ces tokens n'existent pas, utiliser les valeurs en dur : `#10b981` (correct), `#f59e0b` (warning), `#ef4444` (error).
@@ -833,34 +833,34 @@ const game = useGameStore()
 .lobby__badge {
   display: inline-block;
   align-self: flex-start;
-  background: linear-gradient(135deg, var(--qv-accent), var(--qv-accent2, #06b6d4));
+  background: linear-gradient(135deg, var(--hq-accent), var(--hq-accent2, #06b6d4));
   color: #fff;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 0.3rem 0.75rem;
-  border-radius: var(--qv-radius);
+  border-radius: var(--hq-radius);
 }
 
 .lobby__header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; }
-.lobby__title { font-size: 1.6rem; font-weight: 700; margin: 0 0 0.25rem; color: var(--qv-text); }
-.lobby__description { margin: 0 0 0.75rem; color: var(--qv-text-muted); font-size: 0.875rem; line-height: 1.5; }
+.lobby__title { font-size: 1.6rem; font-weight: 700; margin: 0 0 0.25rem; color: var(--hq-text); }
+.lobby__description { margin: 0 0 0.75rem; color: var(--hq-text-muted); font-size: 0.875rem; line-height: 1.5; }
 
 .lobby__tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
 .lobby__tag {
-  background: var(--qv-surface);
-  border: 1px solid var(--qv-border);
-  border-radius: var(--qv-radius);
+  background: var(--hq-surface);
+  border: 1px solid var(--hq-border);
+  border-radius: var(--hq-radius);
   padding: 0.2rem 0.55rem;
   font-size: 0.72rem;
-  color: var(--qv-text-muted);
+  color: var(--hq-text-muted);
 }
 
 .lobby__target-badge {
   flex-shrink: 0;
   padding: 0.3rem 0.75rem;
-  border-radius: var(--qv-radius);
+  border-radius: var(--hq-radius);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -870,15 +870,15 @@ const game = useGameStore()
 .lobby__target-badge--hard   { background: rgba(239,68,68,0.15);   color: #ef4444; }
 
 .lobby__metrics { display: flex; gap: 1rem; }
-.lobby__metric { display: flex; flex-direction: column; align-items: center; background: var(--qv-surface); border: 1px solid var(--qv-border); border-radius: var(--qv-radius); padding: 0.5rem 1rem; min-width: 70px; }
-.lobby__metric strong { font-size: 1.25rem; font-weight: 700; color: var(--qv-accent); line-height: 1; }
-.lobby__metric span { font-size: 0.7rem; color: var(--qv-text-muted); margin-top: 0.15rem; }
+.lobby__metric { display: flex; flex-direction: column; align-items: center; background: var(--hq-surface); border: 1px solid var(--hq-border); border-radius: var(--hq-radius); padding: 0.5rem 1rem; min-width: 70px; }
+.lobby__metric strong { font-size: 1.25rem; font-weight: 700; color: var(--hq-accent); line-height: 1; }
+.lobby__metric span { font-size: 0.7rem; color: var(--hq-text-muted); margin-top: 0.15rem; }
 
-.lobby__divider { height: 1px; background: var(--qv-border); margin: 0.5rem 0; }
+.lobby__divider { height: 1px; background: var(--hq-border); margin: 0.5rem 0; }
 
 .lobby__wait { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center; padding: 1rem 0; }
 .lobby__icon { font-size: 2.5rem; }
-.lobby__count { color: var(--qv-text-muted); font-size: 0.9rem; }
+.lobby__count { color: var(--hq-text-muted); font-size: 0.9rem; }
 </style>
 ```
 
@@ -896,7 +896,7 @@ git commit -m "✨ Player: display quiz info on lobby page"
 - [ ] **Lancer la suite de tests complète**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 bun test
 ```
 
@@ -913,7 +913,7 @@ Expected: aucune erreur de lint.
 - [ ] **Test manuel en dev**
 
 ```bash
-bun run packages/server/src/cli.ts dev examples/quiz-ia-dev.quizv.md
+bun run packages/server/src/cli.ts dev examples/quiz-ia-dev.hashquiz.md
 ```
 
 Ouvrir `http://localhost:3031` (host) — vérifier :

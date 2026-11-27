@@ -75,7 +75,7 @@ Conventional commits are also accepted: `<type>(scope): <description>`
 
 ## Contributor License Agreement
 
-QuizV is fair-code open-core (see [`docs/LICENSING.md`](docs/LICENSING.md)). Before your first pull request can be
+HashQuiz is fair-code open-core (see [`docs/LICENSING.md`](docs/LICENSING.md)). Before your first pull request can be
 merged, you must agree to the [Contributor License Agreement](CLA.md) by commenting on the PR:
 `I have read the CLA and I agree to its terms.`
 

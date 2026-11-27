@@ -1,6 +1,6 @@
 {
   "extraKnownMarketplaces": {
-    "quizv-local": {
+    "hashquiz-local": {
       "source": {
         "source": "directory",
         "path": "."
@@ -8,6 +8,6 @@
     }
   },
   "enabledPlugins": {
-    "quizv@quizv-local": true
+    "hashquiz@hashquiz-local": true
   }
 }

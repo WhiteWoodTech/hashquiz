@@ -1,6 +1,6 @@
 # Technical Guide
 
-Architecture, WebSocket protocol, scoring, and implementation details for QuizV.
+Architecture, WebSocket protocol, scoring, and implementation details for HashQuiz.
 
 ---
 
@@ -8,7 +8,7 @@ Architecture, WebSocket protocol, scoring, and implementation details for QuizV.
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                  quizv dev <file>                   │
+│                  hashquiz dev <file>                   │
 │                                                     │
 │  ┌──────────────┐  ┌────────────┐  ┌────────────┐  │
 │  │  Bun WS/HTTP │  │ Vite host  │  │Vite player │  │
@@ -32,18 +32,18 @@ State is managed in Pinia stores on the client side.
 
 ## Packages
 
-### `@quizv/parser`
+### `@hashquiz/parser`
 
-Parses `.quizv.md` files into typed `Quiz` objects.
+Parses `.hashquiz.md` files into typed `Quiz` objects.
 
 ```typescript
-import { parseQuizFile, validateQuiz } from '@quizv/parser'
+import { parseQuizFile, validateQuiz } from '@hashquiz/parser'
 
 const quiz = parseQuizFile(markdownString)  // throws on malformed input
 const result = validateQuiz(quiz)           // { valid: boolean, errors: [] }
 ```
 
-**`.quizv.md` format:**
+**`.hashquiz.md` format:**
 
 ```markdown
 ---
@@ -66,9 +66,9 @@ theme: dark
 > **Authoring rules** — every question must have **exactly 4 choices** (the player UI is a 2×2 grid).
 > All 4 choices must look **visually identical** (same markdown formatting, length and grammar) so
 > the correct answer doesn't stand out. The parser only enforces ≥2; respect both conventions when
-> writing or generating decks. See the `building-quizv-decks` skill for details.
+> writing or generating decks. See the `building-hashquiz-decks` skill for details.
 
-### `@quizv/core`
+### `@hashquiz/core`
 
 Core game logic. No I/O, fully testable.
 
@@ -99,7 +99,7 @@ function calcPoints(timeRemaining: number, isCorrect: boolean): number {
 
 Points range: 500 (last second) to 1000 (instant answer).
 
-**Backend ports.** `@quizv/core` holds the ports only; each backend plugin implements them:
+**Backend ports.** `@hashquiz/core` holds the ports only; each backend plugin implements them:
 
 - `IRealtimeTransport` (rooms): `broadcast` / `subscribe`.
 - `SoloBackend` (`packages/core/src/solo-backend.ts`): `{ api: SoloApiPort; live(deckId): SoloLivePort }`.
@@ -109,9 +109,9 @@ Points range: 500 (last second) to 1000 (instant answer).
   browser-scored Supabase mode; server-scored backends ignore it.
 - `soloAvailable(config, protocol = location.protocol)` (`runtime-config.ts`): `local` is available on `http:`
   pages only (its `ws://` socket is mixed content on `https:`), `supabase` needs the URL and the anon key.
-- `readRuntimeConfig(import.meta.env)`: each field of the injected `window.__QUIZV_CONFIG__` wins over the build
+- `readRuntimeConfig(import.meta.env)`: each field of the injected `window.__HASHQUIZ_CONFIG__` wins over the build
   env when present (an injected `local` / `browser` overrides a `supabase` / `edge` build). The monorepo Vite
-  plugin builds `/quizv-config.js` from the `VITE_*` values Vite loaded from the app's `.env*` files plus the
+  plugin builds `/hashquiz-config.js` from the `VITE_*` values Vite loaded from the app's `.env*` files plus the
   process env (process env wins), so it matches the developer's setup.
 
 The player solo store keeps the submit failure reason (`submitError`). `deck version mismatch` and
@@ -119,9 +119,9 @@ The player solo store keeps the submit failure reason (`submitError`). `deck ver
 pour utiliser la nouvelle version. », the cached `decks.json` is dropped and **Rejouer** re-opens the deck.
 
 The runtime config field `transport` (`local` | `supabase`) selects the backend for rooms **and** solo; apps
-import `@quizv/backend-*` only, never `@supabase/supabase-js` or `bun:sqlite`.
+import `@hashquiz/backend-*` only, never `@supabase/supabase-js` or `bun:sqlite`.
 
-**`SoloDeckSource`** (`@quizv/core/solo-decks`) is the one deck lookup used by the local server and the Edge
+**`SoloDeckSource`** (`@hashquiz/core/solo-decks`) is the one deck lookup used by the local server and the Edge
 Function: a cached `decks.json` manifest (`parseManifest` checks its shape), solo decks only (`solo: true`),
 TTL 5 min by default. An unknown deck or a version mismatch triggers **one** forced reload before the run is
 rejected, throttled by `minRefetchMs` (10 s; 1 s for the local server, which reads from disk) so bogus
@@ -129,7 +129,7 @@ versions cannot hammer the source; a failed reload keeps the stale cache and bac
 `unknown deck`, `deck version mismatch` or `decks unavailable`. Every backend scores through `verifySoloRun`
 and orders runs with `compareRuns`.
 
-### `@quizv/backend-local`
+### `@hashquiz/backend-local`
 
 `LocalTransport` implements `IRealtimeTransport` using Bun's native WebSocket pub/sub:
 
@@ -141,8 +141,8 @@ interface IRealtimeTransport {
 ```
 
 It also holds the **local solo backend**, served by the `hashquiz dev` Bun server. Subpath exports keep
-`bun:sqlite` out of the browser bundles: `@quizv/backend-local/solo-client` (browser: `fetch` + `WebSocket`,
-`createLocalSoloBackend`) and `@quizv/backend-local/solo-server` (Bun: `SoloStore`, `createSoloHttpHandler`,
+`bun:sqlite` out of the browser bundles: `@hashquiz/backend-local/solo-client` (browser: `fetch` + `WebSocket`,
+`createLocalSoloBackend`) and `@hashquiz/backend-local/solo-server` (Bun: `SoloStore`, `createSoloHttpHandler`,
 `SoloPresenceHub`).
 
 **HTTP** (dev server, port 3030, CORS `*`, `OPTIONS` answers 204, bodies up to 64 KiB). Solo routes exist only
@@ -192,7 +192,7 @@ A run and its answers are written in one transaction. Top and rank use the same 
 `.gitignore` of a decks repository), nothing is deployed online, and players must reach port 3030 of that machine
 (the player app calls `http://<page hostname>:3030`): unsuitable for https static deploys.
 
-### `@quizv/server`
+### `@hashquiz/server`
 
 Bun HTTP + WebSocket server. Serves the game over a single port (3030).
 
@@ -203,12 +203,12 @@ Bun HTTP + WebSocket server. Serves the game over a single port (3030).
 - `GET /` → host HTML (redirect to Vite in Phase 2)
 - `GET /play` → player HTML
 - `GET /ws` → WebSocket upgrade
-- `/solo/*` → local solo API (see `@quizv/backend-local`), when the server has a decks folder
+- `/solo/*` → local solo API (see `@hashquiz/backend-local`), when the server has a decks folder
 
-`QuizvServerOptions` takes `decksDir?` and `soloDbPath?`. `hashquiz dev <file | folder> [--decks <dir>]`: a file
+`HashQuizServerOptions` takes `decksDir?` and `soloDbPath?`. `hashquiz dev <file | folder> [--decks <dir>]`: a file
 is the room deck and the decks folder is `--decks`, else the monorepo `repoDecksDir` (`examples/` or
-`QUIZV_DECKS_DIR`), else the file's folder; a folder is the decks folder and the room deck is its first deck by
-id. The folder is passed to the Vite children as `QUIZV_DECKS_DIR`, and the package's static servers serve
+`HASHQUIZ_DECKS_DIR`), else the file's folder; a folder is the decks folder and the room deck is its first deck by
+id. The folder is passed to the Vite children as `HASHQUIZ_DECKS_DIR`, and the package's static servers serve
 `decks.json` and `host/decks.json` from it.
 
 ---
@@ -286,13 +286,13 @@ type PlayerPhase = 'join' | 'lobby' | 'question' | 'podium'
 
 ## Dev Stack Startup (`packages/server/src/dev.ts`)
 
-From the quizv sources the apps run under Vite as below. From the installed
+From the hashquiz sources the apps run under Vite as below. From the installed
 `hashquiz` npm package (no `apps/` folder) `dev` serves the prebuilt apps from
 the package's `web/` folder on the same ports instead.
 
 ```typescript
 export function devCommand(quizFile: string, port?: number): void {
-  const server = new QuizvServer({ quizFile, port })
+  const server = new HashQuizServer({ quizFile, port })
   server.start()  // WS on port 3030
 
   // Spawn Vite dev servers
@@ -327,12 +327,12 @@ Current coverage: **381 tests across 43 files, 0 failures**
 
 | Package | Tests | Coverage |
 |---------|-------|----------|
-| `@quizv/parser` | 30 | Parse paths, edge cases, validation, `solo` flag |
-| `@quizv/core` | 109 | GameEngine transitions, scoring, choiceCounts, question selection, `SoloSession`, `verifySoloRun`, `compareRuns`, runtime config (`soloAvailable`), deck manifest (`toDecks`, `deckVersion`, `deckInfo`), `parseManifest`, `SoloDeckSource` |
-| `@quizv/ui` | 45 | Theme parity, Fx layout |
-| `@quizv/server` | 28 | `collectDecks`, `hashquiz build`, `resolveDevTarget`, server, local solo on a real port (deck reload, store that cannot open), Vite plugin config |
-| `@quizv/backend-local` | 55 | Transport, `SoloStore` ordering and rank, HTTP handler, presence hub, browser client |
-| `@quizv/backend-supabase` | 54 | Transport, `SoloApi` / `SoloLive`, `toSoloRunRow`, edge bundle, `manifestUrl`, deploy steps and staging |
+| `@hashquiz/parser` | 30 | Parse paths, edge cases, validation, `solo` flag |
+| `@hashquiz/core` | 109 | GameEngine transitions, scoring, choiceCounts, question selection, `SoloSession`, `verifySoloRun`, `compareRuns`, runtime config (`soloAvailable`), deck manifest (`toDecks`, `deckVersion`, `deckInfo`), `parseManifest`, `SoloDeckSource` |
+| `@hashquiz/ui` | 45 | Theme parity, Fx layout |
+| `@hashquiz/server` | 28 | `collectDecks`, `hashquiz build`, `resolveDevTarget`, server, local solo on a real port (deck reload, store that cannot open), Vite plugin config |
+| `@hashquiz/backend-local` | 55 | Transport, `SoloStore` ordering and rank, HTTP handler, presence hub, browser client |
+| `@hashquiz/backend-supabase` | 54 | Transport, `SoloApi` / `SoloLive`, `toSoloRunRow`, edge bundle, `manifestUrl`, deploy steps and staging |
 | `apps/player` | 41 | Route, store (incl. changed deck), runtime deck list |
 | `apps/host` | 12 | Deck browsing, manifest parsing, solo link |
 | `scripts/` | 4 | Pack guard: clean build env, baked Supabase settings |
@@ -341,8 +341,8 @@ Current coverage: **381 tests across 43 files, 0 failures**
 
 ## Solo Mode Storage (Supabase)
 
-Supabase backend (`@quizv/backend-supabase`); the local backend mirrors these tables in SQLite (see
-`@quizv/backend-local`). Schema in
+Supabase backend (`@hashquiz/backend-supabase`); the local backend mirrors these tables in SQLite (see
+`@hashquiz/backend-local`). Schema in
 `packages/backend-supabase/supabase/migrations/20261126090000_solo_live.sql`, hardened by
 `20261126120000_solo_hardening.sql`. RLS is enabled on every table, and table grants match the policies.
 

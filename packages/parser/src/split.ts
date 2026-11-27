@@ -1,5 +1,5 @@
 /**
- * Split a .quizv.md file into raw text blocks.
+ * Split a .hashquiz.md file into raw text blocks.
  *
  * The file format is:
  *   <quiz-meta frontmatter>
@@ -39,7 +39,7 @@ export function splitBlocks(content: string): string[] {
   // Reassemble each pair into a proper `---\nfrontmatter\n---\nbody` block
   if (rest.length % 2 !== 0) {
     throw new Error(
-      `Malformed .quizv.md file: expected an even number of blocks after the meta section, got ${rest.length}`,
+      `Malformed .hashquiz.md file: expected an even number of blocks after the meta section, got ${rest.length}`,
     )
   }
 

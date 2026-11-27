@@ -5,17 +5,17 @@
     <div class="join__form">
       <input
         v-model="code"
-        class="qv-input"
+        class="hq-input"
         placeholder="Game code (e.g. ABC123)"
         style="text-transform:uppercase;letter-spacing:0.12em"
         maxlength="8"
       />
-      <input v-model="pseudo" class="qv-input" placeholder="Your name" maxlength="20" />
-      <input v-model="email"  class="qv-input" type="email" placeholder="Email (optional)" />
+      <input v-model="pseudo" class="hq-input" placeholder="Your name" maxlength="20" />
+      <input v-model="email"  class="hq-input" type="email" placeholder="Email (optional)" />
 
       <p v-if="game.connectError" class="join__error">{{ game.connectError }}</p>
 
-      <button class="qv-btn-primary" :disabled="!code.trim() || !pseudo.trim()" @click="joinGame">
+      <button class="hq-btn-primary" :disabled="!code.trim() || !pseudo.trim()" @click="joinGame">
         Join Game
       </button>
     </div>
@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import { ref, onMounted, defineAsyncComponent } from 'vue'
 import { useGameStore } from '../stores/game'
-import { soloAvailable } from '@quizv/core'
+import { soloAvailable } from '@hashquiz/core'
 import { config } from '../config'
 
 // The solo list (and the deck bundle it needs) loads in its own chunk, only when solo can work.
@@ -44,7 +44,7 @@ onMounted(() => {
   if (param) code.value = param.toUpperCase()
   // Auto-rejoin if a persisted session exists for this code (sessionStorage survives reload and screen-lock)
   try {
-    const raw = sessionStorage.getItem('quizv:player-session')
+    const raw = sessionStorage.getItem('hashquiz:player-session')
     if (raw && code.value) {
       const s = JSON.parse(raw) as { code: string; pseudo: string; email: string }
       if (s.code === code.value) {
@@ -63,21 +63,21 @@ function joinGame() {
 
 <style scoped>
 .join { display: flex; flex-direction: column; align-items: center; padding-top: 2rem; }
-.join__sub   { color: var(--qv-text-muted); margin: 0.5rem 0 2rem; }
+.join__sub   { color: var(--hq-text-muted); margin: 0.5rem 0 2rem; }
 .join__form  { width: 100%; display: flex; flex-direction: column; gap: 0.75rem; }
-.join__error { color: var(--qv-wrong); font-size: 0.9rem; margin: 0; }
-.qv-input {
-  width: 100%; padding: 0.85rem; background: var(--qv-surface);
-  border: 1px solid var(--qv-border); border-radius: var(--qv-radius);
-  color: var(--qv-text); font-size: 1rem; font-family: inherit;
+.join__error { color: var(--hq-wrong); font-size: 0.9rem; margin: 0; }
+.hq-input {
+  width: 100%; padding: 0.85rem; background: var(--hq-surface);
+  border: 1px solid var(--hq-border); border-radius: var(--hq-radius);
+  color: var(--hq-text); font-size: 1rem; font-family: inherit;
 }
-.qv-input:focus { outline: none; border-color: var(--qv-accent); }
-.qv-btn-primary {
-  padding: 0.9rem; background: var(--qv-accent); color: var(--qv-text);
-  border: none; border-radius: var(--qv-radius); font-size: 1.1rem;
+.hq-input:focus { outline: none; border-color: var(--hq-accent); }
+.hq-btn-primary {
+  padding: 0.9rem; background: var(--hq-accent); color: var(--hq-text);
+  border: none; border-radius: var(--hq-radius); font-size: 1.1rem;
   cursor: pointer; font-family: inherit; font-weight: 600; margin-top: 0.25rem;
   transition: background 0.15s;
 }
-.qv-btn-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--qv-accent) 80%, var(--qv-bg)); }
-.qv-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.hq-btn-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--hq-accent) 80%, var(--hq-bg)); }
+.hq-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>

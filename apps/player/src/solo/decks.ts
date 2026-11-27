@@ -1,4 +1,4 @@
-import { fetchDecks, type LoadedDeck } from '@quizv/core/decks'
+import { fetchDecks, type LoadedDeck } from '@hashquiz/core/decks'
 import { soloDecks } from './catalog'
 
 /**

@@ -1,6 +1,6 @@
 /**
  * Keeps the developer's deployment settings out of the npm package: the web apps are
- * built with a clean env (`cleanBuildEnv`, plus `envDir: false` under `QUIZV_PACK=1`),
+ * built with a clean env (`cleanBuildEnv`, plus `envDir: false` under `HASHQUIZ_PACK=1`),
  * then `findBakedSecrets` checks the staged `pkg/web` for anything that still leaked.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
@@ -8,19 +8,19 @@ import { join, relative } from 'node:path'
 
 type Env = Record<string, string | undefined>
 
-const SETTING_PREFIX = /^(VITE|QUIZV|HASHQUIZ)_/
+const SETTING_PREFIX = /^(VITE|HASHQUIZ)_/
 /** Env names whose values must never appear in a shipped bundle. */
-const SECRET_NAME = /^(VITE|QUIZV|HASHQUIZ)_SUPABASE_(URL|ANON_KEY)$/
+const SECRET_NAME = /^(VITE|HASHQUIZ)_SUPABASE_(URL|ANON_KEY)$/
 /** Local Supabase API port (`http://127.0.0.1:54321`). */
 const LOCAL_SUPABASE_PORT = '54321'
 /** A JWT (Supabase anon / service keys): base64url of `{"`. */
 const JWT = /eyJ[A-Za-z0-9_-]{8,}/
 
-/** The env for the pack build: no `VITE_*` / `QUIZV_*` / `HASHQUIZ_*`, and `QUIZV_PACK=1`. */
+/** The env for the pack build: no `VITE_*` / `HASHQUIZ_*`, and `HASHQUIZ_PACK=1`. */
 export function cleanBuildEnv(env: Env): Record<string, string> {
   const out: Record<string, string> = {}
   for (const [k, v] of Object.entries(env)) if (v !== undefined && !SETTING_PREFIX.test(k)) out[k] = v
-  out.QUIZV_PACK = '1'
+  out.HASHQUIZ_PACK = '1'
   return out
 }
 

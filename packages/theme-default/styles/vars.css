@@ -1,46 +1,49 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
 
 :root {
-  --qv-bg:           #06060a;
-  --qv-surface:      #0c0c12;
-  --qv-surface-2:    #14141c;
-  --qv-border:       #22222e;
-  --qv-accent:       #7c3aed;
-  --qv-accent-2:     #06b6d4;
-  --qv-correct:      #22c55e;
-  --qv-wrong:        #ef4444;
-  --qv-warn: #f99e16;
-  --qv-text:         #f2f2f7;
-  --qv-text-muted:   #8a8a9a;
-  --qv-progress:     #6b6b7a;
-  --qv-font-display: 'Inter', system-ui, sans-serif;
-  --qv-font-mono:    'IBM Plex Mono', monospace;
-  --qv-radius:       6px;
-  --qv-radius-sm:    4px;
-  --qv-font-label:   'IBM Plex Mono', monospace;
-  --qv-label-spacing: .4em;
-  --qv-choice-a:     #7c3aed;
-  --qv-choice-b:     #0891b2;
-  --qv-choice-c:     #d97706;
-  --qv-choice-d:     #059669;
-  --qv-qr-dark:      #ffffff;
-  --qv-qr-light:     #111118;
-  --qv-fx-dot:       #ffffff;
-  --qv-fx-line-opacity: .2;
-  --qv-fx-glow:      .35;
-  --qv-fx-dust-density: 1;
-  --qv-fx-dust-alpha: 1.8;
-  --qv-fx-speed:     1;
+  --hq-bg:           #06060a;
+  --hq-surface:      #0c0c12;
+  --hq-surface-2:    #14141c;
+  --hq-border:       #22222e;
+  --hq-accent:       #7c3aed;
+  --hq-accent-2:     #06b6d4;
+  /* Logo colors (docs/brand/) */
+  --hq-brand-violet: #6523ee;
+  --hq-brand-purple: #a833f5;
+  --hq-correct:      #22c55e;
+  --hq-wrong:        #ef4444;
+  --hq-warn: #f99e16;
+  --hq-text:         #f2f2f7;
+  --hq-text-muted:   #8a8a9a;
+  --hq-progress:     #6b6b7a;
+  --hq-font-display: 'Inter', system-ui, sans-serif;
+  --hq-font-mono:    'IBM Plex Mono', monospace;
+  --hq-radius:       6px;
+  --hq-radius-sm:    4px;
+  --hq-font-label:   'IBM Plex Mono', monospace;
+  --hq-label-spacing: .4em;
+  --hq-choice-a:     #7c3aed;
+  --hq-choice-b:     #0891b2;
+  --hq-choice-c:     #d97706;
+  --hq-choice-d:     #059669;
+  --hq-qr-dark:      #ffffff;
+  --hq-qr-light:     #111118;
+  --hq-fx-dot:       #ffffff;
+  --hq-fx-line-opacity: .2;
+  --hq-fx-glow:      .35;
+  --hq-fx-dust-density: 1;
+  --hq-fx-dust-alpha: 1.8;
+  --hq-fx-speed:     1;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
 
 html, body {
-  background: var(--qv-bg);
-  color: var(--qv-text);
-  font-family: var(--qv-font-display);
+  background: var(--hq-bg);
+  color: var(--hq-text);
+  font-family: var(--hq-font-display);
   margin: 0;
   min-height: 100vh;
 }
 
-a { color: var(--qv-accent); }
+a { color: var(--hq-accent); }

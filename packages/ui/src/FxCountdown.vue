@@ -65,14 +65,14 @@ onBeforeUnmount(() => handle?.destroy())
 }
 .fx-countdown__num {
   position: relative;
-  font-family: var(--qv-font-display);
+  font-family: var(--hq-font-display);
   font-weight: 300;
   font-variant-numeric: tabular-nums;
   line-height: 1;
-  color: var(--qv-text);
+  color: var(--hq-text);
   transition: color 0.3s ease;
 }
 .fx-countdown--large .fx-countdown__num { font-size: min(12vmin, 10vw); }
 .fx-countdown--compact .fx-countdown__num { font-size: 52px; }
-.fx-countdown--danger .fx-countdown__num { color: var(--qv-wrong); }
+.fx-countdown--danger .fx-countdown__num { color: var(--hq-wrong); }
 </style>

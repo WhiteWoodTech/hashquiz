@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, test } from 'bun:test'
 import { configFromEnv, readRuntimeConfig, renderConfigScript, soloAvailable } from '../src/runtime-config'
 
-const g = globalThis as { __QUIZV_CONFIG__?: unknown }
-afterEach(() => { delete g.__QUIZV_CONFIG__ })
+const g = globalThis as { __HASHQUIZ_CONFIG__?: unknown }
+afterEach(() => { delete g.__HASHQUIZ_CONFIG__ })
 
 describe('configFromEnv', () => {
   test('defaults to local transport', () => {
@@ -11,12 +11,12 @@ describe('configFromEnv', () => {
       soloScoring: 'browser', playerUrl: undefined,
     })
   })
-  test('HASHQUIZ_* wins over QUIZV_* and VITE_*', () => {
-    const c = configFromEnv({ HASHQUIZ_TRANSPORT: 'supabase', QUIZV_SUPABASE_URL: 'q', VITE_SUPABASE_URL: 'v', VITE_SUPABASE_ANON_KEY: 'k', VITE_QUIZV_GRACE_MS: '500' })
+  test('HASHQUIZ_* wins over VITE_*', () => {
+    const c = configFromEnv({ HASHQUIZ_TRANSPORT: 'supabase', HASHQUIZ_SUPABASE_URL: 'q', VITE_SUPABASE_URL: 'v', VITE_SUPABASE_ANON_KEY: 'k', VITE_GRACE_MS: '500' })
     expect(c).toEqual({ transport: 'supabase', supabaseUrl: 'q', supabaseAnonKey: 'k', graceMs: 500, soloScoring: 'browser', playerUrl: undefined })
   })
   test('solo scoring and player URL use the same precedence', () => {
-    const c = configFromEnv({ QUIZV_SOLO_SCORING: 'edge', VITE_SOLO_SCORING: 'browser', HASHQUIZ_PLAYER_URL: 'https://p.app/', VITE_PLAYER_URL: 'v' })
+    const c = configFromEnv({ HASHQUIZ_SOLO_SCORING: 'edge', VITE_SOLO_SCORING: 'browser', HASHQUIZ_PLAYER_URL: 'https://p.app/', VITE_PLAYER_URL: 'v' })
     expect(c).toMatchObject({ soloScoring: 'edge', playerUrl: 'https://p.app/' })
     expect(configFromEnv({ VITE_SOLO_SCORING: 'nope' }).soloScoring).toBe('browser')
   })
@@ -24,23 +24,23 @@ describe('configFromEnv', () => {
 
 describe('readRuntimeConfig', () => {
   test('injected config overrides the build env', () => {
-    g.__QUIZV_CONFIG__ = { transport: 'supabase', supabaseUrl: 'u', supabaseAnonKey: 'k' }
+    g.__HASHQUIZ_CONFIG__ = { transport: 'supabase', supabaseUrl: 'u', supabaseAnonKey: 'k' }
     expect(readRuntimeConfig({ VITE_TRANSPORT: 'local' })).toMatchObject({ transport: 'supabase', supabaseUrl: 'u' })
   })
   test('injected solo settings: edge and player URL win', () => {
-    g.__QUIZV_CONFIG__ = { transport: 'local', soloScoring: 'edge', playerUrl: 'https://p.app/' }
+    g.__HASHQUIZ_CONFIG__ = { transport: 'local', soloScoring: 'edge', playerUrl: 'https://p.app/' }
     expect(readRuntimeConfig({ VITE_PLAYER_URL: 'v' })).toMatchObject({ soloScoring: 'edge', playerUrl: 'https://p.app/' })
   })
   test('injected local transport overrides a supabase build env', () => {
-    g.__QUIZV_CONFIG__ = { transport: 'local', soloScoring: 'browser' }
+    g.__HASHQUIZ_CONFIG__ = { transport: 'local', soloScoring: 'browser' }
     expect(readRuntimeConfig({ VITE_TRANSPORT: 'supabase', VITE_SUPABASE_URL: 'u', VITE_SUPABASE_ANON_KEY: 'k' }).transport).toBe('local')
   })
   test('injected browser scoring overrides an edge build env', () => {
-    g.__QUIZV_CONFIG__ = { transport: 'local', soloScoring: 'browser' }
+    g.__HASHQUIZ_CONFIG__ = { transport: 'local', soloScoring: 'browser' }
     expect(readRuntimeConfig({ VITE_SOLO_SCORING: 'edge', VITE_PLAYER_URL: 'v' })).toMatchObject({ soloScoring: 'browser', playerUrl: 'v' })
   })
   test('fields missing from the injected config come from the build env', () => {
-    g.__QUIZV_CONFIG__ = { supabaseUrl: 'u' }
+    g.__HASHQUIZ_CONFIG__ = { supabaseUrl: 'u' }
     expect(readRuntimeConfig({ VITE_TRANSPORT: 'supabase', VITE_SOLO_SCORING: 'edge' })).toMatchObject({ transport: 'supabase', soloScoring: 'edge', supabaseUrl: 'u' })
   })
   test('falls back to the build env', () => {

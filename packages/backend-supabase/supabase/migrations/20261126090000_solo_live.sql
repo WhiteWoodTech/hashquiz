@@ -1,4 +1,4 @@
--- Solo live mode: finished solo runs, their answers, the scoring-mode switch and Markuiz leads.
+-- Solo live mode: finished solo runs, their answers, the scoring-mode switch and HashQuiz leads.
 -- anon never writes solo_runs / solo_answers directly: browser mode goes through submit_solo_run
 -- (security definer, gated by solo_settings.scoring_mode), edge mode through the solo-submit
 -- Edge Function (service role). See docs/TECHNICAL_GUIDE.md.
@@ -129,7 +129,7 @@ end;
 $$;
 
 -- Rank of a run within its deck leaderboard: score desc, total_time_ms asc, finished_at asc
--- (same order as compareRuns in @quizv/core).
+-- (same order as compareRuns in @hashquiz/core).
 create function public.solo_rank(p_run_id uuid)
 returns int
 language sql

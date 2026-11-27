@@ -1,6 +1,6 @@
 // Server-side only (Bun): the local solo HTTP endpoints and WS presence hub of `hashquiz dev`.
-import { EMAIL_RE, verifySoloRun, type LivePlayer, type LiveState, type SoloRunSubmission } from '@quizv/core'
-import type { SoloDeckSource } from '@quizv/core/solo-decks'
+import { EMAIL_RE, verifySoloRun, type LivePlayer, type LiveState, type SoloRunSubmission } from '@hashquiz/core'
+import type { SoloDeckSource } from '@hashquiz/core/solo-decks'
 import { soloTopic, type SoloServerMsg } from './protocol'
 import type { SoloStore } from './store'
 

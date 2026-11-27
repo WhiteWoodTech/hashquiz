@@ -1,4 +1,4 @@
-// `@quizv/backend-supabase/cli`: the `hashquiz supabase` command and the project staging used by the npm pack.
+// `@hashquiz/backend-supabase/cli`: the `hashquiz supabase` command and the project staging used by the npm pack.
 export { bundleEdgeCore, EDGE_CORE_FILE, edgeCoreEntry } from './edge-bundle'
 export {
   copySupabaseProject,

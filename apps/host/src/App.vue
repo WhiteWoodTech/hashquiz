@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount } from 'vue'
-import { FxBackdrop } from '@quizv/ui'
+import { FxBackdrop } from '@hashquiz/ui'
 import { useGameStore } from './stores/game'
 import DeckSelectView from './views/DeckSelectView.vue'
 import LobbyView    from './views/LobbyView.vue'
@@ -31,5 +31,5 @@ onBeforeUnmount(() => game.disposeSession?.())
 
 <style>
 .app { position: relative; z-index: 1; height: 100vh; height: 100dvh; overflow: hidden; padding: 0; }
-.connecting { display: flex; align-items: center; justify-content: center; height: 100vh; height: 100dvh; color: var(--qv-text-muted); }
+.connecting { display: flex; align-items: center; justify-content: center; height: 100vh; height: 100dvh; color: var(--hq-text-muted); }
 </style>

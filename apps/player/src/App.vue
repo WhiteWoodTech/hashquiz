@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { computed, defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue'
-import { BrandLogo, FxBackdrop } from '@quizv/ui'
+import { BrandLogo, FxBackdrop } from '@hashquiz/ui'
 import { useGameStore } from './stores/game'
 import { useSoloStore, setSoloDeps } from './stores/solo'
 import { parseSoloHash } from './solo/route'
@@ -111,16 +111,16 @@ const statusLabel = computed(() => {
   text-align: center;
   font-size: 0.85rem;
   font-weight: 500;
-  border-bottom: 1px solid var(--qv-border);
+  border-bottom: 1px solid var(--hq-border);
 }
 .status-banner--connecting,
 .status-banner--reconnecting {
-  background: color-mix(in srgb, var(--qv-warn) 18%, transparent);
-  color: var(--qv-warn);
+  background: color-mix(in srgb, var(--hq-warn) 18%, transparent);
+  color: var(--hq-warn);
 }
 .status-banner--offline {
-  background: color-mix(in srgb, var(--qv-wrong) 18%, transparent);
-  color: var(--qv-wrong);
+  background: color-mix(in srgb, var(--hq-wrong) 18%, transparent);
+  color: var(--hq-wrong);
 }
 .status-enter-active, .status-leave-active { transition: opacity 0.2s, transform 0.2s; }
 .status-enter-from, .status-leave-to { opacity: 0; transform: translateY(-100%); }

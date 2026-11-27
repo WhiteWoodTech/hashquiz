@@ -1,4 +1,4 @@
-import type { IRealtimeTransport, Unsubscribe, GameEvent, PlayerState } from '@quizv/core'
+import type { IRealtimeTransport, Unsubscribe, GameEvent, PlayerState } from '@hashquiz/core'
 
 type ChannelSubscribers = Set<(event: GameEvent) => void>
 type PresenceStore = Map<string, PlayerState>

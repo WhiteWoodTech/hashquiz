@@ -1,5 +1,5 @@
 {
-  "name": "quizv",
+  "name": "hashquiz",
   "version": "0.0.0",
   "description": "Kahoot-alternative real-time multiplayer quiz platform",
   "type": "module",
@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "build": "bun run --filter='*' build",
-    "build:web": "bun -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && bun run --filter='@quizv/app-host' build && bun run --filter='@quizv/app-player' build",
+    "build:web": "bun -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && bun run --filter='@hashquiz/app-host' build && bun run --filter='@hashquiz/app-player' build",
     "pack": "bun scripts/pack.ts",
     "build:edge": "bun packages/backend-supabase/src/cli/edge-bundle.ts",
     "test": "bun test",

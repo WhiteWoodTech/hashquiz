@@ -2,14 +2,14 @@ import { afterEach, describe, expect, spyOn, test } from 'bun:test'
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
-import { SoloSession, type SoloRunSubmission } from '@quizv/core'
-import { deckVersion } from '@quizv/core/decks'
-import { parseQuizFile } from '@quizv/parser'
-import { QuizvServer } from '../src/server'
+import { SoloSession, type SoloRunSubmission } from '@hashquiz/core'
+import { deckVersion } from '@hashquiz/core/decks'
+import { parseQuizFile } from '@hashquiz/parser'
+import { HashQuizServer } from '../src/server'
 
-const QUIZ = resolve(import.meta.dir, '../../../examples/demo.quizv.md')
+const QUIZ = resolve(import.meta.dir, '../../../examples/demo.hashquiz.md')
 const DEMO = readFileSync(QUIZ, 'utf-8')
-const DECK = 'demo.quizv.md'
+const DECK = 'demo.hashquiz.md'
 
 type Msg = { type: string; deckId?: string; players?: Array<{ key: string; pseudo: string }> }
 
@@ -45,7 +45,7 @@ function start(withDecks = true, dbPath?: (dir: string) => string): number {
   cleanups.push(() => rmSync(dir, { recursive: true, force: true }))
   writeFileSync(join(dir, DECK), DEMO)
   lastDir = dir
-  const server = new QuizvServer({
+  const server = new HashQuizServer({
     quizFile: QUIZ,
     port,
     graceMs: 0,
@@ -70,7 +70,7 @@ function play(source = DEMO): SoloRunSubmission {
   return s.toSubmission()
 }
 
-describe('QuizvServer — local solo', () => {
+describe('HashQuizServer — local solo', () => {
   test('submit over HTTP reaches the leaderboard and a solo socket gets solo_new_run', async () => {
     const port = start()
     const sock = await open(`ws://localhost:${port}/ws?role=solo&deck=${encodeURIComponent(DECK)}&key=k1`)

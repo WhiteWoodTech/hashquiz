@@ -1,14 +1,14 @@
-# QuizV Phase 3 — CLI Packaging (Slidev-style)
+# HashQuiz Phase 3 — CLI Packaging (Slidev-style)
 
 > **For agentic workers:** Use `superpowers:executing-plans` to implement this plan task-by-task.
 
-**Goal:** Distribuer QuizV comme un outil CLI installable en une commande, sans clone du repo.
+**Goal:** Distribuer HashQuiz comme un outil CLI installable en une commande, sans clone du repo.
 
 ```bash
 # Résultat final visé
-npx quizv dev mon-quiz.quizv.md
+npx hashquiz dev mon-quiz.hashquiz.md
 # ou
-bunx quizv dev mon-quiz.quizv.md
+bunx hashquiz dev mon-quiz.hashquiz.md
 ```
 
 ---
@@ -20,16 +20,16 @@ Slidev fonctionne ainsi :
 2. `npx slidev deck.md` démarre un serveur qui sert les apps Vue **pré-compilées** embarquées dans le package npm
 3. Pas besoin de Vite côté utilisateur — Vite n'est utilisé qu'au moment du build du package
 
-QuizV suit exactement le même modèle : `.quizv.md` → CLI → serveur avec apps embarquées.
+HashQuiz suit exactement le même modèle : `.hashquiz.md` → CLI → serveur avec apps embarquées.
 
 ---
 
 ## Architecture cible
 
 ```
-packages/server/               ← package publiable (@quizv/server ou quizv)
+packages/server/               ← package publiable (@hashquiz/server ou hashquiz)
 ├── bin/
-│   └── quizv.js              ← binary compilé (bun build --compile)
+│   └── hashquiz.js              ← binary compilé (bun build --compile)
 ├── client/
 │   ├── host/                 ← vite build de apps/host (index.html + assets)
 │   └── player/               ← vite build de apps/player (index.html + assets)
@@ -37,7 +37,7 @@ packages/server/               ← package publiable (@quizv/server ou quizv)
 │   ├── server.ts             ← sert client/host/ et client/player/ en statique
 │   ├── dev.ts                ← mode dev (toujours Vite, pour les contributeurs)
 │   └── cli.ts                ← entry point
-└── package.json              ← "bin": { "quizv": "./bin/quizv.js" }
+└── package.json              ← "bin": { "hashquiz": "./bin/hashquiz.js" }
 ```
 
 ---
@@ -50,7 +50,7 @@ packages/server/               ← package publiable (@quizv/server ou quizv)
 | Apps Vue host + player | ✅ Complètes |
 | `vite.config.ts` avec `build.outDir` | ❌ Pas configuré |
 | Serveur servant les fichiers statiques | ❌ Sert des stubs HTML inline |
-| Commande `quizv start` (production) | ❌ Inexistante |
+| Commande `hashquiz start` (production) | ❌ Inexistante |
 | `package.json` avec `bin` | ❌ Pas de binary |
 | Script de build global | ❌ `bun run build` incomplet |
 | Publish npm | ❌ Non configuré |
@@ -136,7 +136,7 @@ packages/server/client/player/
 ### Step 1.4 : Tester le build
 
 ```bash
-cd /path/to/quizv
+cd /path/to/hashquiz
 cd apps/host && bun run build
 cd ../player && bun run build
 ls packages/server/client/host/    # → index.html, assets/
@@ -154,7 +154,7 @@ git commit -m "✨ Configure vite build output to packages/server/client/"
 
 ## Task 2 : Serveur en mode production (sert les statics)
 
-**Objectif :** Quand les fichiers `client/` existent, `QuizvServer` les sert directement. Plus de Vite, plus de spawn.
+**Objectif :** Quand les fichiers `client/` existent, `HashQuizServer` les sert directement. Plus de Vite, plus de spawn.
 
 ### Step 2.1 : Utilitaire de résolution du répertoire client
 
@@ -181,7 +181,7 @@ function resolveClientDir(): { host: string; player: string } | null {
 
 ### Step 2.2 : Remplacer les stubs HTML par les fichiers buildés
 
-Dans `QuizvServer.start()`, remplacer les réponses HTML inline :
+Dans `HashQuizServer.start()`, remplacer les réponses HTML inline :
 
 ```typescript
 start(): void {
@@ -231,7 +231,7 @@ start(): void {
   })
 
   const localIP = getLocalIP()
-  console.log(`\n  QuizV`)
+  console.log(`\n  HashQuiz`)
   console.log(`  Host:    http://localhost:${this.port}`)
   console.log(`  Players: http://${localIP}:${this.port}/play?code=${this.joinCode}\n`)
 }
@@ -247,11 +247,11 @@ Dans `packages/server/src/cli.ts`, ajouter après `dev` :
 if (command === 'start') {
   // Mode production : pas de Vite, pas de file watcher
   if (!arg) {
-    console.error('Error: provide a .quizv.md file path\n  quizv start quiz.quizv.md')
+    console.error('Error: provide a .hashquiz.md file path\n  hashquiz start quiz.hashquiz.md')
     process.exit(1)
   }
   const absPath = resolve(arg)
-  const server = new QuizvServer({ quizFile: absPath, port })
+  const server = new HashQuizServer({ quizFile: absPath, port })
   server.start()
 }
 ```
@@ -260,9 +260,9 @@ Mettre à jour `printUsage()` :
 ```typescript
 console.log(`
   Commands:
-    dev   <quiz.quizv.md>   Start dev stack (Vite hot-reload)
-    start <quiz.quizv.md>   Start production server (pre-built apps required)
-    check <quiz.quizv.md>   Validate quiz file format
+    dev   <quiz.hashquiz.md>   Start dev stack (Vite hot-reload)
+    start <quiz.hashquiz.md>   Start production server (pre-built apps required)
+    check <quiz.hashquiz.md>   Validate quiz file format
 `)
 ```
 
@@ -273,7 +273,7 @@ console.log(`
 cd apps/host && bun run build && cd ../player && bun run build && cd ../..
 
 # Lancer en mode prod
-bun run packages/server/src/cli.ts start examples/demo.quizv.md
+bun run packages/server/src/cli.ts start examples/demo.hashquiz.md
 
 # Ouvrir http://localhost:3030 → host
 # Ouvrir http://localhost:3030/play?code=XXXX → player
@@ -313,9 +313,9 @@ import { resolve } from 'node:path'
 
 const root = resolve(import.meta.dirname, '..')
 
-console.log('Building @quizv/core, @quizv/parser...')
-await $`bun run --filter='@quizv/core' build`.quiet()
-await $`bun run --filter='@quizv/parser' build`.quiet()
+console.log('Building @hashquiz/core, @hashquiz/parser...')
+await $`bun run --filter='@hashquiz/core' build`.quiet()
+await $`bun run --filter='@hashquiz/parser' build`.quiet()
 
 console.log('Building apps/host...')
 await $`bun run build`.cwd(resolve(root, 'apps/host'))
@@ -324,27 +324,27 @@ console.log('Building apps/player...')
 await $`bun run build`.cwd(resolve(root, 'apps/player'))
 
 console.log('Compiling CLI binary...')
-await $`bun build packages/server/src/cli.ts --compile --outfile dist/quizv --target=bun`
+await $`bun build packages/server/src/cli.ts --compile --outfile dist/hashquiz --target=bun`
 
 console.log('\n✅ Build complete')
-console.log('   Binary:    ./dist/quizv')
-console.log('   Usage:     ./dist/quizv start quiz.quizv.md')
+console.log('   Binary:    ./dist/hashquiz')
+console.log('   Usage:     ./dist/hashquiz start quiz.hashquiz.md')
 ```
 
 ### Step 3.3 : Mettre à jour `packages/server/package.json`
 
 ```json
 {
-  "name": "quizv",
+  "name": "hashquiz",
   "version": "0.1.0",
   "description": "Interactive quiz platform — Kahoot alternative",
   "type": "module",
   "bin": {
-    "quizv": "./bin/quizv.js"
+    "hashquiz": "./bin/hashquiz.js"
   },
   "scripts": {
     "dev": "bun run src/cli.ts dev",
-    "build": "bun build src/cli.ts --outfile bin/quizv.js --target=node",
+    "build": "bun build src/cli.ts --outfile bin/hashquiz.js --target=node",
     "prepublishOnly": "bun run build"
   },
   "files": [
@@ -361,8 +361,8 @@ console.log('   Usage:     ./dist/quizv start quiz.quizv.md')
 
 ```bash
 bun run build
-./dist/quizv check examples/demo.quizv.md
-./dist/quizv start examples/demo.quizv.md
+./dist/hashquiz check examples/demo.hashquiz.md
+./dist/hashquiz start examples/demo.hashquiz.md
 ```
 
 ### Step 3.5 : Commit
@@ -378,7 +378,7 @@ git commit -m "✨ Build script + CLI binary compilation"
 
 ```bash
 # 1. Vérifier le nom sur npm
-npm info quizv   # → 404 si disponible
+npm info hashquiz   # → 404 si disponible
 
 # 2. Login npm
 npm login
@@ -392,7 +392,7 @@ npm publish --access public
 
 Après publication :
 ```bash
-npx quizv dev mon-quiz.quizv.md
+npx hashquiz dev mon-quiz.hashquiz.md
 ```
 
 ---
@@ -401,10 +401,10 @@ npx quizv dev mon-quiz.quizv.md
 
 | Commande | Transport | Apps | Usage |
 |---|---|---|---|
-| `quizv dev quiz.md` | LocalTransport | Vite dev (hot-reload) | Développement du quiz |
-| `quizv start quiz.md` | LocalTransport | Statics pré-buildées | Présentation en LAN |
-| `quizv start quiz.md --supabase` | SupabaseTransport | Statics pré-buildées | Présentation cloud |
-| `quizv check quiz.md` | — | — | Validation du fichier |
+| `hashquiz dev quiz.md` | LocalTransport | Vite dev (hot-reload) | Développement du quiz |
+| `hashquiz start quiz.md` | LocalTransport | Statics pré-buildées | Présentation en LAN |
+| `hashquiz start quiz.md --supabase` | SupabaseTransport | Statics pré-buildées | Présentation cloud |
+| `hashquiz check quiz.md` | — | — | Validation du fichier |
 
 ---
 

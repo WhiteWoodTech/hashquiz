@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "quizv",
+      "name": "hashquiz",
       "devDependencies": {
         "@commitlint/cli": "^21.0.2",
         "@semantic-release/changelog": "^7.0.0",
@@ -24,15 +24,15 @@
       },
     },
     "apps/host": {
-      "name": "@quizv/app-host",
+      "name": "@hashquiz/app-host",
       "version": "0.0.1",
       "dependencies": {
-        "@quizv/core": "workspace:*",
-        "@quizv/parser": "workspace:*",
-        "@quizv/theme-default": "workspace:*",
-        "@quizv/theme-original": "workspace:*",
-        "@quizv/backend-supabase": "workspace:*",
-        "@quizv/ui": "workspace:*",
+        "@hashquiz/backend-supabase": "workspace:*",
+        "@hashquiz/core": "workspace:*",
+        "@hashquiz/parser": "workspace:*",
+        "@hashquiz/theme-default": "workspace:*",
+        "@hashquiz/theme-original": "workspace:*",
+        "@hashquiz/ui": "workspace:*",
         "marked": "18.0.11",
         "pinia": "^4.0.3",
         "vue": "^3.4.27",
@@ -46,15 +46,15 @@
       },
     },
     "apps/player": {
-      "name": "@quizv/app-player",
+      "name": "@hashquiz/app-player",
       "version": "0.0.1",
       "dependencies": {
-        "@quizv/core": "workspace:*",
-        "@quizv/theme-default": "workspace:*",
-        "@quizv/theme-original": "workspace:*",
-        "@quizv/backend-local": "workspace:*",
-        "@quizv/backend-supabase": "workspace:*",
-        "@quizv/ui": "workspace:*",
+        "@hashquiz/backend-local": "workspace:*",
+        "@hashquiz/backend-supabase": "workspace:*",
+        "@hashquiz/core": "workspace:*",
+        "@hashquiz/theme-default": "workspace:*",
+        "@hashquiz/theme-original": "workspace:*",
+        "@hashquiz/ui": "workspace:*",
         "marked": "18.0.11",
         "pinia": "^4.0.3",
         "vue": "^3.4.27",
@@ -67,18 +67,41 @@
         "vite-plugin-node-polyfills": "0.28.0",
       },
     },
-    "packages/core": {
-      "name": "@quizv/core",
+    "packages/backend-local": {
+      "name": "@hashquiz/backend-local",
       "version": "0.0.1",
       "dependencies": {
-        "@quizv/parser": "workspace:*",
+        "@hashquiz/core": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+        "typescript": "^5.4.5",
+      },
+    },
+    "packages/backend-supabase": {
+      "name": "@hashquiz/backend-supabase",
+      "version": "0.0.1",
+      "dependencies": {
+        "@hashquiz/core": "workspace:*",
+        "@supabase/supabase-js": "^2.45.4",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+        "typescript": "^5.4.5",
+      },
+    },
+    "packages/core": {
+      "name": "@hashquiz/core",
+      "version": "0.0.1",
+      "dependencies": {
+        "@hashquiz/parser": "workspace:*",
       },
       "devDependencies": {
         "typescript": "^5.4.5",
       },
     },
     "packages/parser": {
-      "name": "@quizv/parser",
+      "name": "@hashquiz/parser",
       "version": "0.0.1",
       "dependencies": {
         "gray-matter": "^4.0.3",
@@ -88,16 +111,16 @@
       },
     },
     "packages/server": {
-      "name": "@quizv/server",
+      "name": "@hashquiz/server",
       "version": "0.0.1",
       "bin": {
-        "quizv": "./src/cli.ts",
+        "hashquiz": "./src/cli.ts",
       },
       "dependencies": {
-        "@quizv/core": "workspace:*",
-        "@quizv/parser": "workspace:*",
-        "@quizv/backend-local": "workspace:*",
-        "@quizv/backend-supabase": "workspace:*",
+        "@hashquiz/backend-local": "workspace:*",
+        "@hashquiz/backend-supabase": "workspace:*",
+        "@hashquiz/core": "workspace:*",
+        "@hashquiz/parser": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -105,41 +128,18 @@
       },
     },
     "packages/theme-default": {
-      "name": "@quizv/theme-default",
+      "name": "@hashquiz/theme-default",
       "version": "0.0.1",
     },
     "packages/theme-original": {
-      "name": "@quizv/theme-original",
+      "name": "@hashquiz/theme-original",
       "version": "0.0.1",
-    },
-    "packages/backend-local": {
-      "name": "@quizv/backend-local",
-      "version": "0.0.1",
-      "dependencies": {
-        "@quizv/core": "workspace:*",
-      },
-      "devDependencies": {
-        "@types/bun": "latest",
-        "typescript": "^5.4.5",
-      },
-    },
-    "packages/backend-supabase": {
-      "name": "@quizv/backend-supabase",
-      "version": "0.0.1",
-      "dependencies": {
-        "@quizv/core": "workspace:*",
-        "@supabase/supabase-js": "^2.45.4",
-      },
-      "devDependencies": {
-        "@types/bun": "latest",
-        "typescript": "^5.4.5",
-      },
     },
     "packages/ui": {
-      "name": "@quizv/ui",
+      "name": "@hashquiz/ui",
       "version": "0.0.1",
       "dependencies": {
-        "@quizv/core": "workspace:*",
+        "@hashquiz/core": "workspace:*",
         "qrcode": "^1.5.4",
         "vue": "^3.4.27",
       },
@@ -220,6 +220,26 @@
     "@gitmoji/gitmoji-regex": ["@gitmoji/gitmoji-regex@1.0.0", "", { "dependencies": { "emoji-regex": "^10", "gitmojis": "^3" } }, "sha512-+BFXxcWCxn0UIYuG1v5n9SfaCCS8tw95j1x3QsTJRdGGiihRyVLTHiu1wrHlzH3z4nYXKjCKiZFTdWwMjRI+gQ=="],
 
     "@gitmoji/parser-opts": ["@gitmoji/parser-opts@1.4.0", "", { "dependencies": { "@gitmoji/gitmoji-regex": "1.0.0" } }, "sha512-zzmx/vtpdB/ijjUm7u9OzHNCXWKpSbzVEgVzOzhilMgoTBlUDyInZFUtiCTV+Wf4oCP9nxGa/kQGQFfN+XLH1g=="],
+
+    "@hashquiz/app-host": ["@hashquiz/app-host@workspace:apps/host"],
+
+    "@hashquiz/app-player": ["@hashquiz/app-player@workspace:apps/player"],
+
+    "@hashquiz/backend-local": ["@hashquiz/backend-local@workspace:packages/backend-local"],
+
+    "@hashquiz/backend-supabase": ["@hashquiz/backend-supabase@workspace:packages/backend-supabase"],
+
+    "@hashquiz/core": ["@hashquiz/core@workspace:packages/core"],
+
+    "@hashquiz/parser": ["@hashquiz/parser@workspace:packages/parser"],
+
+    "@hashquiz/server": ["@hashquiz/server@workspace:packages/server"],
+
+    "@hashquiz/theme-default": ["@hashquiz/theme-default@workspace:packages/theme-default"],
+
+    "@hashquiz/theme-original": ["@hashquiz/theme-original@workspace:packages/theme-original"],
+
+    "@hashquiz/ui": ["@hashquiz/ui@workspace:packages/ui"],
 
     "@hutson/parse-repository-url": ["@hutson/parse-repository-url@5.0.0", "", {}, "sha512-e5+YUKENATs1JgYHMzTr2MW/NDcXGfYFAuOQU8gJgF/kEh4EqKgfGrfLI67bMD4tbhZVlkigz/9YYwWcbOFthg=="],
 
@@ -317,26 +337,6 @@
 
     "@quansync/fs": ["@quansync/fs@1.0.0", "", { "dependencies": { "quansync": "^1.0.0" } }, "sha512-4TJ3DFtlf1L5LDMaM6CanJ/0lckGNtJcMjQ1NAV6zDmA0tEHKZtxNKin8EgPaVX1YzljbxckyT2tJrpQKAtngQ=="],
 
-    "@quizv/app-host": ["@quizv/app-host@workspace:apps/host"],
-
-    "@quizv/app-player": ["@quizv/app-player@workspace:apps/player"],
-
-    "@quizv/core": ["@quizv/core@workspace:packages/core"],
-
-    "@quizv/parser": ["@quizv/parser@workspace:packages/parser"],
-
-    "@quizv/server": ["@quizv/server@workspace:packages/server"],
-
-    "@quizv/theme-default": ["@quizv/theme-default@workspace:packages/theme-default"],
-
-    "@quizv/theme-original": ["@quizv/theme-original@workspace:packages/theme-original"],
-
-    "@quizv/backend-local": ["@quizv/backend-local@workspace:packages/backend-local"],
-
-    "@quizv/backend-supabase": ["@quizv/backend-supabase@workspace:packages/backend-supabase"],
-
-    "@quizv/ui": ["@quizv/ui@workspace:packages/ui"],
-
     "@rolldown/binding-android-arm-eabi": ["@rolldown/binding-android-arm-eabi@1.3.4", "", { "os": "android", "cpu": "arm" }, "sha512-xCW8CkL/ualx/SbYqeG9iK87lJCZGDQ0soE+kaORJ0Bd+pHALyE4qK7BStmEAyYWLEzZ3/biSIpA6/7GDFvzIg=="],
 
     "@rolldown/binding-android-arm64": ["@rolldown/binding-android-arm64@1.3.4", "", { "os": "android", "cpu": "arm64" }, "sha512-5lifIO+b/prcM9sx/bkPN4w6UEToEfQ3gjhx0+0neuL+dkYskI792CfAq03T51jc8JFcaYXs2hi3l8RjiH/VWQ=="],
@@ -417,7 +417,7 @@
 
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.2", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-RoBvJ2X0wuKlWFIjrwffGw1IqZHKQqzIchKaadZZfnNpsAYp2mM0h36JtPCjNDAHGgYez/15uMBpfGwchhiMgg=="],
 
-    "@types/bun": ["@types/bun@1.3.11", "", { "dependencies": { "bun-types": "1.3.11" } }, "sha512-5vPne5QvtpjGpsGYXiFyycfpDF2ECyPcTSsFBMa0fraoxiQyMJ3SmuQIGhzPg2WJuWxVBoxWJ2kClYTcw/4fAg=="],
+    "@types/bun": ["@types/bun@1.4.5", "", { "dependencies": { "bun-types": "1.4.5" } }, "sha512-DpgwNI9z0L1S0gtb45QLCWgwCUcMLnsHYMJHQvpNj7erGiCGBvpggltAIeARrtobNMKMuy0UP7i56tKKgwFs/Q=="],
 
     "@types/debug": ["@types/debug@4.1.13", "", { "dependencies": { "@types/ms": "*" } }, "sha512-KSVgmQmzMwPlmtljOomayoR89W4FynCAi3E8PPs7vmDVPe84hT+vGPKkJfThkmXs0x0jAaa9U8uW8bbfyS2fWw=="],
 
@@ -587,7 +587,7 @@
 
     "builtin-status-codes": ["builtin-status-codes@3.0.0", "", {}, "sha512-HpGFw18DgFWlncDfjTa2rcQ4W88O1mC8e8yZ2AvQY5KDaktSTwo+KRf6nHK6FRI5FyRyb/5T6+TSxfP7QyGsmQ=="],
 
-    "bun-types": ["bun-types@1.3.11", "", { "dependencies": { "@types/node": "*" } }, "sha512-1KGPpoxQWl9f6wcZh57LvrPIInQMn2TQ7jsgxqpRzg+l0QPOFvJVH7HmvHo/AiPgwXy+/Thf6Ov3EdVn1vOabg=="],
+    "bun-types": ["bun-types@1.4.5", "", { "dependencies": { "@types/node": "*", "undici-types": "*" } }, "sha512-ECHn+9dhL3wv0G6u0+7dQvrnaimXiRDxxerYBmhTaLyJEEuvTPWk2Fye3XIf5Y++JIIiHKfQw4Z7V5D8KuiXbg=="],
 
     "cac": ["cac@7.0.0", "", {}, "sha512-tixWYgm5ZoOD+3g6UTea91eow5z6AAHaho3g0V9CNSNb45gM8SmflpAc+GRd1InC4AqN/07Unrgp56Y94N9hJQ=="],
 
@@ -1657,8 +1657,6 @@
 
     "@pnpm/network.ca-file/graceful-fs": ["graceful-fs@4.2.10", "", {}, "sha512-9ByhssR2fPVsNZj478qUUbKfmL0+t5BDVyjShtyZZLiK7ZDAArFFfopyOTj0M05wE2tJPisA4iTnnXl2YoPvOA=="],
 
-    "@quizv/backend-supabase/@types/bun": ["@types/bun@1.4.5", "", { "dependencies": { "bun-types": "1.4.5" } }, "sha512-DpgwNI9z0L1S0gtb45QLCWgwCUcMLnsHYMJHQvpNj7erGiCGBvpggltAIeARrtobNMKMuy0UP7i56tKKgwFs/Q=="],
-
     "@rollup/pluginutils/picomatch": ["picomatch@4.0.4", "", {}, "sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A=="],
 
     "@semantic-release/npm/execa": ["execa@9.6.1", "", { "dependencies": { "@sindresorhus/merge-streams": "^4.0.0", "cross-spawn": "^7.0.6", "figures": "^6.1.0", "get-stream": "^9.0.0", "human-signals": "^8.0.1", "is-plain-obj": "^4.1.0", "is-stream": "^4.0.1", "npm-run-path": "^6.0.0", "pretty-ms": "^9.2.0", "signal-exit": "^4.1.0", "strip-final-newline": "^4.0.0", "yoctocolors": "^2.1.1" } }, "sha512-9Be3ZoN4LmYR90tUoVu2te2BsbzHfhJyfEiAVfz7N5/zv+jduIfLrV2xdQXOHbaD6KgpGdO9PRPM1Y4Q9QkPkA=="],
@@ -2168,8 +2166,6 @@
     "@commitlint/load/cosmiconfig/js-yaml": ["js-yaml@4.1.1", "", { "dependencies": { "argparse": "^2.0.1" }, "bin": { "js-yaml": "bin/js-yaml.js" } }, "sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA=="],
 
     "@commitlint/load/cosmiconfig/parse-json": ["parse-json@5.2.0", "", { "dependencies": { "@babel/code-frame": "^7.0.0", "error-ex": "^1.3.1", "json-parse-even-better-errors": "^2.3.0", "lines-and-columns": "^1.1.6" } }, "sha512-ayCKvm/phCGxOkYRSCM82iDwct8/EonSEgCSxWxD7ve6jHggsFl4fZVQBPRNgQoKiuV/odhFrGzQXZwbifC8Rg=="],
-
-    "@quizv/backend-supabase/@types/bun/bun-types": ["bun-types@1.4.5", "", { "dependencies": { "@types/node": "*", "undici-types": "*" } }, "sha512-ECHn+9dhL3wv0G6u0+7dQvrnaimXiRDxxerYBmhTaLyJEEuvTPWk2Fye3XIf5Y++JIIiHKfQw4Z7V5D8KuiXbg=="],
 
     "@semantic-release/npm/execa/get-stream": ["get-stream@9.0.1", "", { "dependencies": { "@sec-ant/readable-stream": "^0.4.1", "is-stream": "^4.0.1" } }, "sha512-kVCxPF3vQM/N0B1PmoqVUqgHP+EeVjmZSQn+1oCRPxd2P21P2F19lIgbR3HBosbB1PUhOAoctJnfEn2GbN2eZA=="],
 

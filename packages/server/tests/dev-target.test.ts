@@ -6,7 +6,7 @@ import { resolveDevTarget } from '../src/dev'
 import { repoDecksDir } from '../src/vite-plugin'
 
 const REPO = resolve(import.meta.dir, '../../..')
-const DEMO = resolve(REPO, 'examples/demo.quizv.md')
+const DEMO = resolve(REPO, 'examples/demo.hashquiz.md')
 
 const dirs: string[] = []
 afterEach(() => { for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true }) })
@@ -34,23 +34,23 @@ describe('resolveDevTarget', () => {
 
   test('a file outside the monorepo defaults to its folder', () => {
     const dir = tmp()
-    writeDeck(dir, 'quiz.quizv.md')
-    const file = join(dir, 'quiz.quizv.md')
+    writeDeck(dir, 'quiz.hashquiz.md')
+    const file = join(dir, 'quiz.hashquiz.md')
     expect(resolveDevTarget(file, { repoRoot: null })).toEqual({ quizFile: file, decksDir: dir })
   })
 
   test('a folder uses its first deck by id as the room deck', () => {
     const dir = tmp()
-    writeDeck(dir, 'b.quizv.md')
-    writeDeck(dir, 'a/index.quizv.md')
+    writeDeck(dir, 'b.hashquiz.md')
+    writeDeck(dir, 'a/index.hashquiz.md')
     expect(resolveDevTarget(dir, { repoRoot: REPO })).toEqual({
-      quizFile: join(dir, 'a/index.quizv.md'),
+      quizFile: join(dir, 'a/index.hashquiz.md'),
       decksDir: dir,
     })
   })
 
   test('an empty folder throws', () => {
     const dir = tmp()
-    expect(() => resolveDevTarget(dir, { repoRoot: null })).toThrow(/no \.quizv\.md/)
+    expect(() => resolveDevTarget(dir, { repoRoot: null })).toThrow(/no \.hashquiz\.md/)
   })
 })

@@ -21,10 +21,10 @@
         <ul v-else-if="decks.length" class="decks__grid">
           <DeckCard v-for="deck in decks" :key="deck.id" :deck="deck" :solo-href="soloHref(deck)" @pick="pick" />
         </ul>
-        <p v-else class="decks__empty">No decks found. Add <code>.quizv.md</code> files to your decks folder.</p>
+        <p v-else class="decks__empty">No decks found. Add <code>.hashquiz.md</code> files to your decks folder.</p>
 
         <section v-if="tags.length" class="decks__tags" aria-labelledby="decks-tags">
-          <h2 id="decks-tags" class="decks__heading qv-label">Tags</h2>
+          <h2 id="decks-tags" class="decks__heading hq-label">Tags</h2>
           <ul class="decks__taglist">
             <li v-for="t in tags" :key="t.tag">
               <a class="decks__tag" :href="tagHash(t.tag)">
@@ -40,8 +40,8 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { soloAvailable } from '@quizv/core'
-import { BrandLogo } from '@quizv/ui'
+import { soloAvailable } from '@hashquiz/core'
+import { BrandLogo } from '@hashquiz/ui'
 import { useGameStore } from '../stores/game'
 import { config } from '../config'
 import { loadDecks, type BundledDeck } from '../decks'
@@ -95,34 +95,34 @@ function pick(deck: BundledDeck) {
   gap: 3vmin;
 }
 .decks__title { margin: 0; text-align: center; font-size: clamp(1.4rem, 3.4vmin, 2.4rem); font-weight: 600; }
-.decks__hash { color: var(--qv-accent); margin-right: 0.1em; }
+.decks__hash { color: var(--hq-accent); margin-right: 0.1em; }
 .decks__back {
   align-self: flex-start;
-  color: var(--qv-text-muted);
+  color: var(--hq-text-muted);
   text-decoration: none;
   font-size: clamp(0.9rem, 1.8vmin, 1.2rem);
 }
-.decks__back:hover, .decks__back:focus-visible { color: var(--qv-text); text-decoration: underline; }
+.decks__back:hover, .decks__back:focus-visible { color: var(--hq-text); text-decoration: underline; }
 .decks__grid {
   list-style: none; margin: 0; padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
   gap: 2vmin;
 }
-.decks__empty { text-align: center; color: var(--qv-text-muted); }
-.decks__heading { margin: 0 0 1.2vmin; color: var(--qv-text-muted); font-size: clamp(0.8rem, 1.6vmin, 1.1rem); }
+.decks__empty { text-align: center; color: var(--hq-text-muted); }
+.decks__heading { margin: 0 0 1.2vmin; color: var(--hq-text-muted); font-size: clamp(0.8rem, 1.6vmin, 1.1rem); }
 .decks__taglist { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 1vmin; }
 .decks__tag {
   display: inline-flex; align-items: center; gap: 0.5rem;
   padding: 0.35rem 0.8rem;
-  background: color-mix(in srgb, var(--qv-surface) 82%, transparent);
-  border: 1px solid var(--qv-border);
-  border-radius: var(--qv-radius-sm);
-  color: var(--qv-text);
+  background: color-mix(in srgb, var(--hq-surface) 82%, transparent);
+  border: 1px solid var(--hq-border);
+  border-radius: var(--hq-radius-sm);
+  color: var(--hq-text);
   text-decoration: none;
   font-size: clamp(0.85rem, 1.8vmin, 1.2rem);
 }
-.decks__tag:hover { border-color: var(--qv-accent); }
-.decks__tag:focus-visible { outline: 2px solid var(--qv-accent); outline-offset: 2px; }
-.decks__tag-count { color: var(--qv-text-muted); font-size: 0.85em; }
+.decks__tag:hover { border-color: var(--hq-accent); }
+.decks__tag:focus-visible { outline: 2px solid var(--hq-accent); outline-offset: 2px; }
+.decks__tag-count { color: var(--hq-text-muted); font-size: 0.85em; }
 </style>

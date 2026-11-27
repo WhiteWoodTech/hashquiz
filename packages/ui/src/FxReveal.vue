@@ -11,7 +11,7 @@
           'fx-reveal__label--dim': revealed && !isCorrect(c.id),
         }"
       >
-        <span class="fx-reveal__letter" :style="{ color: `var(--qv-choice-${'abcd'[i % 4]})` }">{{ c.id.toUpperCase() }}</span>
+        <span class="fx-reveal__letter" :style="{ color: `var(--hq-choice-${'abcd'[i % 4]})` }">{{ c.id.toUpperCase() }}</span>
         <span class="fx-reveal__text">{{ c.text }}</span>
         <span class="fx-reveal__votes">{{ counts[c.id] ?? 0 }} {{ (counts[c.id] ?? 0) === 1 ? 'vote' : 'votes' }}<span v-if="revealed && isCorrect(c.id)" class="fx-reveal__check"> ✓</span></span>
       </li>
@@ -110,14 +110,14 @@ defineExpose({
 }
 .fx-reveal__label--dim { opacity: 0.75; }
 .fx-reveal__letter {
-  font-family: var(--qv-font-display);
+  font-family: var(--hq-font-display);
   font-weight: 600;
   font-size: clamp(1.4rem, 4.2vmin, 3rem);
   line-height: 1;
 }
 .fx-reveal__text {
-  font-family: var(--qv-font-display);
-  color: var(--qv-text);
+  font-family: var(--hq-font-display);
+  color: var(--hq-text);
   font-size: clamp(1rem, 2.8vmin, 2rem);
   line-height: 1.2;
   overflow-wrap: anywhere;
@@ -128,12 +128,12 @@ defineExpose({
   overflow: hidden;
 }
 .fx-reveal__votes {
-  color: var(--qv-text-muted);
+  color: var(--hq-text-muted);
   font-size: clamp(0.85rem, 2.2vmin, 1.5rem);
   font-variant-numeric: tabular-nums;
 }
 .fx-reveal__label--ok .fx-reveal__text,
-.fx-reveal__check { color: var(--qv-correct); }
+.fx-reveal__check { color: var(--hq-correct); }
 @media (prefers-reduced-motion: reduce) {
   .fx-reveal__label { transition: none; }
 }

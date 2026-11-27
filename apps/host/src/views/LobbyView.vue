@@ -22,7 +22,7 @@
         <div class="lobby__join">
           <a class="lobby__link lobby__bare" :href="qrUrl" target="_blank" rel="noopener">{{ qrUrl }}</a>
           <div class="lobby__code-box lobby__bare">
-            <p class="lobby__code-label qv-label">Join code</p>
+            <p class="lobby__code-label hq-label">Join code</p>
             <p class="lobby__code">{{ game.joinCode }}</p>
           </div>
         </div>
@@ -32,10 +32,10 @@
         <div class="lobby__start">
           <div class="lobby__count" :class="{ 'lobby__count--pop': popping }">
             <span class="lobby__count-num">{{ String(game.players.length).padStart(2, '0') }}</span>
-            <span class="lobby__count-label qv-label">Joueurs</span>
+            <span class="lobby__count-label hq-label">Joueurs</span>
           </div>
           <button
-            class="qv-btn-primary"
+            class="hq-btn-primary"
             :disabled="game.players.length === 0"
             @click="game.send('host_start')"
           >
@@ -60,8 +60,8 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useGameStore } from '../stores/game'
-import type { PlayerState } from '@quizv/core'
-import { BrandLogo, FxLobby, QrCode, PlayerList, QuizInfoPanel, groupPlayers } from '@quizv/ui'
+import type { PlayerState } from '@hashquiz/core'
+import { BrandLogo, FxLobby, QrCode, PlayerList, QuizInfoPanel, groupPlayers } from '@hashquiz/ui'
 
 const game = useGameStore()
 const qrUrl = computed(() =>
@@ -126,8 +126,8 @@ onBeforeUnmount(() => { if (popTimer) clearTimeout(popTimer) })
 .lobby__groups { flex: 1 1 0; min-height: 0; display: grid; gap: 1vmin; }
 .lobby__groups .lobby__fx { min-width: 0; min-height: 0; }
 .lobby__players { flex: 0 1 auto; max-height: 34%; overflow: auto; padding: 1.2vmin; }
-.lobby__side :deep(.qv-players) { gap: 0.4rem; }
-.lobby__side :deep(.qv-players__chip) { font-size: clamp(0.7rem, 1.6vmin, 1rem); padding: 0.2rem 0.5rem; }
+.lobby__side :deep(.hq-players) { gap: 0.4rem; }
+.lobby__side :deep(.hq-players__chip) { font-size: clamp(0.7rem, 1.6vmin, 1rem); padding: 0.2rem 0.5rem; }
 
 /* Central column: first screen is the quiz card, then the join info, then the start. */
 .lobby__col {
@@ -153,7 +153,7 @@ onBeforeUnmount(() => { if (popTimer) clearTimeout(popTimer) })
 
 /* Names, QR and join code sit directly on the backdrop: a halo of the page
    background keeps their text legible over dust and lines. */
-.lobby__bare { text-shadow: 0 0 1vmin var(--qv-bg), 0 0 2vmin var(--qv-bg); }
+.lobby__bare { text-shadow: 0 0 1vmin var(--hq-bg), 0 0 2vmin var(--hq-bg); }
 
 .lobby .quiz-info {
   padding: 3vmin;
@@ -167,17 +167,17 @@ onBeforeUnmount(() => { if (popTimer) clearTimeout(popTimer) })
 
 .lobby__link {
   font-size: clamp(1rem, 2.6vmin, 1.8rem);
-  color: var(--qv-accent);
+  color: var(--hq-accent);
   word-break: break-all;
   text-align: center;
 }
 .lobby__link:hover { text-decoration: underline; }
 .lobby__code-box { text-align: center; }
-.lobby__code-label { margin: 0; color: var(--qv-text-muted); font-size: clamp(0.75rem, 1.8vmin, 1.1rem); }
-.lobby__code { margin: 0.6vmin 0 0; font-size: clamp(2.5rem, 8vmin, 5.5rem); font-weight: 700; letter-spacing: 0.2em; color: var(--qv-accent); line-height: 1.1; }
+.lobby__code-label { margin: 0; color: var(--hq-text-muted); font-size: clamp(0.75rem, 1.8vmin, 1.1rem); }
+.lobby__code { margin: 0.6vmin 0 0; font-size: clamp(2.5rem, 8vmin, 5.5rem); font-weight: 700; letter-spacing: 0.2em; color: var(--hq-accent); line-height: 1.1; }
 .lobby__qr { display: flex; justify-content: center; width: 100%; }
 /* qrcode sets an inline 800px size on the canvas: override it to fit the column. */
-.lobby__qr :deep(.qv-qr) { width: min(100%, 34vh) !important; height: auto !important; aspect-ratio: 1; image-rendering: pixelated; }
+.lobby__qr :deep(.hq-qr) { width: min(100%, 34vh) !important; height: auto !important; aspect-ratio: 1; image-rendering: pixelated; }
 
 .lobby__count {
   display: flex;
@@ -189,28 +189,28 @@ onBeforeUnmount(() => { if (popTimer) clearTimeout(popTimer) })
 }
 .lobby__count--pop { transform: scale(1.25); transition-duration: 0.12s; }
 .lobby__count-num {
-  font-family: var(--qv-font-display);
+  font-family: var(--hq-font-display);
   font-weight: 300;
   font-size: clamp(3rem, 10vmin, 7rem);
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  color: var(--qv-text);
-  text-shadow: 0 0 1.5vmin var(--qv-bg), 0 0 3vmin var(--qv-bg);
+  color: var(--hq-text);
+  text-shadow: 0 0 1.5vmin var(--hq-bg), 0 0 3vmin var(--hq-bg);
 }
-.lobby__count-label { font-size: clamp(0.75rem, 1.8vmin, 1.2rem); color: var(--qv-text-muted); }
+.lobby__count-label { font-size: clamp(0.75rem, 1.8vmin, 1.2rem); color: var(--hq-text-muted); }
 @media (prefers-reduced-motion: reduce) {
   .lobby__count, .lobby__count--pop { transform: none; transition: none; }
   .lobby__col { scroll-behavior: auto; }
 }
 
-.qv-btn-primary {
+.hq-btn-primary {
   width: min(100%, 28rem); padding: 1.6vmin 2vmin;
-  background: var(--qv-accent); color: var(--qv-text);
-  border: none; border-radius: var(--qv-radius); font-size: clamp(1rem, 2.4vmin, 1.6rem);
+  background: var(--hq-accent); color: var(--hq-text);
+  border: none; border-radius: var(--hq-radius); font-size: clamp(1rem, 2.4vmin, 1.6rem);
   cursor: pointer; font-family: inherit; font-weight: 600;
   transition: background 0.15s;
 }
-.qv-btn-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--qv-accent) 80%, var(--qv-bg)); }
-.qv-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-.qv-btn-primary:focus-visible { outline: 2px solid var(--qv-text); outline-offset: 3px; }
+.hq-btn-primary:hover:not(:disabled) { background: color-mix(in srgb, var(--hq-accent) 80%, var(--hq-bg)); }
+.hq-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.hq-btn-primary:focus-visible { outline: 2px solid var(--hq-text); outline-offset: 3px; }
 </style>

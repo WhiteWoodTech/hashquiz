@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 import { devCommand } from './dev'
 import { buildSite } from './build'
-import { supabaseCommand } from '@quizv/backend-supabase/cli'
-import { parseQuizFile, validateQuiz } from '@quizv/parser'
+import { supabaseCommand } from '@hashquiz/backend-supabase/cli'
+import { parseQuizFile, validateQuiz } from '@hashquiz/parser'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
@@ -10,20 +10,20 @@ const [,, command, arg, ...flags] = process.argv
 
 function printUsage(): void {
   console.log(`
-  hashquiz <command> [options]   (quizv from the sources)
+  hashquiz <command> [options]   (hashquiz from the sources)
 
   Commands:
-    dev <quiz.quizv.md | decks-dir> [--decks <dir>]
+    dev <quiz.hashquiz.md | decks-dir> [--decks <dir>]
                             Start the local dev stack. A file is the room
                             deck; a folder is the decks folder (room deck =
                             its first deck by id). Solo runs are stored in
                             .hashquiz/solo.db.
-    check <quiz.quizv.md>   Validate quiz file format
+    check <quiz.hashquiz.md>   Validate quiz file format
     build [decks-dir]       Build the static site (host + player) for a decks
                             folder (default: decks). Reads HASHQUIZ_TRANSPORT,
                             HASHQUIZ_SUPABASE_URL, HASHQUIZ_SUPABASE_ANON_KEY,
                             HASHQUIZ_SOLO_SCORING, HASHQUIZ_PLAYER_URL
-                            (or their QUIZV_* / VITE_* names) from the environment.
+                            (or their VITE_* names) from the environment.
     supabase deploy --project <ref> [--site-url <url>] [--dry-run]
                             Deploy the solo backend to a Supabase project:
                             migrations, the solo-submit Edge Function and its
@@ -56,7 +56,7 @@ const positional = args.find((a, i) => !a.startsWith('--') && !(i > 0 && args[i 
 
 if (command === 'dev') {
   if (!positional) {
-    console.error('Error: provide a .quizv.md file or a decks folder\n  quizv dev quiz.quizv.md')
+    console.error('Error: provide a .hashquiz.md file or a decks folder\n  hashquiz dev quiz.hashquiz.md')
     process.exit(1)
   }
   try {
@@ -79,7 +79,7 @@ if (command === 'dev') {
   process.exit(await supabaseCommand(args, process.env))
 } else if (command === 'check') {
   if (!arg) {
-    console.error('Error: provide a .quizv.md file path\n  quizv check quiz.quizv.md')
+    console.error('Error: provide a .hashquiz.md file path\n  hashquiz check quiz.hashquiz.md')
     process.exit(1)
   }
   try {

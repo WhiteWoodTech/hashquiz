@@ -1,10 +1,10 @@
-# QuizV Individual Contributor License Agreement
+# HashQuiz Individual Contributor License Agreement
 
 > **DRAFT — not yet reviewed by a lawyer.**
 
-Thank you for your interest in contributing to QuizV. This agreement clarifies the rights you grant on your
-contributions, so the project can keep distributing them under its licenses (MIT, QuizV Sustainable Use License
-and QuizV Enterprise License) and change those licenses in the future.
+Thank you for your interest in contributing to HashQuiz. This agreement clarifies the rights you grant on your
+contributions, so the project can keep distributing them under its licenses (MIT, HashQuiz Sustainable Use License
+and HashQuiz Enterprise License) and change those licenses in the future.
 
 By submitting a contribution (code, documentation, quiz decks or any other material) to this repository, you agree
 to the following:

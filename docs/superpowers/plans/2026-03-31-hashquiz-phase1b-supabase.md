@@ -1,10 +1,10 @@
-# QuizV Phase 1B — Supabase Transport Implementation Plan
+# HashQuiz Phase 1B — Supabase Transport Implementation Plan
 
 > **For agentic workers:** Use `superpowers:executing-plans` to implement this plan task-by-task.
 
-**Goal:** Replace `LocalTransport` (Bun WS pub/sub, LAN-only) with an optional `SupabaseTransport` so QuizV games can run over the internet — host and players on different networks.
+**Goal:** Replace `LocalTransport` (Bun WS pub/sub, LAN-only) with an optional `SupabaseTransport` so HashQuiz games can run over the internet — host and players on different networks.
 
-**Why Supabase:** Supabase Realtime provides managed WebSocket pub/sub channels and presence tracking that maps 1-to-1 onto the `IRealtimeTransport` interface already defined in `@quizv/core`. No custom WebSocket server needed for cloud mode.
+**Why Supabase:** Supabase Realtime provides managed WebSocket pub/sub channels and presence tracking that maps 1-to-1 onto the `IRealtimeTransport` interface already defined in `@hashquiz/core`. No custom WebSocket server needed for cloud mode.
 
 ---
 
@@ -16,17 +16,17 @@
 |---|---|---|
 | `IRealtimeTransport` interface | `packages/core/src/transport.ts` | Complete |
 | `LocalTransport` (Bun WS pub/sub) | `packages/transport-local/src/` | Complete, used in production |
-| `@quizv/transport-supabase` package scaffold | `packages/transport-supabase/` | Stub only (`export {}`) |
+| `@hashquiz/transport-supabase` package scaffold | `packages/transport-supabase/` | Stub only (`export {}`) |
 | `GameEvent` union type | `packages/core/src/events.ts` | Complete (all events typed) |
 | `GameEngine` accepts any `IRealtimeTransport` | `packages/core/src/game.ts` | Complete |
-| `QuizvServer` wired to `LocalTransport` | `packages/server/src/server.ts` | Complete |
+| `HashQuizServer` wired to `LocalTransport` | `packages/server/src/server.ts` | Complete |
 | Join code generation + WS role auth | `packages/server/src/server.ts` | Complete |
 
 ### ❌ Not done (this plan)
 
 - `SupabaseTransport` implementation
 - Supabase project setup + env config
-- `quizv dev --supabase` flag to switch transport
+- `hashquiz dev --supabase` flag to switch transport
 - Cloud player URL (no LAN IP — use Supabase project URL instead)
 - Supabase Auth for host identity (optional, Phase 3)
 
@@ -50,7 +50,7 @@ export interface IRealtimeTransport {
 }
 ```
 
-`SupabaseTransport` must satisfy this interface exactly. No changes to `@quizv/core`.
+`SupabaseTransport` must satisfy this interface exactly. No changes to `@hashquiz/core`.
 
 ### Channel naming
 
@@ -81,11 +81,11 @@ Supabase Realtime presence maps directly onto `IRealtimeTransport.presence`:
 
 ### Transport selection
 
-Selected via CLI flag at dev time. The `QuizvServer` constructor receives the transport instance — no internal switch needed.
+Selected via CLI flag at dev time. The `HashQuizServer` constructor receives the transport instance — no internal switch needed.
 
 ```typescript
 // packages/server/src/server.ts
-constructor(options: QuizvServerOptions) {
+constructor(options: HashQuizServerOptions) {
   this.transport = options.transport ?? new LocalTransport()
 }
 ```
@@ -107,7 +107,7 @@ SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
 SUPABASE_ANON_KEY=eyJ...
 
 # Required for cloud player URL in host_connected
-VITE_PLAYER_URL=https://player.yourquizv.app   # or Vercel/Netlify preview URL
+VITE_PLAYER_URL=https://player.example.com   # or Vercel/Netlify preview URL
 ```
 
 Store in `.env` at repo root (gitignored). Add `.env.example` with placeholder values.
@@ -147,13 +147,13 @@ packages/transport-supabase/
 
 ```json
 {
-  "name": "@quizv/transport-supabase",
+  "name": "@hashquiz/transport-supabase",
   "version": "0.0.1",
   "type": "module",
   "main": "./src/index.ts",
   "exports": { ".": "./src/index.ts" },
   "dependencies": {
-    "@quizv/core": "workspace:*",
+    "@hashquiz/core": "workspace:*",
     "@supabase/supabase-js": "^2.43.0"
   }
 }
@@ -165,8 +165,8 @@ packages/transport-supabase/
 // packages/transport-supabase/src/index.ts
 import { createClient } from '@supabase/supabase-js'
 import type { RealtimeChannel } from '@supabase/supabase-js'
-import type { IRealtimeTransport, Unsubscribe } from '@quizv/core'
-import type { GameEvent, PlayerState } from '@quizv/core'
+import type { IRealtimeTransport, Unsubscribe } from '@hashquiz/core'
+import type { GameEvent, PlayerState } from '@hashquiz/core'
 
 export class SupabaseTransport implements IRealtimeTransport {
   private channels = new Map<string, RealtimeChannel>()
@@ -226,7 +226,7 @@ export class SupabaseTransport implements IRealtimeTransport {
 ### Step 1.3: Install deps
 
 ```bash
-cd /path/to/quizv
+cd /path/to/hashquiz
 bun install
 ```
 
@@ -247,31 +247,31 @@ git commit -m "✨ Implement SupabaseTransport (Phase 1B)"
 
 ---
 
-## Task 2: Wire transport option into `QuizvServer`
+## Task 2: Wire transport option into `HashQuizServer`
 
 **Files:**
 - Modify: `packages/server/src/server.ts`
 - Modify: `packages/server/src/dev.ts`
 - Modify: `packages/server/src/cli.ts`
 
-### Step 2.1: Add `transport` option to `QuizvServerOptions`
+### Step 2.1: Add `transport` option to `HashQuizServerOptions`
 
 In `packages/server/src/server.ts`:
 
 ```typescript
-import type { IRealtimeTransport } from '@quizv/core'
-import { LocalTransport } from '@quizv/transport-local'
+import type { IRealtimeTransport } from '@hashquiz/core'
+import { LocalTransport } from '@hashquiz/transport-local'
 
-export interface QuizvServerOptions {
+export interface HashQuizServerOptions {
   port?: number
   quizFile: string
   transport?: IRealtimeTransport   // ← new, defaults to LocalTransport
 }
 
-export class QuizvServer {
+export class HashQuizServer {
   private transport: IRealtimeTransport
 
-  constructor(options: QuizvServerOptions) {
+  constructor(options: HashQuizServerOptions) {
     this.port = options.port ?? 3030
     this.quizFile = options.quizFile
     this.joinCode = generateJoinCode()
@@ -299,7 +299,7 @@ ws.send(JSON.stringify({
 
 ```typescript
 // packages/server/src/dev.ts
-import { SupabaseTransport } from '@quizv/transport-supabase'
+import { SupabaseTransport } from '@hashquiz/transport-supabase'
 
 export function devCommand(quizFile: string, port?: number, useSupabase = false): void {
   const absPath = resolve(quizFile)
@@ -316,7 +316,7 @@ export function devCommand(quizFile: string, port?: number, useSupabase = false)
     console.log('  🌐 Using Supabase transport')
   }
 
-  const server = new QuizvServer({ quizFile: absPath, port, transport })
+  const server = new HashQuizServer({ quizFile: absPath, port, transport })
   server.start()
   // ... rest unchanged
 }
@@ -341,7 +341,7 @@ bun test
 
 ```bash
 git add packages/server/src/server.ts packages/server/src/dev.ts packages/server/src/cli.ts
-git commit -m "✨ QuizvServer accepts transport option, --supabase CLI flag"
+git commit -m "✨ HashQuizServer accepts transport option, --supabase CLI flag"
 ```
 
 ---
@@ -356,7 +356,7 @@ SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
 SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 # Player app public URL for cloud QR code (optional, defaults to LAN IP)
-VITE_PLAYER_URL=https://player.yourquizv.app
+VITE_PLAYER_URL=https://player.example.com
 ```
 
 ### Step 3.2: Ensure `.env` is gitignored
@@ -421,12 +421,12 @@ mock.module('@supabase/supabase-js', () => ({
 
 ```bash
 # LAN mode (current, unchanged)
-bun run packages/server/src/cli.ts dev examples/demo.quizv.md
+bun run packages/server/src/cli.ts dev examples/demo.hashquiz.md
 
 # Cloud mode (new)
 cp .env.example .env
 # fill SUPABASE_URL + SUPABASE_ANON_KEY + VITE_PLAYER_URL
-bun run packages/server/src/cli.ts dev examples/demo.quizv.md --supabase
+bun run packages/server/src/cli.ts dev examples/demo.hashquiz.md --supabase
 ```
 
 In cloud mode, the host QR code will point to `VITE_PLAYER_URL?code=XXXXXX` so players anywhere on the internet can join.

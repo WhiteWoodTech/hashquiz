@@ -1,7 +1,7 @@
 import { describe, test, expect, mock } from 'bun:test'
 import { GameEngine } from '../src/game'
 import { GameEvents } from '../src/events'
-import type { Quiz } from '@quizv/parser'
+import type { Quiz } from '@hashquiz/parser'
 import type { IRealtimeTransport } from '../src/transport'
 
 const makeQuiz = (): Quiz => ({

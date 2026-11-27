@@ -15,7 +15,7 @@ The question view pages (host and player) show the question text and answer choi
 
 ---
 
-## 1. Protocol change — `@quizv/core`
+## 1. Protocol change — `@hashquiz/core`
 
 File: `packages/core/src/types.ts`
 
@@ -58,8 +58,8 @@ A single meta line inserted **between the header and the question text**:
 ● HARD   [ia]  [llm]  [prompt]
 ```
 
-- **Colored dot**: `--qv-correct` (easy) / `--qv-warn` (medium) / `--qv-wrong` (hard)
-- **Tag chips**: same style as lobby — `--qv-bg` background + `--qv-border` border, small font
+- **Colored dot**: `--hq-correct` (easy) / `--hq-warn` (medium) / `--hq-wrong` (hard)
+- **Tag chips**: same style as lobby — `--hq-bg` background + `--hq-border` border, small font
 - **Conditional**: the whole line is hidden with `v-if` when `tags` is empty
 
 ### Files

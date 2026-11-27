@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { EMAIL_RE } from '@quizv/core'
+import { EMAIL_RE } from '@hashquiz/core'
 import { useSoloStore } from '../stores/solo'
 
 const solo = useSoloStore()
@@ -48,13 +48,13 @@ async function send() {
 
 <style scoped>
 .lead {
-  width: 100%; padding: 1rem; background: var(--qv-surface);
-  border: 1px solid var(--qv-border); border-radius: var(--qv-radius);
+  width: 100%; padding: 1rem; background: var(--hq-surface);
+  border: 1px solid var(--hq-border); border-radius: var(--hq-radius);
 }
 .lead__form { display: flex; flex-direction: column; gap: 0.6rem; }
 .lead__title { margin: 0 0 0.25rem; font-size: 1.05rem; }
-.lead__consent { display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.9rem; color: var(--qv-text-muted); cursor: pointer; }
-.lead__consent input { margin-top: 0.2rem; accent-color: var(--qv-accent); width: 1.1rem; height: 1.1rem; flex-shrink: 0; }
-.lead__error { margin: 0; color: var(--qv-wrong); font-size: 0.9rem; }
-.lead__thanks { margin: 0; text-align: center; color: var(--qv-correct); font-weight: 600; }
+.lead__consent { display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.9rem; color: var(--hq-text-muted); cursor: pointer; }
+.lead__consent input { margin-top: 0.2rem; accent-color: var(--hq-accent); width: 1.1rem; height: 1.1rem; flex-shrink: 0; }
+.lead__error { margin: 0; color: var(--hq-wrong); font-size: 0.9rem; }
+.lead__thanks { margin: 0; text-align: center; color: var(--hq-correct); font-weight: 600; }
 </style>

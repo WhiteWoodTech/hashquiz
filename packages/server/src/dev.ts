@@ -1,8 +1,8 @@
-import { QuizvServer } from './server'
+import { HashQuizServer } from './server'
 import { existsSync, statSync, watch } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { spawn, type ChildProcess } from 'node:child_process'
-import { renderConfigScript } from '@quizv/core'
+import { renderConfigScript } from '@hashquiz/core'
 import { findMonorepoRoot, findWebDist } from './web-dist'
 import { collectDecks, renderDecksJson } from './web-assets'
 import { repoDecksDir } from './vite-plugin'
@@ -20,7 +20,7 @@ export function resolveDevTarget(
   if (!existsSync(target)) throw new Error(`${arg} not found`)
   if (statSync(target).isDirectory()) {
     const first = collectDecks(target)[0]
-    if (!first) throw new Error(`no .quizv.md deck in ${arg}`)
+    if (!first) throw new Error(`no .hashquiz.md deck in ${arg}`)
     return { quizFile: join(target, first.id), decksDir: target }
   }
   const decksDir = opts.decksFlag
@@ -34,19 +34,19 @@ export function resolveDevTarget(
  *  - Bun WS server on port 3030 (WS + join code logic)
  *  - host app on port 3031 (`/host/`), player app on port 3032
  *
- * From the quizv sources the apps run under Vite (hot reload); from the npm
+ * From the hashquiz sources the apps run under Vite (hot reload); from the npm
  * package the prebuilt apps are served as static files.
  */
 export function devCommand(arg: string, port?: number, decksFlag?: string): void {
   const repo = findMonorepoRoot()
   const { quizFile: absPath, decksDir } = resolveDevTarget(arg, { decksFlag, repoRoot: repo })
-  const server = new QuizvServer({ quizFile: absPath, port, decksDir })
+  const server = new HashQuizServer({ quizFile: absPath, port, decksDir })
   server.start()
   console.log(`  Room deck: ${absPath}\n  Decks:     ${decksDir}\n`)
 
   const children: ChildProcess[] = []
   if (repo) {
-    const env = { ...process.env, QUIZV_DECKS_DIR: decksDir }
+    const env = { ...process.env, HASHQUIZ_DECKS_DIR: decksDir }
     for (const app of ['apps/host', 'apps/player']) {
       children.push(spawn('bun', ['run', 'dev'], { cwd: resolve(repo, app), stdio: 'inherit', shell: false, env }))
     }
@@ -78,7 +78,7 @@ function serveStatic(root: string, port: number, home: string, decksDir: string)
     hostname: '0.0.0.0',
     fetch(req) {
       const { pathname } = new URL(req.url)
-      if (pathname === '/quizv-config.js') {
+      if (pathname === '/hashquiz-config.js') {
         return new Response(config, { headers: { 'Content-Type': 'text/javascript' } })
       }
       if (pathname === '/decks.json' || pathname === '/host/decks.json') {

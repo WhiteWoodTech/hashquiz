@@ -1,6 +1,6 @@
 # AI Agents Guide
 
-Complete guide for AI assistants working on the QuizV repository.
+Complete guide for AI assistants working on the HashQuiz repository.
 
 ## Documentation Index
 
@@ -10,8 +10,8 @@ Complete guide for AI assistants working on the QuizV repository.
 | [`PROJECT_STRUCTURE.md`](./PROJECT_STRUCTURE.md) | Monorepo layout and file map |
 | [`CONVENTIONS.md`](./CONVENTIONS.md) | Naming, code style, git conventions |
 | [`TECHNICAL_GUIDE.md`](./TECHNICAL_GUIDE.md) | Architecture, WS protocol, scoring, testing |
-| [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) | CSS tokens (`--qv-*`), typography, spacing |
-| [`COMPONENT_REFERENCE.md`](./COMPONENT_REFERENCE.md) | `@quizv/ui` component API reference |
+| [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) | CSS tokens (`--hq-*`), typography, spacing |
+| [`COMPONENT_REFERENCE.md`](./COMPONENT_REFERENCE.md) | `@hashquiz/ui` component API reference |
 | [`FEATURES.md`](./FEATURES.md) | Feature list and roadmap |
 | [`SCREEN_FLOW.md`](./SCREEN_FLOW.md) | Host and player screen flows |
 | [`TASKS.md`](./TASKS.md) | Task backlog |
@@ -22,14 +22,14 @@ Complete guide for AI assistants working on the QuizV repository.
 
 ## Project Context
 
-**QuizV** is a Kahoot-alternative real-time quiz platform. The source lives at:
+**HashQuiz** is a Kahoot-alternative real-time quiz platform. The source lives at:
 
 ```
-/Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv/
+/path/to/hashquiz/
 ```
 
 This documentation repo (`quizz-agentic-coding`) holds plans, specs, and docs only.
-Always work on source files in `../quizv/`.
+Always work on source files in `../hashquiz/`.
 
 ---
 
@@ -48,11 +48,11 @@ Always work on source files in `../quizv/`.
 ### Key commands
 
 ```bash
-# Run from /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+# Run from /path/to/hashquiz
 
 bun install                                                    # Install deps
 bun test                                                       # Run all tests
-bun run packages/server/src/cli.ts dev examples/demo.quizv.md # Full dev stack
+bun run packages/server/src/cli.ts dev examples/demo.hashquiz.md # Full dev stack
 bun run packages/server/src/cli.ts check <file>               # Validate quiz
 ```
 
@@ -62,15 +62,15 @@ bun run packages/server/src/cli.ts check <file>               # Validate quiz
 
 | Package | Description |
 |---------|-------------|
-| `@quizv/parser` | Parse `.quizv.md` files → typed `Quiz` objects |
-| `@quizv/core` | `GameEngine`, `GameEvent` union, `IRealtimeTransport`, `SoloBackend` ports, `SoloDeckSource`, scoring |
-| `@quizv/backend-local` | Local backend: `LocalTransport` (Bun WebSocket pub/sub) + local solo (SQLite, WS presence) |
-| `@quizv/backend-supabase` | Supabase backend: rooms transport, solo API and presence, `supabase/` project (migrations, Edge Function), `hashquiz supabase deploy` |
-| `@quizv/server` | Bun HTTP+WS server + `quizv` CLI |
-| `@quizv/theme-default` | CSS custom properties (`--qv-*`), new look |
-| `@quizv/theme-original` | Same variables, previous look (switch via the `main.ts` import) |
-| `@quizv/ui` | Shared Vue 3 components |
-| `packages/ee` | Pro / Enterprise features — QuizV Enterprise License (placeholder) |
+| `@hashquiz/parser` | Parse `.hashquiz.md` files → typed `Quiz` objects |
+| `@hashquiz/core` | `GameEngine`, `GameEvent` union, `IRealtimeTransport`, `SoloBackend` ports, `SoloDeckSource`, scoring |
+| `@hashquiz/backend-local` | Local backend: `LocalTransport` (Bun WebSocket pub/sub) + local solo (SQLite, WS presence) |
+| `@hashquiz/backend-supabase` | Supabase backend: rooms transport, solo API and presence, `supabase/` project (migrations, Edge Function), `hashquiz supabase deploy` |
+| `@hashquiz/server` | Bun HTTP+WS server + `hashquiz` CLI |
+| `@hashquiz/theme-default` | CSS custom properties (`--hq-*`), new look |
+| `@hashquiz/theme-original` | Same variables, previous look (switch via the `main.ts` import) |
+| `@hashquiz/ui` | Shared Vue 3 components |
+| `packages/ee` | Pro / Enterprise features — HashQuiz Enterprise License (placeholder) |
 
 | App | Port | Description |
 |-----|------|-------------|
@@ -128,7 +128,7 @@ All messages are JSON. See [`TECHNICAL_GUIDE.md`](./TECHNICAL_GUIDE.md) for the 
 ### Working with Vue Components
 
 Components live in `packages/ui/src/`. All use `<script setup lang="ts">`.
-Design tokens from `@quizv/theme-default/styles/vars.css` are available as `var(--qv-*)`.
+Design tokens from `@hashquiz/theme-default/styles/vars.css` are available as `var(--hq-*)`.
 
 ### Pre-commit Checklist
 
@@ -142,11 +142,11 @@ Design tokens from `@quizv/theme-default/styles/vars.css` are available as `var(
 - Do not add `any` types without justification
 - Do not call `crypto.randomUUID()` — it fails on HTTP over LAN; use `Math.random()` instead
 - Do not add Vue Router — navigation is phase-driven (`v-if` on store phase)
-- Do not import `@supabase/supabase-js` or `bun:sqlite` in the apps — import `@quizv/backend-supabase` /
-  `@quizv/backend-local` (browser subpaths only), which sit behind the ports in `@quizv/core`
+- Do not import `@supabase/supabase-js` or `bun:sqlite` in the apps — import `@hashquiz/backend-supabase` /
+  `@hashquiz/backend-local` (browser subpaths only), which sit behind the ports in `@hashquiz/core`
 - Do not call `ws.send()` without checking `readyState === WebSocket.OPEN`
 - Do not put paid features outside `packages/ee/` or `*.ee.*` files, and do not make MIT packages
-  (`@quizv/parser`, skills, MCP) depend on fair-code or Enterprise code — see [`LICENSING.md`](./LICENSING.md)
+  (`@hashquiz/parser`, skills, MCP) depend on fair-code or Enterprise code — see [`LICENSING.md`](./LICENSING.md)
 
 ---
 

@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import type { PodiumEntry } from '@quizv/core'
+import type { PodiumEntry } from '@hashquiz/core'
 import { mountScene } from './fx/loop'
 import { ordinalFr } from './ordinal'
 import { PODIUM_SLOTS } from './fx/layout'
@@ -91,10 +91,10 @@ onBeforeUnmount(() => handle?.destroy())
 }
 .fx-podium__label--on { opacity: 1; }
 .fx-podium__name {
-  font-family: var(--qv-font-display);
+  font-family: var(--hq-font-display);
   font-size: clamp(1rem, 4cqh, 3.2rem);
   font-weight: 600;
-  color: var(--qv-text);
+  color: var(--hq-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -102,20 +102,20 @@ onBeforeUnmount(() => handle?.destroy())
 .fx-podium__label--first .fx-podium__name { font-size: clamp(1.15rem, 5cqh, 4rem); }
 .fx-podium__score {
   font-size: clamp(0.85rem, 3cqh, 2.4rem);
-  color: var(--qv-text-muted);
+  color: var(--hq-text-muted);
 }
 .fx-podium__label--me .fx-podium__name,
-.fx-podium__label--me .fx-podium__score { color: var(--qv-accent); }
+.fx-podium__label--me .fx-podium__score { color: var(--hq-accent); }
 .fx-podium__outside {
   position: absolute;
   left: 50%;
   top: 5cqh;
   transform: translateX(-50%);
   margin: 0;
-  font-family: var(--qv-font-display);
+  font-family: var(--hq-font-display);
   font-size: clamp(1.2rem, 5cqh, 4rem);
   font-weight: 700;
-  color: var(--qv-accent);
+  color: var(--hq-accent);
   opacity: 0;
   transition: opacity 0.6s ease;
 }

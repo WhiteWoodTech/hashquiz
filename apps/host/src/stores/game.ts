@@ -1,10 +1,10 @@
 import { config } from '../config'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { PlayerState, QuestionPublic, Score, PodiumEntry, QuizInfo } from '@quizv/core'
-import type { GameEvent } from '@quizv/core'
+import type { PlayerState, QuestionPublic, Score, PodiumEntry, QuizInfo } from '@hashquiz/core'
+import type { GameEvent } from '@hashquiz/core'
 import { SupabaseHostSession } from '../session/supabase-session'
-import { SupabaseTransport } from '@quizv/backend-supabase'
+import { SupabaseTransport } from '@hashquiz/backend-supabase'
 import { generateJoinCode } from '../session/join-code'
 import type { BundledDeck } from '../decks'
 

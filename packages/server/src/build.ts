@@ -1,7 +1,7 @@
 import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { parseQuizFile, validateQuiz } from '@quizv/parser'
-import { configFromEnv, renderConfigScript } from '@quizv/core'
+import { parseQuizFile, validateQuiz } from '@hashquiz/parser'
+import { configFromEnv, renderConfigScript } from '@hashquiz/core'
 import { collectDecks } from './web-assets'
 import { findWebDist } from './web-dist'
 
@@ -14,7 +14,7 @@ export interface BuildOptions {
 /**
  * Static site for a decks folder: the prebuilt apps, `host/decks.json` (host
  * list), the same `decks.json` at the root (player solo decks) and
- * `quizv-config.js` (transport + Supabase settings from the env). Deployable
+ * `hashquiz-config.js` (transport + Supabase settings from the env). Deployable
  * as-is (e.g. Vercel, see docs/DEPLOY.md). Returns the number of decks.
  */
 export function buildSite({ decksDir, outDir, env = process.env }: BuildOptions): number {
@@ -22,7 +22,7 @@ export function buildSite({ decksDir, outDir, env = process.env }: BuildOptions)
   if (!existsSync(decksAbs)) throw new Error(`Decks folder not found: ${decksDir}`)
 
   const decks = collectDecks(decksAbs)
-  if (decks.length === 0) throw new Error(`No .quizv.md file found in ${decksDir}`)
+  if (decks.length === 0) throw new Error(`No .hashquiz.md file found in ${decksDir}`)
   const problems: string[] = []
   for (const { id, content } of decks) {
     try {
@@ -38,7 +38,7 @@ export function buildSite({ decksDir, outDir, env = process.env }: BuildOptions)
   if (problems.length) throw new Error(`Invalid decks:\n  ${problems.join('\n  ')}`)
 
   const web = findWebDist()
-  if (!web) throw new Error('Prebuilt web apps not found (in the quizv repo, run `bun run build:web` first)')
+  if (!web) throw new Error('Prebuilt web apps not found (in the hashquiz repo, run `bun run build:web` first)')
 
   const out = resolve(outDir)
   if (out === decksAbs) throw new Error('--out must differ from the decks folder')
@@ -48,6 +48,6 @@ export function buildSite({ decksDir, outDir, env = process.env }: BuildOptions)
   const manifest = JSON.stringify(decks)
   writeFileSync(resolve(out, 'host/decks.json'), manifest)
   writeFileSync(resolve(out, 'decks.json'), manifest)
-  writeFileSync(resolve(out, 'quizv-config.js'), renderConfigScript(configFromEnv(env)))
+  writeFileSync(resolve(out, 'hashquiz-config.js'), renderConfigScript(configFromEnv(env)))
   return decks.length
 }

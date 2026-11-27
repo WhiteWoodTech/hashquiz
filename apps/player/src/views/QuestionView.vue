@@ -1,59 +1,59 @@
 <template>
   <div class="question-view" v-if="game.question">
     <!-- Progress bar: current question / total -->
-    <div class="qv-progress">
-      <span class="qv-progress__label qv-label">Q{{ game.questionIdx + 1 }}</span>
-      <div class="qv-progress__track">
+    <div class="hq-progress">
+      <span class="hq-progress__label hq-label">Q{{ game.questionIdx + 1 }}</span>
+      <div class="hq-progress__track">
         <div
-          class="qv-progress__fill"
+          class="hq-progress__fill"
           :style="{ width: ((game.questionIdx + 1) / (game.quizMeta?.totalQuestions ?? 1) * 100) + '%' }"
         />
       </div>
-      <span class="qv-progress__label">{{ game.quizMeta?.totalQuestions ?? '?' }}</span>
+      <span class="hq-progress__label">{{ game.quizMeta?.totalQuestions ?? '?' }}</span>
     </div>
 
     <!-- Timer ring, replaced by the result block once the answer is revealed -->
-    <div v-if="!revealed" class="qv-timer-wrap">
+    <div v-if="!revealed" class="hq-timer-wrap">
       <FxCountdown :total="game.question.timer" :remaining="remaining" size="compact" />
     </div>
     <div
       v-else
       role="status"
-      :class="['qv-result', isCorrect ? 'qv-result--correct' : 'qv-result--wrong']"
+      :class="['hq-result', isCorrect ? 'hq-result--correct' : 'hq-result--wrong']"
     >
       <!-- FxVerdict draws the check / cross; screen readers get the verdict as text. -->
-      <FxVerdict class="qv-result__fx" :correct="isCorrect" :delta="game.lastDelta" :answered="game.answered" />
-      <span class="qv-sr-only">{{ isCorrect ? 'Correct' : 'Wrong' }}</span>
-      <div class="qv-result__line">
-        <span class="qv-result__score">{{ game.totalScore }} <small>pts</small></span>
-        <span v-if="game.rank !== null" class="qv-result__rank qv-label">{{ ordinalFr(game.rank) }} / {{ game.playerTotal }}</span>
+      <FxVerdict class="hq-result__fx" :correct="isCorrect" :delta="game.lastDelta" :answered="game.answered" />
+      <span class="hq-sr-only">{{ isCorrect ? 'Correct' : 'Wrong' }}</span>
+      <div class="hq-result__line">
+        <span class="hq-result__score">{{ game.totalScore }} <small>pts</small></span>
+        <span v-if="game.rank !== null" class="hq-result__rank hq-label">{{ ordinalFr(game.rank) }} / {{ game.playerTotal }}</span>
       </div>
-      <span class="qv-result__delta">{{ shownDelta > 0 ? '+' + shownDelta : '+0' }} pts</span>
-      <span v-if="game.answered" class="qv-result__info">Answered in {{ Math.round(game.answerTimeMs / 1000) }}s / {{ game.question.timer }}s</span>
-      <span v-else class="qv-result__info">No answer submitted</span>
+      <span class="hq-result__delta">{{ shownDelta > 0 ? '+' + shownDelta : '+0' }} pts</span>
+      <span v-if="game.answered" class="hq-result__info">Answered in {{ Math.round(game.answerTimeMs / 1000) }}s / {{ game.question.timer }}s</span>
+      <span v-else class="hq-result__info">No answer submitted</span>
     </div>
 
     <!-- Question meta: tags left, difficulty dot right -->
-    <div class="qv-q-meta">
-      <div class="qv-q-meta__tags">
+    <div class="hq-q-meta">
+      <div class="hq-q-meta__tags">
         <span
           v-for="tag in game.question.tags"
           :key="tag"
-          class="qv-q-meta__tag"
+          class="hq-q-meta__tag"
         >{{ tag }}</span>
       </div>
-      <span :class="['qv-difficulty', `qv-difficulty--${game.question.difficulty}`]">
-        <span class="qv-difficulty__dot qv-difficulty__dot--1"></span>
-        <span class="qv-difficulty__dot qv-difficulty__dot--2"></span>
-        <span class="qv-difficulty__dot qv-difficulty__dot--3"></span>
+      <span :class="['hq-difficulty', `hq-difficulty--${game.question.difficulty}`]">
+        <span class="hq-difficulty__dot hq-difficulty__dot--1"></span>
+        <span class="hq-difficulty__dot hq-difficulty__dot--2"></span>
+        <span class="hq-difficulty__dot hq-difficulty__dot--3"></span>
       </span>
     </div>
 
     <!-- Question text -->
-    <h2 class="qv-q-text">{{ game.question.text.replace(/^#+\s/, '') }}</h2>
+    <h2 class="hq-q-text">{{ game.question.text.replace(/^#+\s/, '') }}</h2>
 
     <!-- 2×2 answer grid -->
-    <div class="qv-grid">
+    <div class="hq-grid">
       <AnswerButton
         v-for="(choice, i) in game.question.choices"
         :key="choice.id"
@@ -68,7 +68,7 @@
     <!-- Valider button: one-shoot + multiple, before submission -->
     <button
       v-if="oneShoot && isMultiple && !game.answered && !timerExpired"
-      class="qv-validate-btn"
+      class="hq-validate-btn"
       :disabled="selected.size === 0"
       @click="validateMultiple"
     >
@@ -80,7 +80,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useGameStore } from '../stores/game'
-import { FxCountdown, FxVerdict, AnswerButton, ordinalFr } from '@quizv/ui'
+import { FxCountdown, FxVerdict, AnswerButton, ordinalFr } from '@hashquiz/ui'
 
 const game = useGameStore()
 const remaining        = ref(game.question?.timer ?? 0)
@@ -223,72 +223,72 @@ function validateMultiple() {
 .question-view { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding-top: 0.5rem; }
 
 /* Progress bar */
-.qv-progress { display: flex; align-items: center; gap: 0.6rem; width: 100%; }
-.qv-progress__label { font-size: 0.8rem; color: var(--qv-text-muted); min-width: 2rem; }
-.qv-progress__label:last-child { text-align: right; }
-.qv-progress__track { flex: 1; height: 4px; background: var(--qv-border); border-radius: 2px; overflow: hidden; }
-.qv-progress__fill { height: 100%; background: var(--qv-progress); border-radius: 2px; transition: width 0.3s; }
+.hq-progress { display: flex; align-items: center; gap: 0.6rem; width: 100%; }
+.hq-progress__label { font-size: 0.8rem; color: var(--hq-text-muted); min-width: 2rem; }
+.hq-progress__label:last-child { text-align: right; }
+.hq-progress__track { flex: 1; height: 4px; background: var(--hq-border); border-radius: 2px; overflow: hidden; }
+.hq-progress__fill { height: 100%; background: var(--hq-progress); border-radius: 2px; transition: width 0.3s; }
 
 /* Question meta */
-.qv-q-meta { display: flex; align-items: center; justify-content: space-between; width: 100%; }
-.qv-q-meta__tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-.qv-q-meta__tag { background: var(--qv-bg); border: 1px solid var(--qv-border); border-radius: var(--qv-radius-sm); padding: 0.15rem 0.5rem; font-size: 0.75rem; color: var(--qv-text-muted); }
+.hq-q-meta { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+.hq-q-meta__tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.hq-q-meta__tag { background: var(--hq-bg); border: 1px solid var(--hq-border); border-radius: var(--hq-radius-sm); padding: 0.15rem 0.5rem; font-size: 0.75rem; color: var(--hq-text-muted); }
 /* 3-dot difficulty */
-.qv-difficulty { display: flex; gap: 3px; align-items: center; flex-shrink: 0; }
-.qv-difficulty__dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid currentColor; background: transparent; }
-.qv-difficulty--easy   { color: var(--qv-correct); }
-.qv-difficulty--medium { color: var(--qv-warn); }
-.qv-difficulty--hard   { color: var(--qv-wrong); }
-.qv-difficulty--easy   .qv-difficulty__dot--1 { background: currentColor; }
-.qv-difficulty--medium .qv-difficulty__dot--1,
-.qv-difficulty--medium .qv-difficulty__dot--2 { background: currentColor; }
-.qv-difficulty--hard   .qv-difficulty__dot { background: currentColor; }
+.hq-difficulty { display: flex; gap: 3px; align-items: center; flex-shrink: 0; }
+.hq-difficulty__dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid currentColor; background: transparent; }
+.hq-difficulty--easy   { color: var(--hq-correct); }
+.hq-difficulty--medium { color: var(--hq-warn); }
+.hq-difficulty--hard   { color: var(--hq-wrong); }
+.hq-difficulty--easy   .hq-difficulty__dot--1 { background: currentColor; }
+.hq-difficulty--medium .hq-difficulty__dot--1,
+.hq-difficulty--medium .hq-difficulty__dot--2 { background: currentColor; }
+.hq-difficulty--hard   .hq-difficulty__dot { background: currentColor; }
 
-.qv-timer-wrap { margin: 0.5rem 0; }
-.qv-q-text { font-size: 1.25rem; text-align: center; margin: 0.5rem 0; line-height: 1.4; }
-.qv-grid { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+.hq-timer-wrap { margin: 0.5rem 0; }
+.hq-q-text { font-size: 1.25rem; text-align: center; margin: 0.5rem 0; line-height: 1.4; }
+.hq-grid { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
 @media (max-width: 640px) {
-  .qv-grid { grid-template-columns: 1fr; }
+  .hq-grid { grid-template-columns: 1fr; }
 }
 
 /* Result block (replaces the countdown after reveal) */
-.qv-result {
+.hq-result {
   display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
-  width: 100%; padding: 0.25rem 0.75rem 0.5rem; border-radius: var(--qv-radius);
+  width: 100%; padding: 0.25rem 0.75rem 0.5rem; border-radius: var(--hq-radius);
   text-align: center; animation: reveal-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.qv-result .qv-result__fx { height: 88px; }
-.qv-result__line { display: flex; align-items: baseline; justify-content: center; gap: 0.75rem; }
-.qv-result__score { font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
-.qv-result__score small { font-size: 0.8rem; font-weight: 500; color: var(--qv-text-muted); }
-.qv-result__rank  { font-size: 0.85rem; color: var(--qv-text); text-transform: none; letter-spacing: 0.08em; }
-.qv-result__delta { font-size: 1.15rem; font-weight: 700; }
-.qv-result--correct .qv-result__delta { color: var(--qv-correct); }
-.qv-result--wrong   .qv-result__delta { color: var(--qv-text-muted); }
-.qv-result__info  { font-size: 0.8rem; color: var(--qv-text-muted); }
+.hq-result .hq-result__fx { height: 88px; }
+.hq-result__line { display: flex; align-items: baseline; justify-content: center; gap: 0.75rem; }
+.hq-result__score { font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
+.hq-result__score small { font-size: 0.8rem; font-weight: 500; color: var(--hq-text-muted); }
+.hq-result__rank  { font-size: 0.85rem; color: var(--hq-text); text-transform: none; letter-spacing: 0.08em; }
+.hq-result__delta { font-size: 1.15rem; font-weight: 700; }
+.hq-result--correct .hq-result__delta { color: var(--hq-correct); }
+.hq-result--wrong   .hq-result__delta { color: var(--hq-text-muted); }
+.hq-result__info  { font-size: 0.8rem; color: var(--hq-text-muted); }
 @keyframes reveal-pop {
   from { opacity: 0; transform: scale(0.8); }
   to   { opacity: 1; transform: scale(1); }
 }
 
-.qv-validate-btn {
+.hq-validate-btn {
   margin-top: 0.5rem;
   padding: 0.75rem 2rem;
-  border: 2px solid var(--qv-accent);
-  border-radius: var(--qv-radius);
+  border: 2px solid var(--hq-accent);
+  border-radius: var(--hq-radius);
   background: transparent;
-  color: var(--qv-accent);
+  color: var(--hq-accent);
   font-size: 1rem;
   font-family: inherit;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
-.qv-validate-btn:not(:disabled):hover {
-  background: var(--qv-accent);
-  color: var(--qv-text);
+.hq-validate-btn:not(:disabled):hover {
+  background: var(--hq-accent);
+  color: var(--hq-text);
 }
-.qv-validate-btn:disabled {
+.hq-validate-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }

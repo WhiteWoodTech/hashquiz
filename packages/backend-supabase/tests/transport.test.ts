@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test'
 import { SupabaseTransport } from '../src/index'
-import { GameEvents, type GameEvent, type PlayerState } from '@quizv/core'
+import { GameEvents, type GameEvent, type PlayerState } from '@hashquiz/core'
 import { FakeSupabase } from './fake-supabase'
 
 function makeTransport(): { transport: SupabaseTransport; fake: FakeSupabase } {

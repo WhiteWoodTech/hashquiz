@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'bun:test'
-import type { GameEvent, IRealtimeTransport, PlayerState } from '@quizv/core'
-import type { Quiz } from '@quizv/parser'
+import type { GameEvent, IRealtimeTransport, PlayerState } from '@hashquiz/core'
+import type { Quiz } from '@hashquiz/parser'
 import { SupabaseHostSession, type HostEvent } from '../src/session/supabase-session'
 
 /** Minimal in-memory transport: broadcasts loop back to subscribers, presence is manual. */

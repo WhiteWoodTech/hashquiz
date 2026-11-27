@@ -1,4 +1,4 @@
-import type { Quiz } from '@quizv/parser'
+import type { Quiz } from '@hashquiz/parser'
 import type { QuestionPublic } from './types'
 import { calcPoints } from './scoring'
 import { serveQuestions, toPublic, type ServedQuestion } from './selection'

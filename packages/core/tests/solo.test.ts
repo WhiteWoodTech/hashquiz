@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test'
-import type { Quiz, Question } from '@quizv/parser'
+import type { Quiz, Question } from '@hashquiz/parser'
 import { SoloSession } from '../src/solo'
 import { calcPoints } from '../src/scoring'
 

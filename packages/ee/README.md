@@ -1,6 +1,6 @@
-# @quizv/ee
+# @hashquiz/ee
 
-Pro, Business and Enterprise features for QuizV, licensed under the [QuizV Enterprise License](LICENSE).
+Pro, Business and Enterprise features for HashQuiz, licensed under the [HashQuiz Enterprise License](LICENSE).
 
 **Production use requires a valid license key.** Development and testing are free. See
 [`docs/LICENSING.md`](../../docs/LICENSING.md).
@@ -25,6 +25,6 @@ features so that they never mix with the fair-code or MIT code.
 ## Rules
 
 - Enterprise code lives in this package, or in files named `*.ee.ts` / `*.ee.vue`.
-- Fair-code and MIT packages must not import from `@quizv/ee` directly: they expose extension points that
-  `@quizv/ee` plugs into when a valid license key is present.
-- The MIT packages (`@quizv/parser`, skills, MCP) must never depend on fair-code or Enterprise code.
+- Fair-code and MIT packages must not import from `@hashquiz/ee` directly: they expose extension points that
+  `@hashquiz/ee` plugs into when a valid license key is present.
+- The MIT packages (`@hashquiz/parser`, skills, MCP) must never depend on fair-code or Enterprise code.

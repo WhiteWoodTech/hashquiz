@@ -1,8 +1,8 @@
-import { parseQuizFile, validateQuiz } from '@quizv/parser'
-import type { Quiz } from '@quizv/parser'
-import { GameEngine } from '@quizv/core'
-import type { PlayerState, QuizInfo } from '@quizv/core'
-import { LocalTransport } from '@quizv/backend-local'
+import { parseQuizFile, validateQuiz } from '@hashquiz/parser'
+import type { Quiz } from '@hashquiz/parser'
+import { GameEngine } from '@hashquiz/core'
+import type { PlayerState, QuizInfo } from '@hashquiz/core'
+import { LocalTransport } from '@hashquiz/backend-local'
 import {
   createSoloHttpHandler,
   DEFAULT_SOLO_DB,
@@ -12,8 +12,8 @@ import {
   soloTopic,
   type SoloConn,
   type SoloServerMsg,
-} from '@quizv/backend-local/solo-server'
-import { parseManifest, SoloDeckSource } from '@quizv/core/solo-decks'
+} from '@hashquiz/backend-local/solo-server'
+import { parseManifest, SoloDeckSource } from '@hashquiz/core/solo-decks'
 import { readFileSync } from 'node:fs'
 import { networkInterfaces } from 'node:os'
 import { resolve } from 'node:path'
@@ -49,10 +49,10 @@ function generateJoinCode(): string {
   return Math.random().toString(36).slice(2, 8).toUpperCase()
 }
 
-export interface QuizvServerOptions {
+export interface HashQuizServerOptions {
   port?: number
   quizFile: string
-  /** Grace period in ms before a disconnected player is removed. Defaults to QUIZV_GRACE_MS env var or 60000. */
+  /** Grace period in ms before a disconnected player is removed. Defaults to HASHQUIZ_GRACE_MS env var or 60000. */
   graceMs?: number
   /** Decks folder of the local solo service (`/solo/*`, `role=solo` sockets); solo is off without it. */
   decksDir?: string
@@ -78,7 +78,7 @@ interface SoloService {
 const DEFAULT_GRACE_MS = 60_000
 function resolveGraceMs(opt?: number): number {
   if (typeof opt === 'number' && Number.isFinite(opt) && opt >= 0) return opt
-  const raw = process.env['QUIZV_GRACE_MS']
+  const raw = process.env['HASHQUIZ_GRACE_MS']
   if (raw) {
     const n = Number(raw)
     if (Number.isFinite(n) && n >= 0) return n
@@ -152,14 +152,14 @@ export function buildQuizInfo(quiz: Quiz): QuizInfo {
 }
 
 /**
- * QuizvServer manages one game session.
+ * HashQuizServer manages one game session.
  * - Serves a minimal HTML host control page at /
  * - Serves a minimal HTML player join page at /play
  * - Exposes WebSocket at /ws for real-time game events
  *
  * In Phase 1, the HTML pages are minimal stubs. Full Vue apps are served in Phase 2.
  */
-export class QuizvServer {
+export class HashQuizServer {
   private engine: GameEngine
   private transport: LocalTransport
   private joinCode: string
@@ -171,7 +171,7 @@ export class QuizvServer {
   private server: Server<WsData> | null = null
   private solo: SoloService | null = null
 
-  constructor(options: QuizvServerOptions) {
+  constructor(options: HashQuizServerOptions) {
     this.port = options.port ?? 3030
     this.quizFile = options.quizFile
     this.joinCode = generateJoinCode()
@@ -421,7 +421,7 @@ export class QuizvServer {
     const playerURL = `http://${localIP}:${this.port}/play`
 
     console.log(`
-  QuizV Dev Server
+  HashQuiz Dev Server
   ─────────────────────────────────────────
   Host:    http://localhost:${this.port}
   Players: ${playerURL}
@@ -446,7 +446,7 @@ export class QuizvServer {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>QuizV Host — ${this.joinCode}</title>
+  <title>HashQuiz Host — ${this.joinCode}</title>
   <style>
     body { font-family: system-ui; background: #0a0a0f; color: #fff; padding: 2rem; }
     button { background: #7c3aed; color: #fff; border: none; padding: 0.75rem 1.5rem;
@@ -463,7 +463,7 @@ export class QuizvServer {
   </style>
 </head>
 <body>
-  <h1>QuizV Host Control</h1>
+  <h1>HashQuiz Host Control</h1>
   <p id="ws-status">Connecting...</p>
   <div id="status">
     <p>Join code: <strong>${this.joinCode}</strong></p>
@@ -567,7 +567,7 @@ export class QuizvServer {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>QuizV Player</title>
+  <title>HashQuiz Player</title>
   <style>
     body { font-family: system-ui; background: #0a0a0f; color: #fff; padding: 1rem;
            max-width: 480px; margin: 0 auto; }
@@ -584,7 +584,7 @@ export class QuizvServer {
 </head>
 <body>
   <div id="join-screen">
-    <h1>Join QuizV</h1>
+    <h1>Join HashQuiz</h1>
     <input id="code" placeholder="Join code (e.g. ABC123)" style="text-transform:uppercase;letter-spacing:0.15em" />
     <input id="pseudo" placeholder="Your name" />
     <input id="email" type="email" placeholder="Email (optional)" />

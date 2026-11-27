@@ -1,14 +1,14 @@
 {
-  "name": "quizv-local",
+  "name": "hashquiz-local",
   "owner": {
     "name": "Maxime Lenne",
     "email": "hello@maxime-lenne.fr"
   },
   "plugins": [
     {
-      "name": "quizv",
-      "source": "./.claude/plugins/quizv",
-      "description": "Create, plan, and generate QuizV quiz decks from sources and web research"
+      "name": "hashquiz",
+      "source": "./.claude/plugins/hashquiz",
+      "description": "Create, plan, and generate HashQuiz quiz decks from sources and web research"
     }
   ]
 }

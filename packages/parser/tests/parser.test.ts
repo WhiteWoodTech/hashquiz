@@ -8,7 +8,7 @@ const fixture = (name: string) =>
 
 describe('parseQuizFile', () => {
   test('parses quiz meta from first frontmatter block', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     expect(quiz.meta.title).toBe('Demo Quiz')
     expect(quiz.meta.description).toBe('A test quiz')
     expect(quiz.meta.theme).toBe('default')
@@ -17,12 +17,12 @@ describe('parseQuizFile', () => {
   })
 
   test('parses correct number of questions', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     expect(quiz.questions).toHaveLength(2)
   })
 
   test('parses single-choice question', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     const q = quiz.questions[0]!
     expect(q.type).toBe('single')
     expect(q.timer).toBe(20)
@@ -35,32 +35,32 @@ describe('parseQuizFile', () => {
   })
 
   test('parses multiple-choice question', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     const q = quiz.questions[1]!
     expect(q.type).toBe('multiple')
     expect(q.choices.filter(c => c.isCorrect)).toHaveLength(3)
   })
 
   test('parses explanation from blockquote', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     expect(quiz.questions[0]!.explanation).toBe(
       'The sky is blue due to Rayleigh scattering.'
     )
   })
 
   test('assigns sequential choice ids a/b/c/d', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     const ids = quiz.questions[0]!.choices.map(c => c.id)
     expect(ids).toEqual(['a', 'b', 'c', 'd'])
   })
 
   test('infers type:multiple when multiple [x] present and type not set', () => {
-    const quiz = parseQuizFile(fixture('multi-correct.quizv.md'))
+    const quiz = parseQuizFile(fixture('multi-correct.hashquiz.md'))
     expect(quiz.questions[0]!.type).toBe('multiple')
   })
 
   test('defaults missing optional meta fields', () => {
-    const quiz = parseQuizFile(fixture('missing-title.quizv.md'))
+    const quiz = parseQuizFile(fixture('missing-title.hashquiz.md'))
     expect(quiz.meta.tags).toEqual([])
     expect(quiz.meta.author).toBeUndefined()
   })
@@ -68,14 +68,14 @@ describe('parseQuizFile', () => {
 
 describe('validateQuiz', () => {
   test('returns valid:true for valid quiz', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     const result = validateQuiz(quiz)
     expect(result.valid).toBe(true)
     expect(result.errors).toHaveLength(0)
   })
 
   test('returns error when title is missing', () => {
-    const quiz = parseQuizFile(fixture('missing-title.quizv.md'))
+    const quiz = parseQuizFile(fixture('missing-title.hashquiz.md'))
     const result = validateQuiz(quiz)
     expect(result.valid).toBe(false)
     expect(result.errors.some(e => e.field === 'title')).toBe(true)
@@ -192,7 +192,7 @@ difficulty: easy
 
 describe('parseMeta — new fields', () => {
   test('one-shoot defaults to true when absent', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     expect(quiz.meta.oneShoot).toBe(true)
   })
 
@@ -356,12 +356,12 @@ difficulty: easy
   })
 
   test('max-questions undefined when absent', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     expect(quiz.meta.maxQuestions).toBeUndefined()
   })
 
   test('max-time undefined when absent', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     expect(quiz.meta.maxTimeSec).toBeUndefined()
   })
 
@@ -406,7 +406,7 @@ difficulty: easy
   })
 
   test('target-difficulty undefined when absent', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     expect(quiz.meta.targetDifficulty).toBeUndefined()
   })
 

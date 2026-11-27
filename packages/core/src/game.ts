@@ -1,4 +1,4 @@
-import type { Quiz, Question } from '@quizv/parser'
+import type { Quiz, Question } from '@hashquiz/parser'
 import type { IRealtimeTransport } from './transport'
 import { GameEvents, type StateSnapshot } from './events'
 import { calcPoints } from './scoring'

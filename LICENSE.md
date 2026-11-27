@@ -1,24 +1,24 @@
-# QuizV licensing
+# HashQuiz licensing
 
 > **DRAFT — not yet reviewed by a lawyer.** The texts below describe the intended licensing model.
 > They must be reviewed before the repository is made public.
 
-QuizV is **fair-code open-core**. The repository contains code under three licenses.
+HashQuiz is **fair-code open-core**. The repository contains code under three licenses.
 See [`docs/LICENSING.md`](docs/LICENSING.md) for a plain-language FAQ.
 
 | Tier | License | Applies to |
 |------|---------|------------|
-| Format & tooling | [MIT](packages/parser/LICENSE) | `packages/parser/` (the `.quizv.md` format), `.claude/plugins/quizv/` (Claude skills and commands), and any future MCP server package marked MIT |
-| Product | **QuizV Sustainable Use License** (below) | Everything else, unless stated otherwise: `packages/core`, `packages/server`, `packages/transport-*`, `packages/ui`, `packages/theme-default`, `apps/host`, `apps/player`, `decks/`, `examples/` |
-| Pro / Enterprise | [QuizV Enterprise License](LICENSE_EE.md) | `packages/ee/`, and any file whose name contains `.ee.` or whose path contains a `.ee` directory |
+| Format & tooling | [MIT](packages/parser/LICENSE) | `packages/parser/` (the `.hashquiz.md` format), `.claude/plugins/hashquiz/` (Claude skills and commands), and any future MCP server package marked MIT |
+| Product | **HashQuiz Sustainable Use License** (below) | Everything else, unless stated otherwise: `packages/core`, `packages/server`, `packages/transport-*`, `packages/ui`, `packages/theme-default`, `apps/host`, `apps/player`, `decks/`, `examples/` |
+| Pro / Enterprise | [HashQuiz Enterprise License](LICENSE_EE.md) | `packages/ee/`, and any file whose name contains `.ee.` or whose path contains a `.ee` directory |
 
 When a directory contains its own `LICENSE` file, that file takes precedence for its contents.
 
-Versions of QuizV released before this change (up to and including v2.0.0) remain available under the MIT license.
+Versions of HashQuiz released before this change (up to and including v2.0.0) remain available under the MIT license.
 
 ---
 
-## QuizV Sustainable Use License
+## HashQuiz Sustainable Use License
 
 Version 1.0 (draft)
 

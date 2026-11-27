@@ -1,5 +1,5 @@
 import type { SupabaseClient, RealtimeChannel } from '@supabase/supabase-js'
-import type { LivePlayer, LiveState as Me, SoloLivePort } from '@quizv/core'
+import type { LivePlayer, LiveState as Me, SoloLivePort } from '@hashquiz/core'
 
 /**
  * Resolves once the Realtime socket is idle or open, i.e. not mid-reconnect. Phoenix disconnects on `pagehide`

@@ -1,4 +1,4 @@
-# QuizV Enterprise License
+# HashQuiz Enterprise License
 
 > **DRAFT — not yet reviewed by a lawyer.**
 
@@ -10,7 +10,7 @@ This license applies to `packages/ee/`, and to any file whose name contains `.ee
 directory (the "Enterprise Software").
 
 1. **Production use requires a license key.** You may use the Enterprise Software in production only if you (and
-   any entity you represent) hold a valid QuizV Enterprise, Business or Pro license key, or a valid QuizV Cloud
+   any entity you represent) hold a valid HashQuiz Enterprise, Business or Pro license key, or a valid HashQuiz Cloud
    subscription, covering the number of hosts, instances and features you use.
 2. **Development and testing are free.** Without a license key, you may copy, modify and run the Enterprise
    Software for development, testing and evaluation purposes only.

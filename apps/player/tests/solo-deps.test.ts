@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, test } from 'bun:test'
-import type { QuizvRuntimeConfig } from '@quizv/core'
+import type { HashQuizRuntimeConfig } from '@hashquiz/core'
 import { defaultSoloDeps } from '../src/solo/deps'
 
-const cfg = (over: Partial<QuizvRuntimeConfig>): QuizvRuntimeConfig => ({ transport: 'local', soloScoring: 'browser', ...over })
+const cfg = (over: Partial<HashQuizRuntimeConfig>): HashQuizRuntimeConfig => ({ transport: 'local', soloScoring: 'browser', ...over })
 
 const realFetch = globalThis.fetch
 afterEach(() => {

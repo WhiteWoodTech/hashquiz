@@ -1,10 +1,10 @@
-# QuizV Phase 2 — Vue Apps Implementation Plan
+# HashQuiz Phase 2 — Vue Apps Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace the inline HTML stubs with full Vue 3 applications for host (desktop) and player (mobile-first), built on shared UI components and a design token system.
 
-**Architecture:** Two Vite SPA apps (`apps/host` on port 3031, `apps/player` on port 3032) connect to the existing Bun WS server on port 3030. Shared Vue components live in `@quizv/ui`. Design tokens live in `@quizv/theme-default`. State is managed with Pinia stores. Navigation is state-driven (`v-if` on phase, no router needed). `quizv dev` is updated to spawn all three processes and print joined URLs.
+**Architecture:** Two Vite SPA apps (`apps/host` on port 3031, `apps/player` on port 3032) connect to the existing Bun WS server on port 3030. Shared Vue components live in `@hashquiz/ui`. Design tokens live in `@hashquiz/theme-default`. State is managed with Pinia stores. Navigation is state-driven (`v-if` on phase, no router needed). `hashquiz dev` is updated to spawn all three processes and print joined URLs.
 
 **Tech Stack:** Vue 3 + Vite 5 + UnoCSS + Pinia, `qrcode` (QR gen), `canvas-confetti` (podium), Bun workspaces, TypeScript strict.
 
@@ -26,13 +26,13 @@ packages/server/src/dev.ts        # Spawn Vite dev servers alongside Bun server
 
 ```
 packages/theme-default/
-├── package.json                   # @quizv/theme-default
+├── package.json                   # @hashquiz/theme-default
 ├── index.ts                       # empty re-export
 └── styles/
-    └── vars.css                   # --qv-* CSS custom properties + base reset
+    └── vars.css                   # --hq-* CSS custom properties + base reset
 
 packages/ui/
-├── package.json                   # @quizv/ui  deps: @quizv/core, vue, qrcode
+├── package.json                   # @hashquiz/ui  deps: @hashquiz/core, vue, qrcode
 ├── tsconfig.json
 └── src/
     ├── index.ts                   # barrel export of all components
@@ -137,7 +137,7 @@ expect(broadcastedEvents).toContainEqual(
 - [ ] **Step 1.4: Run tests and verify they pass**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 bun test
 ```
 
@@ -172,7 +172,7 @@ git commit -m "✨ Add choiceCounts to answer_revealed, playerUrl to host_connec
 
 ---
 
-## Task 2: `@quizv/theme-default` CSS tokens
+## Task 2: `@hashquiz/theme-default` CSS tokens
 
 **Files:**
 - Create: `packages/theme-default/package.json`
@@ -183,7 +183,7 @@ git commit -m "✨ Add choiceCounts to answer_revealed, playerUrl to host_connec
 
 ```json
 {
-  "name": "@quizv/theme-default",
+  "name": "@hashquiz/theme-default",
   "version": "0.0.1",
   "type": "module",
   "exports": {
@@ -204,46 +204,46 @@ export {}
 
 ```css
 :root {
-  --qv-bg:           #0a0a0f;
-  --qv-surface:      #111118;
-  --qv-surface-2:    #1a1a25;
-  --qv-border:       #2a2a3a;
-  --qv-accent:       #7c3aed;
-  --qv-accent-2:     #06b6d4;
-  --qv-correct:      #22c55e;
-  --qv-wrong:        #ef4444;
-  --qv-warn:         #f97316;
-  --qv-text:         #ffffff;
-  --qv-text-muted:   #888899;
-  --qv-font-display: 'Syne', system-ui, sans-serif;
-  --qv-font-mono:    'IBM Plex Mono', monospace;
-  --qv-radius:       12px;
-  --qv-radius-sm:    8px;
+  --hq-bg:           #0a0a0f;
+  --hq-surface:      #111118;
+  --hq-surface-2:    #1a1a25;
+  --hq-border:       #2a2a3a;
+  --hq-accent:       #7c3aed;
+  --hq-accent-2:     #06b6d4;
+  --hq-correct:      #22c55e;
+  --hq-wrong:        #ef4444;
+  --hq-warn:         #f97316;
+  --hq-text:         #ffffff;
+  --hq-text-muted:   #888899;
+  --hq-font-display: 'Syne', system-ui, sans-serif;
+  --hq-font-mono:    'IBM Plex Mono', monospace;
+  --hq-radius:       12px;
+  --hq-radius-sm:    8px;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
 
 html, body {
-  background: var(--qv-bg);
-  color: var(--qv-text);
-  font-family: var(--qv-font-display);
+  background: var(--hq-bg);
+  color: var(--hq-text);
+  font-family: var(--hq-font-display);
   margin: 0;
   min-height: 100vh;
 }
 
-a { color: var(--qv-accent); }
+a { color: var(--hq-accent); }
 ```
 
 - [ ] **Step 2.4: Commit**
 
 ```bash
 git add packages/theme-default/
-git commit -m "📦 Add @quizv/theme-default CSS token package"
+git commit -m "📦 Add @hashquiz/theme-default CSS token package"
 ```
 
 ---
 
-## Task 3: `@quizv/ui` — package scaffold + `TimerRing`
+## Task 3: `@hashquiz/ui` — package scaffold + `TimerRing`
 
 **Files:**
 - Create: `packages/ui/package.json`
@@ -255,14 +255,14 @@ git commit -m "📦 Add @quizv/theme-default CSS token package"
 
 ```json
 {
-  "name": "@quizv/ui",
+  "name": "@hashquiz/ui",
   "version": "0.0.1",
   "type": "module",
   "exports": {
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@quizv/core": "workspace:*",
+    "@hashquiz/core": "workspace:*",
     "vue": "^3.4.27",
     "qrcode": "^1.5.4"
   },
@@ -290,7 +290,7 @@ git commit -m "📦 Add @quizv/theme-default CSS token package"
 - [ ] **Step 3.3: Install `qrcode` dep**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 bun install
 ```
 
@@ -305,7 +305,7 @@ Expected output: packages resolved without errors.
     <circle
       :cx="cx" :cy="cy" :r="r"
       fill="none"
-      stroke="var(--qv-surface-2)"
+      stroke="var(--hq-surface-2)"
       :stroke-width="sw"
     />
     <!-- Animated progress arc -->
@@ -354,9 +354,9 @@ const fraction = computed(() =>
 const offset = computed(() => circum.value * (1 - fraction.value))
 
 const color = computed(() => {
-  if (fraction.value > 0.5) return 'var(--qv-accent)'   // purple
-  if (fraction.value > 0.25) return 'var(--qv-warn)'    // orange
-  return 'var(--qv-wrong)'                               // red
+  if (fraction.value > 0.5) return 'var(--hq-accent)'   // purple
+  if (fraction.value > 0.25) return 'var(--hq-warn)'    // orange
+  return 'var(--hq-wrong)'                               // red
 })
 </script>
 ```
@@ -371,12 +371,12 @@ export { default as TimerRing } from './TimerRing.vue'
 
 ```bash
 git add packages/ui/
-git commit -m "📦 Add @quizv/ui package with TimerRing component"
+git commit -m "📦 Add @hashquiz/ui package with TimerRing component"
 ```
 
 ---
 
-## Task 4: `@quizv/ui` — `AnswerButton` + `AnswerBarChart`
+## Task 4: `@hashquiz/ui` — `AnswerButton` + `AnswerBarChart`
 
 **Files:**
 - Create: `packages/ui/src/AnswerButton.vue`
@@ -390,12 +390,12 @@ The button has four color variants (a/b/c/d) and five states.
 ```vue
 <template>
   <button
-    :class="['qv-btn', `qv-btn--${colorId}`, `qv-btn--${state}`]"
+    :class="['hq-btn', `hq-btn--${colorId}`, `hq-btn--${state}`]"
     :disabled="state !== 'idle'"
     @click="emit('select', id)"
   >
-    <span class="qv-btn__badge">{{ id.toUpperCase() }}</span>
-    <span class="qv-btn__text">{{ text }}</span>
+    <span class="hq-btn__badge">{{ id.toUpperCase() }}</span>
+    <span class="hq-btn__text">{{ text }}</span>
   </button>
 </template>
 
@@ -410,34 +410,34 @@ const emit = defineEmits<{ select: [id: string] }>()
 </script>
 
 <style scoped>
-.qv-btn {
+.hq-btn {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   width: 100%;
   padding: 0.85rem 1rem;
   border: 2px solid transparent;
-  border-radius: var(--qv-radius);
-  background: var(--qv-surface-2);
-  color: var(--qv-text);
+  border-radius: var(--hq-radius);
+  background: var(--hq-surface-2);
+  color: var(--hq-text);
   font-size: 1rem;
   font-family: inherit;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s, opacity 0.15s;
   text-align: left;
 }
-.qv-btn--a { --c: #7c3aed; }
-.qv-btn--b { --c: #0891b2; }
-.qv-btn--c { --c: #d97706; }
-.qv-btn--d { --c: #059669; }
+.hq-btn--a { --c: #7c3aed; }
+.hq-btn--b { --c: #0891b2; }
+.hq-btn--c { --c: #d97706; }
+.hq-btn--d { --c: #059669; }
 
-.qv-btn:not(:disabled):hover       { border-color: var(--c); }
-.qv-btn--selected                  { border-color: var(--c); background: color-mix(in srgb, var(--c) 18%, var(--qv-surface-2)); }
-.qv-btn--correct                   { border-color: var(--qv-correct); background: color-mix(in srgb, var(--qv-correct) 18%, var(--qv-surface-2)); }
-.qv-btn--wrong                     { border-color: var(--qv-wrong); background: color-mix(in srgb, var(--qv-wrong) 12%, var(--qv-surface-2)); opacity: 0.65; }
-.qv-btn--disabled                  { opacity: 0.45; cursor: not-allowed; }
+.hq-btn:not(:disabled):hover       { border-color: var(--c); }
+.hq-btn--selected                  { border-color: var(--c); background: color-mix(in srgb, var(--c) 18%, var(--hq-surface-2)); }
+.hq-btn--correct                   { border-color: var(--hq-correct); background: color-mix(in srgb, var(--hq-correct) 18%, var(--hq-surface-2)); }
+.hq-btn--wrong                     { border-color: var(--hq-wrong); background: color-mix(in srgb, var(--hq-wrong) 12%, var(--hq-surface-2)); opacity: 0.65; }
+.hq-btn--disabled                  { opacity: 0.45; cursor: not-allowed; }
 
-.qv-btn__badge {
+.hq-btn__badge {
   min-width: 2rem;
   height: 2rem;
   display: flex;
@@ -459,16 +459,16 @@ Used on the host reveal screen to show per-choice vote distribution.
 
 ```vue
 <template>
-  <div class="qv-chart">
-    <div v-for="(choice, i) in choices" :key="choice.id" class="qv-chart__row">
-      <span class="qv-chart__id">{{ choice.id.toUpperCase() }}</span>
-      <div class="qv-chart__track">
+  <div class="hq-chart">
+    <div v-for="(choice, i) in choices" :key="choice.id" class="hq-chart__row">
+      <span class="hq-chart__id">{{ choice.id.toUpperCase() }}</span>
+      <div class="hq-chart__track">
         <div
-          class="qv-chart__bar"
+          class="hq-chart__bar"
           :style="{ width: pct(choice.id) + '%', background: palette[i] }"
         />
       </div>
-      <span class="qv-chart__count">{{ counts[choice.id] ?? 0 }}</span>
+      <span class="hq-chart__count">{{ counts[choice.id] ?? 0 }}</span>
     </div>
   </div>
 </template>
@@ -494,12 +494,12 @@ function pct(id: string): number {
 </script>
 
 <style scoped>
-.qv-chart { display: flex; flex-direction: column; gap: 0.6rem; }
-.qv-chart__row { display: grid; grid-template-columns: 1.8rem 1fr 2.5rem; align-items: center; gap: 0.5rem; }
-.qv-chart__id   { font-weight: 700; color: var(--qv-text-muted); font-size: 0.9rem; }
-.qv-chart__track { height: 1.5rem; background: var(--qv-surface-2); border-radius: 4px; overflow: hidden; }
-.qv-chart__bar  { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
-.qv-chart__count { text-align: right; color: var(--qv-text-muted); font-size: 0.85rem; }
+.hq-chart { display: flex; flex-direction: column; gap: 0.6rem; }
+.hq-chart__row { display: grid; grid-template-columns: 1.8rem 1fr 2.5rem; align-items: center; gap: 0.5rem; }
+.hq-chart__id   { font-weight: 700; color: var(--hq-text-muted); font-size: 0.9rem; }
+.hq-chart__track { height: 1.5rem; background: var(--hq-surface-2); border-radius: 4px; overflow: hidden; }
+.hq-chart__bar  { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+.hq-chart__count { text-align: right; color: var(--hq-text-muted); font-size: 0.85rem; }
 </style>
 ```
 
@@ -515,12 +515,12 @@ export { default as AnswerBarChart } from './AnswerBarChart.vue'
 
 ```bash
 git add packages/ui/src/
-git commit -m "✨ Add AnswerButton and AnswerBarChart to @quizv/ui"
+git commit -m "✨ Add AnswerButton and AnswerBarChart to @hashquiz/ui"
 ```
 
 ---
 
-## Task 5: `@quizv/ui` — `PlayerList`, `Podium`, `QrCode`
+## Task 5: `@hashquiz/ui` — `PlayerList`, `Podium`, `QrCode`
 
 **Files:**
 - Create: `packages/ui/src/PlayerList.vue`
@@ -532,19 +532,19 @@ git commit -m "✨ Add AnswerButton and AnswerBarChart to @quizv/ui"
 
 ```vue
 <template>
-  <div class="qv-players">
-    <div v-for="p in players" :key="p.id" class="qv-players__chip">
-      <span class="qv-players__avatar">{{ initial(p.pseudo) }}</span>
+  <div class="hq-players">
+    <div v-for="p in players" :key="p.id" class="hq-players__chip">
+      <span class="hq-players__avatar">{{ initial(p.pseudo) }}</span>
       <span>{{ p.pseudo }}</span>
     </div>
-    <div v-if="players.length === 0" class="qv-players__empty">
+    <div v-if="players.length === 0" class="hq-players__empty">
       Waiting for players…
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { PlayerState } from '@quizv/core'
+import type { PlayerState } from '@hashquiz/core'
 defineProps<{ players: PlayerState[] }>()
 function initial(pseudo: string): string {
   return (pseudo[0] ?? '?').toUpperCase()
@@ -552,10 +552,10 @@ function initial(pseudo: string): string {
 </script>
 
 <style scoped>
-.qv-players { display: flex; flex-wrap: wrap; gap: 0.5rem; min-height: 2.5rem; align-items: flex-start; }
-.qv-players__chip { display: flex; align-items: center; gap: 0.45rem; background: var(--qv-surface-2); padding: 0.3rem 0.65rem; border-radius: 2rem; font-size: 0.9rem; }
-.qv-players__avatar { width: 1.5rem; height: 1.5rem; background: var(--qv-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; flex-shrink: 0; }
-.qv-players__empty { color: var(--qv-text-muted); font-size: 0.9rem; }
+.hq-players { display: flex; flex-wrap: wrap; gap: 0.5rem; min-height: 2.5rem; align-items: flex-start; }
+.hq-players__chip { display: flex; align-items: center; gap: 0.45rem; background: var(--hq-surface-2); padding: 0.3rem 0.65rem; border-radius: 2rem; font-size: 0.9rem; }
+.hq-players__avatar { width: 1.5rem; height: 1.5rem; background: var(--hq-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; flex-shrink: 0; }
+.hq-players__empty { color: var(--hq-text-muted); font-size: 0.9rem; }
 </style>
 ```
 
@@ -563,40 +563,40 @@ function initial(pseudo: string): string {
 
 ```vue
 <template>
-  <ol class="qv-podium">
+  <ol class="hq-podium">
     <li
       v-for="entry in podium"
       :key="entry.rank"
-      :class="['qv-podium__row', rankClass(entry.rank)]"
+      :class="['hq-podium__row', rankClass(entry.rank)]"
     >
-      <span class="qv-podium__rank">{{ medal(entry.rank) }}</span>
-      <span class="qv-podium__name">{{ entry.pseudo }}</span>
-      <span class="qv-podium__score">{{ entry.score.toLocaleString() }} pts</span>
+      <span class="hq-podium__rank">{{ medal(entry.rank) }}</span>
+      <span class="hq-podium__name">{{ entry.pseudo }}</span>
+      <span class="hq-podium__score">{{ entry.score.toLocaleString() }} pts</span>
     </li>
   </ol>
 </template>
 
 <script setup lang="ts">
-import type { PodiumEntry } from '@quizv/core'
+import type { PodiumEntry } from '@hashquiz/core'
 defineProps<{ podium: PodiumEntry[] }>()
 
 function medal(rank: number): string {
   return rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`
 }
 function rankClass(rank: number): string {
-  return rank <= 3 ? `qv-podium__row--top${rank}` : ''
+  return rank <= 3 ? `hq-podium__row--top${rank}` : ''
 }
 </script>
 
 <style scoped>
-.qv-podium { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
-.qv-podium__row { display: flex; align-items: center; gap: 0.9rem; padding: 0.75rem 1rem; border-radius: var(--qv-radius-sm); background: var(--qv-surface); border: 1px solid transparent; }
-.qv-podium__row--top1 { border-color: #ffd700; background: color-mix(in srgb, #ffd700 10%, var(--qv-surface)); }
-.qv-podium__row--top2 { border-color: #c0c0c0; background: color-mix(in srgb, #c0c0c0 8%, var(--qv-surface)); }
-.qv-podium__row--top3 { border-color: #cd7f32; background: color-mix(in srgb, #cd7f32 8%, var(--qv-surface)); }
-.qv-podium__rank  { font-size: 1.3rem; min-width: 2.2rem; }
-.qv-podium__name  { flex: 1; font-weight: 600; }
-.qv-podium__score { font-weight: 700; color: var(--qv-accent); }
+.hq-podium { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.hq-podium__row { display: flex; align-items: center; gap: 0.9rem; padding: 0.75rem 1rem; border-radius: var(--hq-radius-sm); background: var(--hq-surface); border: 1px solid transparent; }
+.hq-podium__row--top1 { border-color: #ffd700; background: color-mix(in srgb, #ffd700 10%, var(--hq-surface)); }
+.hq-podium__row--top2 { border-color: #c0c0c0; background: color-mix(in srgb, #c0c0c0 8%, var(--hq-surface)); }
+.hq-podium__row--top3 { border-color: #cd7f32; background: color-mix(in srgb, #cd7f32 8%, var(--hq-surface)); }
+.hq-podium__rank  { font-size: 1.3rem; min-width: 2.2rem; }
+.hq-podium__name  { flex: 1; font-weight: 600; }
+.hq-podium__score { font-weight: 700; color: var(--hq-accent); }
 </style>
 ```
 
@@ -604,7 +604,7 @@ function rankClass(rank: number): string {
 
 ```vue
 <template>
-  <canvas ref="canvasEl" class="qv-qr" />
+  <canvas ref="canvasEl" class="hq-qr" />
 </template>
 
 <script setup lang="ts">
@@ -625,7 +625,7 @@ watchEffect(async () => {
 </script>
 
 <style scoped>
-.qv-qr { border-radius: var(--qv-radius-sm); display: block; }
+.hq-qr { border-radius: var(--hq-radius-sm); display: block; }
 </style>
 ```
 
@@ -644,7 +644,7 @@ export { default as QrCode } from './QrCode.vue'
 
 ```bash
 git add packages/ui/src/
-git commit -m "✨ Add PlayerList, Podium, QrCode to @quizv/ui"
+git commit -m "✨ Add PlayerList, Podium, QrCode to @hashquiz/ui"
 ```
 
 ---
@@ -663,7 +663,7 @@ The store connects to `ws://localhost:3030/ws?role=host` and manages the full ho
 
 ```json
 {
-  "name": "@quizv/app-host",
+  "name": "@hashquiz/app-host",
   "version": "0.0.1",
   "type": "module",
   "scripts": {
@@ -671,9 +671,9 @@ The store connects to `ws://localhost:3030/ws?role=host` and manages the full ho
     "build": "vite build"
   },
   "dependencies": {
-    "@quizv/core": "workspace:*",
-    "@quizv/ui": "workspace:*",
-    "@quizv/theme-default": "workspace:*",
+    "@hashquiz/core": "workspace:*",
+    "@hashquiz/ui": "workspace:*",
+    "@hashquiz/theme-default": "workspace:*",
     "pinia": "^2.1.7",
     "vue": "^3.4.27"
   },
@@ -713,7 +713,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import 'virtual:uno.css'
-import '@quizv/theme-default/styles/vars.css'
+import '@hashquiz/theme-default/styles/vars.css'
 
 createApp(App).use(createPinia()).mount('#app')
 ```
@@ -723,8 +723,8 @@ createApp(App).use(createPinia()).mount('#app')
 ```typescript
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { PlayerState, QuestionPublic, Score, PodiumEntry } from '@quizv/core'
-import type { GameEvent } from '@quizv/core'
+import type { PlayerState, QuestionPublic, Score, PodiumEntry } from '@hashquiz/core'
+import type { GameEvent } from '@hashquiz/core'
 
 export type HostPhase = 'connecting' | 'lobby' | 'question' | 'revealed' | 'finished'
 
@@ -820,7 +820,7 @@ export const useGameStore = defineStore('game', () => {
 - [ ] **Step 6.6: Install dependencies**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 bun install
 ```
 
@@ -871,7 +871,7 @@ onMounted(() => game.connect())
 
 <style>
 .app { min-height: 100vh; padding: 2rem; }
-.connecting { display: flex; align-items: center; justify-content: center; height: 100vh; color: var(--qv-text-muted); }
+.connecting { display: flex; align-items: center; justify-content: center; height: 100vh; color: var(--hq-text-muted); }
 </style>
 ```
 
@@ -880,7 +880,7 @@ onMounted(() => game.connect())
 ```vue
 <template>
   <div class="lobby">
-    <h1 class="lobby__title">QuizV</h1>
+    <h1 class="lobby__title">HashQuiz</h1>
 
     <div class="lobby__main">
       <div class="lobby__qr">
@@ -896,7 +896,7 @@ onMounted(() => game.connect())
         <p class="lobby__count">{{ game.players.length }} player{{ game.players.length !== 1 ? 's' : '' }} connected</p>
         <PlayerList :players="game.players" />
         <button
-          class="qv-btn-primary"
+          class="hq-btn-primary"
           :disabled="game.players.length === 0"
           @click="game.send('host_start')"
         >
@@ -909,29 +909,29 @@ onMounted(() => game.connect())
 
 <script setup lang="ts">
 import { useGameStore } from '../stores/game'
-import { QrCode, PlayerList } from '@quizv/ui'
+import { QrCode, PlayerList } from '@hashquiz/ui'
 const game = useGameStore()
 </script>
 
 <style scoped>
 .lobby { max-width: 960px; margin: 0 auto; }
-.lobby__title { font-size: 2.5rem; color: var(--qv-accent); margin-bottom: 2rem; }
+.lobby__title { font-size: 2.5rem; color: var(--hq-accent); margin-bottom: 2rem; }
 .lobby__main { display: grid; grid-template-columns: auto 1fr; gap: 3rem; align-items: start; }
 .lobby__qr { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
-.lobby__url { font-size: 0.75rem; color: var(--qv-text-muted); word-break: break-all; max-width: 220px; text-align: center; }
-.lobby__code-box { background: var(--qv-surface); border-radius: var(--qv-radius); padding: 1.25rem; margin-bottom: 1rem; }
-.lobby__code-label { margin: 0; color: var(--qv-text-muted); font-size: 0.85rem; }
-.lobby__code { margin: 0.25rem 0 0; font-size: 3rem; font-weight: 700; letter-spacing: 0.2em; color: var(--qv-accent); }
-.lobby__count { color: var(--qv-text-muted); margin: 0 0 0.75rem; }
-.qv-btn-primary {
+.lobby__url { font-size: 0.75rem; color: var(--hq-text-muted); word-break: break-all; max-width: 220px; text-align: center; }
+.lobby__code-box { background: var(--hq-surface); border-radius: var(--hq-radius); padding: 1.25rem; margin-bottom: 1rem; }
+.lobby__code-label { margin: 0; color: var(--hq-text-muted); font-size: 0.85rem; }
+.lobby__code { margin: 0.25rem 0 0; font-size: 3rem; font-weight: 700; letter-spacing: 0.2em; color: var(--hq-accent); }
+.lobby__count { color: var(--hq-text-muted); margin: 0 0 0.75rem; }
+.hq-btn-primary {
   margin-top: 1.5rem; width: 100%; padding: 0.9rem;
-  background: var(--qv-accent); color: #fff;
-  border: none; border-radius: var(--qv-radius); font-size: 1.1rem;
+  background: var(--hq-accent); color: #fff;
+  border: none; border-radius: var(--hq-radius); font-size: 1.1rem;
   cursor: pointer; font-family: inherit; font-weight: 600;
   transition: background 0.15s;
 }
-.qv-btn-primary:hover:not(:disabled) { background: #6d28d9; }
-.qv-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.hq-btn-primary:hover:not(:disabled) { background: #6d28d9; }
+.hq-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>
 ```
 
@@ -940,27 +940,27 @@ const game = useGameStore()
 ```vue
 <template>
   <div class="question-view" v-if="game.question">
-    <header class="qv-header">
-      <span class="qv-header__q">Q{{ game.questionIdx + 1 }} / {{ game.totalQs }}</span>
+    <header class="hq-header">
+      <span class="hq-header__q">Q{{ game.questionIdx + 1 }} / {{ game.totalQs }}</span>
       <TimerRing :total="game.question.timer" :remaining="remaining" :size="80" />
-      <span class="qv-header__answers">{{ game.answerCount }} / {{ game.players.length }} answered</span>
+      <span class="hq-header__answers">{{ game.answerCount }} / {{ game.players.length }} answered</span>
     </header>
 
-    <h2 class="qv-question-text">{{ game.question.text.replace(/^#+\s/, '') }}</h2>
+    <h2 class="hq-question-text">{{ game.question.text.replace(/^#+\s/, '') }}</h2>
 
-    <div class="qv-choices-grid">
+    <div class="hq-choices-grid">
       <div
         v-for="(choice, i) in game.question.choices"
         :key="choice.id"
-        :class="['qv-choice-card', `qv-choice-card--${['a','b','c','d'][i]}`]"
+        :class="['hq-choice-card', `hq-choice-card--${['a','b','c','d'][i]}`]"
       >
-        <span class="qv-choice-card__id">{{ choice.id.toUpperCase() }}</span>
+        <span class="hq-choice-card__id">{{ choice.id.toUpperCase() }}</span>
         <span>{{ choice.text }}</span>
       </div>
     </div>
 
-    <div class="qv-controls">
-      <button class="qv-btn-action" @click="game.send('host_reveal')">
+    <div class="hq-controls">
+      <button class="hq-btn-action" @click="game.send('host_reveal')">
         🔍 Reveal Answer
       </button>
     </div>
@@ -970,7 +970,7 @@ const game = useGameStore()
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useGameStore } from '../stores/game'
-import { TimerRing } from '@quizv/ui'
+import { TimerRing } from '@hashquiz/ui'
 
 const game = useGameStore()
 const remaining = ref(game.question?.timer ?? 0)
@@ -991,24 +991,24 @@ onUnmounted(() => { if (interval) clearInterval(interval) })
 
 <style scoped>
 .question-view { max-width: 960px; margin: 0 auto; }
-.qv-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-.qv-header__q, .qv-header__answers { color: var(--qv-text-muted); font-size: 0.9rem; }
-.qv-question-text { font-size: 1.6rem; margin: 0 0 1.5rem; line-height: 1.4; }
-.qv-choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
-.qv-choice-card { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-radius: var(--qv-radius); background: var(--qv-surface-2); }
-.qv-choice-card--a { border-left: 4px solid #7c3aed; }
-.qv-choice-card--b { border-left: 4px solid #0891b2; }
-.qv-choice-card--c { border-left: 4px solid #d97706; }
-.qv-choice-card--d { border-left: 4px solid #059669; }
-.qv-choice-card__id { font-weight: 700; min-width: 1.5rem; }
-.qv-controls { display: flex; gap: 1rem; }
-.qv-btn-action {
-  padding: 0.8rem 1.5rem; background: var(--qv-surface-2); color: var(--qv-text);
-  border: 1px solid var(--qv-border); border-radius: var(--qv-radius);
+.hq-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.hq-header__q, .hq-header__answers { color: var(--hq-text-muted); font-size: 0.9rem; }
+.hq-question-text { font-size: 1.6rem; margin: 0 0 1.5rem; line-height: 1.4; }
+.hq-choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+.hq-choice-card { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-radius: var(--hq-radius); background: var(--hq-surface-2); }
+.hq-choice-card--a { border-left: 4px solid #7c3aed; }
+.hq-choice-card--b { border-left: 4px solid #0891b2; }
+.hq-choice-card--c { border-left: 4px solid #d97706; }
+.hq-choice-card--d { border-left: 4px solid #059669; }
+.hq-choice-card__id { font-weight: 700; min-width: 1.5rem; }
+.hq-controls { display: flex; gap: 1rem; }
+.hq-btn-action {
+  padding: 0.8rem 1.5rem; background: var(--hq-surface-2); color: var(--hq-text);
+  border: 1px solid var(--hq-border); border-radius: var(--hq-radius);
   cursor: pointer; font-size: 1rem; font-family: inherit;
   transition: background 0.15s;
 }
-.qv-btn-action:hover { background: var(--qv-surface); }
+.hq-btn-action:hover { background: var(--hq-surface); }
 </style>
 ```
 
@@ -1044,38 +1044,38 @@ onUnmounted(() => { if (interval) clearInterval(interval) })
     </div>
 
     <div class="rv-controls">
-      <button class="qv-btn-action" @click="game.send('host_next')">⏭ Next Question</button>
+      <button class="hq-btn-action" @click="game.send('host_next')">⏭ Next Question</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useGameStore } from '../stores/game'
-import { AnswerBarChart } from '@quizv/ui'
+import { AnswerBarChart } from '@hashquiz/ui'
 const game = useGameStore()
 </script>
 
 <style scoped>
 .reveal-view { max-width: 960px; margin: 0 auto; }
-.rv-header { color: var(--qv-text-muted); margin-bottom: 1rem; font-size: 0.9rem; }
+.rv-header { color: var(--hq-text-muted); margin-bottom: 1rem; font-size: 0.9rem; }
 .rv-question { font-size: 1.4rem; margin: 0 0 1.5rem; }
-.rv-explanation { background: var(--qv-surface-2); border-left: 3px solid var(--qv-accent-2); border-radius: var(--qv-radius-sm); padding: 1rem; margin: 1.5rem 0; }
-.rv-explanation__label { color: var(--qv-text-muted); font-size: 0.8rem; margin: 0 0 0.25rem; }
+.rv-explanation { background: var(--hq-surface-2); border-left: 3px solid var(--hq-accent-2); border-radius: var(--hq-radius-sm); padding: 1rem; margin: 1.5rem 0; }
+.rv-explanation__label { color: var(--hq-text-muted); font-size: 0.8rem; margin: 0 0 0.25rem; }
 .rv-explanation p:last-child { margin: 0; }
 .rv-scores { margin: 1.5rem 0; }
-.rv-scores h3 { margin: 0 0 0.75rem; font-size: 1rem; color: var(--qv-text-muted); }
-.rv-score-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.4rem 0; border-bottom: 1px solid var(--qv-border); }
+.rv-scores h3 { margin: 0 0 0.75rem; font-size: 1rem; color: var(--hq-text-muted); }
+.rv-score-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.4rem 0; border-bottom: 1px solid var(--hq-border); }
 .rv-score-row span:first-child { flex: 1; }
-.rv-score-delta { color: var(--qv-correct); font-weight: 600; }
-.rv-score-total { color: var(--qv-text-muted); font-size: 0.85rem; min-width: 4rem; text-align: right; }
+.rv-score-delta { color: var(--hq-correct); font-weight: 600; }
+.rv-score-total { color: var(--hq-text-muted); font-size: 0.85rem; min-width: 4rem; text-align: right; }
 .rv-controls { margin-top: 1.5rem; }
-.qv-btn-action {
-  padding: 0.8rem 1.5rem; background: var(--qv-accent); color: #fff;
-  border: none; border-radius: var(--qv-radius);
+.hq-btn-action {
+  padding: 0.8rem 1.5rem; background: var(--hq-accent); color: #fff;
+  border: none; border-radius: var(--hq-radius);
   cursor: pointer; font-size: 1rem; font-family: inherit; font-weight: 600;
   transition: background 0.15s;
 }
-.qv-btn-action:hover { background: #6d28d9; }
+.hq-btn-action:hover { background: #6d28d9; }
 </style>
 ```
 
@@ -1091,7 +1091,7 @@ const game = useGameStore()
 
 <script setup lang="ts">
 import { useGameStore } from '../stores/game'
-import { Podium } from '@quizv/ui'
+import { Podium } from '@hashquiz/ui'
 const game = useGameStore()
 </script>
 
@@ -1104,8 +1104,8 @@ h1 { font-size: 2rem; margin-bottom: 1.5rem; }
 - [ ] **Step 7.6: Verify host app starts**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
-bun run quizv dev examples/demo.quizv.md &
+cd /path/to/hashquiz
+bun run hashquiz dev examples/demo.hashquiz.md &
 cd apps/host && bun run dev
 ```
 
@@ -1133,7 +1133,7 @@ git commit -m "✨ Host app: Lobby, Question, Reveal, Podium views"
 
 ```json
 {
-  "name": "@quizv/app-player",
+  "name": "@hashquiz/app-player",
   "version": "0.0.1",
   "type": "module",
   "scripts": {
@@ -1141,9 +1141,9 @@ git commit -m "✨ Host app: Lobby, Question, Reveal, Podium views"
     "build": "vite build"
   },
   "dependencies": {
-    "@quizv/core": "workspace:*",
-    "@quizv/ui": "workspace:*",
-    "@quizv/theme-default": "workspace:*",
+    "@hashquiz/core": "workspace:*",
+    "@hashquiz/ui": "workspace:*",
+    "@hashquiz/theme-default": "workspace:*",
     "canvas-confetti": "^1.9.3",
     "pinia": "^2.1.7",
     "vue": "^3.4.27"
@@ -1185,7 +1185,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import 'virtual:uno.css'
-import '@quizv/theme-default/styles/vars.css'
+import '@hashquiz/theme-default/styles/vars.css'
 
 createApp(App).use(createPinia()).mount('#app')
 ```
@@ -1197,8 +1197,8 @@ The player reads `?code=XXXX` from the URL and connects to `ws://${location.host
 ```typescript
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { QuestionPublic, Score, PodiumEntry } from '@quizv/core'
-import type { GameEvent } from '@quizv/core'
+import type { QuestionPublic, Score, PodiumEntry } from '@hashquiz/core'
+import type { GameEvent } from '@hashquiz/core'
 
 export type PlayerPhase = 'join' | 'lobby' | 'question' | 'feedback' | 'podium'
 
@@ -1288,7 +1288,7 @@ export const useGameStore = defineStore('game', () => {
 - [ ] **Step 8.6: Install dependencies**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 bun install
 ```
 
@@ -1353,23 +1353,23 @@ Reads `?code=XXXX` from URL to pre-fill the join code field.
 ```vue
 <template>
   <div class="join">
-    <h1 class="join__title">QuizV</h1>
+    <h1 class="join__title">HashQuiz</h1>
     <p class="join__sub">Enter the game code to join</p>
 
     <div class="join__form">
       <input
         v-model="code"
-        class="qv-input"
+        class="hq-input"
         placeholder="Game code (e.g. ABC123)"
         style="text-transform:uppercase;letter-spacing:0.12em"
         maxlength="8"
       />
-      <input v-model="pseudo" class="qv-input" placeholder="Your name" maxlength="20" />
-      <input v-model="email"  class="qv-input" type="email" placeholder="Email (optional)" />
+      <input v-model="pseudo" class="hq-input" placeholder="Your name" maxlength="20" />
+      <input v-model="email"  class="hq-input" type="email" placeholder="Email (optional)" />
 
       <p v-if="game.connectError" class="join__error">{{ game.connectError }}</p>
 
-      <button class="qv-btn-primary" :disabled="!code.trim() || !pseudo.trim()" @click="joinGame">
+      <button class="hq-btn-primary" :disabled="!code.trim() || !pseudo.trim()" @click="joinGame">
         Join Game
       </button>
     </div>
@@ -1397,24 +1397,24 @@ function joinGame() {
 
 <style scoped>
 .join { display: flex; flex-direction: column; align-items: center; padding-top: 3rem; }
-.join__title { font-size: 2.5rem; color: var(--qv-accent); margin: 0; }
-.join__sub   { color: var(--qv-text-muted); margin: 0.5rem 0 2rem; }
+.join__title { font-size: 2.5rem; color: var(--hq-accent); margin: 0; }
+.join__sub   { color: var(--hq-text-muted); margin: 0.5rem 0 2rem; }
 .join__form  { width: 100%; display: flex; flex-direction: column; gap: 0.75rem; }
-.join__error { color: var(--qv-wrong); font-size: 0.9rem; margin: 0; }
-.qv-input {
-  width: 100%; padding: 0.85rem; background: var(--qv-surface);
-  border: 1px solid var(--qv-border); border-radius: var(--qv-radius);
-  color: var(--qv-text); font-size: 1rem; font-family: inherit;
+.join__error { color: var(--hq-wrong); font-size: 0.9rem; margin: 0; }
+.hq-input {
+  width: 100%; padding: 0.85rem; background: var(--hq-surface);
+  border: 1px solid var(--hq-border); border-radius: var(--hq-radius);
+  color: var(--hq-text); font-size: 1rem; font-family: inherit;
 }
-.qv-input:focus { outline: none; border-color: var(--qv-accent); }
-.qv-btn-primary {
-  padding: 0.9rem; background: var(--qv-accent); color: #fff;
-  border: none; border-radius: var(--qv-radius); font-size: 1.1rem;
+.hq-input:focus { outline: none; border-color: var(--hq-accent); }
+.hq-btn-primary {
+  padding: 0.9rem; background: var(--hq-accent); color: #fff;
+  border: none; border-radius: var(--hq-radius); font-size: 1.1rem;
   cursor: pointer; font-family: inherit; font-weight: 600; margin-top: 0.25rem;
   transition: background 0.15s;
 }
-.qv-btn-primary:hover:not(:disabled) { background: #6d28d9; }
-.qv-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.hq-btn-primary:hover:not(:disabled) { background: #6d28d9; }
+.hq-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>
 ```
 
@@ -1437,7 +1437,7 @@ const game = useGameStore()
 <style scoped>
 .lobby { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; gap: 0.75rem; }
 .lobby__icon { font-size: 4rem; }
-.lobby__count { color: var(--qv-text-muted); }
+.lobby__count { color: var(--hq-text-muted); }
 </style>
 ```
 
@@ -1449,25 +1449,25 @@ const game = useGameStore()
 <template>
   <div class="question-view" v-if="game.question">
     <!-- Score bar (appears after first feedback) -->
-    <div v-if="game.totalScore > 0" class="qv-score-bar">
+    <div v-if="game.totalScore > 0" class="hq-score-bar">
       Score: <strong>{{ game.totalScore }}</strong> pts
     </div>
 
     <!-- Timer ring -->
-    <div class="qv-timer-wrap">
+    <div class="hq-timer-wrap">
       <TimerRing :total="game.question.timer" :remaining="remaining" :size="100" />
     </div>
 
     <!-- Answer time indicator (shown after submitting) -->
-    <p v-if="game.answered" class="qv-answer-time">
+    <p v-if="game.answered" class="hq-answer-time">
       Answered in {{ Math.round(game.answerTimeMs / 1000) }}s / {{ game.question.timer }}s
     </p>
 
     <!-- Question text -->
-    <h2 class="qv-q-text">{{ game.question.text.replace(/^#+\s/, '') }}</h2>
+    <h2 class="hq-q-text">{{ game.question.text.replace(/^#+\s/, '') }}</h2>
 
     <!-- 2×2 answer grid -->
-    <div class="qv-grid">
+    <div class="hq-grid">
       <AnswerButton
         v-for="(choice, i) in game.question.choices"
         :key="choice.id"
@@ -1484,7 +1484,7 @@ const game = useGameStore()
 <script setup lang="ts">
 import { ref, watch, onUnmounted } from 'vue'
 import { useGameStore } from '../stores/game'
-import { TimerRing, AnswerButton } from '@quizv/ui'
+import { TimerRing, AnswerButton } from '@hashquiz/ui'
 
 const game = useGameStore()
 const remaining = ref(game.question?.timer ?? 0)
@@ -1519,11 +1519,11 @@ function submitAnswer(id: string) {
 
 <style scoped>
 .question-view { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding-top: 0.5rem; }
-.qv-score-bar { align-self: flex-end; font-size: 0.85rem; color: var(--qv-text-muted); }
-.qv-timer-wrap { margin: 0.5rem 0; }
-.qv-answer-time { font-size: 0.85rem; color: var(--qv-text-muted); margin: 0; }
-.qv-q-text { font-size: 1.25rem; text-align: center; margin: 0.5rem 0; line-height: 1.4; }
-.qv-grid { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+.hq-score-bar { align-self: flex-end; font-size: 0.85rem; color: var(--hq-text-muted); }
+.hq-timer-wrap { margin: 0.5rem 0; }
+.hq-answer-time { font-size: 0.85rem; color: var(--hq-text-muted); margin: 0; }
+.hq-q-text { font-size: 1.25rem; text-align: center; margin: 0.5rem 0; line-height: 1.4; }
+.hq-grid { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
 </style>
 ```
 
@@ -1554,12 +1554,12 @@ const game = useGameStore()
 .feedback { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; gap: 0.75rem; }
 .feedback__icon   { font-size: 5rem; margin: 0; line-height: 1; }
 .feedback__delta  { font-size: 2rem; font-weight: 700; margin: 0; }
-.feedback__correct .feedback__icon  { color: var(--qv-correct); }
-.feedback__correct .feedback__delta { color: var(--qv-correct); }
-.feedback__wrong .feedback__icon    { color: var(--qv-wrong); }
-.feedback__wrong .feedback__delta   { color: var(--qv-text-muted); }
-.feedback__total { color: var(--qv-text-muted); margin: 0; }
-.feedback__wait  { font-size: 0.85rem; color: var(--qv-text-muted); margin-top: 1rem; }
+.feedback__correct .feedback__icon  { color: var(--hq-correct); }
+.feedback__correct .feedback__delta { color: var(--hq-correct); }
+.feedback__wrong .feedback__icon    { color: var(--hq-wrong); }
+.feedback__wrong .feedback__delta   { color: var(--hq-text-muted); }
+.feedback__total { color: var(--hq-text-muted); margin: 0; }
+.feedback__wait  { font-size: 0.85rem; color: var(--hq-text-muted); margin-top: 1rem; }
 </style>
 ```
 
@@ -1581,7 +1581,7 @@ const game = useGameStore()
 import { computed, onMounted } from 'vue'
 import confetti from 'canvas-confetti'
 import { useGameStore } from '../stores/game'
-import { Podium } from '@quizv/ui'
+import { Podium } from '@hashquiz/ui'
 
 const game = useGameStore()
 
@@ -1602,21 +1602,21 @@ onMounted(() => {
 
 <style scoped>
 .podium-view { display: flex; flex-direction: column; gap: 1.5rem; }
-.podium-view__rank { text-align: center; background: var(--qv-surface); border-radius: var(--qv-radius); padding: 1.5rem; }
+.podium-view__rank { text-align: center; background: var(--hq-surface); border-radius: var(--hq-radius); padding: 1.5rem; }
 .podium-view__medal { font-size: 3.5rem; margin: 0; line-height: 1; }
 .podium-view__name  { font-size: 1.3rem; font-weight: 700; margin: 0.5rem 0 0.25rem; }
-.podium-view__score { color: var(--qv-accent); font-size: 1.5rem; font-weight: 700; margin: 0; }
+.podium-view__score { color: var(--hq-accent); font-size: 1.5rem; font-weight: 700; margin: 0; }
 </style>
 ```
 
 - [ ] **Step 9.7: Verify player app starts**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv/apps/player
+cd /path/to/hashquiz/apps/player
 bun run dev
 ```
 
-Open `http://localhost:3032`. Expected: join form displayed. Try entering a wrong code → "Connection failed" error. Then enter the correct code (printed by `quizv dev`) + a name → lobby screen.
+Open `http://localhost:3032`. Expected: join form displayed. Try entering a wrong code → "Connection failed" error. Then enter the correct code (printed by `hashquiz dev`) + a name → lobby screen.
 
 - [ ] **Step 9.8: Commit**
 
@@ -1627,7 +1627,7 @@ git commit -m "✨ Player app: Join, Lobby, Question, Feedback, Podium views"
 
 ---
 
-## Task 10: `quizv dev` — spawn Vue apps + print joined URLs
+## Task 10: `hashquiz dev` — spawn Vue apps + print joined URLs
 
 **Files:**
 - Modify: `packages/server/src/dev.ts`
@@ -1638,7 +1638,7 @@ Update `devCommand` to spawn both Vite dev servers alongside the Bun WS server a
 - [ ] **Step 10.1: Update `packages/server/src/dev.ts`**
 
 ```typescript
-import { QuizvServer } from './server'
+import { HashQuizServer } from './server'
 import { watch } from 'node:fs'
 import { resolve } from 'node:path'
 import { spawn } from 'node:child_process'
@@ -1653,7 +1653,7 @@ import { spawn } from 'node:child_process'
  */
 export function devCommand(quizFile: string, port?: number): void {
   const absPath = resolve(quizFile)
-  const server = new QuizvServer({ quizFile: absPath, port })
+  const server = new HashQuizServer({ quizFile: absPath, port })
   server.start()
 
   // Spawn Vite dev servers (non-blocking — output piped to stdout)
@@ -1670,17 +1670,17 @@ export function devCommand(quizFile: string, port?: number): void {
 }
 ```
 
-- [ ] **Step 10.2: Verify `bun run dev` in apps works before running `quizv dev`**
+- [ ] **Step 10.2: Verify `bun run dev` in apps works before running `hashquiz dev`**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 bun install
 ```
 
 - [ ] **Step 10.3: Run tests to confirm no regressions**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 bun test
 ```
 
@@ -1690,7 +1690,7 @@ Expected: all tests pass (25+).
 
 ```bash
 git add packages/server/src/dev.ts
-git commit -m "✨ quizv dev spawns Vite apps for host and player"
+git commit -m "✨ hashquiz dev spawns Vite apps for host and player"
 ```
 
 ---
@@ -1702,8 +1702,8 @@ Verify the full standalone game flow using the Vue apps.
 - [ ] **Step 11.1: Start the dev stack**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
-bun run packages/server/src/cli.ts dev examples/demo.quizv.md
+cd /path/to/hashquiz
+bun run packages/server/src/cli.ts dev examples/demo.hashquiz.md
 ```
 
 Expected output includes lines like:
@@ -1761,7 +1761,7 @@ git commit -m "✅ Phase 2 complete: Vue host + player apps, full game flow veri
 
 ```bash
 # Start everything
-bun run packages/server/src/cli.ts dev examples/demo.quizv.md
+bun run packages/server/src/cli.ts dev examples/demo.hashquiz.md
 
 # Host app:   http://localhost:3031
 # Player app: http://192.168.x.x:3032?code=XXXXXX

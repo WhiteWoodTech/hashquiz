@@ -2,7 +2,7 @@ import type { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js'
 import {
   EMAIL_RE, verifySoloRun,
   type Outcome, type Quiz, type RankedRun, type SoloApiPort, type SoloRunSubmission, type SubmittedRun,
-} from '@quizv/core'
+} from '@hashquiz/core'
 import { REBUILD_MIN_MS, realtimeSettled } from './live'
 import { toSoloRunRow } from './rows'
 

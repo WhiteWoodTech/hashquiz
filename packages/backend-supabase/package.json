@@ -1,5 +1,5 @@
 {
-  "name": "@quizv/backend-supabase",
+  "name": "@hashquiz/backend-supabase",
   "version": "0.0.1",
   "license": "SEE LICENSE IN ../../LICENSE.md",
   "type": "module",
@@ -13,7 +13,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@quizv/core": "workspace:*",
+    "@hashquiz/core": "workspace:*",
     "@supabase/supabase-js": "^2.45.4"
   },
   "devDependencies": {

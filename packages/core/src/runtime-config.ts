@@ -3,10 +3,10 @@
  *
  * The apps are built once (and shipped prebuilt in the `hashquiz` npm package), so
  * deployment settings cannot be baked in at build time. `hashquiz build` writes a
- * `/quizv-config.js` script that sets `window.__QUIZV_CONFIG__`; the apps read it
+ * `/hashquiz-config.js` script that sets `window.__HASHQUIZ_CONFIG__`; the apps read it
  * here and fall back to the Vite `VITE_*` env vars (monorepo dev and builds).
  */
-export interface QuizvRuntimeConfig {
+export interface HashQuizRuntimeConfig {
   /** `local` (Bun WS server from `hashquiz dev`) or `supabase` (Supabase Realtime). */
   transport: 'local' | 'supabase'
   supabaseUrl?: string
@@ -29,18 +29,18 @@ type Env = Record<string, string | undefined>
  * `ws://`, which an `https:` page cannot open (mixed content). Supabase mode needs a URL and anon key.
  */
 export function soloAvailable(
-  config: QuizvRuntimeConfig,
+  config: HashQuizRuntimeConfig,
   protocol: string | undefined = (globalThis as { location?: { protocol?: string } }).location?.protocol,
 ): boolean {
   if (config.transport === 'local') return protocol !== 'https:'
   return !!(config.supabaseUrl && config.supabaseAnonKey)
 }
 
-/** Builds the config from environment variables (`HASHQUIZ_*`, then `QUIZV_*`, then `VITE_*`). */
-export function configFromEnv(env: Env): QuizvRuntimeConfig {
+/** Builds the config from environment variables (`HASHQUIZ_*`, then `VITE_*`). */
+export function configFromEnv(env: Env): HashQuizRuntimeConfig {
   const pick = (name: string) =>
-    env[`HASHQUIZ_${name}`] || env[`QUIZV_${name}`] || env[`VITE_${name}`] || undefined
-  const grace = pick('GRACE_MS') ?? env.VITE_QUIZV_GRACE_MS
+    env[`HASHQUIZ_${name}`] || env[`VITE_${name}`] || undefined
+  const grace = pick('GRACE_MS')
   const n = grace !== undefined ? Number(grace) : NaN
   return {
     transport: pick('TRANSPORT') === 'supabase' ? 'supabase' : 'local',
@@ -52,18 +52,18 @@ export function configFromEnv(env: Env): QuizvRuntimeConfig {
   }
 }
 
-/** The `/quizv-config.js` script content for a config. */
-export function renderConfigScript(config: QuizvRuntimeConfig): string {
-  return `window.__QUIZV_CONFIG__ = ${JSON.stringify(config)};\n`
+/** The `/hashquiz-config.js` script content for a config. */
+export function renderConfigScript(config: HashQuizRuntimeConfig): string {
+  return `window.__HASHQUIZ_CONFIG__ = ${JSON.stringify(config)};\n`
 }
 
 /**
- * The config the running app should use: each field of `window.__QUIZV_CONFIG__` when present,
+ * The config the running app should use: each field of `window.__HASHQUIZ_CONFIG__` when present,
  * otherwise the given build-time env (pass `import.meta.env`). The injected config is written by
  * whoever serves the app (`hashquiz dev` / `build`, the monorepo Vite plugin), so it wins.
  */
-export function readRuntimeConfig(buildEnv: Env = {}): QuizvRuntimeConfig {
-  const injected = (globalThis as { __QUIZV_CONFIG__?: Partial<QuizvRuntimeConfig> }).__QUIZV_CONFIG__
+export function readRuntimeConfig(buildEnv: Env = {}): HashQuizRuntimeConfig {
+  const injected = (globalThis as { __HASHQUIZ_CONFIG__?: Partial<HashQuizRuntimeConfig> }).__HASHQUIZ_CONFIG__
   const fromBuild = configFromEnv(buildEnv)
   if (!injected) return fromBuild
   return {

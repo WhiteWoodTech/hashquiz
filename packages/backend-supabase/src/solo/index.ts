@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import type { SoloBackend } from '@quizv/core'
+import type { SoloBackend } from '@hashquiz/core'
 import { SoloApi } from './api'
 import { SoloLive } from './live'
 

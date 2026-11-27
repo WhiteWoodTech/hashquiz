@@ -1,6 +1,6 @@
 # Conventions
 
-Code style, naming, and git conventions for the QuizV project.
+Code style, naming, and git conventions for the HashQuiz project.
 
 ## Code Style
 
@@ -16,14 +16,14 @@ Code style, naming, and git conventions for the QuizV project.
 | Element | Convention | Example |
 |---------|------------|---------|
 | Files | kebab-case | `game-engine.ts`, `FxCountdown.vue` |
-| Classes | PascalCase | `GameEngine`, `QuizvServer` |
+| Classes | PascalCase | `GameEngine`, `HashQuizServer` |
 | Vue components | PascalCase | `AnswerButton.vue`, `PlayerList.vue` |
 | Interfaces | PascalCase with `I` prefix for transport | `IRealtimeTransport` |
 | Types | PascalCase | `GameEvent`, `PlayerState`, `HostPhase` |
 | Functions | camelCase | `parseQuizFile`, `revealAnswer` |
 | Constants | camelCase or UPPER_SNAKE_CASE | `joinCode`, `MAX_RETRY` |
-| CSS classes | BEM kebab | `qv-btn`, `qv-btn__badge`, `qv-btn--selected` |
-| CSS variables | `--qv-*` prefix | `--qv-accent`, `--qv-surface-2` |
+| CSS classes | BEM kebab | `hq-btn`, `hq-btn__badge`, `hq-btn--selected` |
+| CSS variables | `--hq-*` prefix | `--hq-accent`, `--hq-surface-2` |
 
 ### TypeScript Patterns
 
@@ -59,7 +59,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 // 2. Store imports
 import { useGameStore } from '../stores/game'
 // 3. Component imports
-import { FxCountdown } from '@quizv/ui'
+import { FxCountdown } from '@hashquiz/ui'
 
 // 4. Props / emits
 const props = defineProps<{ total: number; remaining: number }>()
@@ -79,7 +79,7 @@ function toggleChoice(id: string) { /* ... */ }
 </script>
 
 <style scoped>
-/* Scoped styles using --qv-* tokens */
+/* Scoped styles using --hq-* tokens */
 </style>
 ```
 
@@ -89,23 +89,23 @@ function toggleChoice(id: string) { /* ... */ }
 
 ### BEM Naming
 
-All component CSS classes use BEM with the `qv-` prefix:
+All component CSS classes use BEM with the `hq-` prefix:
 
 ```css
-.qv-btn { }                /* block */
-.qv-btn__badge { }         /* element */
-.qv-btn--selected { }      /* modifier */
-.qv-btn--a { }             /* color variant modifier */
+.hq-btn { }                /* block */
+.hq-btn__badge { }         /* element */
+.hq-btn--selected { }      /* modifier */
+.hq-btn--a { }             /* color variant modifier */
 ```
 
 ### Design Tokens
 
-Always use CSS custom properties from `@quizv/theme-default`:
+Always use CSS custom properties from `@hashquiz/theme-default`:
 
 ```css
 /* Do */
-background: var(--qv-surface-2);
-color: var(--qv-accent);
+background: var(--hq-surface-2);
+color: var(--hq-accent);
 
 /* Don't */
 background: #1a1a25;
@@ -154,8 +154,8 @@ describe('GameEngine', () => {
 
 ### Coverage Targets
 
-- `@quizv/parser`: all parse paths, edge cases, validation errors
-- `@quizv/core`: all `GameEngine` state transitions, scoring formula
+- `@hashquiz/parser`: all parse paths, edge cases, validation errors
+- `@hashquiz/core`: all `GameEngine` state transitions, scoring formula
 - No tests for Vue components or server (manual E2E instead)
 
 ---
@@ -165,7 +165,7 @@ describe('GameEngine', () => {
 ### Monorepo Layout
 
 ```text
-quizv/
+hashquiz/
 ├── packages/         # Shared packages
 │   └── <name>/
 │       ├── package.json
@@ -198,8 +198,8 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 // 3. Workspace packages
-import type { GameEvent, PlayerState } from '@quizv/core'
-import { FxCountdown } from '@quizv/ui'
+import type { GameEvent, PlayerState } from '@hashquiz/core'
+import { FxCountdown } from '@hashquiz/ui'
 
 // 4. Relative imports
 import { useGameStore } from '../stores/game'

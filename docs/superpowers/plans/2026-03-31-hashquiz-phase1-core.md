@@ -1,10 +1,10 @@
-# QuizV Phase 1 — Core Implementation Plan
+# HashQuiz Phase 1 — Core Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Bootstrap the `quizv/` monorepo and implement the parser, game engine, local transport, and Bun dev server so that `quizv dev demo.quizv.md` starts a working LAN quiz game.
+**Goal:** Bootstrap the `hashquiz/` monorepo and implement the parser, game engine, local transport, and Bun dev server so that `hashquiz dev demo.hashquiz.md` starts a working LAN quiz game.
 
-**Architecture:** Bun workspaces monorepo. `@quizv/parser` converts `.quizv.md` files to typed `Quiz` objects. `@quizv/core` holds the `IRealtimeTransport` interface, `GameEvent` types, and game state machine. `@quizv/transport-local` implements the interface via Bun WebSockets. `@quizv/server` wires them together into a Bun HTTP + WS server and exposes the `quizv` CLI.
+**Architecture:** Bun workspaces monorepo. `@hashquiz/parser` converts `.hashquiz.md` files to typed `Quiz` objects. `@hashquiz/core` holds the `IRealtimeTransport` interface, `GameEvent` types, and game state machine. `@hashquiz/transport-local` implements the interface via Bun WebSockets. `@hashquiz/server` wires them together into a Bun HTTP + WS server and exposes the `hashquiz` CLI.
 
 **Tech Stack:** Bun 1.x, TypeScript 5 (strict), Vue 3, Vite 5, UnoCSS, gray-matter, unified/remark, ws-compatible Bun native WebSocket
 
@@ -15,14 +15,14 @@
 ### New project root
 
 ```
-/Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv/
+/path/to/hashquiz/
 ├── package.json                 # Bun workspaces root
 ├── bunfig.toml
 ├── tsconfig.base.json
 ├── .gitignore
 ├── .editorconfig
 ├── examples/
-│   └── demo.quizv.md
+│   └── demo.hashquiz.md
 └── packages/
     ├── parser/
     │   ├── package.json
@@ -30,7 +30,7 @@
     │   └── src/
     │       ├── index.ts          # exports: parseQuizFile, validateQuiz
     │       ├── types.ts          # Quiz, Question, Choice, ValidationResult
-    │       ├── split.ts          # split raw .quizv.md into raw blocks
+    │       ├── split.ts          # split raw .hashquiz.md into raw blocks
     │       ├── parse-meta.ts     # parse quiz-level frontmatter block
     │       └── parse-question.ts # parse one question block → Question
     ├── core/
@@ -52,8 +52,8 @@
         ├── package.json
         ├── tsconfig.json
         └── src/
-            ├── cli.ts            # quizv binary entry — parses argv, dispatches commands
-            ├── server.ts         # QuizvServer class (Bun HTTP + WS, serves host/player HTML)
+            ├── cli.ts            # hashquiz binary entry — parses argv, dispatches commands
+            ├── server.ts         # HashQuizServer class (Bun HTTP + WS, serves host/player HTML)
             └── dev.ts            # devCommand(quizFile): watches file, restarts game on change
 ```
 
@@ -78,17 +78,17 @@ apps/
 ## Task 1: Initialize Repo
 
 **Files:**
-- Create: `quizv/package.json`
-- Create: `quizv/bunfig.toml`
-- Create: `quizv/tsconfig.base.json`
-- Create: `quizv/.gitignore`
-- Create: `quizv/.editorconfig`
+- Create: `hashquiz/package.json`
+- Create: `hashquiz/bunfig.toml`
+- Create: `hashquiz/tsconfig.base.json`
+- Create: `hashquiz/.gitignore`
+- Create: `hashquiz/.editorconfig`
 
 - [ ] **Step 1.1: Create project directory and git repo**
 
 ```bash
-mkdir -p /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+mkdir -p /path/to/hashquiz
+cd /path/to/hashquiz
 git init
 ```
 
@@ -96,7 +96,7 @@ git init
 
 ```json
 {
-  "name": "quizv",
+  "name": "hashquiz",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -173,14 +173,14 @@ insert_final_newline = true
 - [ ] **Step 1.7: Commit**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 git add .
-git commit -m "📦 Initialize quizv monorepo"
+git commit -m "📦 Initialize hashquiz monorepo"
 ```
 
 ---
 
-## Task 2: `@quizv/parser` — Types
+## Task 2: `@hashquiz/parser` — Types
 
 **Files:**
 - Create: `packages/parser/package.json`
@@ -191,7 +191,7 @@ git commit -m "📦 Initialize quizv monorepo"
 
 ```json
 {
-  "name": "@quizv/parser",
+  "name": "@hashquiz/parser",
   "version": "0.0.1",
   "type": "module",
   "main": "./src/index.ts",
@@ -270,7 +270,7 @@ export interface ValidationResult {
 - [ ] **Step 2.4: Install parser dependencies**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 bun install
 ```
 
@@ -278,20 +278,20 @@ bun install
 
 ```bash
 git add packages/parser
-git commit -m "📦 Add @quizv/parser package scaffold with types"
+git commit -m "📦 Add @hashquiz/parser package scaffold with types"
 ```
 
 ---
 
-## Task 3: `@quizv/parser` — Write Failing Tests
+## Task 3: `@hashquiz/parser` — Write Failing Tests
 
 **Files:**
-- Create: `packages/parser/tests/fixtures/valid.quizv.md`
-- Create: `packages/parser/tests/fixtures/multi-correct.quizv.md`
-- Create: `packages/parser/tests/fixtures/missing-title.quizv.md`
+- Create: `packages/parser/tests/fixtures/valid.hashquiz.md`
+- Create: `packages/parser/tests/fixtures/multi-correct.hashquiz.md`
+- Create: `packages/parser/tests/fixtures/missing-title.hashquiz.md`
 - Create: `packages/parser/tests/parser.test.ts`
 
-- [ ] **Step 3.1: Create `packages/parser/tests/fixtures/valid.quizv.md`**
+- [ ] **Step 3.1: Create `packages/parser/tests/fixtures/valid.hashquiz.md`**
 
 ```markdown
 ---
@@ -334,7 +334,7 @@ difficulty: medium
 > Red, blue, and yellow are the primary colors in the traditional color wheel.
 ```
 
-- [ ] **Step 3.2: Create `packages/parser/tests/fixtures/multi-correct.quizv.md`**
+- [ ] **Step 3.2: Create `packages/parser/tests/fixtures/multi-correct.hashquiz.md`**
 
 ```markdown
 ---
@@ -356,7 +356,7 @@ difficulty: hard
 - [ ] 5
 ```
 
-- [ ] **Step 3.3: Create `packages/parser/tests/fixtures/missing-title.quizv.md`**
+- [ ] **Step 3.3: Create `packages/parser/tests/fixtures/missing-title.hashquiz.md`**
 
 ```markdown
 ---
@@ -389,7 +389,7 @@ const fixture = (name: string) =>
 
 describe('parseQuizFile', () => {
   test('parses quiz meta from first frontmatter block', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     expect(quiz.meta.title).toBe('Demo Quiz')
     expect(quiz.meta.description).toBe('A test quiz')
     expect(quiz.meta.theme).toBe('default')
@@ -398,12 +398,12 @@ describe('parseQuizFile', () => {
   })
 
   test('parses correct number of questions', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     expect(quiz.questions).toHaveLength(2)
   })
 
   test('parses single-choice question', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     const q = quiz.questions[0]!
     expect(q.type).toBe('single')
     expect(q.timer).toBe(20)
@@ -416,32 +416,32 @@ describe('parseQuizFile', () => {
   })
 
   test('parses multiple-choice question', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     const q = quiz.questions[1]!
     expect(q.type).toBe('multiple')
     expect(q.choices.filter(c => c.isCorrect)).toHaveLength(3)
   })
 
   test('parses explanation from blockquote', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     expect(quiz.questions[0]!.explanation).toBe(
       'The sky is blue due to Rayleigh scattering.'
     )
   })
 
   test('assigns sequential choice ids a/b/c/d', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     const ids = quiz.questions[0]!.choices.map(c => c.id)
     expect(ids).toEqual(['a', 'b', 'c', 'd'])
   })
 
   test('infers type:multiple when multiple [x] present and type not set', () => {
-    const quiz = parseQuizFile(fixture('multi-correct.quizv.md'))
+    const quiz = parseQuizFile(fixture('multi-correct.hashquiz.md'))
     expect(quiz.questions[0]!.type).toBe('multiple')
   })
 
   test('defaults missing optional meta fields', () => {
-    const quiz = parseQuizFile(fixture('missing-title.quizv.md'))
+    const quiz = parseQuizFile(fixture('missing-title.hashquiz.md'))
     expect(quiz.meta.tags).toEqual([])
     expect(quiz.meta.author).toBeUndefined()
   })
@@ -449,14 +449,14 @@ describe('parseQuizFile', () => {
 
 describe('validateQuiz', () => {
   test('returns valid:true for valid quiz', () => {
-    const quiz = parseQuizFile(fixture('valid.quizv.md'))
+    const quiz = parseQuizFile(fixture('valid.hashquiz.md'))
     const result = validateQuiz(quiz)
     expect(result.valid).toBe(true)
     expect(result.errors).toHaveLength(0)
   })
 
   test('returns error when title is missing', () => {
-    const quiz = parseQuizFile(fixture('missing-title.quizv.md'))
+    const quiz = parseQuizFile(fixture('missing-title.hashquiz.md'))
     const result = validateQuiz(quiz)
     expect(result.valid).toBe(false)
     expect(result.errors.some(e => e.field === 'title')).toBe(true)
@@ -498,7 +498,7 @@ difficulty: easy
 - [ ] **Step 3.5: Run tests to confirm they fail**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 bun test packages/parser
 ```
 
@@ -508,12 +508,12 @@ Expected: FAIL — `Cannot find module '../src/index'`
 
 ```bash
 git add packages/parser/tests
-git commit -m "🧪 Add failing tests for @quizv/parser"
+git commit -m "🧪 Add failing tests for @hashquiz/parser"
 ```
 
 ---
 
-## Task 4: `@quizv/parser` — Implementation
+## Task 4: `@hashquiz/parser` — Implementation
 
 **Files:**
 - Create: `packages/parser/src/split.ts`
@@ -527,7 +527,7 @@ Splits the raw file content into raw text blocks separated by `---` on its own l
 
 ```typescript
 /**
- * Split a .quizv.md file into raw text blocks.
+ * Split a .hashquiz.md file into raw text blocks.
  * The file uses `---` on a line by itself as a separator.
  * Returns an array of trimmed strings. Empty blocks are filtered out.
  */
@@ -662,7 +662,7 @@ import type { Quiz, ValidationResult } from './types'
 export type { Quiz, QuizMeta, Question, Choice, ValidationResult, ValidationError } from './types'
 
 /**
- * Parse a full .quizv.md file content into a typed Quiz object.
+ * Parse a full .hashquiz.md file content into a typed Quiz object.
  * Throws if the file cannot be parsed at all.
  */
 export function parseQuizFile(content: string): Quiz {
@@ -718,7 +718,7 @@ export function validateQuiz(quiz: Quiz): ValidationResult {
 - [ ] **Step 4.5: Run tests to verify they pass**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 bun test packages/parser
 ```
 
@@ -728,12 +728,12 @@ Expected: All tests PASS
 
 ```bash
 git add packages/parser/src
-git commit -m "✨ Implement @quizv/parser — parseQuizFile and validateQuiz"
+git commit -m "✨ Implement @hashquiz/parser — parseQuizFile and validateQuiz"
 ```
 
 ---
 
-## Task 5: `@quizv/core` — Types and Transport Interface
+## Task 5: `@hashquiz/core` — Types and Transport Interface
 
 **Files:**
 - Create: `packages/core/package.json`
@@ -746,7 +746,7 @@ git commit -m "✨ Implement @quizv/parser — parseQuizFile and validateQuiz"
 
 ```json
 {
-  "name": "@quizv/core",
+  "name": "@hashquiz/core",
   "version": "0.0.1",
   "type": "module",
   "main": "./src/index.ts",
@@ -757,7 +757,7 @@ git commit -m "✨ Implement @quizv/parser — parseQuizFile and validateQuiz"
     "test": "bun test"
   },
   "dependencies": {
-    "@quizv/parser": "workspace:*"
+    "@hashquiz/parser": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.4.5"
@@ -913,14 +913,14 @@ export const GameEvents = {
 - [ ] **Step 5.6: Commit**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 git add packages/core
-git commit -m "📦 Add @quizv/core — types, transport interface, game events"
+git commit -m "📦 Add @hashquiz/core — types, transport interface, game events"
 ```
 
 ---
 
-## Task 6: `@quizv/core` — Scoring and Game Engine
+## Task 6: `@hashquiz/core` — Scoring and Game Engine
 
 **Files:**
 - Create: `packages/core/src/scoring.ts`
@@ -999,7 +999,7 @@ Expected: All PASS
 ```typescript
 import { describe, test, expect, mock } from 'bun:test'
 import { GameEngine } from '../src/game'
-import type { Quiz } from '@quizv/parser'
+import type { Quiz } from '@hashquiz/parser'
 import type { IRealtimeTransport } from '../src/transport'
 
 const makeQuiz = (): Quiz => ({
@@ -1122,7 +1122,7 @@ Expected: FAIL — `GameEngine is not defined`
 - [ ] **Step 6.7: Create `packages/core/src/game.ts`**
 
 ```typescript
-import type { Quiz, Question } from '@quizv/parser'
+import type { Quiz, Question } from '@hashquiz/parser'
 import type { IRealtimeTransport } from './transport'
 import { GameEvents } from './events'
 import { calcPoints } from './scoring'
@@ -1272,7 +1272,7 @@ export class GameEngine {
 - [ ] **Step 6.8: Create `packages/core/src/index.ts`**
 
 ```typescript
-export type { Quiz, Question, Choice, QuizMeta } from '@quizv/parser'
+export type { Quiz, Question, Choice, QuizMeta } from '@hashquiz/parser'
 export * from './types'
 export * from './transport'
 export * from './events'
@@ -1292,12 +1292,12 @@ Expected: All PASS
 
 ```bash
 git add packages/core
-git commit -m "✨ Implement @quizv/core — game engine, scoring, events"
+git commit -m "✨ Implement @hashquiz/core — game engine, scoring, events"
 ```
 
 ---
 
-## Task 7: `@quizv/transport-local` — Bun WebSocket Transport
+## Task 7: `@hashquiz/transport-local` — Bun WebSocket Transport
 
 **Files:**
 - Create: `packages/transport-local/package.json`
@@ -1310,7 +1310,7 @@ The local transport uses Bun's native WebSocket server. The `GameEngine` channel
 
 ```json
 {
-  "name": "@quizv/transport-local",
+  "name": "@hashquiz/transport-local",
   "version": "0.0.1",
   "type": "module",
   "main": "./src/index.ts",
@@ -1318,7 +1318,7 @@ The local transport uses Bun's native WebSocket server. The `GameEngine` channel
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@quizv/core": "workspace:*"
+    "@hashquiz/core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.4.5",
@@ -1343,7 +1343,7 @@ The local transport uses Bun's native WebSocket server. The `GameEngine` channel
 - [ ] **Step 7.3: Create `packages/transport-local/src/index.ts`**
 
 ```typescript
-import type { IRealtimeTransport, Unsubscribe, GameEvent, PlayerState } from '@quizv/core'
+import type { IRealtimeTransport, Unsubscribe, GameEvent, PlayerState } from '@hashquiz/core'
 
 type ChannelSubscribers = Set<(event: GameEvent) => void>
 type PresenceStore = Map<string, PlayerState>
@@ -1439,7 +1439,7 @@ export class LocalTransport implements IRealtimeTransport {
 - [ ] **Step 7.4: Install updated dependencies**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 bun install
 ```
 
@@ -1447,7 +1447,7 @@ bun install
 
 ```bash
 git add packages/transport-local
-git commit -m "✨ Implement @quizv/transport-local — Bun WebSocket transport"
+git commit -m "✨ Implement @hashquiz/transport-local — Bun WebSocket transport"
 ```
 
 ---
@@ -1455,16 +1455,16 @@ git commit -m "✨ Implement @quizv/transport-local — Bun WebSocket transport"
 ## Task 8: Create Demo Quiz File
 
 **Files:**
-- Create: `examples/demo.quizv.md`
+- Create: `examples/demo.hashquiz.md`
 
-- [ ] **Step 8.1: Create `examples/demo.quizv.md`**
+- [ ] **Step 8.1: Create `examples/demo.hashquiz.md`**
 
 ```markdown
 ---
-title: QuizV Demo
+title: HashQuiz Demo
 description: A demonstration quiz about web technologies
 theme: default
-author: QuizV
+author: HashQuiz
 tags: [demo, web]
 ---
 
@@ -1539,7 +1539,7 @@ tags: [web]
 bun -e "
 import { parseQuizFile, validateQuiz } from './packages/parser/src/index.ts'
 import { readFileSync } from 'node:fs'
-const content = readFileSync('./examples/demo.quizv.md', 'utf-8')
+const content = readFileSync('./examples/demo.hashquiz.md', 'utf-8')
 const quiz = parseQuizFile(content)
 const result = validateQuiz(quiz)
 console.log('Valid:', result.valid)
@@ -1553,19 +1553,19 @@ Expected output:
 ```
 Valid: true
 Questions: 4
-Title: QuizV Demo
+Title: HashQuiz Demo
 ```
 
 - [ ] **Step 8.3: Commit**
 
 ```bash
-git add examples/demo.quizv.md
-git commit -m "📝 Add demo.quizv.md example quiz file"
+git add examples/demo.hashquiz.md
+git commit -m "📝 Add demo.hashquiz.md example quiz file"
 ```
 
 ---
 
-## Task 9: `@quizv/server` — Bun HTTP + WebSocket Server
+## Task 9: `@hashquiz/server` — Bun HTTP + WebSocket Server
 
 **Files:**
 - Create: `packages/server/package.json`
@@ -1578,11 +1578,11 @@ git commit -m "📝 Add demo.quizv.md example quiz file"
 
 ```json
 {
-  "name": "@quizv/server",
+  "name": "@hashquiz/server",
   "version": "0.0.1",
   "type": "module",
   "bin": {
-    "quizv": "./src/cli.ts"
+    "hashquiz": "./src/cli.ts"
   },
   "main": "./src/server.ts",
   "exports": {
@@ -1592,9 +1592,9 @@ git commit -m "📝 Add demo.quizv.md example quiz file"
     "test": "bun test"
   },
   "dependencies": {
-    "@quizv/core": "workspace:*",
-    "@quizv/parser": "workspace:*",
-    "@quizv/transport-local": "workspace:*"
+    "@hashquiz/core": "workspace:*",
+    "@hashquiz/parser": "workspace:*",
+    "@hashquiz/transport-local": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.4.5",
@@ -1619,10 +1619,10 @@ git commit -m "📝 Add demo.quizv.md example quiz file"
 - [ ] **Step 9.3: Create `packages/server/src/server.ts`**
 
 ```typescript
-import { parseQuizFile, validateQuiz } from '@quizv/parser'
-import { GameEngine } from '@quizv/core'
-import { LocalTransport } from '@quizv/transport-local'
-import type { GameEvent, PlayerState } from '@quizv/core'
+import { parseQuizFile, validateQuiz } from '@hashquiz/parser'
+import { GameEngine } from '@hashquiz/core'
+import { LocalTransport } from '@hashquiz/transport-local'
+import type { GameEvent, PlayerState } from '@hashquiz/core'
 import { readFileSync } from 'node:fs'
 import { networkInterfaces } from 'node:os'
 
@@ -1644,27 +1644,27 @@ function generateJoinCode(): string {
   return Math.random().toString(36).slice(2, 8).toUpperCase()
 }
 
-export interface QuizvServerOptions {
+export interface HashQuizServerOptions {
   port?: number
   quizFile: string
 }
 
 /**
- * QuizvServer manages one game session.
+ * HashQuizServer manages one game session.
  * - Serves a minimal HTML host control page at /
  * - Serves a minimal HTML player join page at /play
  * - Exposes WebSocket at /ws for real-time game events
  *
  * In Phase 1, the HTML pages are minimal stubs. Full Vue apps are served in Phase 6-7.
  */
-export class QuizvServer {
+export class HashQuizServer {
   private engine: GameEngine
   private transport: LocalTransport
   private joinCode: string
   private port: number
   private quizFile: string
 
-  constructor(options: QuizvServerOptions) {
+  constructor(options: HashQuizServerOptions) {
     this.port = options.port ?? 3030
     this.quizFile = options.quizFile
     this.joinCode = generateJoinCode()
@@ -1782,7 +1782,7 @@ export class QuizvServer {
     const playerURL = `http://${localIP}:${this.port}/play`
 
     console.log(`
-  QuizV Dev Server
+  HashQuiz Dev Server
   ─────────────────────────────────────────
   Host:    http://localhost:${this.port}
   Players: ${playerURL}
@@ -1798,7 +1798,7 @@ export class QuizvServer {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>QuizV Host — ${this.joinCode}</title>
+  <title>HashQuiz Host — ${this.joinCode}</title>
   <style>
     body { font-family: system-ui; background: #0a0a0f; color: #fff; padding: 2rem; }
     button { background: #7c3aed; color: #fff; border: none; padding: 0.75rem 1.5rem;
@@ -1810,7 +1810,7 @@ export class QuizvServer {
   </style>
 </head>
 <body>
-  <h1>QuizV Host Control</h1>
+  <h1>HashQuiz Host Control</h1>
   <div id="status">
     <p>Join code: <strong>${this.joinCode}</strong></p>
     <p>Players: <span id="playerCount">0</span></p>
@@ -1846,7 +1846,7 @@ export class QuizvServer {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>QuizV Player</title>
+  <title>HashQuiz Player</title>
   <style>
     body { font-family: system-ui; background: #0a0a0f; color: #fff; padding: 1rem;
            max-width: 480px; margin: 0 auto; }
@@ -1865,7 +1865,7 @@ export class QuizvServer {
 </head>
 <body>
   <div id="join-screen">
-    <h1>Join QuizV</h1>
+    <h1>Join HashQuiz</h1>
     <input id="pseudo" placeholder="Your name" />
     <input id="email" type="email" placeholder="Email (optional)" />
     <button onclick="join()">Join Game</button>
@@ -1970,17 +1970,17 @@ export class QuizvServer {
 - [ ] **Step 9.4: Create `packages/server/src/dev.ts`**
 
 ```typescript
-import { QuizvServer } from './server'
+import { HashQuizServer } from './server'
 import { watch } from 'node:fs'
 import { resolve } from 'node:path'
 
 /**
  * Run the dev server with file watching.
- * On .quizv.md change, prints a notice (full hot-reload requires process restart in Phase 1).
+ * On .hashquiz.md change, prints a notice (full hot-reload requires process restart in Phase 1).
  */
 export function devCommand(quizFile: string, port?: number): void {
   const absPath = resolve(quizFile)
-  const server = new QuizvServer({ quizFile: absPath, port })
+  const server = new HashQuizServer({ quizFile: absPath, port })
   server.start()
 
   watch(absPath, () => {
@@ -1994,7 +1994,7 @@ export function devCommand(quizFile: string, port?: number): void {
 ```typescript
 #!/usr/bin/env bun
 import { devCommand } from './dev'
-import { parseQuizFile, validateQuiz } from '@quizv/parser'
+import { parseQuizFile, validateQuiz } from '@hashquiz/parser'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
@@ -2002,11 +2002,11 @@ const [,, command, arg, ...flags] = process.argv
 
 function printUsage(): void {
   console.log(`
-  quizv <command> [options]
+  hashquiz <command> [options]
 
   Commands:
-    dev <quiz.quizv.md>     Start local dev server with hot-reload
-    check <quiz.quizv.md>   Validate quiz file format
+    dev <quiz.hashquiz.md>     Start local dev server with hot-reload
+    check <quiz.hashquiz.md>   Validate quiz file format
 
   Options:
     --port <number>         Port to listen on (default: 3030)
@@ -2023,13 +2023,13 @@ const port = portFlag !== -1 ? parseInt(flags[portFlag + 1] ?? '3030') : 3030
 
 if (command === 'dev') {
   if (!arg) {
-    console.error('Error: provide a .quizv.md file path\n  quizv dev quiz.quizv.md')
+    console.error('Error: provide a .hashquiz.md file path\n  hashquiz dev quiz.hashquiz.md')
     process.exit(1)
   }
   devCommand(arg, port)
 } else if (command === 'check') {
   if (!arg) {
-    console.error('Error: provide a .quizv.md file path\n  quizv check quiz.quizv.md')
+    console.error('Error: provide a .hashquiz.md file path\n  hashquiz check quiz.hashquiz.md')
     process.exit(1)
   }
   try {
@@ -2061,26 +2061,26 @@ if (command === 'dev') {
 - [ ] **Step 9.6: Install dependencies**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 bun install
 ```
 
-- [ ] **Step 9.7: Test `quizv check`**
+- [ ] **Step 9.7: Test `hashquiz check`**
 
 ```bash
-bun run packages/server/src/cli.ts check examples/demo.quizv.md
+bun run packages/server/src/cli.ts check examples/demo.hashquiz.md
 ```
 
 Expected output:
 ```
-✓ examples/demo.quizv.md is valid
+✓ examples/demo.hashquiz.md is valid
   4 questions, theme: default
 ```
 
-- [ ] **Step 9.8: Test `quizv dev` starts the server**
+- [ ] **Step 9.8: Test `hashquiz dev` starts the server**
 
 ```bash
-bun run packages/server/src/cli.ts dev examples/demo.quizv.md &
+bun run packages/server/src/cli.ts dev examples/demo.hashquiz.md &
 sleep 2
 curl -s http://localhost:3030 | grep -o '<title>[^<]*</title>'
 kill %1
@@ -2088,14 +2088,14 @@ kill %1
 
 Expected output:
 ```
-<title>QuizV Host — XXXXXX</title>
+<title>HashQuiz Host — XXXXXX</title>
 ```
 
 - [ ] **Step 9.9: Commit**
 
 ```bash
 git add packages/server packages/transport-local
-git commit -m "✨ Implement @quizv/server — Bun HTTP+WS dev server and CLI"
+git commit -m "✨ Implement @hashquiz/server — Bun HTTP+WS dev server and CLI"
 ```
 
 ---
@@ -2120,7 +2120,7 @@ Create minimal Vue 3 app stubs for host and player. Full implementation is in Ph
 
 ```json
 {
-  "name": "@quizv/app-host",
+  "name": "@hashquiz/app-host",
   "version": "0.0.1",
   "type": "module",
   "scripts": {
@@ -2128,8 +2128,8 @@ Create minimal Vue 3 app stubs for host and player. Full implementation is in Ph
     "build": "vite build"
   },
   "dependencies": {
-    "@quizv/core": "workspace:*",
-    "@quizv/transport-supabase": "workspace:*",
+    "@hashquiz/core": "workspace:*",
+    "@hashquiz/transport-supabase": "workspace:*",
     "vue": "^3.4.27"
   },
   "devDependencies": {
@@ -2175,7 +2175,7 @@ export default defineConfig({
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QuizV Host</title>
+  <title>HashQuiz Host</title>
 </head>
 <body>
   <div id="app"></div>
@@ -2199,7 +2199,7 @@ createApp(App).mount('#app')
 <template>
   <div style="background:#0a0a0f;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui">
     <div style="text-align:center">
-      <h1 style="color:#7c3aed;font-size:3rem">QuizV</h1>
+      <h1 style="color:#7c3aed;font-size:3rem">HashQuiz</h1>
       <p>Host application — coming in Phase 2</p>
     </div>
   </div>
@@ -2210,7 +2210,7 @@ createApp(App).mount('#app')
 
 ```json
 {
-  "name": "@quizv/app-player",
+  "name": "@hashquiz/app-player",
   "version": "0.0.1",
   "type": "module",
   "scripts": {
@@ -2218,8 +2218,8 @@ createApp(App).mount('#app')
     "build": "vite build"
   },
   "dependencies": {
-    "@quizv/core": "workspace:*",
-    "@quizv/transport-supabase": "workspace:*",
+    "@hashquiz/core": "workspace:*",
+    "@hashquiz/transport-supabase": "workspace:*",
     "vue": "^3.4.27"
   },
   "devDependencies": {
@@ -2265,7 +2265,7 @@ export default defineConfig({
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QuizV Player</title>
+  <title>HashQuiz Player</title>
 </head>
 <body>
   <div id="app"></div>
@@ -2289,29 +2289,29 @@ createApp(App).mount('#app')
 <template>
   <div style="background:#0a0a0f;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui">
     <div style="text-align:center">
-      <h1 style="color:#7c3aed;font-size:3rem">QuizV</h1>
+      <h1 style="color:#7c3aed;font-size:3rem">HashQuiz</h1>
       <p>Player application — coming in Phase 2</p>
     </div>
   </div>
 </template>
 ```
 
-- [ ] **Step 10.13: Create `@quizv/transport-supabase` stub** (needed as dependency)
+- [ ] **Step 10.13: Create `@hashquiz/transport-supabase` stub** (needed as dependency)
 
 ```bash
-mkdir -p /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv/packages/transport-supabase/src
+mkdir -p /path/to/hashquiz/packages/transport-supabase/src
 ```
 
 Create `packages/transport-supabase/package.json`:
 ```json
 {
-  "name": "@quizv/transport-supabase",
+  "name": "@hashquiz/transport-supabase",
   "version": "0.0.1",
   "type": "module",
   "main": "./src/index.ts",
   "exports": { ".": "./src/index.ts" },
   "dependencies": {
-    "@quizv/core": "workspace:*"
+    "@hashquiz/core": "workspace:*"
   }
 }
 ```
@@ -2326,7 +2326,7 @@ export {}
 - [ ] **Step 10.14: Install all dependencies**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 bun install
 ```
 
@@ -2344,7 +2344,7 @@ git commit -m "📦 Add Vue 3 app stubs and transport-supabase stub"
 - [ ] **Step 11.1: Run full test suite**
 
 ```bash
-cd /Users/maxime-lenne/Documents_Non_iCloud/workspace_js_ts/quizv
+cd /path/to/hashquiz
 bun test
 ```
 
@@ -2353,12 +2353,12 @@ Expected: All tests pass (parser + core)
 - [ ] **Step 11.2: Validate demo quiz**
 
 ```bash
-bun run packages/server/src/cli.ts check examples/demo.quizv.md
+bun run packages/server/src/cli.ts check examples/demo.hashquiz.md
 ```
 
 Expected:
 ```
-✓ examples/demo.quizv.md is valid
+✓ examples/demo.hashquiz.md is valid
   4 questions, theme: default
 ```
 
@@ -2366,14 +2366,14 @@ Expected:
 
 ```bash
 # In background
-bun run packages/server/src/cli.ts dev examples/demo.quizv.md &
+bun run packages/server/src/cli.ts dev examples/demo.hashquiz.md &
 sleep 1
 
 # Verify host page loads
-curl -s http://localhost:3030 | grep -c "QuizV Host Control"
+curl -s http://localhost:3030 | grep -c "HashQuiz Host Control"
 
 # Verify player page loads
-curl -s http://localhost:3030/play | grep -c "Join QuizV"
+curl -s http://localhost:3030/play | grep -c "Join HashQuiz"
 
 # Stop background process
 kill %1
@@ -2386,7 +2386,7 @@ Expected: Both greps return `1`
 Start the server and open both pages in a browser:
 
 ```bash
-bun run packages/server/src/cli.ts dev examples/demo.quizv.md
+bun run packages/server/src/cli.ts dev examples/demo.hashquiz.md
 ```
 
 Then:
@@ -2402,7 +2402,7 @@ Then:
 
 ```bash
 git add .
-git commit -m "✅ Phase 1 complete — quizv dev server working end-to-end"
+git commit -m "✅ Phase 1 complete — hashquiz dev server working end-to-end"
 ```
 
 ---
@@ -2413,11 +2413,11 @@ After Phase 1 is complete:
 
 | Deliverable | Status |
 |---|---|
-| `@quizv/parser` — parses `.quizv.md` files | ✓ |
-| `@quizv/core` — game engine + transport interface | ✓ |
-| `@quizv/transport-local` — Bun WS transport | ✓ |
-| `@quizv/server` — HTTP + WS dev server + CLI | ✓ |
-| `quizv dev quiz.quizv.md` — works end-to-end | ✓ |
+| `@hashquiz/parser` — parses `.hashquiz.md` files | ✓ |
+| `@hashquiz/core` — game engine + transport interface | ✓ |
+| `@hashquiz/transport-local` — Bun WS transport | ✓ |
+| `@hashquiz/server` — HTTP + WS dev server + CLI | ✓ |
+| `hashquiz dev quiz.hashquiz.md` — works end-to-end | ✓ |
 | Vue 3 app stubs (host + player) | ✓ stub |
 
-**Next:** Phase 2 plan covers `@quizv/ui` components, `@quizv/theme-default`, full Vue host app, full Vue player app, Supabase schema + transport, and Vercel deployment.
+**Next:** Phase 2 plan covers `@hashquiz/ui` components, `@hashquiz/theme-default`, full Vue host app, full Vue player app, Supabase schema + transport, and Vercel deployment.

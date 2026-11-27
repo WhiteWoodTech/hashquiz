@@ -1,12 +1,12 @@
 /* Shared utilities driven by theme tokens. Import after the theme's vars.css. */
-.qv-label {
-  font-family: var(--qv-font-label);
-  letter-spacing: var(--qv-label-spacing);
+.hq-label {
+  font-family: var(--hq-font-label);
+  letter-spacing: var(--hq-label-spacing);
   text-transform: uppercase;
   font-weight: 500;
 }
 
-.qv-sr-only {
+.hq-sr-only {
   position: absolute;
   width: 1px;
   height: 1px;

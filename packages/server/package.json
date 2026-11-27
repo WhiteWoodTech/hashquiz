@@ -1,10 +1,10 @@
 {
-  "name": "@quizv/server",
+  "name": "@hashquiz/server",
   "version": "0.0.1",
   "license": "SEE LICENSE IN ../../LICENSE.md",
   "type": "module",
   "bin": {
-    "quizv": "./src/cli.ts"
+    "hashquiz": "./src/cli.ts"
   },
   "main": "./src/server.ts",
   "exports": {
@@ -14,10 +14,10 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@quizv/core": "workspace:*",
-    "@quizv/parser": "workspace:*",
-    "@quizv/backend-local": "workspace:*",
-    "@quizv/backend-supabase": "workspace:*"
+    "@hashquiz/core": "workspace:*",
+    "@hashquiz/parser": "workspace:*",
+    "@hashquiz/backend-local": "workspace:*",
+    "@hashquiz/backend-supabase": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.4.5",

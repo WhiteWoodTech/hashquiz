@@ -43,13 +43,13 @@ const solo = useSoloStore()
 .solo-end { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; padding-top: 1rem; }
 .solo-end__summary { text-align: center; }
 .solo-end__name  { font-size: 1.3rem; font-weight: 700; margin: 0 0 0.25rem; }
-.solo-end__score { color: var(--qv-accent); font-size: 2rem; font-weight: 700; margin: 0; }
-.solo-end__meta  { color: var(--qv-text-muted); margin: 0.35rem 0 0; font-variant-numeric: tabular-nums; }
+.solo-end__score { color: var(--hq-accent); font-size: 2rem; font-weight: 700; margin: 0; }
+.solo-end__meta  { color: var(--hq-text-muted); margin: 0.35rem 0 0; font-variant-numeric: tabular-nums; }
 .solo-end__rank  { font-size: 1.15rem; font-weight: 700; margin: 0.5rem 0 0; }
-.solo-end__status { margin: 0; font-size: 0.9rem; color: var(--qv-text-muted); }
+.solo-end__status { margin: 0; font-size: 0.9rem; color: var(--hq-text-muted); }
 .solo-end__status:empty { display: none; }
 .solo-end__retry {
   background: none; border: none; padding: 0.25rem; font-family: inherit;
-  color: var(--qv-wrong); text-decoration: underline; cursor: pointer;
+  color: var(--hq-wrong); text-decoration: underline; cursor: pointer;
 }
 </style>

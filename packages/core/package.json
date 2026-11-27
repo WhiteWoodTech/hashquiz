@@ -1,5 +1,5 @@
 {
-  "name": "@quizv/core",
+  "name": "@hashquiz/core",
   "version": "0.0.1",
   "license": "SEE LICENSE IN ../../LICENSE.md",
   "type": "module",
@@ -13,7 +13,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@quizv/parser": "workspace:*"
+    "@hashquiz/parser": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.4.5"

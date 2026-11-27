@@ -2,18 +2,18 @@ import { afterEach, describe, expect, test } from 'bun:test'
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
-import { SoloSession, verifySoloRun, type LiveState, type SoloRunSubmission } from '@quizv/core'
-import { deckVersion } from '@quizv/core/decks'
-import { parseManifest, SoloDeckSource } from '@quizv/core/solo-decks'
+import { SoloSession, verifySoloRun, type LiveState, type SoloRunSubmission } from '@hashquiz/core'
+import { deckVersion } from '@hashquiz/core/decks'
+import { parseManifest, SoloDeckSource } from '@hashquiz/core/solo-decks'
 import { parseQuizFile } from '../../parser/src/index'
 import { collectDecks } from '../../server/src/web-assets'
 import { SOLO_WS_ROLE, soloTopic, type SoloServerMsg } from '../src/solo/protocol'
 import { createSoloHttpHandler, SOLO_MAX_BODY, SoloPresenceHub, type SoloConn } from '../src/solo/server'
 import { SoloStore } from '../src/solo/store'
 
-const DEMO = readFileSync(resolve(import.meta.dir, '../../../examples/demo.quizv.md'), 'utf-8')
-const DECK = 'demo/index.quizv.md'
-const ROOM = 'room/index.quizv.md'
+const DEMO = readFileSync(resolve(import.meta.dir, '../../../examples/demo.hashquiz.md'), 'utf-8')
+const DECK = 'demo/index.hashquiz.md'
+const ROOM = 'room/index.hashquiz.md'
 const BASE = 'http://localhost:3030'
 
 const dirs: string[] = []
@@ -136,7 +136,7 @@ describe('createSoloHttpHandler', () => {
   test('deck edited on disk', async () => {
     const { handle, dir, store } = setup()
     expect((await call(handle, post('/solo/runs', JSON.stringify(play())))).status).toBe(200)
-    const edited = DEMO.replace('title: QuizV Demo', 'title: QuizV Demo v2')
+    const edited = DEMO.replace('title: HashQuiz Demo', 'title: HashQuiz Demo v2')
     writeDeck(dir, DECK, edited)
     expect((await call(handle, post('/solo/runs', JSON.stringify(play(edited))))).status).toBe(200)
     const old = await call(handle, post('/solo/runs', JSON.stringify(play())))
@@ -295,7 +295,7 @@ describe('createSoloHttpHandler', () => {
 describe('protocol', () => {
   test('role and topic', () => {
     expect(SOLO_WS_ROLE).toBe('solo')
-    expect(soloTopic('a/b.quizv.md')).toBe('solo:a/b.quizv.md')
+    expect(soloTopic('a/b.hashquiz.md')).toBe('solo:a/b.hashquiz.md')
   })
 })
 

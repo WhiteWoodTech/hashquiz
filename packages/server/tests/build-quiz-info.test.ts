@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'bun:test'
 import { buildQuizInfo } from '../src/server'
-import type { Quiz } from '@quizv/parser'
+import type { Quiz } from '@hashquiz/parser'
 
 const makeQuiz = (overrides: Partial<Quiz['meta']> = {}, questions: Quiz['questions'] = []): Quiz => ({
   meta: { title: 'Test', theme: 'default', tags: [], oneShoot: true, ...overrides },

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from 'bun:test'
-import { configFromEnv, readRuntimeConfig, renderConfigScript } from '../src/runtime-config'
+import { configFromEnv, readRuntimeConfig, renderConfigScript, soloAvailable } from '../src/runtime-config'
 
 const g = globalThis as { __QUIZV_CONFIG__?: unknown }
 afterEach(() => { delete g.__QUIZV_CONFIG__ })
@@ -40,5 +40,15 @@ describe('readRuntimeConfig', () => {
     const script = renderConfigScript({ transport: 'supabase', supabaseUrl: 'u', soloScoring: 'browser' })
     new Function(script.replace('window.', 'globalThis.'))()
     expect(readRuntimeConfig().supabaseUrl).toBe('u')
+  })
+})
+
+describe('soloAvailable', () => {
+  test('soloAvailable: local is always available', () => {
+    expect(soloAvailable({ transport: 'local', soloScoring: 'browser' })).toBe(true)
+  })
+  test('soloAvailable: supabase needs url and anon key', () => {
+    expect(soloAvailable({ transport: 'supabase', supabaseUrl: 'u', soloScoring: 'browser' })).toBe(false)
+    expect(soloAvailable({ transport: 'supabase', supabaseUrl: 'u', supabaseAnonKey: 'k', soloScoring: 'browser' })).toBe(true)
   })
 })

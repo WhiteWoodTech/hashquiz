@@ -6,7 +6,8 @@
   "main": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./decks": "./src/decks.ts"
+    "./decks": "./src/decks.ts",
+    "./solo-decks": "./src/solo-decks.ts"
   },
   "scripts": {
     "test": "bun test"

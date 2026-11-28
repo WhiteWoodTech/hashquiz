@@ -5,6 +5,7 @@ import { configFromEnv, renderConfigScript } from '@hashquiz/core'
 import { collectDecks } from './web-assets'
 import { findWebDist } from './web-dist'
 import { applySeo, renderRobots, seoFromEnv } from './seo'
+import { THEME_FILE, linkTheme } from './theme'
 
 export interface BuildOptions {
   decksDir: string
@@ -21,7 +22,7 @@ export interface BuildOptions {
  * Static site for a decks folder: the prebuilt apps, `host/decks.json` (host
  * list), the same `decks.json` at the root (player solo decks) and
  * `hashquiz-config.js` (transport + Supabase settings from the env), the files
- * of `publicDir`, a default `robots.txt` and the search settings of
+ * of `publicDir` (a `theme.css` there is linked from both pages, see theme.ts), a default `robots.txt` and the search settings of
  * `HASHQUIZ_SITE_URL` / `HASHQUIZ_LANG` / `HASHQUIZ_INDEXABLE`. Deployable
  * as-is (e.g. Vercel, see docs/DEPLOY.md). Returns the number of decks.
  */
@@ -63,7 +64,11 @@ export function buildSite({ decksDir, outDir, publicDir, env = process.env }: Bu
   writeFileSync(resolve(out, 'robots.txt'), renderRobots(seo, hasSitemap))
   if (hasPublic) cpSync(publicAbs, out, { recursive: true })
   const playerHtml = resolve(out, 'index.html')
-  writeFileSync(playerHtml, applySeo(readFileSync(playerHtml, 'utf-8'), seo))
+  const themed = hasPublic && existsSync(resolve(publicAbs, THEME_FILE))
+  const page = (html: string) => (themed ? linkTheme(html) : html)
+  writeFileSync(playerHtml, page(applySeo(readFileSync(playerHtml, 'utf-8'), seo)))
+  const hostHtml = resolve(out, 'host/index.html')
+  if (themed) writeFileSync(hostHtml, page(readFileSync(hostHtml, 'utf-8')))
   const manifest = JSON.stringify(decks)
   writeFileSync(resolve(out, 'host/decks.json'), manifest)
   writeFileSync(resolve(out, 'decks.json'), manifest)

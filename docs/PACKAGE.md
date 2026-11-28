@@ -61,6 +61,23 @@ can add `llms.txt` or `sitemap.xml`, or replace `og.png` and `robots.txt`. The `
 `robots.txt` appears only when `public/` holds a `sitemap.xml` and `HASHQUIZ_SITE_URL` is set.
 Background: [SEO audit](https://github.com/WhiteWoodTech/hashquiz/blob/develop/docs/SEO_AUDIT.md).
 
+### Theme
+
+A `public/theme.css` restyles the site without forking the engine: `build` (and `dev` from the package) links it
+last in the player and host pages, so a `:root` block there overrides the `--hq-*` tokens (colors, fonts, radii,
+offset shadows, particles). Replace `favicon.svg` (and `favicon-32.png`, `apple-touch-icon.png`) the same way.
+Token list: [design system](https://github.com/WhiteWoodTech/hashquiz/blob/develop/docs/DESIGN_SYSTEM.md#deck-repository-theme).
+
+```css
+/* public/theme.css */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+:root {
+  --hq-bg: #1a1e1f;
+  --hq-accent: #5c7063;
+  --hq-font-display: 'Roboto', system-ui, sans-serif;
+}
+```
+
 The `VITE_*` names (`VITE_TRANSPORT`, …) are accepted too. The prebuilt apps carry no
 settings of their own: whatever `hashquiz-config.js` says (including `local` and `browser`) is what they use.
 

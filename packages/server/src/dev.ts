@@ -6,6 +6,7 @@ import { renderConfigScript } from '@hashquiz/core'
 import { findMonorepoRoot, findWebDist } from './web-dist'
 import { collectDecks, renderDecksJson } from './web-assets'
 import { repoDecksDir } from './vite-plugin'
+import { THEME_FILE, linkTheme } from './theme'
 
 /**
  * What `hashquiz dev <arg>` runs. A file is the room deck; the decks folder (host list, solo decks) is
@@ -56,8 +57,12 @@ export function devCommand(arg: string, port?: number, decksFlag?: string): void
       console.error('Prebuilt web apps not found: reinstall the hashquiz package.')
       process.exit(1)
     }
-    serveStatic(web, 3031, '/host/', decksDir)
-    serveStatic(web, 3032, '/', decksDir)
+    // The decks repo's public folder (llms.txt, og.png, theme.css...) over the prebuilt apps, as `build` does.
+    const publicDir = resolve('public')
+    const pub = existsSync(publicDir) && statSync(publicDir).isDirectory() ? publicDir : null
+    serveStatic(web, 3031, '/host/', decksDir, pub)
+    serveStatic(web, 3032, '/', decksDir, pub)
+    if (pub && existsSync(join(pub, THEME_FILE))) console.log(`  Theme:      ${join(pub, THEME_FILE)}`)
     console.log('  Host app:   http://localhost:3031/host/\n  Player app: http://localhost:3032/\n')
   }
 
@@ -70,8 +75,11 @@ export function devCommand(arg: string, port?: number, decksFlag?: string): void
   })
 }
 
-/** Minimal static server for the prebuilt apps, local transport config, decks listed from `decksDir`. */
-function serveStatic(root: string, port: number, home: string, decksDir: string): void {
+/**
+ * Minimal static server for the prebuilt apps, local transport config, decks listed from `decksDir`.
+ * Files of `publicDir` win over the apps' files; its `theme.css` is linked from the pages.
+ */
+function serveStatic(root: string, port: number, home: string, decksDir: string, publicDir: string | null): void {
   const config = renderConfigScript({ transport: 'local', soloScoring: 'browser' })
   Bun.serve({
     port,
@@ -85,12 +93,20 @@ function serveStatic(root: string, port: number, home: string, decksDir: string)
         return new Response(renderDecksJson(decksDir), { headers: { 'Content-Type': 'application/json' } })
       }
       if (pathname === '/' && home !== '/') return Response.redirect(home, 302)
-      const file = resolve(join(root, decodeURIComponent(pathname)))
-      if (!file.startsWith(root)) return new Response('Not found', { status: 404 })
-      if (existsSync(file) && statSync(file).isFile()) return new Response(Bun.file(file))
+      const themed = publicDir !== null && existsSync(join(publicDir, THEME_FILE))
+      const page = async (path: string) => new Response(
+        themed ? linkTheme(await Bun.file(path).text()) : Bun.file(path),
+        { headers: { 'Content-Type': 'text/html; charset=utf-8' } },
+      )
+      for (const base of publicDir ? [publicDir, root] : [root]) {
+        const file = resolve(join(base, decodeURIComponent(pathname)))
+        if (!file.startsWith(base)) return new Response('Not found', { status: 404 })
+        if (existsSync(file) && statSync(file).isFile()) return file.endsWith('.html') ? page(file) : new Response(Bun.file(file))
+        const dirIndex = join(file, 'index.html')
+        if (base === root && existsSync(dirIndex)) return page(dirIndex)
+      }
       // SPA fallback: the app's own index.html
-      const index = pathname.startsWith('/host') ? join(root, 'host/index.html') : join(root, 'index.html')
-      return new Response(Bun.file(index))
+      return page(pathname.startsWith('/host') ? join(root, 'host/index.html') : join(root, 'index.html'))
     },
   })
 }

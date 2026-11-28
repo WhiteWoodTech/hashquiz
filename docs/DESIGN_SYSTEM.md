@@ -38,6 +38,16 @@ import '@hashquiz/ui/styles/base.css'
 | `@hashquiz/theme-default` | Pixel retromodern brand: Space Grotesk text, Jersey 10 pixel titles and figures, JetBrains Mono labels, logo violets on near-black, square corners, 4 px two-tone offset shadows, stepped bars, square white particles |
 | `@hashquiz/theme-original` | Previous look: Syne, `#0a0a0f` surfaces, 12/8 px radii, tight label spacing, fewer particles |
 
+### Deck repository theme
+
+A decks repository restyles its site with a `public/theme.css` (no fork): `hashquiz build` and `hashquiz dev`
+(npm package) link it after the app styles in the player and host pages (`packages/server/src/theme.ts`), so its
+`:root` overrides any `--hq-*` token above. Keep it to tokens: component classes are not a stable API.
+Useful knobs: `--hq-font-pixel` (titles, figures, join code, buttons: any display font), `--hq-pixel: 0px` and
+`--hq-step-gap: 0px` (no offset shadows, plain bars), `--hq-fx-pixel: 0` (round particles), `--hq-radius*`.
+The logo keeps its shape and takes `--hq-brand-violet` / `--hq-brand-purple`. Fonts are loaded by the theme
+itself (`@import` first in the file). Example: WhiteWoodTech/hashquiz-trainings-decks.
+
 `packages/ui/tests/theme-parity.test.ts` fails if the two themes do not declare exactly the same variables.
 When adding a token, add it to both `vars.css` files.
 

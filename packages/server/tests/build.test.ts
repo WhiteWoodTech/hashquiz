@@ -6,6 +6,7 @@ import { collectDecks } from '../src/web-assets'
 import { buildSite } from '../src/build'
 import { findWebDist } from '../src/web-dist'
 import { applySeo, renderRobots, seoFromEnv } from '../src/seo'
+import { linkTheme } from '../src/theme'
 
 const tmp = mkdtempSync(join(tmpdir(), 'hashquiz-build-'))
 afterAll(() => rmSync(tmp, { recursive: true, force: true }))
@@ -42,6 +43,30 @@ describe('buildSite', () => {
     // The player reads the same manifest at the site root (solo decks).
     expect(readFileSync(join(out, 'decks.json'), 'utf-8')).toBe(readFileSync(join(out, 'host/decks.json'), 'utf-8'))
     expect(readFileSync(join(out, 'hashquiz-config.js'), 'utf-8')).toContain('"transport":"supabase"')
+  })
+})
+
+describe('theme', () => {
+  test('links theme.css last in <head>, once', () => {
+    const html = '<head>\n  <link rel="stylesheet" href="/assets/app.css">\n</head>\n<body></body>'
+    const out = linkTheme(html)
+    expect(out.indexOf('href="/theme.css"')).toBeGreaterThan(out.indexOf('app.css'))
+    expect(out.indexOf('href="/theme.css"')).toBeLessThan(out.indexOf('</head>'))
+    expect(linkTheme(out)).toBe(out)
+  })
+
+  test.skipIf(!findWebDist())('build links public/theme.css from the player and host pages only when present', () => {
+    const dir = decksDir({ 'demo/index.hashquiz.md': demo })
+    const plain = join(tmp, 'out-plain')
+    buildSite({ decksDir: dir, outDir: plain, publicDir: mkdtempSync(join(tmp, 'pub-')), env: {} })
+    expect(readFileSync(join(plain, 'index.html'), 'utf-8')).not.toContain('theme.css')
+    const pub = mkdtempSync(join(tmp, 'pub-'))
+    writeFileSync(join(pub, 'theme.css'), ':root { --hq-accent: #5c7063; }')
+    const out = join(tmp, 'out-theme')
+    buildSite({ decksDir: dir, outDir: out, publicDir: pub, env: {} })
+    expect(readFileSync(join(out, 'theme.css'), 'utf-8')).toContain('#5c7063')
+    expect(readFileSync(join(out, 'index.html'), 'utf-8')).toContain('<link rel="stylesheet" href="/theme.css">')
+    expect(readFileSync(join(out, 'host/index.html'), 'utf-8')).toContain('<link rel="stylesheet" href="/theme.css">')
   })
 })
 

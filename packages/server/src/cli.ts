@@ -42,7 +42,8 @@ function printUsage(): void {
     --out <dir>             Output folder for build (default: dist)
     --public <dir>          Files copied to the site root by build, e.g.
                             robots.txt, llms.txt, og.png (default: ./public
-                            when it exists)
+                            when it exists). A theme.css there overrides the
+                            --hq-* design tokens (build and dev).
 `)
 }
 

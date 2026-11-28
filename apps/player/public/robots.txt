@@ -1,0 +1,3 @@
+# HashQuiz: the host dashboard is a tool, never a search result.
+User-agent: *
+Disallow: /host

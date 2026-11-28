@@ -174,22 +174,23 @@ Mis de côté le 28 novembre 2026 : ce bloc est suivi dans `WhiteWoodTech/hashqu
 #### Pages publiques de l'application
 
 Fait le 28 novembre 2026 : `hashquiz build` écrit ces pages en HTML statique (sans JavaScript) quand
-`HASHQUIZ_CATALOG=true`. Le catalogue est **désactivé par défaut**, car la page de détails publie les bonnes réponses :
-chaque dépôt de decks choisit de l'ouvrir. Libellés en français avec `HASHQUIZ_LANG=fr`, en anglais sinon.
+`HASHQUIZ_CATALOG=true`. Aucune page ne montre de question ni de réponse : elles restent réservées aux animateurs.
+Le catalogue est **désactivé par défaut** : chaque dépôt de decks choisit de lister ses quiz publiquement.
+Libellés en français avec `HASHQUIZ_LANG=fr`, en anglais sinon.
 
 | # | Action | Effort | Où |
 | --- | --- | --- | --- |
 | P2.7 | ✅ **Index des quiz** (`/quiz/`) : tous les decks avec titre, description, tags, difficulté, nombre de questions, solo ; pages de tags en vraies URL (`/quiz/tag/<tag>/`) | M | `packages/server/src/catalog.ts` |
-| P2.8 | ✅ **Une page par quiz** (`/quiz/<slug>/`) : titre, description, auteur, tags, difficulté, 3 questions d'exemple, liens « Animer ce quiz » (host), « Jouer en solo » (decks `solo: true`) et vers les détails | M | idem |
-| P2.9 | ✅ **Page de détails** (`/quiz/<slug>/details/`) : toutes les questions et leurs choix ; bonne réponse et explication repliées dans un `<details>` (présentes dans le HTML, donc lisibles par les moteurs) | M | idem |
-| P2.10 | ✅ JSON-LD `ItemList` (index), `Quiz` (page quiz), `Quiz` + `Question`/`acceptedAnswer`/`suggestedAnswer` (détails), `BreadcrumbList` partout | M | idem |
+| P2.8 | ✅ **Une page par quiz** (`/quiz/<slug>/`) : titre, description, auteur, tags, difficulté, nombre de questions, liens « Animer ce quiz » (host) et « Jouer en solo » (decks `solo: true`). Pas de questions d'exemple pour l'instant (voir P2.9) | M | `packages/server/src/catalog.ts` |
+| P2.9 | ⏸️ **Page de détails et questions d'exemple** : mises de côté (décision du 28/11/2026). La liste des questions, réponses et explications ne sera jamais publique ni indexée : elle sera réservée aux animateurs connectés. Les questions d'exemple d'une page publique devront être exclues du tirage des parties. Suivi dans `docs/TASKS.md` | M | — |
+| P2.10 | ✅ JSON-LD `ItemList` (index), `Quiz` sans les questions (page quiz), `BreadcrumbList` partout | M | `packages/server/src/catalog.ts` |
 | P2.11 | ⏳ Déplacer l'écran joueur de `/` vers `/join` : à faire avec la landing, quand la racine reviendra au site statique | S | `vercel.json`, `apps/player` |
 
 #### Commun aux deux
 
 | # | Action | Effort | Où |
 | --- | --- | --- | --- |
-| P2.12 | ✅ côté app : `sitemap.xml` (index, quiz, détails, tags) écrit avec le catalogue quand `HASHQUIZ_SITE_URL` est défini, et déclaré dans `robots.txt` ; pas de `lastmod` (le build ne voit pas l'historique git). Côté site statique : à faire avec lui | S | idem |
+| P2.12 | ✅ côté app : `sitemap.xml` (index, quiz, tags) écrit avec le catalogue quand `HASHQUIZ_SITE_URL` est défini, et déclaré dans `robots.txt` ; pas de `lastmod` (le build ne voit pas l'historique git). Côté site statique : à faire avec lui | S | idem |
 | P2.13 | ✅ côté app : `404.html` (`noindex`) avec un lien vers le catalogue, servi par Vercel à la place de sa page texte | S | idem |
 
 ### Priorité 3 : amélioration continue, à planifier

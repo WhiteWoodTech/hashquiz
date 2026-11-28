@@ -121,7 +121,6 @@
         "@hashquiz/backend-supabase": "workspace:*",
         "@hashquiz/core": "workspace:*",
         "@hashquiz/parser": "workspace:*",
-        "marked": "18.0.11",
       },
       "devDependencies": {
         "@types/bun": "latest",

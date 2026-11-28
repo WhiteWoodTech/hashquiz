@@ -30,9 +30,9 @@ describe('catalog settings and slugs', () => {
 describe('renderCatalog', () => {
   const decks = catalogDecks([{ id: 'demo/index.hashquiz.md', content: demo }])
 
-  test('writes the catalogue, deck, details, tag and 404 pages', () => {
+  test('writes the catalogue, deck, tag and 404 pages', () => {
     const files = byPath(renderCatalog(decks, { indexable: false }))
-    for (const p of ['quiz/index.html', 'quiz/demo/index.html', 'quiz/demo/details/index.html', 'quiz/tag/web/index.html', '404.html']) {
+    for (const p of ['quiz/index.html', 'quiz/demo/index.html', 'quiz/tag/web/index.html', '404.html']) {
       expect(files.has(p)).toBe(true)
     }
     expect(files.has('sitemap.xml')).toBe(false)
@@ -42,14 +42,18 @@ describe('renderCatalog', () => {
     expect(files.get('quiz/index.html')).not.toContain('noindex')
   })
 
-  test('details page lists every question with its answer and Quiz JSON-LD', () => {
-    const html = byPath(renderCatalog(decks, { indexable: false })).get('quiz/demo/details/index.html')!
-    expect(html).toContain('What does HTML stand for?')
-    expect(html).toContain('HyperText Markup Language')
-    expect(html).toContain('"@type":"Quiz"')
-    expect(html).toContain('"acceptedAnswer":[{"@type":"Answer","text":"HyperText Markup Language"}]')
+  test('no page shows a question or an answer', () => {
+    const files = renderCatalog(decks, { indexable: false })
+    expect(files.some((f) => f.path.includes('details'))).toBe(false)
+    for (const f of files) {
+      expect(f.content).not.toContain('What does HTML stand for?')
+      expect(f.content).not.toContain('HyperText Markup Language')
+    }
+    const deck = byPath(files).get('quiz/demo/index.html')!
+    expect(deck).toContain('"@type":"Quiz"')
+    expect(deck).not.toContain('acceptedAnswer')
     // Solo decks link to the player's solo route.
-    expect(html).toContain('href="/#/solo/demo%2Findex.hashquiz.md"')
+    expect(deck).toContain('href="/#/solo/demo%2Findex.hashquiz.md"')
   })
 
   test('site URL adds canonical links and a sitemap; French labels with HASHQUIZ_LANG=fr', () => {
@@ -58,7 +62,7 @@ describe('renderCatalog', () => {
     expect(deck).toContain('<html lang="fr">')
     expect(deck).toContain('<link rel="canonical" href="https://hashquiz.ai/quiz/demo/">')
     expect(deck).toContain('Animer ce quiz')
-    expect(files.get('sitemap.xml')).toContain('<loc>https://hashquiz.ai/quiz/demo/details/</loc>')
+    expect(files.get('sitemap.xml')).toContain('<loc>https://hashquiz.ai/quiz/demo/</loc>')
     expect(files.get('sitemap.xml')).not.toContain('404')
   })
 

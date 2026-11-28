@@ -120,7 +120,7 @@ describe('buildSite catalogue', () => {
     const dir = decksDir({ 'demo/index.hashquiz.md': demo })
     const out = join(tmp, 'out-catalog')
     buildSite({ decksDir: dir, outDir: out, publicDir: mkdtempSync(join(tmp, 'public-')), env: { HASHQUIZ_CATALOG: 'true', HASHQUIZ_SITE_URL: 'https://hashquiz.ai' } })
-    expect(existsSync(join(out, 'quiz/demo/details/index.html'))).toBe(true)
+    expect(existsSync(join(out, 'quiz/demo/index.html'))).toBe(true)
     expect(readFileSync(join(out, 'robots.txt'), 'utf-8')).toContain('Sitemap: https://hashquiz.ai/sitemap.xml')
   })
 

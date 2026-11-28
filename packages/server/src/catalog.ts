@@ -1,6 +1,5 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
-import { marked } from 'marked'
 import { parseQuizFile, type Quiz } from '@hashquiz/parser'
 import type { SeoSettings } from './seo'
 
@@ -9,10 +8,11 @@ import type { SeoSettings } from './seo'
  * search engines and AI crawlers read without JavaScript (SEO audit, phase 2):
  *
  * - `quiz/index.html`: every deck;
- * - `quiz/<slug>/index.html`: one deck, a few sample questions and the links to play it;
- * - `quiz/<slug>/details/index.html`: every question with its answer and explanation;
+ * - `quiz/<slug>/index.html`: one deck and the links to play it;
  * - `quiz/tag/<tag>/index.html`: the decks carrying a tag;
  * - `404.html`, and `sitemap.xml` when `HASHQUIZ_SITE_URL` is set.
+ *
+ * No page shows a question: the questions and answers stay private to the hosts (see docs/TASKS.md).
  */
 
 export interface CatalogDeck {
@@ -44,14 +44,7 @@ const TEXT = {
     solo: 'Jouable en solo',
     host: 'Animer ce quiz',
     playSolo: 'Jouer en solo',
-    details: 'Voir toutes les questions',
-    samples: 'Exemples de questions',
-    allQuestions: 'Toutes les questions',
-    answer: 'Réponse et explication',
-    correct: 'Bonne réponse',
-    multiple: 'Plusieurs réponses possibles',
     tag: (t: string) => `Quiz sur ${t}`,
-    back: 'Retour au quiz',
     notFound: 'Page introuvable',
     notFoundText: 'Cette page n\'existe pas. Les quiz sont tous sur le catalogue.',
     seeCatalog: 'Voir les quiz',
@@ -68,23 +61,14 @@ const TEXT = {
     solo: 'Playable solo',
     host: 'Host this quiz',
     playSolo: 'Play solo',
-    details: 'See every question',
-    samples: 'Sample questions',
-    allQuestions: 'All questions',
-    answer: 'Answer and explanation',
-    correct: 'Correct answer',
-    multiple: 'Several answers possible',
     tag: (t: string) => `${t} quizzes`,
-    back: 'Back to the quiz',
     notFound: 'Page not found',
     notFoundText: 'This page does not exist. Every quiz is in the catalogue.',
     seeCatalog: 'Browse quizzes',
   },
 } as const
 
-const SAMPLE_COUNT = 3
-
-/** `HASHQUIZ_CATALOG=true` turns the catalogue on (off by default: the details pages publish the answers). */
+/** `HASHQUIZ_CATALOG=true` turns the catalogue on (off by default: each deploy decides to list its decks publicly). */
 export function catalogEnabled(env: Record<string, string | undefined>): boolean {
   return ['1', 'true', 'yes'].includes((env.HASHQUIZ_CATALOG ?? '').trim().toLowerCase())
 }
@@ -119,9 +103,6 @@ export function catalogDecks(entries: { id: string; content: string }[]): Catalo
 const esc = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
-const inline = (md: string): string => marked.parseInline(md, { async: false }) as string
-const block = (md: string): string => marked.parse(md, { async: false }) as string
-const plain = (md: string): string => inline(md).replace(/<[^>]+>/g, '').replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
 
 
 /** JSON for a `<script type="application/ld+json">`: no `</script>` break-out. */
@@ -166,13 +147,6 @@ h2{margin-top:40px}
 .actions{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}
 .btn{display:inline-block;padding:10px 18px;border-radius:10px;background:var(--violet);color:#fff;text-decoration:none;font-weight:600}
 .btn.alt{background:transparent;border:2px solid var(--purple)}
-ol.questions{padding-left:20px}
-ol.questions>li{margin:0 0 24px}
-.q{font-weight:600}
-.choices{margin:6px 0;padding-left:20px}
-details{background:var(--card);border-radius:10px;padding:10px 14px;margin-top:8px}
-summary{cursor:pointer;color:var(--muted)}
-.ok{color:#7ee2a8;font-weight:600}
 footer{color:var(--muted);font-size:14px;padding-top:40px;padding-bottom:40px}
 `
 
@@ -243,15 +217,7 @@ ${metaLine(ctx, d.quiz)}
 ${tagList(meta.tags)}</li>`
 }
 
-function questionItem(ctx: Ctx, q: Quiz['questions'][number]): string {
-  const t = TEXT[ctx.lang]
-  const right = q.choices.filter((c) => c.isCorrect).map((c) => inline(c.text))
-  return `<li><p class="q">${inline(q.text)}${q.type === 'multiple' ? ` <small>(${esc(t.multiple)})</small>` : ''}</p>
-<ul class="choices">${q.choices.map((c) => `<li>${inline(c.text)}</li>`).join('')}</ul>
-<details><summary>${esc(t.answer)}</summary><p><span class="ok">${esc(t.correct)} :</span> ${right.join(' · ')}</p>${q.explanation ? block(q.explanation) : ''}</details></li>`
-}
-
-function quizLd(ctx: Ctx, d: CatalogDeck, path: string, withQuestions: boolean): unknown {
+function quizLd(ctx: Ctx, d: CatalogDeck, path: string): unknown {
   const { meta } = d.quiz
   return {
     '@context': 'https://schema.org',
@@ -264,15 +230,6 @@ function quizLd(ctx: Ctx, d: CatalogDeck, path: string, withQuestions: boolean):
     educationalLevel: difficultyOf(d.quiz),
     ...(meta.tags.length && { keywords: meta.tags.join(', ') }),
     ...(meta.author && { author: { '@type': 'Person', name: meta.author } }),
-    ...(withQuestions && {
-      hasPart: d.quiz.questions.map((q) => ({
-        '@type': 'Question',
-        name: plain(q.text),
-        eduQuestionType: q.type === 'multiple' ? 'Checkbox' : 'Multiple choice',
-        acceptedAnswer: q.choices.filter((c) => c.isCorrect).map((c) => ({ '@type': 'Answer', text: plain(c.text) })),
-        suggestedAnswer: q.choices.filter((c) => !c.isCorrect).map((c) => ({ '@type': 'Answer', text: plain(c.text) })),
-      })),
-    }),
   }
 }
 
@@ -312,16 +269,12 @@ export function renderCatalog(decks: CatalogDeck[], seo: SeoSettings): CatalogFi
     const title = meta.title || d.id
     const description = (meta.description ?? '').trim() || `${title} · ${t.questions(questions.length)}`
     const path = `/quiz/${d.slug}/`
-    const detailsPath = `${path}details/`
-    const actions = (extra: { href: string; label: string }): string =>
-      `<div class="actions"><a class="btn" href="/host/">${esc(t.host)}</a>${
-        meta.solo ? `<a class="btn alt" href="/#/solo/${encodeURIComponent(d.id)}">${esc(t.playSolo)}</a>` : ''
-      }<a class="btn alt" href="${extra.href}">${esc(extra.label)}</a></div>`
+    const actions = `<div class="actions"><a class="btn" href="/host/">${esc(t.host)}</a>${
+      meta.solo ? `<a class="btn alt" href="/#/solo/${encodeURIComponent(d.id)}">${esc(t.playSolo)}</a>` : ''
+    }</div>`
     const header = `<h1>${esc(title)}</h1>\n${meta.description ? `<p class="intro">${esc(meta.description.trim())}</p>\n` : ''}${metaLine(ctx, d.quiz)}\n${
       meta.author ? `<p>${esc(t.by)} ${esc(meta.author)}</p>\n` : ''
     }${tagList(meta.tags)}`
-    const samples = questions.filter((q) => q.explanation).slice(0, SAMPLE_COUNT)
-    const shown = samples.length ? samples : questions.slice(0, SAMPLE_COUNT)
 
     const c = crumbs(ctx, [home, { name: title, path }])
     files.push({
@@ -330,20 +283,8 @@ export function renderCatalog(decks: CatalogDeck[], seo: SeoSettings): CatalogFi
         path,
         title: `${title} · HashQuiz`,
         description,
-        body: `${c.html}\n${header}\n${actions({ href: detailsPath, label: t.details })}\n<h2>${esc(t.samples)}</h2>\n<ol class="questions">${shown.map((q) => questionItem(ctx, q)).join('\n')}</ol>\n<p><a href="${detailsPath}">${esc(t.details)} (${esc(t.questions(questions.length))})</a></p>`,
-        ld: [quizLd(ctx, d, path, false), c.ld],
-      }),
-    })
-
-    const cd = crumbs(ctx, [home, { name: title, path }, { name: t.allQuestions, path: detailsPath }])
-    files.push({
-      path: `quiz/${d.slug}/details/index.html`,
-      content: page(ctx, {
-        path: detailsPath,
-        title: `${title} : ${t.allQuestions.toLowerCase()} · HashQuiz`,
-        description,
-        body: `${cd.html}\n<h1>${esc(title)} : ${esc(t.allQuestions.toLowerCase())}</h1>\n${metaLine(ctx, d.quiz)}\n${actions({ href: path, label: t.back })}\n<ol class="questions">${questions.map((q) => questionItem(ctx, q)).join('\n')}</ol>`,
-        ld: [quizLd(ctx, d, detailsPath, true), cd.ld],
+        body: `${c.html}\n${header}\n${actions}`,
+        ld: [quizLd(ctx, d, path), c.ld],
       }),
     })
   }

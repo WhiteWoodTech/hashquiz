@@ -17,8 +17,7 @@
     "@hashquiz/backend-local": "workspace:*",
     "@hashquiz/backend-supabase": "workspace:*",
     "@hashquiz/core": "workspace:*",
-    "@hashquiz/parser": "workspace:*",
-    "marked": "18.0.11"
+    "@hashquiz/parser": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.4.5",

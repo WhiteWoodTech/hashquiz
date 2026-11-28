@@ -32,6 +32,11 @@ Y a t'il un pb de divulgation des réponses au autres (WS) ?
 
 ## Backlog
 
+### SEO catalogue (parked 2026-11-28, see [`SEO_AUDIT.md`](SEO_AUDIT.md) P2.9)
+
+- [ ] Quiz details page (every question, answer and explanation) for signed-in hosts only: never public, never indexed
+- [ ] Sample questions on the public quiz page, excluded from the questions drawn for a game
+
 ### Licensing (fair-code open-core)
 
 - [ ] Legal review of `LICENSE.md`, `LICENSE_EE.md` and `CLA.md`

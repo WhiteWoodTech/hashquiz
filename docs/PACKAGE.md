@@ -50,7 +50,7 @@ from the environment:
 | `HASHQUIZ_SITE_URL` | Public URL of the site (e.g. `https://hashquiz.ai`): canonical, `og:url`, absolute `og:image`, sitemap line of `robots.txt` |
 | `HASHQUIZ_LANG` | `<html lang>` of the player page, e.g. `fr` (default `en`) |
 | `HASHQUIZ_INDEXABLE` | `true` lets search engines index the player page (default: `noindex`). The host is always `noindex` |
-| `HASHQUIZ_CATALOG` | `true` writes the public quiz catalogue (below). Off by default: it publishes the answers |
+| `HASHQUIZ_CATALOG` | `true` writes the public quiz catalogue (below). Off by default: each deploy decides to list its decks |
 
 ### Search engines and link previews
 
@@ -66,15 +66,14 @@ AI assistants without JavaScript:
 | Path | Content |
 | --- | --- |
 | `/quiz/` | Every deck: title, description, tags, difficulty, number of questions |
-| `/quiz/<slug>/` | One deck, 3 sample questions, links to host it, play it solo (`solo: true`) and see the details |
-| `/quiz/<slug>/details/` | Every question with its choices; the answer and explanation are folded in a `<details>` |
+| `/quiz/<slug>/` | One deck: description, author, tags, difficulty, links to host it and play it solo (`solo: true`) |
 | `/quiz/tag/<tag>/` | The decks carrying a tag |
 | `/404.html` | Not-found page linking to the catalogue |
 | `/sitemap.xml` | Every catalogue page, when `HASHQUIZ_SITE_URL` is set (a `public/sitemap.xml` replaces it) |
 
-The pages carry JSON-LD (`ItemList`, `Quiz` with its questions and answers, `BreadcrumbList`). The slug comes from the
-deck folder (`decks/docker-basics/index.hashquiz.md` → `docker-basics`). Labels are in French when `HASHQUIZ_LANG`
-starts with `fr`, in English otherwise.
+No page shows a question or an answer. The pages carry JSON-LD (`ItemList`, `Quiz`, `BreadcrumbList`).
+The slug comes from the deck folder (`decks/docker-basics/index.hashquiz.md` → `docker-basics`).
+Labels are in French when `HASHQUIZ_LANG` starts with `fr`, in English otherwise.
 
 Background: [SEO audit](https://github.com/WhiteWoodTech/hashquiz/blob/develop/docs/SEO_AUDIT.md).
 

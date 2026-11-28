@@ -115,7 +115,7 @@ Bases techniques sans lesquelles rien d'autre ne sert. Faible effort, fort impac
 | P1.5 | ✅ Favicon (déjà là), `manifest.webmanifest` et icônes 192/512 px | S | `apps/player/public/` |
 | P1.6 | ✅ Open Graph et Twitter Card, image `og.png` 1200×630 aux couleurs de la marque ; `og:image` rendue absolue au build | S | `apps/player/` |
 | P1.7 | ↪️ `llms.txt` : propre à chaque site, donc fourni par le dépôt de decks via `public/` (copié par `hashquiz build`) | S | `hashquiz-trainings-decks` |
-| P1.8 | ⏳ Domaines : `hquiz.ai` pour le produit, `hquiz.dev` pour la documentation technique et la communauté ; redirection 301 des `*.vercel.app` à faire dans Vercel | S | Vercel |
+| P1.8 | ⏳ Domaines : `hashquiz.ai` pour le produit, `hashquiz.dev` pour la documentation technique et la communauté ; redirection 301 des `*.vercel.app` à faire dans Vercel | S | Vercel |
 | P1.9 | ⏳ Inscrire les domaines dans Google Search Console et Bing Webmaster Tools (Bing alimente ChatGPT Search et Copilot) | S | Hors dépôt |
 
 Légende : ✅ fait dans le dépôt hashquiz, ↪️ délégué au dépôt qui déploie le site, ⏳ action hors code.

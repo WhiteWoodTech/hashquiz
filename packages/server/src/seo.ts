@@ -3,7 +3,7 @@
  * See docs/SEO_AUDIT.md (phase 1) and docs/PACKAGE.md.
  */
 export interface SeoSettings {
-  /** Public URL of the deployed site, no trailing slash (e.g. `https://hquiz.ai`). */
+  /** Public URL of the deployed site, no trailing slash (e.g. `https://hashquiz.ai`). */
   siteUrl?: string
   /** `<html lang>` of the player page (e.g. `fr`). */
   lang?: string

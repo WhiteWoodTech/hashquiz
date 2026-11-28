@@ -47,7 +47,7 @@ from the environment:
 | `HASHQUIZ_SUPABASE_ANON_KEY` | Supabase anon public key |
 | `HASHQUIZ_SOLO_SCORING` | Solo run scoring: `browser` (default) or `edge` |
 | `HASHQUIZ_PLAYER_URL` | Optional player URL for the host's solo links (default: same origin) |
-| `HASHQUIZ_SITE_URL` | Public URL of the site (e.g. `https://hquiz.ai`): canonical, `og:url`, absolute `og:image`, sitemap line of `robots.txt` |
+| `HASHQUIZ_SITE_URL` | Public URL of the site (e.g. `https://hashquiz.ai`): canonical, `og:url`, absolute `og:image`, sitemap line of `robots.txt` |
 | `HASHQUIZ_LANG` | `<html lang>` of the player page, e.g. `fr` (default `en`) |
 | `HASHQUIZ_INDEXABLE` | `true` lets search engines index the player page (default: `noindex`). The host is always `noindex` |
 

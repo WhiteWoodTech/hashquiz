@@ -55,10 +55,10 @@ describe('seo', () => {
 
   test('reads and validates the env', () => {
     expect(seoFromEnv({})).toEqual({ indexable: false })
-    expect(seoFromEnv({ HASHQUIZ_SITE_URL: 'https://hquiz.ai/', HASHQUIZ_LANG: 'fr', HASHQUIZ_INDEXABLE: 'true' }))
-      .toEqual({ siteUrl: 'https://hquiz.ai', lang: 'fr', indexable: true })
-    expect(() => seoFromEnv({ HASHQUIZ_SITE_URL: 'hquiz.ai' })).toThrow(/not a URL/)
-    expect(() => seoFromEnv({ HASHQUIZ_SITE_URL: 'ftp://hquiz.ai' })).toThrow(/http/)
+    expect(seoFromEnv({ HASHQUIZ_SITE_URL: 'https://hashquiz.ai/', HASHQUIZ_LANG: 'fr', HASHQUIZ_INDEXABLE: 'true' }))
+      .toEqual({ siteUrl: 'https://hashquiz.ai', lang: 'fr', indexable: true })
+    expect(() => seoFromEnv({ HASHQUIZ_SITE_URL: 'hashquiz.ai' })).toThrow(/not a URL/)
+    expect(() => seoFromEnv({ HASHQUIZ_SITE_URL: 'ftp://hashquiz.ai' })).toThrow(/http/)
     expect(() => seoFromEnv({ HASHQUIZ_LANG: 'fr"><script>' })).toThrow(/language/)
   })
 
@@ -67,18 +67,18 @@ describe('seo', () => {
   })
 
   test('applies lang, indexing, canonical and absolute og:image', () => {
-    const out = applySeo(html, { siteUrl: 'https://hquiz.ai', lang: 'fr', indexable: true })
+    const out = applySeo(html, { siteUrl: 'https://hashquiz.ai', lang: 'fr', indexable: true })
     expect(out).toContain('<html lang="fr">')
     expect(out).not.toContain('noindex')
-    expect(out).toContain('<meta property="og:image" content="https://hquiz.ai/og.png">')
-    expect(out).toContain('<link rel="canonical" href="https://hquiz.ai/">')
-    expect(out).toContain('<meta property="og:url" content="https://hquiz.ai/">')
+    expect(out).toContain('<meta property="og:image" content="https://hashquiz.ai/og.png">')
+    expect(out).toContain('<link rel="canonical" href="https://hashquiz.ai/">')
+    expect(out).toContain('<meta property="og:url" content="https://hashquiz.ai/">')
   })
 
   test('robots.txt keeps the host out and lists the sitemap only when there is one', () => {
     expect(renderRobots({ indexable: false }, false)).toContain('Disallow: /host')
-    expect(renderRobots({ siteUrl: 'https://hquiz.ai', indexable: false }, false)).not.toContain('Sitemap')
-    expect(renderRobots({ siteUrl: 'https://hquiz.ai', indexable: false }, true)).toContain('Sitemap: https://hquiz.ai/sitemap.xml')
+    expect(renderRobots({ siteUrl: 'https://hashquiz.ai', indexable: false }, false)).not.toContain('Sitemap')
+    expect(renderRobots({ siteUrl: 'https://hashquiz.ai', indexable: false }, true)).toContain('Sitemap: https://hashquiz.ai/sitemap.xml')
   })
 })
 
@@ -95,12 +95,12 @@ describe('buildSite search files', () => {
     writeFileSync(join(pub, 'llms.txt'), '# HashQuiz')
     writeFileSync(join(pub, 'sitemap.xml'), '<urlset/>')
     const out = join(tmp, 'out-seo')
-    buildSite({ decksDir: dir, outDir: out, publicDir: pub, env: { HASHQUIZ_SITE_URL: 'https://hquiz.ai', HASHQUIZ_LANG: 'fr' } })
+    buildSite({ decksDir: dir, outDir: out, publicDir: pub, env: { HASHQUIZ_SITE_URL: 'https://hashquiz.ai', HASHQUIZ_LANG: 'fr' } })
     expect(readFileSync(join(out, 'llms.txt'), 'utf-8')).toBe('# HashQuiz')
-    expect(readFileSync(join(out, 'robots.txt'), 'utf-8')).toContain('Sitemap: https://hquiz.ai/sitemap.xml')
+    expect(readFileSync(join(out, 'robots.txt'), 'utf-8')).toContain('Sitemap: https://hashquiz.ai/sitemap.xml')
     const page = readFileSync(join(out, 'index.html'), 'utf-8')
     expect(page).toContain('<html lang="fr">')
-    expect(page).toContain('<link rel="canonical" href="https://hquiz.ai/">')
+    expect(page).toContain('<link rel="canonical" href="https://hashquiz.ai/">')
     expect(page).toContain('content="noindex"')
     expect(readFileSync(join(out, 'host/index.html'), 'utf-8')).toContain('noindex, nofollow')
   })

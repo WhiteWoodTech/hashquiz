@@ -17,6 +17,10 @@
       <span class="hq-sr-only">{{ result.isCorrect ? 'Bonne réponse' : result.answered ? 'Mauvaise réponse' : 'Temps écoulé' }}</span>
       <span class="solo-q__delta">+{{ result.points }} pts</span>
       <span class="solo-q__score">{{ solo.score }} <small>pts</small></span>
+      <span class="solo-q__rank">
+        {{ ordinal(solo.liveRank.rank) }}
+        <small>{{ solo.liveRank.of > 1 ? `sur ${solo.liveRank.of} joueurs en cours` : 'seul en cours' }}</small>
+      </span>
       <span class="solo-q__info">
         {{ result.answered ? `Répondu en ${Math.round(result.answerTimeMs / 1000)} s / ${q.timer} s` : 'Pas de réponse' }}
       </span>
@@ -70,6 +74,7 @@ import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import { marked } from 'marked'
 import { AnswerButton, FxCountdown, FxVerdict } from '@hashquiz/ui'
 import { useSoloStore } from '../stores/solo'
+import { ordinal } from '../solo/format'
 import '../solo/solo.css'
 
 const solo = useSoloStore()
@@ -183,6 +188,8 @@ function validate() {
 .solo-q__result--wrong   .solo-q__delta { color: var(--hq-text-muted); }
 .solo-q__score { font-family: var(--hq-font-pixel); font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
 .solo-q__score small { font-size: 0.8rem; font-weight: 500; color: var(--hq-text-muted); }
+.solo-q__rank { font-family: var(--hq-font-pixel); font-size: 1.15rem; color: var(--hq-figure); }
+.solo-q__rank small { font-family: var(--hq-font-display); font-size: 0.8rem; color: var(--hq-text-muted); }
 .solo-q__info { font-size: 0.8rem; color: var(--hq-text-muted); }
 @keyframes solo-pop {
   from { opacity: 0; transform: scale(0.8); }

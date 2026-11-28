@@ -165,8 +165,8 @@ SoloPhase: 'loading' → 'unavailable' | 'intro' → 'question' → 'revealed' �
 | `unavailable` | Unknown or non-solo deck id, deck list load error, or solo not available (Supabase transport without credentials); also when no question is served (e.g. a `max-time` budget no question fits) or the presence channel cannot open | `SoloIntroView` | Short "quiz not available" message |
 | `intro` | Hash `#/solo/<deckId>` on a solo deck | `SoloIntroView` | Quiz card (with the **plays** count, the deck's finished runs), pseudo field (no email), **Commencer**, leaderboard (`SoloLeaderboard`: live players "en cours" + past runs) |
 | `question` | Start, or **Suivant** | `SoloQuestionView` | Answer grid + countdown (the question `timer`); **Valider** makes the answer final when it is not a one-tap case |
-| `revealed` | Final answer or timeout | `SoloQuestionView` | Correction (verdict, correct answers, explanation, points, running score), live players on this quiz, **Suivant** (no auto-advance) |
-| `end` | Last correction passed | `SoloEndView` | Score, total time, rank, full leaderboard with own row highlighted, **Rejouer** (new run, new row) and **Menu** beside it (hash `#/`: back to the player home, `JoinView` + solo list), HashQuiz interest form (`LeadForm`) |
+| `revealed` | Final answer or timeout | `SoloQuestionView` | Correction (verdict, correct answers, explanation, points, running score, place among the players in progress: « 2e sur 3 joueurs en cours », by current score, ties shared), live players on this quiz, **Suivant** (no auto-advance) |
+| `end` | Last correction passed | `SoloEndView` | Score, total time, rank, full leaderboard with own row highlighted, **Rejouer** (new run, new row) and **Menu** beside it (hash `#/`: back to the player home, `JoinView` + solo list), **Partager** (native share sheet with score, rank and the deck's solo link; otherwise copies them to the clipboard, « Lien copié ! »), HashQuiz interest form (`LeadForm`) |
 
 ### Solo Flow Diagram
 
@@ -191,7 +191,7 @@ SoloPhase: 'loading' → 'unavailable' | 'intro' → 'question' → 'revealed' �
          ▼
   ┌──────────────┐
   │ SoloEnd      │  Run saved (local server, RPC or Edge Function), score, time, rank,
-  │              │  leaderboard, [Rejouer] [Menu], HashQuiz form
+  │              │  leaderboard, [Rejouer] [Menu] [Partager], HashQuiz form
   └──────────────┘
          │ [Menu] → #/ → JoinView (solo list)
 ```

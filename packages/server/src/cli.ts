@@ -23,7 +23,9 @@ function printUsage(): void {
                             folder (default: decks). Reads HASHQUIZ_TRANSPORT,
                             HASHQUIZ_SUPABASE_URL, HASHQUIZ_SUPABASE_ANON_KEY,
                             HASHQUIZ_SOLO_SCORING, HASHQUIZ_PLAYER_URL
-                            (or their VITE_* names) from the environment.
+                            (or their VITE_* names) from the environment, and
+                            HASHQUIZ_SITE_URL, HASHQUIZ_LANG,
+                            HASHQUIZ_INDEXABLE for search engines.
     supabase deploy --project <ref> [--site-url <url>] [--dry-run]
                             Deploy the solo backend to a Supabase project:
                             migrations, the solo-submit Edge Function and its
@@ -38,6 +40,9 @@ function printUsage(): void {
                             repo's decks/ or tests/fixtures/ from the
                             sources, else the file's folder)
     --out <dir>             Output folder for build (default: dist)
+    --public <dir>          Files copied to the site root by build, e.g.
+                            robots.txt, llms.txt, og.png (default: ./public
+                            when it exists)
 `)
 }
 
@@ -69,7 +74,7 @@ if (command === 'dev') {
   const decksDir = positional ?? 'decks'
   const outDir = flag('--out') ?? 'dist'
   try {
-    const count = buildSite({ decksDir, outDir })
+    const count = buildSite({ decksDir, outDir, publicDir: flag('--public') })
     console.log(`✓ Built ${count} deck(s) from ${decksDir} into ${outDir}`)
   } catch (e) {
     console.error(`✗ ${e instanceof Error ? e.message : String(e)}`)

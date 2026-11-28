@@ -109,14 +109,27 @@ Bases techniques sans lesquelles rien d'autre ne sert. Faible effort, fort impac
 | # | Action | Effort | Où |
 | --- | --- | --- | --- |
 | P1.1 | ✅ **Nom unique** : HashQuiz, utilisé dans tous les `<title>`, le README et les métadonnées | S | `apps/*/index.html`, `README.md` |
-| P1.2 | Ajouter `robots.txt` : autoriser le site public, **bloquer `/host`** et les écrans de jeu, déclarer le sitemap | S | `apps/player/public/robots.txt` |
-| P1.3 | Ajouter `<meta name="robots" content="noindex">` sur le host (et sur le joueur tant qu'il n'y a pas de landing) | S | `apps/host/index.html` |
-| P1.4 | `lang="fr"`, `<meta name="description">`, `<link rel="canonical">`, `theme-color` dans les deux `index.html` | S | `apps/*/index.html` |
-| P1.5 | Favicon (SVG + PNG 180 px pour iOS) et `manifest.webmanifest` minimal | S | `apps/*/public/` |
-| P1.6 | Balises Open Graph et Twitter Card avec une image 1200×630 : le lien de partage d'une partie doit être beau | S | `apps/player/index.html` |
-| P1.7 | Publier un premier `llms.txt` (présentation, liens, résumé du format `.hashquiz.md`) | S | `apps/player/public/llms.txt` |
-| P1.8 | Rattacher un **domaine propre** (ex. `hashquiz.app` ou `hashquiz.fr`) et rediriger en 301 les `*.vercel.app` | S | Vercel, `vercel.json` |
-| P1.9 | Inscrire le domaine dans Google Search Console et Bing Webmaster Tools (Bing alimente ChatGPT Search et Copilot) | S | Hors dépôt |
+| P1.2 | ✅ `robots.txt` qui bloque `/host`, écrit par `hashquiz build` (ligne `Sitemap:` dès qu'un `sitemap.xml` est fourni) ; remplaçable par celui du dépôt de decks | S | `apps/player/public/robots.txt`, `packages/server/src/seo.ts` |
+| P1.3 | ✅ `noindex, nofollow` sur le host ; `noindex` sur le joueur, levé par `HASHQUIZ_INDEXABLE=true` quand une landing existera | S | `apps/*/index.html` |
+| P1.4 | ✅ Description et `theme-color` dans les deux `index.html` ; `lang` (`HASHQUIZ_LANG`) et canonical (`HASHQUIZ_SITE_URL`) posés au build, car ils dépendent du déploiement | S | `apps/*/index.html`, `hashquiz build` |
+| P1.5 | ✅ Favicon (déjà là), `manifest.webmanifest` et icônes 192/512 px | S | `apps/player/public/` |
+| P1.6 | ✅ Open Graph et Twitter Card, image `og.png` 1200×630 aux couleurs de la marque ; `og:image` rendue absolue au build | S | `apps/player/` |
+| P1.7 | ↪️ `llms.txt` : propre à chaque site, donc fourni par le dépôt de decks via `public/` (copié par `hashquiz build`) | S | `hashquiz-trainings-decks` |
+| P1.8 | ⏳ Domaines : `hquiz.ai` pour le produit, `hquiz.dev` pour la documentation technique et la communauté ; redirection 301 des `*.vercel.app` à faire dans Vercel | S | Vercel |
+| P1.9 | ⏳ Inscrire les domaines dans Google Search Console et Bing Webmaster Tools (Bing alimente ChatGPT Search et Copilot) | S | Hors dépôt |
+
+Légende : ✅ fait dans le dépôt hashquiz, ↪️ délégué au dépôt qui déploie le site, ⏳ action hors code.
+
+#### Répartition entre les dépôts
+
+HashQuiz est un outil : chaque dépôt de decks le déploie avec `hashquiz build`. Le dépôt hashquiz fournit donc les
+réglages génériques, et chaque déploiement apporte ce qui lui est propre :
+
+| Où | Quoi |
+| --- | --- |
+| `hashquiz` (ce dépôt) | Métadonnées, manifest, icônes, image OG par défaut, `noindex`, variables `HASHQUIZ_SITE_URL` / `HASHQUIZ_LANG` / `HASHQUIZ_INDEXABLE`, option `--public` de `hashquiz build` (voir `docs/PACKAGE.md`) |
+| Dépôt de decks déployé (`WhiteWoodTech/hashquiz-trainings-decks`) | Valeurs des variables, `public/llms.txt`, `public/sitemap.xml`, image OG dédiée si besoin, domaine |
+| Site statique (mis de côté) | Accueil, landing, FAQ, pages éditoriales de la P2 : suivi dans `hashquiz-trainings-decks`, fichier `docs/SEO_STATIC_SITE.md` |
 
 ### Priorité 2 : important, sous un à deux mois
 
@@ -145,6 +158,9 @@ Points d'attention liés à cette séparation :
   et les pages de détails doivent être générées en HTML au build (voir [la mise en œuvre](#mise-en-œuvre-suggérée-du-pré-rendu)).
 
 #### Site statique
+
+Mis de côté le 28 novembre 2026 : ce bloc est suivi dans `WhiteWoodTech/hashquiz-trainings-decks`
+(`docs/SEO_STATIC_SITE.md`).
 
 | # | Action | Effort | Où |
 | --- | --- | --- | --- |

@@ -31,6 +31,7 @@ hashquiz check decks/my-deck/index.hashquiz.md   # validate one deck
 hashquiz dev decks/my-deck/index.hashquiz.md     # local game: host :3031/host/, players :3032
 hashquiz dev decks                            # same, a folder: solo decks folder, room deck = first deck by id
 hashquiz build decks --out dist               # static site with every deck under decks/
+hashquiz build decks --public public          # same, with extra files copied to the site root
 hashquiz supabase deploy --project <ref>      # solo backend on a Supabase project
 ```
 
@@ -46,6 +47,19 @@ from the environment:
 | `HASHQUIZ_SUPABASE_ANON_KEY` | Supabase anon public key |
 | `HASHQUIZ_SOLO_SCORING` | Solo run scoring: `browser` (default) or `edge` |
 | `HASHQUIZ_PLAYER_URL` | Optional player URL for the host's solo links (default: same origin) |
+| `HASHQUIZ_SITE_URL` | Public URL of the site (e.g. `https://hquiz.ai`): canonical, `og:url`, absolute `og:image`, sitemap line of `robots.txt` |
+| `HASHQUIZ_LANG` | `<html lang>` of the player page, e.g. `fr` (default `en`) |
+| `HASHQUIZ_INDEXABLE` | `true` lets search engines index the player page (default: `noindex`). The host is always `noindex` |
+
+### Search engines and link previews
+
+The player page ships a description, Open Graph tags and a 1200×630 `og.png`, a web app manifest and its icons.
+`build` also writes a `robots.txt` that keeps `/host` out of search engines.
+
+Files in `public/` (or the folder given with `--public`) are copied to the site root last, so a decks repository
+can add `llms.txt` or `sitemap.xml`, or replace `og.png` and `robots.txt`. The `Sitemap:` line of the generated
+`robots.txt` appears only when `public/` holds a `sitemap.xml` and `HASHQUIZ_SITE_URL` is set.
+Background: [SEO audit](https://github.com/WhiteWoodTech/hashquiz/blob/develop/docs/SEO_AUDIT.md).
 
 The `VITE_*` names (`VITE_TRANSPORT`, …) are accepted too. The prebuilt apps carry no
 settings of their own: whatever `hashquiz-config.js` says (including `local` and `browser`) is what they use.

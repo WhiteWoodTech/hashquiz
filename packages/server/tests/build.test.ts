@@ -114,3 +114,20 @@ describe('buildSite search files', () => {
     expect(readFileSync(join(out, 'robots.txt'), 'utf-8')).toBe('User-agent: *\n')
   })
 })
+
+describe('buildSite catalogue', () => {
+  test.skipIf(!findWebDist())('writes the catalogue and its sitemap with HASHQUIZ_CATALOG=true', () => {
+    const dir = decksDir({ 'demo/index.hashquiz.md': demo })
+    const out = join(tmp, 'out-catalog')
+    buildSite({ decksDir: dir, outDir: out, publicDir: mkdtempSync(join(tmp, 'public-')), env: { HASHQUIZ_CATALOG: 'true', HASHQUIZ_SITE_URL: 'https://hashquiz.ai' } })
+    expect(existsSync(join(out, 'quiz/demo/details/index.html'))).toBe(true)
+    expect(readFileSync(join(out, 'robots.txt'), 'utf-8')).toContain('Sitemap: https://hashquiz.ai/sitemap.xml')
+  })
+
+  test.skipIf(!findWebDist())('writes no catalogue by default', () => {
+    const dir = decksDir({ 'demo/index.hashquiz.md': demo })
+    const out = join(tmp, 'out-nocatalog')
+    buildSite({ decksDir: dir, outDir: out, publicDir: mkdtempSync(join(tmp, 'public-')), env: {} })
+    expect(existsSync(join(out, 'quiz'))).toBe(false)
+  })
+})

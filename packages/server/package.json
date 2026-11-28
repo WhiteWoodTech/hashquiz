@@ -14,10 +14,11 @@
     "test": "bun test"
   },
   "dependencies": {
+    "@hashquiz/backend-local": "workspace:*",
+    "@hashquiz/backend-supabase": "workspace:*",
     "@hashquiz/core": "workspace:*",
     "@hashquiz/parser": "workspace:*",
-    "@hashquiz/backend-local": "workspace:*",
-    "@hashquiz/backend-supabase": "workspace:*"
+    "marked": "18.0.11"
   },
   "devDependencies": {
     "typescript": "^5.4.5",

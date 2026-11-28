@@ -5,6 +5,7 @@ import { configFromEnv, renderConfigScript } from '@hashquiz/core'
 import { collectDecks } from './web-assets'
 import { findWebDist } from './web-dist'
 import { applySeo, renderRobots, seoFromEnv } from './seo'
+import { catalogEnabled, writeCatalog } from './catalog'
 
 export interface BuildOptions {
   decksDir: string
@@ -22,7 +23,8 @@ export interface BuildOptions {
  * list), the same `decks.json` at the root (player solo decks) and
  * `hashquiz-config.js` (transport + Supabase settings from the env), the files
  * of `publicDir`, a default `robots.txt` and the search settings of
- * `HASHQUIZ_SITE_URL` / `HASHQUIZ_LANG` / `HASHQUIZ_INDEXABLE`. Deployable
+ * `HASHQUIZ_SITE_URL` / `HASHQUIZ_LANG` / `HASHQUIZ_INDEXABLE`, and the public quiz
+ * catalogue with `HASHQUIZ_CATALOG=true` (see ./catalog.ts). Deployable
  * as-is (e.g. Vercel, see docs/DEPLOY.md). Returns the number of decks.
  */
 export function buildSite({ decksDir, outDir, publicDir, env = process.env }: BuildOptions): number {
@@ -59,7 +61,8 @@ export function buildSite({ decksDir, outDir, publicDir, env = process.env }: Bu
   mkdirSync(out, { recursive: true })
   cpSync(web, out, { recursive: true })
   const hasPublic = existsSync(publicAbs) && statSync(publicAbs).isDirectory()
-  const hasSitemap = hasPublic && existsSync(resolve(publicAbs, 'sitemap.xml'))
+  const catalog = catalogEnabled(env) ? writeCatalog(out, decks, seo) : []
+  const hasSitemap = catalog.includes('sitemap.xml') || (hasPublic && existsSync(resolve(publicAbs, 'sitemap.xml')))
   writeFileSync(resolve(out, 'robots.txt'), renderRobots(seo, hasSitemap))
   if (hasPublic) cpSync(publicAbs, out, { recursive: true })
   const playerHtml = resolve(out, 'index.html')

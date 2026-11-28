@@ -25,7 +25,9 @@ function printUsage(): void {
                             HASHQUIZ_SOLO_SCORING, HASHQUIZ_PLAYER_URL
                             (or their VITE_* names) from the environment, and
                             HASHQUIZ_SITE_URL, HASHQUIZ_LANG,
-                            HASHQUIZ_INDEXABLE for search engines.
+                            HASHQUIZ_INDEXABLE for search engines, and
+                            HASHQUIZ_CATALOG=true for the public quiz
+                            pages under /quiz/.
     supabase deploy --project <ref> [--site-url <url>] [--dry-run]
                             Deploy the solo backend to a Supabase project:
                             migrations, the solo-submit Edge Function and its

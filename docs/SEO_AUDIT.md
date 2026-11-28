@@ -173,20 +173,24 @@ Mis de côté le 28 novembre 2026 : ce bloc est suivi dans `WhiteWoodTech/hashqu
 
 #### Pages publiques de l'application
 
+Fait le 28 novembre 2026 : `hashquiz build` écrit ces pages en HTML statique (sans JavaScript) quand
+`HASHQUIZ_CATALOG=true`. Le catalogue est **désactivé par défaut**, car la page de détails publie les bonnes réponses :
+chaque dépôt de decks choisit de l'ouvrir. Libellés en français avec `HASHQUIZ_LANG=fr`, en anglais sinon.
+
 | # | Action | Effort | Où |
 | --- | --- | --- | --- |
-| P2.7 | **Index des quiz publics** (`/quiz`) : liste de tous les decks avec titre, description, tags, difficulté, nombre de questions ; filtres par tag en vraies URL (`/quiz/tag/docker`) au lieu de `#/tag/docker` | M | `apps/host` ou nouvelle app, pré-rendu |
-| P2.8 | **Une page par quiz** (`/quiz/docker-fundamentals`) : titre, description, tags, difficulté, auteur, 3 à 5 questions d'exemple, bouton « Jouer ce quiz » | M | Pré-rendu au build depuis `decks/` |
-| P2.9 | **Page de détails** du quiz (`/quiz/docker-fundamentals/details`) : liste complète des questions avec leurs explications (`> …`), c'est le contenu le plus citable par les LLM. À décider : afficher ou non les bonnes réponses (on peut les masquer derrière un `<details>` pour ne pas gâcher la partie) | M | Pré-rendu au build |
-| P2.10 | JSON-LD `Quiz` + `Question`/`acceptedAnswer` sur la page de détails, `ItemList` sur l'index, `BreadcrumbList` partout | M | Pages pré-rendues |
-| P2.11 | Déplacer l'écran joueur de `/` vers `/join` (garder `/?code=` en redirection pour les QR codes déjà imprimés), puisque la racine revient au site statique | S | `vercel.json`, `apps/player` |
+| P2.7 | ✅ **Index des quiz** (`/quiz/`) : tous les decks avec titre, description, tags, difficulté, nombre de questions, solo ; pages de tags en vraies URL (`/quiz/tag/<tag>/`) | M | `packages/server/src/catalog.ts` |
+| P2.8 | ✅ **Une page par quiz** (`/quiz/<slug>/`) : titre, description, auteur, tags, difficulté, 3 questions d'exemple, liens « Animer ce quiz » (host), « Jouer en solo » (decks `solo: true`) et vers les détails | M | idem |
+| P2.9 | ✅ **Page de détails** (`/quiz/<slug>/details/`) : toutes les questions et leurs choix ; bonne réponse et explication repliées dans un `<details>` (présentes dans le HTML, donc lisibles par les moteurs) | M | idem |
+| P2.10 | ✅ JSON-LD `ItemList` (index), `Quiz` (page quiz), `Quiz` + `Question`/`acceptedAnswer`/`suggestedAnswer` (détails), `BreadcrumbList` partout | M | idem |
+| P2.11 | ⏳ Déplacer l'écran joueur de `/` vers `/join` : à faire avec la landing, quand la racine reviendra au site statique | S | `vercel.json`, `apps/player` |
 
 #### Commun aux deux
 
 | # | Action | Effort | Où |
 | --- | --- | --- | --- |
-| P2.12 | `sitemap.xml` par projet (site : pages éditoriales ; app : index, quiz, détails, tags) avec `lastmod` issu de git, déclarés tous deux dans `robots.txt` | S | Scripts de build |
-| P2.13 | Page 404 personnalisée (lien vers l'accueil et le catalogue) au lieu de la page texte Vercel | S | Les deux projets |
+| P2.12 | ✅ côté app : `sitemap.xml` (index, quiz, détails, tags) écrit avec le catalogue quand `HASHQUIZ_SITE_URL` est défini, et déclaré dans `robots.txt` ; pas de `lastmod` (le build ne voit pas l'historique git). Côté site statique : à faire avec lui | S | idem |
+| P2.13 | ✅ côté app : `404.html` (`noindex`) avec un lien vers le catalogue, servi par Vercel à la place de sa page texte | S | idem |
 
 ### Priorité 3 : amélioration continue, à planifier
 

@@ -24,7 +24,9 @@
     <div class="solo-end__actions">
       <button class="solo-btn hq-press" @click="solo.playAgain()">Rejouer</button>
       <a class="solo-btn solo-btn--ghost hq-press" :href="MENU_HASH">Menu</a>
+      <button class="solo-btn solo-btn--ghost hq-press" @click="share">Partager</button>
     </div>
+    <p v-if="shareNote" class="solo-end__share-note" role="status">{{ shareNote }}</p>
 
     <SoloLeaderboard :live="solo.liveOthers" :rows="solo.board" />
 
@@ -33,14 +35,30 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useSoloStore } from '../stores/solo'
 import { formatDuration } from '../solo/format'
 import { MENU_HASH } from '../solo/route'
+import { shareQuiz, shareText, shareUrl } from '../solo/share'
 import SoloLeaderboard from '../components/SoloLeaderboard.vue'
 import LeadForm from '../components/LeadForm.vue'
 import '../solo/solo.css'
 
 const solo = useSoloStore()
+
+const SHARE_NOTES = { copied: 'Lien copié !', failed: 'Partage indisponible sur ce navigateur.' } as const
+const shareNote = ref('')
+async function share() {
+  const d = solo.deck
+  if (!d) return
+  const title = d.quiz.meta.title || d.name
+  const outcome = await shareQuiz({
+    title,
+    text: shareText({ title, score: solo.score, rank: solo.myRank }),
+    url: shareUrl(d.id, location),
+  }, navigator)
+  shareNote.value = outcome === 'copied' || outcome === 'failed' ? SHARE_NOTES[outcome] : ''
+}
 </script>
 
 <style scoped>
@@ -52,6 +70,7 @@ const solo = useSoloStore()
 .solo-end__rank  { font-size: 1.15rem; font-weight: 700; margin: 0.5rem 0 0; }
 .solo-end__actions { display: flex; gap: 0.75rem; width: 100%; }
 .solo-end__actions .solo-btn { flex: 1 1 0; display: block; text-align: center; text-decoration: none; }
+.solo-end__share-note { margin: -0.5rem 0 0; font-size: 0.85rem; color: var(--hq-text-muted); }
 .solo-end__status { margin: 0; font-size: 0.9rem; color: var(--hq-text-muted); }
 .solo-end__status:empty { display: none; }
 .solo-end__retry {

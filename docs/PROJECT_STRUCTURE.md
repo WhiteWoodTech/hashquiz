@@ -50,6 +50,7 @@ hashquiz/
 │           ├── solo/                # Solo live mode (loaded on #/solo/<deckId> only); backends live in @hashquiz/backend-*
 │           │   ├── route.ts         # parseSoloHash, soloHash
 │           │   ├── decks.ts         # Runtime deck list: /decks.json (cached), findDeck, loadSoloDecks
+│           │   ├── share.ts         # End-screen share: text, deck link, share sheet or clipboard
 │           │   ├── catalog.ts       # soloDecks filter
 │           │   ├── deps.ts          # Picks the SoloBackend from the runtime transport (local or Supabase)
 │           │   ├── format.ts        # Time formatting

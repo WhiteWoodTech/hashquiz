@@ -193,6 +193,24 @@ describe('solo store', () => {
     expect(solo.liveOthers.map(p => p.pseudo)).toEqual(['Zoe'])
   })
 
+  test('liveRank: place by current score among players in progress, own run included, ties shared', async () => {
+    const solo = setup()
+    await solo.open('solo/deck')
+    solo.start('Alice')
+    await flush()
+    expect(solo.liveRank).toEqual({ rank: 1, of: 1 })
+    clock += 2_000
+    solo.answer([solo.question!.choices[0]!.id])
+    const mine = solo.score
+    live.cb?.([
+      { key: 'me', pseudo: 'Alice', index: 0, total: 2, score: mine },
+      { key: 'x', pseudo: 'Zoe', index: 1, total: 2, score: mine + 100 },
+      { key: 'y', pseudo: 'Bob', index: 1, total: 2, score: mine },
+      { key: 'z', pseudo: 'Eve', index: 0, total: 2, score: 0 },
+    ])
+    expect(solo.liveRank).toEqual({ rank: 2, of: 4 })
+  })
+
   test('timeout reveals a missed question with zero points', async () => {
     const solo = setup()
     await solo.open('solo/deck')

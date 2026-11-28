@@ -76,6 +76,15 @@ export const useSoloStore = defineStore('solo', () => {
 
   const liveOthers = computed(() => live.value.filter(p => p.key !== presence?.key))
 
+  /**
+   * The player's place among everyone playing this deck right now (own run included), by current score:
+   * stored runs only hold final scores, so they cannot rank a run in progress. Ties share a place.
+   */
+  const liveRank = computed(() => ({
+    rank: 1 + liveOthers.value.filter(p => p.score > score.value).length,
+    of: 1 + liveOthers.value.length,
+  }))
+
   const board = computed<BoardRow[]>(() => {
     const rows = top.value.map((r, i) => ({ ...r, rank: i + 1, mine: r.id === myRunId.value }))
     const mine = myRun.value
@@ -302,7 +311,7 @@ export const useSoloStore = defineStore('solo', () => {
 
   return {
     phase, deck, session, pseudo, question, index, total, score, correctCount, totalTimeMs, deadlineMs, lastResult,
-    live, liveOthers, top, runCount, myRunId, myRank, myRun, board, submitState, submitError,
+    live, liveOthers, liveRank, top, runCount, myRunId, myRank, myRun, board, submitState, submitError,
     open, start, answer, timeout, next, retrySubmit, playAgain, abandon, submitLead,
   }
 })
